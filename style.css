@@ -1,0 +1,759 @@
+/* CSS Rest */
+* {
+    vertical-align: baseline;
+    font-weight: inherit;
+    font-family: inherit;
+    font-style: inherit;
+    font-size: 100%;
+    border: 0 none;
+    outline: 0;
+    padding: 0;
+    margin: 0;
+    }
+
+    body {
+    padding: 0px;
+    margin: 0px;
+    }
+
+    h1, h2, h3, h4, h5, h6, p, pre, blockquote, form, ul, ol, dl {
+    margin: 20px 0;
+    }
+
+    li, dd, blockquote {
+    margin-left: 40px;
+    }
+
+    table {
+    border-collapse: collapse;
+    border-spacing: 0;
+    }
+
+
+    /* 
+    --------------End CSS Rest---------------
+    ___________________________________________
+    */
+
+/* Body Styling */
+
+
+/* index header styling */
+
+#index{
+    background: linear-gradient(180deg, #1E6CB4 25.96%, #393A7B 111.57%);
+}
+
+.header {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    background-color: #393A7B;
+    color: #fff;
+    padding: 20px;
+    align-items: center;
+}
+
+.logo-left {
+    justify-self: start;
+}
+
+.title-center {
+    text-align: center;
+    font-family: Arial, Helvetica, sans-serif;
+    font-style: normal;
+    font-weight: 600;
+    font-size: 36px;
+    line-height: 45px;
+    text-transform: uppercase;
+}
+
+.logo-right {
+    justify-self: end;
+}
+
+/* index main stying */
+
+#container-index{
+    display: grid;
+    grid-template-columns: 56% 46%;
+    width: 1225px;
+    align-items: center;
+}
+
+#container-index{
+    margin: 4em auto;
+    background: #6C63FF;
+    box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.25);
+    border-radius: 51px;
+}
+
+
+
+.hero-img{
+    background:#ffffff;
+    grid-column: 1/2;
+    border-radius: 51px 0 0 51px;
+}
+
+.hero-img img{
+    width: 684.93px;
+    height: 714px;
+}
+
+.log_signup-section{
+    grid-column: 2/3;
+    margin: auto;
+    align-items: center;
+}
+
+.signup{
+    width: 286px;
+    height: 57px;
+    background: #F29A2E;
+    border-radius: 10px;
+    text-align: center;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 2em;
+    color: #444053;
+    font-family: Arial, Helvetica, sans-serif;
+}
+
+.log_signup-section p{
+    margin-bottom: 0.5em; 
+    color: #ffffff;
+    font-family: 'Source code Pro';
+    text-transform: uppercase;
+}
+
+.login{
+    width: 286px;
+    height: 57px;
+    background-color: rgba(255, 255, 255, 0);
+    border: 2px solid #FFFFFF;
+    border-radius: 10px;
+    text-align: center;
+    cursor: pointer;
+    text-decoration: none;
+    font-size: 2em;
+    color: #444053;
+    font-family: Arial, Helvetica, sans-serif;
+
+}
+
+
+/* Styling the login page */
+
+#container-login{
+    display: grid;
+    grid-template-columns: 30% 60%;
+    background: linear-gradient(180deg, #1E6CB4 25.96%, #393A7B 111.57%);
+    margin: 0 auto;
+    height: 82vh;
+}
+
+.login_img{
+    display: flex;
+    justify-content: center;
+    grid-column: 1/2;
+    background: #1E6CB4;
+    box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.25); 
+    /* width: 100%;
+    height: 100%; */
+}
+
+.login_img img{
+    margin: auto auto;
+}
+
+
+.login_form > div{
+    margin-top: 8em;
+
+}
+
+.login_form h2{
+    font-family: 'Source Code Pro';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 36px;
+    line-height: 45px;
+    text-transform: uppercase;
+    text-align: center;
+    color: #FFFFFF;
+    margin-bottom: 2em;
+
+}
+
+.btn{
+    width: 286px;
+    height: 57px; 
+    background-color: rgba(255, 255, 255, 0);
+    font-size: 2em;
+    font-weight: 600;
+    font-family: 'Source Code Pro';
+    text-align: center;
+    text-transform: uppercase;
+    cursor: pointer;
+    color: #fff;
+    text-align: center;
+    border: 2px solid #FFFFFF;
+    border-radius: 10px;
+    padding: 10px;
+    margin-bottom: 1em;
+}
+
+.input_field{
+    width: 20em;
+    height: 2em;
+    background-color: rgba(255, 255, 255, 0);
+    border-bottom: 2px solid #fff;
+    padding: auto;
+    font-family: 'Source Code Pro';
+    color: #fff;
+}
+
+.login_form form > label{
+    font-family: 'Source Code Pro';
+    font-size: 1.5rem;
+    color: #fff;
+    
+}
+.login_form form > a{
+    font-size: 16px;
+    font-family: 'Source Code Pro';
+    color: #fff;
+    text-decoration: none;
+}
+
+.login_form form > a:hover{
+    color: #F29A2E;
+}
+
+.login_form{
+    grid-column: 2/3;
+    margin: 0 auto;
+    
+}
+
+/* Styling for sign up form */
+
+#contianer-signup{
+    display: grid;
+    grid-template-columns: 30% 60%;
+    background: linear-gradient(180deg, #1E6CB4 25.96%, #393A7B 111.57%);
+    margin: 0 auto;
+    height: 100vh;
+}
+
+.signup_img{
+    display: flex;
+    justify-content: center;
+    grid-column: 1/2;
+    box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.25); 
+}
+
+.signup_img img{
+    margin: auto auto;
+}
+
+.signup_form{
+    grid-column: 2/3;
+    margin: 0 auto;
+}
+
+.signup_form > div{
+    margin-top: 3em;
+}
+
+.btn_signup{
+    width: 286px;
+    height: 57px; 
+    background-color: #F29A2E;
+    font-size: 2em;
+    font-weight: 600;
+    font-family: 'Source Code Pro';
+    text-align: center;
+    text-transform: uppercase;
+    cursor: pointer;
+    color: #fff;
+    text-align: center;
+    border-radius: 10px;
+    padding: 10px;
+    margin-bottom: 0.2em;
+}
+
+.signup_form form > label{
+    font-family: 'Source Code Pro';
+    font-size: 1.5rem;
+    color: #fff;  
+}
+
+.signup_form form > a{
+    font-size: 16px;
+    font-family: 'Source Code Pro';
+    color: #fff;
+    text-decoration: none;
+}
+
+.signup_form form > a:hover{
+    color: #F29A2E;
+}
+.signup_form div h1{
+    font-family: 'Source Code Pro';
+font-style: normal;
+font-weight: 600;
+font-size: 36px;
+line-height: 45px;
+text-transform: uppercase;
+color: #ffffff;
+}
+
+.signup_form div h2{
+    font-family: 'Source Code Pro';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 24px;
+    line-height: 30px;
+    text-transform: uppercase;
+    color: #3F3D56;
+}
+
+form select option{
+    font-size: 25px;
+}
+
+#signup_form > select{
+    background-color: rgba(0, 0, 0, 0.25);
+    color: #fff;
+    font-family: 'Source Code Pro';
+    font-size: 1.5rem;
+    width: 13.5em;
+    height: 2em;
+    padding: 0.5em;
+    border-radius: 8px;
+}
+#signup_form > select option{
+    background-color: #6C63FF;
+}
+
+/* Styling for Home Page */
+
+#container-home{
+    display: grid;
+    grid-template-columns: repeat(16,1fr);
+    grid-template-rows: repeat(16,1fr);
+    gap: 12px;
+    background: linear-gradient(180deg, #1E6CB4 25.96%, #393A7B 111.57%);
+    height: 93vh;
+    padding: 2em;
+}
+
+#nav_section{
+    grid-column: 1/2;
+    grid-row: 1/ span 17;
+    background: #2F2E41;
+    width: auto;
+    height: 100%;
+    padding: 0.5em;
+    background: #2F2E41;
+    border-right: 9px solid #9002D2;
+    border-radius: 51px 0px 0px 51px;   
+}
+
+.active{
+    background: rgba(217, 217, 217, 0.01);
+    border: 1px solid #F29A2E;
+    box-shadow: inset 0px 0px 4px 1px rgba(255, 208, 55, 0.51);
+    border-radius: 15px;
+    padding: 0.5em;
+}
+
+.nav ul li{
+    text-align: center;
+    list-style: none;
+    margin: 1em auto;
+}
+
+.nav ul li a{
+    font-family: 'Source Code Pro';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 15px;
+    text-transform: uppercase;
+    color: #FFFFFF;
+    text-decoration: none;
+}
+
+.logout{
+    margin-top: 8em;
+}
+
+.logout button{
+    width: 84px;
+    height: 34px;
+    left: 51px;
+    top: 871px;
+    background: #F29A2E;
+    border-radius: 8px;
+    margin: auto;
+
+    font-family: 'Source Code Pro';
+    font-style: normal;
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 20px;
+    text-transform: uppercase;
+    color: #FFFFFF;
+    cursor: pointer;
+    }
+
+.logout button:hover{
+    background: #FF0000;
+}
+
+#main_section{
+    grid-column: 2/17;
+    grid-row: 1/17;
+    background: rgba(255, 255, 255, 0);
+
+    display: grid;
+    grid-template-columns: auto;
+    grid-template-rows: 30% 70%;
+    gap: 12px;
+    padding-bottom: 0px;
+}
+
+.header_section{
+    grid-row: 1/2;
+    background: #2F2E41;
+    width: 100%;
+    /* height: 10em; */
+    background: #2F2E41;
+    border-left: 10px solid #9002D2;
+    border-radius: 0px 51px; 
+    
+    display: grid;
+    grid-template-columns: 70% 30%;
+    grid-template-rows: auto;
+
+}
+.anouncements{
+    grid-column: 1/2;
+}
+.proDetails{
+    grid-column: 2/3;
+    background: linear-gradient(270deg, #9002D2 0%, rgba(68, 64, 83, 0) 100%);
+    border-radius: 0px 51px;
+
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 2fr;
+}
+
+.proDetails h3{
+    font-family: 'Source Code Pro';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 36px;
+    line-height: 45px;
+    text-transform: uppercase;
+    color: #FFFFFF;
+
+}
+
+.userInfo{
+    font-family: 'Source Code Pro';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 24px;
+    line-height: 12px;
+    text-transform: uppercase;
+    color: #FFFFFF;
+}
+
+.content_section{
+    grid-row: 2/3;
+    background: #2F2E41;
+    width: 100%;
+    height: 100%;
+    margin-bottom: 0px;
+}
+
+.userInfo{
+grid-column: 1/ span 2;
+grid-row: 1/2;
+margin-left: 2em;
+}
+
+.branding{
+    grid-column: 1/3;
+    grid-row:2/3;
+    width: 400px;
+    height: auto;
+    margin-left: 8em;
+}
+
+.branding .sb_Logo{ 
+    width: 10em;
+    height: auto;
+}
+
+.branding .tcn_Logo{ 
+    width: 10em;
+    height: auto;
+    margin-bottom: 2em;
+    
+}
+
+
+
+
+
+/* Sign in Page Styling */
+
+#signin-container{
+    background: linear-gradient(180deg, #1E6CB4 25.96%, #393A7B 111.57%);
+    height: 100vh;
+    margin: 0 auto;
+}
+.signedinTitle{
+    font-family: 'Source Code Pro';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 64px;
+    line-height: 80px;
+    text-transform: uppercase;
+    color: #FFFFFF;
+    margin: 0 auto;
+    padding: 25px;
+    text-align: center;
+    }
+
+#userSignin{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: auto;
+    gap: 2em;
+    justify-content: center;
+    }
+
+.userSignin{
+    grid-column: 1/2;
+    justify-content: center;
+    margin: 2em;
+    
+}
+
+
+.userSignin p{
+    font-family: 'Source Code Pro';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 16px;
+    line-height: 20px;
+    text-align: center;
+    text-transform: uppercase;
+    color: #FFFFFF;
+    text-align: center;
+}
+
+.userSignin-box{
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    /* grid-template-rows: auto; */
+
+    width: 920px;
+    height: 552px;
+    background: #3F3D56;
+    border: 6px solid #D9D9D9;
+    border-radius: 25px;
+    margin: 0 auto;
+    padding: 1em;
+    overflow: scroll;
+    }
+
+
+.search_users{
+    position: relative;
+    grid-column: 1/4;
+    grid-row: 1/2;
+    margin: 2em auto;
+}
+.user-cards{
+    grid-column: 1/4;
+    grid-row-start: 2;
+    
+    display: grid;
+    
+}
+
+.search-label {
+    position: absolute;
+    top: 0.6em;
+    left: 12px;
+    transform: translateY(10%);
+    }
+
+
+
+.search_users input{
+    width: 691px;
+    height: 35px;
+    background: #D9D9D9;
+    border-radius: 51px;
+    padding: 0.5em 2em ;
+
+    font-family: 'Source Code Pro';
+    font-style: normal;
+    font-weight: 200;
+    font-size: 24px;
+    line-height: 30px;
+    color: #000000;
+    }
+
+.userSignedin{
+    grid-column: 2/3;
+    margin-top: 2.5em;
+}
+
+.userSignedin p{
+    font-family: 'Source Code Pro';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 24px;
+    line-height: 30px;
+    text-transform: uppercase;
+    color: #FFFFFF;
+    text-align: center;
+}
+
+.userSingedin-box{
+    background: #3F3D56;
+    width: 350px;
+    height: 550px;
+    border: 6px solid #F29A2E;
+    border-radius: 15px;
+    margin: 0 auto;
+    padding: 1em;
+    overflow: scroll;
+}
+
+.userSignin_card{
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    column-gap: 0.5em;
+    border-radius: 25px;
+    background: #E6EAEE;
+    width: 300px;
+    height: 100px;
+    padding: 0.5em;
+    margin: 0.5em;
+}
+.proImg{
+    grid-column: 1/2;
+    grid-row:1/3;
+    background: #2F2E41;
+    border-radius: 30px;
+    width: 80px;
+    height: 80px;
+    margin: auto;
+}
+
+.userName{
+    grid-column: 2/4;
+    grid-row:1/2;
+    text-align: center;
+}
+
+.userName h3{
+    font-family: 'Source Code Pro';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 16px;
+    line-height: 5px;
+    text-transform: uppercase;
+    color: #000000;
+}
+
+.userRole{
+    grid-column: 2/3;
+    grid-row:2/3;
+}
+
+.userRole p{
+    font-family: 'Source Code Pro';
+    font-style: normal;
+    font-weight: 400;
+    font-size: 15px;
+    line-height: 5px;
+    text-transform: uppercase;
+    color: #000000;
+    }
+
+.signBtn{
+    grid-column: 3/4;
+    grid-row:2/3;
+    margin: auto;
+}
+
+.signBtn button{
+    font-family: 'Source Code Pro';
+    font-style: normal;
+    font-size: 16px;
+    background: #F29A2E;
+    border-radius: 15px;
+    color: #F2F2F2;
+    padding: 0.5em 0.8em;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+.signBtn button:hover{
+    background: #74E34D;
+}
+
+.signBtnOut button{
+    font-family: 'Source Code Pro';
+    font-style: normal;
+    font-size: 16px;
+    background: #F29A2E;
+    border-radius: 15px;
+    color: #F2F2F2;
+    padding: 0.5em;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+.signBtnOut button:hover{
+    background: #FF0000;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
