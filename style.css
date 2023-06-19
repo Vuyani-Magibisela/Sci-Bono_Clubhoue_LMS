@@ -586,7 +586,8 @@ margin-left: 2em;
     grid-row-start: 2;
     
     display: grid;
-    
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: auto;
 }
 
 .search-label {
@@ -641,6 +642,10 @@ margin-left: 2em;
 }
 
 .userSignin_card{
+    grid-column: 1/4;
+    grid-row: auto;
+
+
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     grid-template-rows: 1fr 1fr;
