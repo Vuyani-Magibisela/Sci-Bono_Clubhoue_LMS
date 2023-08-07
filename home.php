@@ -116,15 +116,18 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true) {
 
                 <div class="proDetails">
                     <div class="userInfo">
-                        <!--if the user logs in print information-->
-                        <?php if(isset($_SESSION['loggedin'])) : ?>
+                        <div class="userDetails">
+                            <!--if the user logs in print information-->
+                            <?php if(isset($_SESSION['loggedin'])) : ?>
 
-                        <h3><?php echo $_SESSION['username']; ?></h3>
+                            <h3><?php echo $_SESSION['username']; ?></h3>
 
-                        <h4><?php echo $_SESSION['user_type']; ?> </h4>
-                            <div class="proImag">
-                                <img src="" />
-                            </div>
+                            <h4><?php echo $_SESSION['user_type']; ?> </h4>
+                        </div>
+
+                        <div class="proImag" `1>
+                            <img src="public/images/ui-user-profile-negative.svg" width="80px" />
+                        </div>
                         <?php endif ?>
                     </div>
 

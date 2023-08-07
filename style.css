@@ -448,7 +448,7 @@ form select option{
     border-radius: 0px 51px;
 
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
     grid-template-rows: 2fr;
 }
 
@@ -660,11 +660,20 @@ margin-left: 2em;
 .proImg{
     grid-column: 1/2;
     grid-row:1/3;
-    background: #2F2E41;
+    /* background: #2F2E41;
     border-radius: 30px;
+    /* width: 800px;
+    height: 800px; */ 
+    margin: auto;
+}
+
+.proImg img{
     width: 80px;
     height: 80px;
-    margin: auto;
+}
+
+.userDetails{
+    background-color: red;
 }
 
 .userName{
@@ -733,32 +742,3 @@ margin-left: 2em;
 .signBtnOut button:hover{
     background: #FF0000;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
