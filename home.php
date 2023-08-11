@@ -122,11 +122,16 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true) {
 
                             <h3><?php echo $_SESSION['username']; ?></h3>
 
-                            <h4><?php echo $_SESSION['user_type']; ?> </h4>
+                            
+                        </div>
+                        <div class="userStatus">
+                        <h4><?php echo $_SESSION['user_type']; ?> </h4>
+                        <img src="public/images/bell.svg" width="20px" />
+
                         </div>
 
                         <div class="proImag" `1>
-                            <img src="public/images/ui-user-profile-negative.svg" width="80px" />
+                            <img src="public/images/ui-user-profile-negative.svg" width="20px" />
                         </div>
                         <?php endif ?>
                     </div>
