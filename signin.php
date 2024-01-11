@@ -13,7 +13,7 @@
     ?>
 
     <main id="signin-container">
-        <div class="signedinTitle">
+        <div class="dailyRegTitle">
             <h1>Clubhouse Daily Register</h1>
         </div>
 
@@ -22,7 +22,7 @@
             
             <div class="userSignin">
                 
-                <p>Search For your name and select sign in, if you can not find your name please ask a mentor for assistance</p>
+                <p>Search For your name and select sign in, if you can not find your name please ask a mentor for assistance</p><br>
                 
                 <div class="userSignin-box">
                     <div class="search_users">

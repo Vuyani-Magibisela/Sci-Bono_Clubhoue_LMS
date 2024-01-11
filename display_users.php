@@ -37,6 +37,7 @@ mysqli_close($conn);
 ?>
 
 <!-- Display the user cards -->
-<div class="user-cards">
-    <?php echo $userCards; ?>
-</div>
+<?php echo $userCards; ?>
+<!-- <div class="user-cards">
+    
+</div> -->
