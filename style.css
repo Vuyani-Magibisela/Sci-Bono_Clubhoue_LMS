@@ -33,7 +33,7 @@
     /* 
     --------------End CSS Rest---------------
     ___________________________________________
-    */
+    */header
 
 /* Body Styling */
 
@@ -448,7 +448,7 @@ form select option{
     border-radius: 0px 51px;
 
     display: grid;
-    grid-template-columns: 1fr 1fr;
+    grid-template-columns: 1fr 1fr 1fr;
     grid-template-rows: 2fr;
 }
 
@@ -518,7 +518,7 @@ margin-left: 2em;
     height: 100vh;
     margin: 0 auto;
 }
-.signedinTitle{
+.dailyRegTitle{
     font-family: 'Source Code Pro';
     font-style: normal;
     font-weight: 600;
@@ -531,7 +531,7 @@ margin-left: 2em;
     text-align: center;
     }
 
-#userSignin{
+.userSignin #userSignin{
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: auto;
@@ -562,7 +562,7 @@ margin-left: 2em;
 .userSignin-box{
     display: grid;
     grid-template-columns: repeat(3, 1fr);
-    /* grid-template-rows: auto; */
+    grid-template-rows: auto;
 
     width: 920px;
     height: 552px;
@@ -586,7 +586,8 @@ margin-left: 2em;
     grid-row-start: 2;
     
     display: grid;
-    
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: auto;
 }
 
 .search-label {
@@ -641,6 +642,10 @@ margin-left: 2em;
 }
 
 .userSignin_card{
+    grid-column: 1 / span 1;
+    grid-row: auto;
+
+
     display: grid;
     grid-template-columns: 1fr 1fr 1fr;
     grid-template-rows: 1fr 1fr;
@@ -655,11 +660,20 @@ margin-left: 2em;
 .proImg{
     grid-column: 1/2;
     grid-row:1/3;
-    background: #2F2E41;
+    /* background: #2F2E41;
     border-radius: 30px;
+    /* width: 800px;
+    height: 800px; */ 
+    margin: auto;
+}
+
+.proImg img{
     width: 80px;
     height: 80px;
-    margin: auto;
+}
+
+.userDetails{
+    background-color: red;
 }
 
 .userName{
@@ -728,32 +742,3 @@ margin-left: 2em;
 .signBtnOut button:hover{
     background: #FF0000;
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
