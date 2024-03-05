@@ -28,6 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['loggedin'] = true;
             $_SESSION['username'] = $username;
             $_SESSION['user_type'] = $row['user_type']; // Store the user_type in session
+            $_SESSION['user_id'] = $row['id']; 
 
             header("Location: home.php");
             exit;

@@ -32,6 +32,8 @@ while ($row = mysqli_fetch_assoc($result)) {
     ';
 }
 
+
+
 // Close the database connection
 mysqli_close($conn);
 ?>

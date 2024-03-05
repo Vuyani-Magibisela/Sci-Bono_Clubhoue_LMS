@@ -30,7 +30,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true) {
                         </svg>
                         Home
                         </a>
-
+                    </li>
                     <li>
                         <a href="projects.php">
                             <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -44,7 +44,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true) {
                             </svg>
                         Projects
                         </a>
-
+                    </li>
                         <li>
                             <a href="members.php">
                                 <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -56,7 +56,8 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true) {
                                 </svg>
 
                             Members
-                            </a>  
+                            </a> 
+                        </li> 
                         <li>
                             <a href="learn.php">
                                 <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -68,15 +69,34 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true) {
                                 </svg>
                             Learn
                             </a>
-
+                        </li>
+                        
                         <li>
-                            <a href="reports.php">
-                                <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                    <path d="M50 15H10C8.61929 15 7.5 16.1193 7.5 17.5V50C7.5 51.3807 8.61929 52.5 10 52.5H50C51.3807 52.5 52.5 51.3807 52.5 50V17.5C52.5 16.1193 51.3807 15 50 15Z" fill="#6C63FF" stroke="#F29A2E" stroke-width="2" stroke-linejoin="round"/>
-                                    <path d="M22.437 30.0103H37.437" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                    <path d="M7.5 16.25L16.25 6.25H43.75L52.5 16.25" stroke="#F29A2E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                </svg>
-                            Reports
+                        <!-- Show the icon only if the user is an admin -->
+                            <?php 
+                                $userType = $_SESSION['user_type'];
+
+                                if ($userType === "admin"): ?>
+                                    <a href="reports.php">
+                                        <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                            <path d="M50 15H10C8.61929 15 7.5 16.1193 7.5 17.5V50C7.5 51.3807 8.61929 52.5 10 52.5H50C51.3807 52.5 52.5 51.3807 52.5 50V17.5C52.5 16.1193 51.3807 15 50 15Z" fill="#6C63FF" stroke="#F29A2E" stroke-width="2" stroke-linejoin="round"/>
+                                            <path d="M22.437 30.0103H37.437" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                            <path d="M7.5 16.25L16.25 6.25H43.75L52.5 16.25" stroke="#F29A2E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                        </svg>
+                                    Reports
+                                    </a>
+                            <?php endif; ?> 
+                        </li>
+                        
+                        <li>
+                            <a href="signin.php">
+                            <svg width="66" height="66" viewBox="0 0 66 66" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M33 59.125C47.4284 59.125 59.125 47.4284 59.125 33C59.125 18.5716 47.4284 6.875 33 6.875C18.5716 6.875 6.875 18.5716 6.875 33C6.875 47.4284 18.5716 59.125 33 59.125Z" fill="#6C63FF" stroke="#F29A2E" stroke-width="2"/>
+                                <path d="M49.5083 33.817V33.8156C49.5083 29.822 46.2708 26.5845 42.2771 26.5845H23.7229C19.7292 26.5845 16.4918 29.822 16.4918 33.8156V33.817C16.4918 37.8106 19.7292 41.0481 23.7229 41.0481H42.2771C46.2708 41.0481 49.5083 37.8106 49.5083 33.817Z" fill="#8CC86E" stroke="white" stroke-width="2"/>
+                                <path d="M35.7583 34.1714C35.7583 37.9683 38.8363 41.0464 42.6333 41.0464C46.4302 41.0464 49.5083 37.9683 49.5083 34.1714C49.5083 30.3744 46.4302 27.2964 42.6333 27.2964C38.8363 27.2964 35.7583 30.3744 35.7583 34.1714Z" stroke="white" stroke-width="2"/>
+                            </svg>
+
+                            Sign In
                             </a>
                         </li>
 

@@ -1,0 +1,11 @@
+UserName:Sam_King
+UserType:Member
+Password:12345
+
+UserName: thato_tsile
+UserType: Admin
+Password: 13378
+
+UserName:
+UserType:
+Password:

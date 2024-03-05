@@ -1,3 +1,16 @@
+<?php
+// Check if a session is not already active
+if(session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+if(isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
+    $destination = "home.php";
+} else {
+    $destination = "login.php";
+}
+?>
+
 <html lang="en">
 <head>
     <title></title>
@@ -7,7 +20,7 @@
 <body>
    <header class="header">
         <div class="logo-left">
-            <a href="index.php"><img src="public/images/Sci-Bono logo White.png" alt="Left Logo" width="" height="121"></a>
+            <a href="<?php echo $destination; ?>"><img src="public/images/Sci-Bono logo White.png" alt="Left Logo" width="" height="121"></a>
         </div>
         <div class="title-center">
             <h1>Sci-Bono Clubhouse</h1>
