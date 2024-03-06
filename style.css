@@ -519,7 +519,7 @@ margin-left: 2em;
     height: 100vh;
     margin: 0 auto;
 }
-.dailyRegTitle{
+.dailyRegTitle {
     font-family: 'Source Code Pro';
     font-style: normal;
     font-weight: 600;
@@ -531,14 +531,17 @@ margin-left: 2em;
     padding: 25px;
     text-align: center;
     }
+    /* .dailyRegTitle{
 
-.userSignin #userSignin{
+    } */
+#userSign-in_OutContainer{
     display: grid;
     grid-template-columns: 1fr 1fr;
     grid-template-rows: auto;
     gap: 2em;
     justify-content: center;
-    }
+}
+
 
 .userSignin{
     grid-column: 1/2;
@@ -565,13 +568,13 @@ margin-left: 2em;
     grid-template-columns: repeat(3, 1fr);
     grid-template-rows: auto;
 
-    width: 920px;
+    width: 1020px;
     height: 552px;
     background: #3F3D56;
     border: 6px solid #D9D9D9;
     border-radius: 25px;
     margin: 0 auto;
-    padding: 1em;
+    padding: 0.5em;
     overflow: scroll;
     }
 
@@ -643,7 +646,7 @@ margin-left: 2em;
 }
 
 .userSignin_card{
-    grid-column: 1 / span 1;
+    grid-column: 1 span 3;
     grid-row: auto;
 
 

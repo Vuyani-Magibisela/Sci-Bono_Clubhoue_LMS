@@ -7,6 +7,7 @@
     <title>Daily Register</title>
     <link rel="sytlesheet" href="style.css">
     <link rel="stylesheet" href="screenSizes.css">
+    <script src="script.js"></script>
 </head>
 <body>
     <?php 
@@ -19,7 +20,7 @@
         </div>
 
 
-        <div id="userSignin">
+        <div id="userSign-in_OutContainer">
             
             <div class="userSignin">
                 
@@ -48,23 +49,25 @@
             <div class="userSignedin">
                 <p>Signed in Members</p>
                 <div class="userSingedin-box">
-                    <div class="userSignin_card">
-                        <div class="proImg">
-                            <img src="" alt="">
-                        </div>
-                        <div class="userName">
-                            <h3><?php echo ''; ?>Vuyani Magibisela</h3>
-                        </div>
+                    <!--Add condition if checked in field is selected dont show if not show-->
 
-                        <div class="userRole">
-                            <p><?php echo ''; ?>Admin</p>
-                        </div>
+                        <div class="userSignin_card">
+                            <div class="proImg">
+                                <img src="" alt="">
+                            </div>
+                            <div class="userName">
+                                <h3><?php echo ''; ?>Vuyani Magibisela</h3>
+                            </div>
 
-                        <div class="signBtnOut">
-                            <button>Sign Out</button>
+                            <div class="userRole">
+                                <p><?php echo ''; ?>Admin</p>
+                            </div>
+
+                            <div class="signBtnOut">
+                                <button>Sign Out</button>
+                            </div>
                         </div>
-                    </div>
-                
+                  
                 </div> 
             </div>
         </div>
