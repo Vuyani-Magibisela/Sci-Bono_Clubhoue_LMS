@@ -677,7 +677,7 @@ margin-left: 2em;
 }
 
 .userDetails{
-    background-color: #fff;
+    background-color: rgba(255, 255, 255,0.5);
 }
 
 .userName{
