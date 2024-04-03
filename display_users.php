@@ -8,6 +8,7 @@ $result = mysqli_query($conn, $sql);
 // Generate HTML for user cards
 $userCards = '';
 while ($row = mysqli_fetch_assoc($result)) {
+    $userId = $row['id']; // Get user ID
     $username = $row['username'];
     $userType = $row['user_type'];
 
@@ -26,7 +27,7 @@ while ($row = mysqli_fetch_assoc($result)) {
             </div>
 
             <div class="signBtn">
-                <button>Sign in</button>
+                <button onclick="signIn('.$userId.')">Sign in</button> <!-- Pass user ID to signIn function -->
             </div>
         </div>
     ';

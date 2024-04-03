@@ -1,19 +1,34 @@
-// JavaScript code for handling sign in/out buttons
-document.querySelectorAll('.signBtn button').forEach(button => {
-    button.addEventListener('click', function() {
-        // Get the user card container
-        alert("Clicked");
-        const card = this.closest('.userSignin_card');
-        // Move the user card to the signed-in container
-        document.querySelector('.userSignedin-box').appendChild(card);
-    });
-});
+// JavaScript function to handle sign-in with password verification
+function signIn(userId) {
+    // Prompt the user to enter their password
+    var password = prompt("Please enter your password:");
 
-document.querySelectorAll('.signBtnOut button').forEach(button => {
-    button.addEventListener('click', function() {
-        // Get the user card container
-        const card = this.closest('.userSignin_card');
-        // Move the user card to the signed-out container
-        document.querySelector('.userSignin-box').appendChild(card);
-    });
-});
+    // Validate password via AJAX
+    if (password !== null) { // Check if the user clicked Cancel or OK in the prompt
+        // Send AJAX request to validate password
+        var xhr = new XMLHttpRequest();
+        xhr.onreadystatechange = function() {
+            if (xhr.readyState === XMLHttpRequest.DONE) {
+                if (xhr.status === 200) {
+                    // If password is validated, proceed with sign-in action
+                    // You can implement this part based on the response from the server
+                    var response = xhr.responseText;
+                    if (response === "valid") {
+                        // Proceed with sign-in action (send another AJAX request)
+                        // Implement this part based on your server-side logic
+                        // Example:
+                        // sendSignInRequest(userId);
+                    } else {
+                        alert("Invalid password. Please try again.");
+                    }
+                } else {
+                    // Handle AJAX error
+                    console.error("AJAX request failed:", xhr.statusText);
+                }
+            }
+        };
+        xhr.open("POST", "validate_password.php"); // Adjust the PHP file name accordingly
+        xhr.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        xhr.send("userId=" + userId + "&password=" + encodeURIComponent(password));
+    }
+}
