@@ -6,6 +6,6 @@ UserName: thato_tsile
 UserType: Admin
 Password: 13378
 
-UserName:
-UserType:
-Password:
+UserName: Kgotso_Maponya
+UserType: Member
+Password: 123Kgotso
