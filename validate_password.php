@@ -5,29 +5,45 @@ require 'server.php';
 $userId = $_POST['userId'];
 $password = $_POST['password'];
 
-// Validate password against the stored password in the users table
-$sql = "SELECT * FROM users WHERE id = $userId AND password = '$password'";
+// Validate user ID (you might want to add additional validation)
+$userId = (int) $userId;
+
+// Debugging - log user ID and password
+//console_log($userId);
+//console_log($password);
+
+// Validate password against the hashed password stored in the users table
+$sql = "SELECT password FROM users WHERE id = $userId"; // Retrieve only the hashed password
 $result = mysqli_query($conn, $sql);
 
-if (mysqli_num_rows($result) > 0) {
-    // Password is valid, proceed with marking the user as checked in or checked out
-    // You can implement this part based on the context of the request (sign-in or sign-out)
+if ($result && mysqli_num_rows($result) > 0) {
+    // Fetch the hashed password from the database
+    $row = mysqli_fetch_assoc($result);
+    $hashedPasswordFromDB = $row['password'];
 
-    // Example for marking user as checked in:
-    $checkInSql = "INSERT INTO attendance (user_id, check_in_time) VALUES ($userId, NOW())";
-    mysqli_query($conn, $checkInSql);
+    // Verify the entered password against the hashed password from the database
+    if (password_verify($password, $hashedPasswordFromDB)) {
+        // Password is valid, proceed with marking the user as checked in or checked out
+        // You can implement this part based on the context of the request (sign-in or sign-out)
 
-    // Example for marking user as checked out:
-    // $checkOutSql = "UPDATE attendance SET check_out_time = NOW() WHERE user_id = $userId AND DATE(check_in_time) = CURDATE()";
-    // mysqli_query($conn, $checkOutSql);
+        // Example for marking user as checked in:
+        $checkInSql = "INSERT INTO attendance (user_id, check_in_time) VALUES ($userId, NOW())";
+        mysqli_query($conn, $checkInSql);
 
-    // Send response indicating success
-    echo "valid";
+        // Example for marking user as checked out:
+        // $checkOutSql = "UPDATE attendance SET check_out_time = NOW() WHERE user_id = $userId AND DATE(check_in_time) = CURDATE()";
+        // mysqli_query($conn, $checkOutSql);
+
+        // Send response indicating success
+        echo "valid";
+    } else {
+        // Invalid password
+        echo "invalid";
+    }
 } else {
-    // Invalid password
-    echo "invalid";
+    // User ID not found or error retrieving password
+    echo "error";
 }
 
 // Close the database connection
 mysqli_close($conn);
-
