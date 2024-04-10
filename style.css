@@ -474,13 +474,24 @@ form select option{
     color: #FFFFFF;
 }
 
+
+/*content_section */
+
 .content_section{
     grid-row: 2/3;
     background: #2F2E41;
+    border-radius: 0 0 2em 2em;
     width: 100%;
     height: 100%;
     margin-bottom: 0px;
 }
+
+/*Member content_section */
+.content_section_members{
+    background: red;
+}
+
+
 
 .userInfo{
 grid-column: 1/ span 2;
@@ -744,3 +755,5 @@ margin-left: 2em;
 .signBtnOut button:hover{
     background: #FF0000;
 }
+
+
