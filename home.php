@@ -21,7 +21,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true) {
         <section id="nav_section">
             <div class="nav">
                 <ul>
-                    <li>
+                    <li class="active">
                         <a  href="home.php" >
                         <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
                             <path d="M11 23V53H49V23L30 8L11 23Z" fill="#6C63FF" stroke="#F29A2E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
@@ -46,7 +46,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true) {
                         </a>
                     </li>
                         <li>
-                            <a href="members.php" class="active">
+                            <a href="members.php" >
                                 <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M52.5 10H7.5C6.11929 10 5 11.1193 5 12.5V47.5C5 48.8807 6.11929 50 7.5 50H52.5C53.8807 50 55 48.8807 55 47.5V12.5C55 11.1193 53.8807 10 52.5 10Z" stroke="#F29A2E" stroke-width="2" stroke-linejoin="round"/>
                                     <path d="M21.25 31.25C24.0114 31.25 26.25 29.0114 26.25 26.25C26.25 23.4886 24.0114 21.25 21.25 21.25C18.4886 21.25 16.25 23.4886 16.25 26.25C16.25 29.0114 18.4886 31.25 21.25 31.25Z" fill="#6C63FF" stroke="#F29A2E" stroke-width="2" stroke-linejoin="round"/>
@@ -145,8 +145,8 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true) {
                             
                         </div>
                         <div class="userStatus">
-                        <h4><?php echo $_SESSION['user_type']; ?> </h4>
-                        <img src="public/images/bell.svg" width="20px" />
+                            <h4><?php echo $_SESSION['user_type']; ?> </h4>
+                            <img src="public/images/bell.svg" width="20px" />
 
                         </div>
 
@@ -168,7 +168,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true) {
 
             </div>
 
-            <div class="content_section_members">
+            <div class="content_section">
                 
             </div>
 

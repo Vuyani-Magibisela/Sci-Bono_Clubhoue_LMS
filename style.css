@@ -488,8 +488,106 @@ form select option{
 
 /*Member content_section */
 .content_section_members{
-    background: red;
+    background: #2F2E41;
+    border-radius: 2em 0 2em 2em;
 }
+
+.content_section_members h1{
+    color: #fff;
+    font-size: 45px;
+    text-align: center;
+}
+
+.member-cards{
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr;
+    column-gap: 0.5em;
+    border-radius: 20px;
+    background: #E6EAEE;
+    width: 416px;
+    height: 222px;
+    padding: 0.5em;
+    margin: 0.5em;
+}
+
+.memberImg{
+    width: 150px;
+    height: 200px;
+    background: #D9D9D9; 
+    border-radius: 10px; 
+}
+.memberImg img{
+    width:111.93px;
+    height: 141.82px;
+    background: #535461;
+    border-radius: 10px; 
+    margin: 0.5em 1em 0 1em;
+}
+
+
+.member-cards_layout{
+    grid-column: 1/4;
+    grid-row-start: 2;
+    
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    grid-template-rows: auto;
+
+    margin-left: 6em;
+}
+
+.memberRole{
+    grid-column: 1/4;
+    color: #fff;
+    position: absolute;
+    top: 11em; 
+    left: 2.5em;
+    
+}
+.memberRole p{
+    width: 68.24px;
+    height: 12.57px;
+    font-size: 12px;
+    background-color: #F29A2E;
+    border-radius: 10px;
+    padding: 0.5em;
+    text-align: center;
+}
+
+.memberName{
+    grid-column: 1/4;
+    color: #000;
+    position: absolute;
+    top: 9.5em; 
+    left: 1em;
+}
+
+.memberName h3{
+    font-size: 0.7em;
+    text-transform: uppercase;
+}
+
+.viewProfile_Btn{
+    grid-column: 3/4;
+    grid-row:2/3;
+    margin: auto;
+}
+
+.viewProfile_Btn button{ 
+    font-family: 'Source Code Pro';
+    font-style: normal;
+    font-size: 12px;
+    background: #F29A2E;
+    border-radius: 15px;
+    color: #F2F2F2;
+    padding: 0.5em 0.8em;
+    text-transform: uppercase;
+    cursor: pointer;
+}
+
+
 
 
 
@@ -516,7 +614,6 @@ margin-left: 2em;
     width: 10em;
     height: auto;
     margin-bottom: 2em;
-    
 }
 
 
@@ -686,7 +783,7 @@ margin-left: 2em;
 }
 
 .userDetails{
-    background-color: rgba(255, 255, 255,0.5);
+    /* background-color: rgba(255, 255, 255,0.5); */
 }
 
 .userName{
@@ -737,6 +834,7 @@ margin-left: 2em;
     text-transform: uppercase;
     cursor: pointer;
 }
+
 .signBtn button:hover{
     background: #74E34D;
 }
