@@ -490,6 +490,7 @@ form select option{
 .content_section_members{
     background: #2F2E41;
     border-radius: 2em 0 2em 2em;
+    overflow: scroll;
 }
 
 .content_section_members h1{
@@ -517,6 +518,7 @@ form select option{
     height: 200px;
     background: #D9D9D9; 
     border-radius: 10px; 
+    filter: drop-shadow(0px 0px 5px #4444dd);
 }
 .memberImg img{
     width:111.93px;
@@ -587,7 +589,13 @@ form select option{
     cursor: pointer;
 }
 
+.memberSkills{
 
+}
+
+.badges{
+    background: #444053;
+}
 
 
 

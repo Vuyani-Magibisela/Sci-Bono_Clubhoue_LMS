@@ -25,6 +25,14 @@ while ($row = mysqli_fetch_assoc($result)) {
             <div class="memberRole">
                 <p>'.$userType.'</p>
             </div>
+            <div class="memberSkills">
+                <h1>Skills</h1>
+                <ul class="badges">
+                    <li><a href=""></a></li>
+                    <li><a href=""></a></li>
+                    <li><a href=""></a></li>
+                </ul>
+            </div>
 
             <div class="viewProfile_Btn">
                 <button onclick="signIn('.$userId.')">View Profile</button> <!-- Pass user ID to signIn function -->

@@ -9,3 +9,8 @@ Password: 13378
 UserName: Kgotso_Maponya
 UserType: Member
 Password: 123Kgotso
+
+UserName: itumeleng_kgakane     
+UserType: Member
+Password: 123Kgotso
+
