@@ -72,11 +72,15 @@
 }
 
 /* index main stying */
+#index{
+    background: #393A7B;
+}
+
 
 #container-index{
     display: grid;
     grid-template-columns: 56% 46%;
-    width: 1225px;
+    width: 76.563em;
     align-items: center;
 }
 
@@ -84,7 +88,7 @@
     margin: 4em auto;
     background: #6C63FF;
     box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.25);
-    border-radius: 51px;
+    border-radius: 3.188em;
 }
 
 
@@ -96,8 +100,8 @@
 }
 
 .hero-img img{
-    width: 684.93px;
-    height: 714px;
+    width: 42.808em;
+    height: 44.625em;
 }
 
 .log_signup-section{
