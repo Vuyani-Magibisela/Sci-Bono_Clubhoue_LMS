@@ -46,3 +46,4 @@ function handleSignInResponse(response) {
 var userId = 1; // Example user ID
 var password = "Vu13#k*s3D"; // Example password
 sendSignInRequest(userId, password);
+handleSignInResponse();
