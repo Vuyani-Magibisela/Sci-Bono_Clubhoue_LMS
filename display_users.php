@@ -27,7 +27,7 @@ while ($row = mysqli_fetch_assoc($result)) {
             </div>
 
             <div class="signBtn">
-                <button onclick="signIn('.$userId.')">Sign in</button> <!-- Pass user ID to signIn function -->
+                <button class=" button" onclick="signIn('.$userId.')">Sign in</button> <!-- Pass user ID to signIn function -->
             </div>
         </div>
     ';

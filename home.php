@@ -129,13 +129,12 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true) {
         
         <section id="main_section">
             <div class="header_section">
-                <div class="header01">
-                    <img src="public/images/header01.png" alt="">
-                </div>
            
                 <div class="anouncements">
+                    <span>
                     <h4>Announcements</h4>
-                    <span><?php  $currentDate = date("l, F jS, Y"); echo $currentDate; ?></span>
+                    <h6><?php  $currentDate = date("l, F jS, Y"); echo $currentDate; ?></h6>
+                    </span>
                 </div>
 
                 <div class="proDetails">

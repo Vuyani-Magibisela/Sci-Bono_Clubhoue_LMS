@@ -1,3 +1,16 @@
+// Function to prompt the user to enter their password and initiate sign-in process
+function signInPrompt(userId) {
+    // Prompt the user to enter their password
+    var password = prompt("Please enter your password:");
+    if (password === null) {
+        // User canceled the prompt, do nothing
+        return;
+    }
+    
+    // Perform sign-in process with the provided user ID and password
+    sendSignInRequest(userId, password);
+}
+
 // Function to send a sign-in request to the server
 function sendSignInRequest(userId, password) {
     // Create a new XMLHttpRequest object
@@ -21,7 +34,7 @@ function sendSignInRequest(userId, password) {
     };
     
     // Prepare the data to send in the request body
-    var formData = "userId=" + userId + "&password=" + encodeURIComponent(password);
+    var formData = "userId=" + encodeURIComponent(userId) + "&password=" + encodeURIComponent(password);
     
     // Send the AJAX request with the prepared data
     xhr.send(formData);
@@ -40,10 +53,16 @@ function handleSignInResponse(response) {
     }
 }
 
-// Usage example:
-// Call sendSignInRequest function with user ID and password parameters
-// Replace userId and password with actual values from your application
-var userId = 1; // Example user ID
-var password = "Vu13#k*s3D"; // Example password
-sendSignInRequest(userId, password);
-handleSignInResponse();
+// Add event listeners to all sign-in buttons on member cards
+var signInButtons = document.querySelectorAll(".userSignin_card button");
+signInButtons.forEach(function(button) {
+    button.addEventListener("click", function() {
+        // Retrieve the user ID associated with the clicked sign-in button
+        var userId = button.dataset.userId;
+        if (userId) {
+            // Call signInPrompt function with the retrieved user ID
+            signInPrompt(userId);
+        }
+    });
+});
+
