@@ -1,16 +1,23 @@
 <?php
 require 'server.php';
 
+// Debugging: Log received POST data
+error_log('Received POST data: ' . print_r($_POST, true));
+
 // Retrieve user ID and password from the AJAX request
 $userId = $_POST['userId'];
 $password = $_POST['password'];
+
+// Debugging: Log received user ID and password
+error_log('Received user ID: ' . $userId);
+error_log('Received password: ' . $password);
 
 // Validate user ID (you might want to add additional validation)
 $userId = (int) $userId;
 
 // Debugging - log user ID and password
-//console_log($userId);
-//console_log($password);
+// console_log($userId);
+// console_log($password);
 
 // Validate password against the hashed password stored in the users table
 $sql = "SELECT password FROM users WHERE id = $userId"; // Retrieve only the hashed password
