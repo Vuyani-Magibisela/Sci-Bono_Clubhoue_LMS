@@ -1,5 +1,25 @@
+// Add event listeners to all sign-in buttons on member cards
+var signInButtons = document.querySelectorAll(".userSignin_card button");
+signInButtons.forEach(function(button) {
+    button.addEventListener("click", function() {
+        // Retrieve the user ID associated with the clicked sign-in button
+        var userId = button.dataset.userId;
+        console.log("Clicked on sign-in button for user ID:", userId);
+        
+        // Verify if userId is retrieved correctly
+        if (!userId) {
+            console.error("Error: User ID not found for sign-in button.");
+            return;
+        }
+        
+        // Call signInPrompt function with the retrieved user ID
+        signInPrompt(userId);
+    });
+});
+
 // Function to prompt the user to enter their password and initiate sign-in process
 function signInPrompt(userId) {
+    console.log("Prompting for password for user ID:", userId);
     // Prompt the user to enter their password
     var password = prompt("Please enter your password:");
     if (password === null) {
@@ -52,17 +72,3 @@ function handleSignInResponse(response) {
         // Display an error message to the user or take appropriate action
     }
 }
-
-// Add event listeners to all sign-in buttons on member cards
-var signInButtons = document.querySelectorAll(".userSignin_card button");
-signInButtons.forEach(function(button) {
-    button.addEventListener("click", function() {
-        // Retrieve the user ID associated with the clicked sign-in button
-        var userId = button.dataset.userId;
-        if (userId) {
-            // Call signInPrompt function with the retrieved user ID
-            signInPrompt(userId);
-        }
-    });
-});
-

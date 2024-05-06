@@ -472,7 +472,7 @@ form select option{
 
 .proDetails{
     grid-column: 2/3;
-    background: linear-gradient(270deg, #9002D2 50%, rgba(203, 202, 207, 0) 100%);
+    background: linear-gradient(270deg, #9002D2 80%, rgba(203, 202, 207, 0) 100%);
     /* background: #9002D2; */
     background-size: contain    ;     
     border-radius: 0px 51px;
@@ -503,9 +503,7 @@ form select option{
     color: #FFFFFF;
 }
 
-
 /*content_section */
-
 .content_section{
     grid-row: 2/3;
     background: #2F2E41;
