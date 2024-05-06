@@ -7,6 +7,8 @@ error_log('Received POST data: ' . print_r($_POST, true));
 // Retrieve user ID and password from the AJAX request
 $userId = $_POST['userId'];
 $password = $_POST['password'];
+echo("User ID ".$userId );
+echo("User Password ".$password);
 
 // Debugging: Log received user ID and password
 error_log('Received user ID: ' . $userId);

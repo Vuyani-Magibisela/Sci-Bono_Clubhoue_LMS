@@ -28,6 +28,7 @@ function signInPrompt(userId) {
 
 // Function to send a sign-in request to the server
 function sendSignInRequest(userId, password) {
+    
     // Create a new XMLHttpRequest object
     var xhr = new XMLHttpRequest();
     
