@@ -12,6 +12,7 @@
 <body>
     <?php 
     include 'header.php';
+    include 'display_users.php'
     ?>
 
     <main id="signin-container">
@@ -38,8 +39,8 @@
                         <input type="text" id="search" class="search-input" name="search_users" onfocus="hideLabel()" onblur="showLabel()">  
                     </div>
 
-                    <div class="user-cards">
-                        <?php include 'display_users.php'?>
+                    <div class="signInUserCards user-cards">
+                        <?php echo $signInUserCards; ?>
                     </div>
                     
 
@@ -51,21 +52,8 @@
                 <div class="userSingedin-box">
                     <!--Add condition if checked in field is selected dont show if not show-->
 
-                        <div class="userSignin_card">
-                            <div class="proImg">
-                                <img src="" alt="">
-                            </div>
-                            <div class="userName">
-                                <h3><?php echo ''; ?>Vuyani Magibisela</h3>
-                            </div>
-
-                            <div class="userRole">
-                                <p><?php echo ''; ?>Admin</p>
-                            </div>
-
-                            <div class="signBtnOut">
-                                <button>Sign Out</button>
-                            </div>
+                        <div class="signOutUserCards user-cards">
+                        <?php echo $signOutUserCards; ?>
                         </div>
                   
                 </div> 

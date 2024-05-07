@@ -36,11 +36,11 @@ if ($result && mysqli_num_rows($result) > 0) {
         // You can implement this part based on the context of the request (sign-in or sign-out)
 
         // Example for marking user as checked in:
-        $checkInSql = "INSERT INTO attendance (user_id, check_in_time) VALUES ($userId, NOW())";
+        $checkInSql = "INSERT INTO attendance (user_id, checked_in) VALUES ($userId, NOW())";
         mysqli_query($conn, $checkInSql);
 
         // Example for marking user as checked out:
-        // $checkOutSql = "UPDATE attendance SET check_out_time = NOW() WHERE user_id = $userId AND DATE(check_in_time) = CURDATE()";
+        $checkOutSql = "UPDATE attendance SET checked_out = NOW() WHERE user_id = $userId AND DATE(checked_in) = CURDATE()";
         // mysqli_query($conn, $checkOutSql);
 
         // Send response indicating success
