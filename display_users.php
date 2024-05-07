@@ -21,7 +21,7 @@ while ($row = mysqli_fetch_assoc($result)) {
 
     // Generate HTML for user card based on sign-in status
     $userCardHTML = '
-        <div class="userCard">
+        <div class="userCard userSignin_card">
             <div class="proImg" alt="User Profile Picture">
                 <img src="" alt="">
             </div>
@@ -31,7 +31,7 @@ while ($row = mysqli_fetch_assoc($result)) {
             <div class="userRole">
                 <p>'.$userType.'</p>
             </div>
-            <div class="actionBtn">
+            <div class="actionBtn signBtn">
     ';
 
     if ($isSignedIn) {

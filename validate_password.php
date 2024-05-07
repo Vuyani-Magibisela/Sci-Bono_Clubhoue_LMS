@@ -1,6 +1,15 @@
 <?php
 require 'server.php';
 
+if (isset($_POST['password'])) {
+    $password = $_POST['password'];
+    // Validate the password...
+} else {
+    // Handle the case where 'password' key is not present
+    echo "Error: Password parameter is missing.";
+}
+
+
 // Debugging: Log received POST data
 error_log('Received POST data: ' . print_r($_POST, true));
 

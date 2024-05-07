@@ -20,6 +20,19 @@
             <h1>Clubhouse Daily Register</h1>
         </div>
 
+        <div id="signin-modal" class="modal">
+            <div class="modal-content">
+                <span id="close-signin-modal" class="close">&times;</span>
+                <form id="signin-form">
+                    <label for="userId">User ID:</label>
+                    <input type="text" id="userId" name="userId">
+                    <label for="password">Password:</label>
+                    <input type="password" id="password" name="password">
+                    <button type="submit">Sign In</button>
+                </form>
+            </div>
+        </div>  
+
 
         <div id="userSign-in_OutContainer">
             
@@ -41,9 +54,7 @@
 
                     <div class="signInUserCards user-cards">
                         <?php echo $signInUserCards; ?>
-                    </div>
-                    
-
+                    </div> 
                 </div>
             </div>
 
