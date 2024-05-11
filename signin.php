@@ -7,7 +7,7 @@
     <title>Daily Register</title>
     <link rel="sytlesheet" href="style.css">
     <link rel="stylesheet" href="screenSizes.css">
-    <script src="script.js"></script>
+
 </head>
 <body>
     <?php 
@@ -74,6 +74,7 @@
         </div>
 
     </main>
-
+    
+    <script src="script.js"></script>
 </body>
 </html>
