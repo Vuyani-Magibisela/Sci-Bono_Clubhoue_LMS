@@ -2,9 +2,9 @@ UserName:Sam_King
 UserType:Member
 Password:12345
 
-UserName: thato_tsile
+UserName: themba_kgakane
 UserType: Admin
-Password: 13378
+Password: 1234
 
 UserName: Kgotso_Maponya
 UserType: Member
@@ -12,5 +12,20 @@ Password: 123Kgotso
 
 UserName: itumeleng_kgakane     
 UserType: Member
-Password: 123Kgotso
+Password: 54321
+
+UserName: themba_magibisela     
+UserType: Member
+Password: 13378
+
+UserName: jabu_khumalo    
+UserType: Member
+Password: 12345
+
+
+UserName: lebo_skhosana    
+UserType: Admin
+Password: 12345
+
+
 

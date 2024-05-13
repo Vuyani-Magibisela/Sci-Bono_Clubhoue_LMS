@@ -19,38 +19,48 @@ while ($row = mysqli_fetch_assoc($result)) {
     $attendanceResult = mysqli_query($conn, $attendanceSql);
     $isSignedIn = mysqli_num_rows($attendanceResult) > 0;
 
-    // Generate HTML for user card based on sign-in status
-    $userCardHTML = '
-        <div class="userCard userSignin_card">
-            <div class="proImg" alt="User Profile Picture">
-                <img src="" alt="">
-            </div>
-            <div class="userName">
-                <h3>'.$username.'</h3>
-            </div>
-            <div class="userRole">
-                <p>'.$userType.'</p>
-            </div>
-            <div class="actionBtn signBtn">
-    ';
-
     if ($isSignedIn) {
-        // User is signed in, display sign-out button
-        $userCardHTML .= '<button class="signOutBtn" onclick="signOut('.$userId.')">Sign Out</button>';
-        $signOutUserCards .= $userCardHTML.'</div></div>';
+        // User is signed in, display the card in the signOutUserCards section
+        // Generate HTML for user card
+        $userCardHTML = '
+            <div id="userCard'.$userId.'" class="userCard userSignin_card">
+                <div class="proImg" alt="User Profile Picture">
+                    <img src="" alt="">
+                </div>
+                <div class="userName">
+                    <h3>'.$username.'</h3>
+                </div>
+                <div class="userRole">
+                    <p>'.$userType.'</p>
+                </div>
+                <div class="actionBtn signBtn">
+                    <button class="signOutBtn" onclick="signOut('.$userId.')">Sign Out</button>
+                </div>
+            </div>';
+
+        $signOutUserCards .= $userCardHTML;
     } else {
-        // User is not signed in, display sign-in button
-        $userCardHTML .= '<button class="signInBtn" onclick="signIn('.$userId.')">Sign In</button>';
-        $signInUserCards .= $userCardHTML.'</div></div>';
+        // User is signed out, display the card in the signInUserCards section
+        // Generate HTML for user card
+        $userCardHTML = '
+            <div id="userCard'.$userId.'" class="userCard userSignin_card">
+                <div class="proImg" alt="User Profile Picture">
+                    <img src="" alt="">
+                </div>
+                <div class="userName">
+                    <h3>'.$username.'</h3>
+                </div>
+                <div class="userRole">
+                    <p>'.$userType.'</p>
+                </div>
+                <div class="actionBtn signBtn">
+                    <button class="signInBtn" onclick="signIn('.$userId.')">Sign In</button>
+                </div>
+            </div>';
+
+        $signInUserCards .= $userCardHTML;
     }
 }
 
 // Close the database connection
 mysqli_close($conn);
-?>
-
-<!-- Display the user cards -->
-
-<!-- <div class="user-cards">
-    
-</div> -->

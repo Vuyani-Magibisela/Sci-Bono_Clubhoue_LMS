@@ -103,6 +103,7 @@ function sendSignInRequest(userId, password) {
         if (xhr.readyState === XMLHttpRequest.DONE) {
             if (xhr.status === 200) {
                 // Handle the server response
+                console.log(xhr.responseText);
                 handleSignInResponse(xhr.responseText);
             } else {
                 // Handle AJAX error
@@ -119,7 +120,7 @@ function sendSignInRequest(userId, password) {
 }
 
 // Define the signOut function
-function signOut(userId) {
+function signOut(userId, password) {
     // Send an AJAX request to the server to mark the user as signed out
     var xhr = new XMLHttpRequest();
     var url = "validate_password.php"; // Update the URL to your PHP script for handling sign-out
@@ -129,10 +130,11 @@ function signOut(userId) {
         if (xhr.readyState === XMLHttpRequest.DONE) {
             if (xhr.status === 200) {
                 // If sign-out is successful, remove the user card from the UI
+                //console.log('This is the responseText', xhr.responseText);  
                 var response = xhr.responseText;
                 if (response === "success") {
                     // Remove the user card from the DOM
-                    var userCard = document.getElementById("userCard_" + userId);
+                    var userCard = document.getElementById("userCard" + userId);
                     if (userCard) {
                         userCard.parentNode.removeChild(userCard);
                     }
@@ -142,15 +144,15 @@ function signOut(userId) {
                 }
             } else {
                 console.error("Failed to send sign-out request:", xhr.statusText);
-            }
+            }   
         }
     };
-    xhr.send("userId=" + userId + "&action=signOut"); // Pass user ID and action to the server
+    xhr.send("userId=" + encodeURIComponent(userId) + "&password=" + encodeURIComponent(password) + "&action=signOut"); // Pass user ID and action to the server
 }
 
 // Function to handle the server response after signing in
-function handleSignInResponse(response) {
-    if (response === "valid") {
+function handleSignInResponse(  response) {
+    if (response.trim() === "valid") {
         // User has been successfully signed in
         console.log("Sign-in successful!");
         // Perform any additional actions as needed (e.g., update UI)

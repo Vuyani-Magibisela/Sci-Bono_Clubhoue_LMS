@@ -53,7 +53,7 @@
                     </div>
 
                     <div class="signInUserCards user-cards">
-                        <?php echo $signInUserCards; ?>
+                        <?php echo   $signInUserCards; ?>
                     </div> 
                 </div>
             </div>
