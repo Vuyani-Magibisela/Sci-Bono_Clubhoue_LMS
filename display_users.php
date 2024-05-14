@@ -15,9 +15,12 @@ while ($row = mysqli_fetch_assoc($result)) {
     $userType = $row['user_type'];
 
     // Check if the user is signed in
-    $attendanceSql = "SELECT * FROM attendance WHERE user_id = $userId AND DATE(checked_in) = CURDATE()";
+    $attendanceSql = "SELECT * FROM attendance WHERE user_id = $userId AND sign_in_status = 'signedIn'";
+   // $attendanceSatus = "SELECT * FROM attendance WHERE user_id = $userId AND DATE(checked_out) = CURDATE() AND sign_in_status = 'signedOut'";
+    //$attendanceStatusResults = mysqli_query($conn, $attendanceSatus);
     $attendanceResult = mysqli_query($conn, $attendanceSql);
     $isSignedIn = mysqli_num_rows($attendanceResult) > 0;
+   // $statusIsSignedOut = mysqli_num_rows($attendanceStatusResults) > 0;
 
     if ($isSignedIn) {
         // User is signed in, display the card in the signOutUserCards section

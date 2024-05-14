@@ -60,7 +60,6 @@ if (isset($_POST['action']) && $_POST['action'] === "signOut") {
         // Fetch the hashed password from the database
         $row = mysqli_fetch_assoc($result);
         $hashedPasswordFromDB = $row['password'];
-
         // Verify the entered password against the hashed password from the database
         if (password_verify($password, $hashedPasswordFromDB)) {
             // Password is valid, proceed with marking the user as checked in or checked out
