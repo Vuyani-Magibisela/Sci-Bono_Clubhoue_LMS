@@ -878,13 +878,18 @@ __________________________________________________
 .userSingedin-box{
     background: #3F3D56;
     width: 350px;
-    height: 550px;
+    height: 600px;
     border: 6px solid #F29A2E;
     border-radius: 15px;
     margin: 0 auto;
     padding: 1em;
+    /* overflow-y: auto; */
     overflow: scroll;
 }
+
+/* .signOutUserCards{
+
+} */
 
 .userSignin_card{
     grid-column: 1 span 3;

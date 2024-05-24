@@ -63,7 +63,7 @@
                 <div class="userSingedin-box">
                     <!--Add condition if checked in field is selected dont show if not show-->
 
-                        <div class="signOutUserCards user-cards">
+                        <div class="signOutUserCards ">
                         <?php echo $signOutUserCards; ?>
                         </div>
                   
