@@ -73,9 +73,9 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true) {
                         
                         <li>
                         <!-- Show the icon only if the user is an admin -->
-                            <?php 
+                        <?php 
+                            if (isset($_SESSION['user_type'])) {
                                 $userType = $_SESSION['user_type'];
-
                                 if ($userType === "admin"): ?>
                                     <a href="reports.php">
                                         <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -83,9 +83,13 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true) {
                                             <path d="M22.437 30.0103H37.437" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                             <path d="M7.5 16.25L16.25 6.25H43.75L52.5 16.25" stroke="#F29A2E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
                                         </svg>
-                                    Reports
+                                        Reports
                                     </a>
-                            <?php endif; ?> 
+                                <?php endif; 
+                            }
+                        ?>
+
+                            
                         </li>
                         
                         <li>
@@ -147,13 +151,21 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true) {
 
                             
                         </div>
-                        <div class="userStatus">
-                            <h4><?php echo $_SESSION['user_type']; ?> </h4>
-                            <img src="public/images/bell.svg" width="20px" />
 
+                        <div class="userStatus">
+
+                            <h4>
+                                <?php 
+                                    if (isset($_SESSION['user_type'])) {
+                                        $userType = $_SESSION['user_type'];
+                                        echo $_SESSION['user_type']; 
+                                    }
+                                ?>
+                            </h4>
+                            <!-- <img src="public/images/bell.svg" width="20px" /> -->
                         </div>
 
-                        <div class="proImag" `1>
+                        <div class="proImag" >
                             <img src="public/images/ui-user-profile-negative.svg" width="20px" />
                         </div>
                         <?php endif ?>

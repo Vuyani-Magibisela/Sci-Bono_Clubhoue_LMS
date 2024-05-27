@@ -13,6 +13,9 @@ while ($row = mysqli_fetch_assoc($result)) {
     $userId = $row['id']; // Get user ID
     $username = $row['username'];
     $userType = $row['user_type'];
+    $userName = $row['name'];
+    $userSurname = $row['surname'];
+    
 
     // Check if the user is signed in
     $attendanceSql = "SELECT * FROM attendance WHERE user_id = $userId AND sign_in_status = 'signedIn'";
@@ -32,6 +35,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                 </div>
                 <div class="userName">
                     <h3>'.$username.'</h3>
+                    <h6>'.$userName.' '.$userSurname.'</h6>
                 </div>
                 <div class="userRole">
                     <p>'.$userType.'</p>
@@ -52,6 +56,7 @@ while ($row = mysqli_fetch_assoc($result)) {
                 </div>
                 <div class="userName">
                     <h3>'.$username.'</h3>
+                    <h6>'.$userName.' '.$userSurname.'</h6>
                 </div>
                 <div class="userRole">
                     <p>'.$userType.'</p>
