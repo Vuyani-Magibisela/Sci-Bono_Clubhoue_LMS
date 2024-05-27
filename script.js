@@ -139,6 +139,7 @@ function signOut(userId, password) {
                         userCard.parentNode.removeChild(userCard);
                     }
                     console.log("User signed out successfully.");
+                    window.location.reload();
                 } else {
                     console.error("Sign-out failed:", response);
                 }
@@ -155,10 +156,12 @@ function handleSignInResponse(  response) {
     if (response.trim() === "valid") {
         // User has been successfully signed in
         console.log("Sign-in successful!");
+        window.location.reload();
         // Perform any additional actions as needed (e.g., update UI)
     } else {
         // Sign-in failed due to invalid password
         console.log("Sign-in failed: Invalid password.");
+        window.location.reload();
         // Display an error message to the user or take appropriate action
     }
 }
