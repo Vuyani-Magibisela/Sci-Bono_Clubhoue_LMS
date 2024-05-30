@@ -23,6 +23,7 @@
         <div id="signin-modal" class="modal">
             <div class="modal-content">
                 <span id="close-signin-modal" class="close">&times;</span>
+                <p class="incorrectPassword">INCORRECT PASSWOARD TRY AGAIN!!!</p>
                 <form id="signin-form">
                     <label for="userId">User ID:</label>
                     <input type="text" id="userId" name="userId">
@@ -31,7 +32,11 @@
                     <button type="submit" >Sign In</button>
                 </form>
             </div>
-        </div>  
+        </div> 
+        
+        <div class="logoutSuccess">
+            <p>successfully Signed Out</p>
+        </div>
 
 
         <div id="userSign-in_OutContainer">

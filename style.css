@@ -711,6 +711,48 @@ margin-left: 2em;
     width: 50%;
 }
 
+/* Add Error for incorrect password*/
+.modal-content {
+    transition: border 0.5s;
+}
+
+.modal-content.error {
+    border: 2px solid #FF0000;
+}
+
+@keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    50% { transform: translateX(5px); }
+    75% { transform: translateX(-5px); }
+    100% { transform: translateX(0); }
+}
+
+.modal-content.shake {
+    animation: shake 0.5s;
+}
+
+
+.incorrectPassword{
+    visibility: hidden;
+    color: #FF0000;
+    font-weight: bold;
+    font-size: 18px;
+}
+
+.incorrectPassword.show {
+    visibility: visible;
+    
+}
+
+.logoutSuccess{
+    visibility: hidden;
+}
+.logoutSuccess.logoutSuccessShow{
+    visibility: visible;
+}
+
+
 .close {
     color: red;
     float: right;
@@ -810,7 +852,7 @@ __________________________________________________
     grid-template-rows: auto;
 
     width: 1020px;
-    height: 552px;
+    height: 610px;
     background: #3F3D56;
     border: 6px solid #D9D9D9;
     border-radius: 25px;

@@ -82,7 +82,7 @@ document.getElementById("signin-form").addEventListener("submit", function(event
 
     // Close the modal
     var modal = document.getElementById("signin-modal");
-    modal.style.display = "none";
+    // modal.style.display = "none";
 
     
 });
@@ -152,7 +152,9 @@ function signOut(userId, password) {
 }
 
 // Function to handle the server response after signing in
-function handleSignInResponse(  response) {
+function handleSignInResponse(response) {
+    var modalContent = document.querySelector('.modal-content');
+    var modalText = document.querySelector('.incorrectPassword');
     if (response.trim() === "valid") {
         // User has been successfully signed in
         console.log("Sign-in successful!");
@@ -161,7 +163,16 @@ function handleSignInResponse(  response) {
     } else {
         // Sign-in failed due to invalid password
         console.log("Sign-in failed: Invalid password.");
-        window.location.reload();
-        // Display an error message to the user or take appropriate action
+        // Add the error class to change background color to red
+        modalContent.classList.add('error');
+        //Add the incorrectPassoword class to show text
+        modalText.classList.add('show');
+        // Add the shake class to shake the div
+        modalContent.classList.add('shake');
+        // Remove the classes after the animation ends
+        setTimeout(function() {
+            modalContent.classList.remove('error', 'shake');
+            modalText.classList.remove('show')
+        }, 5000); // The timeout duration should match the animation duration
     }
 }
