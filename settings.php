@@ -49,7 +49,7 @@ include 'profile_updater.php';
                         Projects
                         </a>
                     </li>
-                        <li class="active">
+                        <li>
                             <a href="members.php" >
                                 <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M52.5 10H7.5C6.11929 10 5 11.1193 5 12.5V47.5C5 48.8807 6.11929 50 7.5 50H52.5C53.8807 50 55 48.8807 55 47.5V12.5C55 11.1193 53.8807 10 52.5 10Z" stroke="#F29A2E" stroke-width="2" stroke-linejoin="round"/>
@@ -106,7 +106,7 @@ include 'profile_updater.php';
                             </a>
                         </li>
 
-                        <li>
+                        <li class="active">
                             <a href="settings.php">
                                 <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
                                     <path d="M30 50H8.75C6.67894 50 5 48.3211 5 46.25V13.75C5 11.6789 6.67894 10 8.75 10H51.25C53.3211 10 55 11.6789 55 13.75V28.8235" stroke="#F29A2E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
