@@ -1037,6 +1037,43 @@ __________________________________________________
     background: #FF0000;
 }
 
+#signOut-modal {
+    position: fixed;
+    bottom: 35px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 300px; 
+    font-size: 28px;
+    font-weight: 900    ;
+    text-align: center;
+    color: #fff;
+    padding: 20px; 
+    background-color: #8CC86E; 
+    border: 1px solid #43AF0C;
+    border-radius: 20px; 
+    animation: popUp 0.5s ease-out forwards, glow 1.5s infinite alternate;
+  }
+  
+  @keyframes popUp {
+    from {
+      transform: translateX(-50%) translateY(100%);
+    }
+    to {
+      transform: translateX(-50%) translateY(0);
+    }
+  }
+
+  @keyframes glow {
+    from {
+      box-shadow: 0 0 5px rgba(140, 200, 110, 0.555);
+    }
+    to {
+      box-shadow: 0 0 20px rgba(140, 200, 110, 1);
+    }
+  } 
+  
+
+
 /*Settings Styles*/
 
 .content_section_settings{

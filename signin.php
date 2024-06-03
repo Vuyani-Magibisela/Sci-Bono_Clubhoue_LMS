@@ -34,7 +34,7 @@
             </div>
         </div> 
         
-        <div class="logoutSuccess">
+        <div id="signOut-modal">
             <p>successfully Signed Out</p>
         </div>
 

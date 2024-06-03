@@ -26,6 +26,10 @@ window.onclick = function(event) {
     }
 }
 
+var SingOutmodal = document.getElementById("signOut-modal");
+SingOutmodal.style.display = "none";
+
+
 //_____________________________________End of SignIn Model_______________________
 
 
@@ -132,14 +136,20 @@ function signOut(userId, password) {
                 // If sign-out is successful, remove the user card from the UI
                 //console.log('This is the responseText', xhr.responseText);  
                 var response = xhr.responseText;
+                
                 if (response === "success") {
                     // Remove the user card from the DOM
                     var userCard = document.getElementById("userCard" + userId);
                     if (userCard) {
                         userCard.parentNode.removeChild(userCard);
                     }
+                    //debuging
                     console.log("User signed out successfully.");
-                    window.location.reload();
+
+                    SingOutmodal.style.display = "block";
+                    setTimeout(function() {
+                        window.location.reload();
+                    }, 1000); 
                 } else {
                     console.error("Sign-out failed:", response);
                 }
