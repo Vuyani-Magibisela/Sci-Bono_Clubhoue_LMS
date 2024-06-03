@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 28, 2024 at 04:59 PM
+-- Generation Time: Jun 03, 2024 at 05:07 PM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -207,7 +207,85 @@ INSERT INTO `attendance` (`id`, `user_id`, `checked_in`, `checked_out`, `sign_in
 (167, 6, '2024-05-28 14:58:20', '2024-05-28 15:26:03', 'signedOut'),
 (168, 16, '2024-05-28 15:50:22', '2024-05-28 16:52:27', 'signedOut'),
 (169, 15, '2024-05-28 16:15:52', '2024-05-28 16:50:54', 'signedOut'),
-(170, 30, '2024-05-28 16:16:10', '2024-05-28 16:51:02', 'signedOut');
+(170, 30, '2024-05-28 16:16:10', '2024-05-28 16:51:02', 'signedOut'),
+(171, 1, '2024-05-30 10:14:25', '2024-05-30 17:17:55', 'signedOut'),
+(172, 69, '2024-05-30 10:15:34', '2024-05-30 17:01:57', 'signedOut'),
+(173, 24, '2024-05-30 10:27:41', '2024-05-30 13:41:16', 'signedOut'),
+(174, 23, '2024-05-30 10:29:56', '2024-05-30 17:17:31', 'signedOut'),
+(175, 5, '2024-05-30 10:34:26', '2024-05-30 15:24:15', 'signedOut'),
+(176, 22, '2024-05-30 10:35:16', '2024-05-30 17:17:42', 'signedOut'),
+(177, 54, '2024-05-30 13:02:49', '2024-05-30 16:59:30', 'signedOut'),
+(178, 7, '2024-05-30 13:03:17', '2024-05-30 17:17:20', 'signedOut'),
+(179, 52, '2024-05-30 13:07:36', '2024-05-30 15:43:16', 'signedOut'),
+(180, 60, '2024-05-30 13:15:31', '2024-05-30 17:16:57', 'signedOut'),
+(181, 56, '2024-05-30 13:34:41', '2024-05-30 16:59:23', 'signedOut'),
+(182, 76, '2024-05-30 15:39:04', '2024-05-30 17:19:11', 'signedOut'),
+(183, 58, '2024-05-30 16:02:12', '2024-05-30 16:43:29', 'signedOut'),
+(184, 67, '2024-05-30 16:02:58', '2024-05-30 16:37:40', 'signedOut'),
+(185, 72, '2024-05-30 16:07:43', '2024-05-30 17:09:55', 'signedOut'),
+(186, 27, '2024-05-30 16:19:24', '2024-05-30 17:17:14', 'signedOut'),
+(187, 1, '2024-05-31 09:34:48', '2024-05-31 17:29:16', 'signedOut'),
+(188, 23, '2024-05-31 09:35:07', '2024-05-31 17:13:48', 'signedOut'),
+(189, 22, '2024-05-31 09:36:36', '2024-05-31 17:13:47', 'signedOut'),
+(190, 69, '2024-05-31 10:00:45', '2024-05-31 16:47:45', 'signedOut'),
+(191, 5, '2024-05-31 10:04:08', '2024-05-31 15:22:55', 'signedOut'),
+(192, 72, '2024-05-31 12:25:58', '2024-05-31 16:21:27', 'signedOut'),
+(193, 58, '2024-05-31 13:16:35', '2024-05-31 16:35:25', 'signedOut'),
+(194, 77, '2024-05-31 13:57:06', '2024-05-31 16:36:08', 'signedOut'),
+(195, 78, '2024-05-31 13:59:10', '2024-05-31 17:06:08', 'signedOut'),
+(196, 34, '2024-05-31 14:25:49', '2024-05-31 16:35:30', 'signedOut'),
+(197, 27, '2024-05-31 14:29:23', '2024-05-31 17:15:41', 'signedOut'),
+(198, 72, '2024-05-31 14:35:10', '2024-05-31 16:21:27', 'signedOut'),
+(199, 79, '2024-05-31 14:55:54', '2024-05-31 17:05:40', 'signedOut'),
+(200, 26, '2024-05-31 15:02:10', '2024-05-31 17:29:18', 'signedOut'),
+(201, 56, '2024-05-31 15:05:36', '2024-05-31 17:05:52', 'signedOut'),
+(202, 80, '2024-05-31 15:44:45', '2024-05-31 17:14:04', 'signedOut'),
+(203, 67, '2024-05-31 15:58:55', '2024-05-31 16:35:10', 'signedOut'),
+(204, 6, '2024-05-31 16:01:40', '2024-05-31 17:29:17', 'signedOut'),
+(205, 55, '2024-05-31 17:05:21', '2024-05-31 17:05:48', 'signedOut'),
+(206, 1, '2024-06-01 12:24:59', '2024-06-01 16:48:43', 'signedOut'),
+(207, 7, '2024-06-01 12:26:07', '2024-06-01 16:37:01', 'signedOut'),
+(208, 72, '2024-06-01 13:18:12', '2024-06-01 15:09:16', 'signedOut'),
+(209, 66, '2024-06-01 13:23:38', '2024-06-01 16:48:46', 'signedOut'),
+(210, 81, '2024-06-01 13:26:55', '2024-06-01 16:48:46', 'signedOut'),
+(211, 34, '2024-06-01 13:27:19', '2024-06-01 15:46:22', 'signedOut'),
+(212, 52, '2024-06-01 13:27:48', '2024-06-01 14:27:45', 'signedOut'),
+(213, 55, '2024-06-01 13:28:18', '2024-06-01 16:36:43', 'signedOut'),
+(214, 56, '2024-06-01 13:28:48', '2024-06-01 16:36:53', 'signedOut'),
+(215, 82, '2024-06-01 13:33:23', '2024-06-01 16:36:49', 'signedOut'),
+(216, 83, '2024-06-01 13:37:38', '2024-06-01 16:48:47', 'signedOut'),
+(217, 84, '2024-06-01 13:42:40', '2024-06-01 15:46:07', 'signedOut'),
+(218, 77, '2024-06-01 14:01:34', '2024-06-01 16:38:27', 'signedOut'),
+(219, 30, '2024-06-01 14:07:20', '2024-06-01 16:48:45', 'signedOut'),
+(220, 60, '2024-06-01 14:33:56', '2024-06-01 16:48:45', 'signedOut'),
+(221, 16, '2024-06-01 14:38:12', '2024-06-01 16:48:43', 'signedOut'),
+(222, 26, '2024-06-01 14:52:49', '2024-06-01 16:48:44', 'signedOut'),
+(223, 47, '2024-06-01 15:54:15', '2024-06-01 16:39:05', 'signedOut'),
+(224, 46, '2024-06-01 15:55:10', '2024-06-01 16:38:51', 'signedOut'),
+(225, 1, '2024-06-03 09:57:20', NULL, 'signedIn'),
+(226, 4, '2024-06-03 09:57:42', '2024-06-03 16:13:28', 'signedOut'),
+(227, 69, '2024-06-03 09:58:34', NULL, 'signedIn'),
+(228, 5, '2024-06-03 09:58:54', '2024-06-03 16:13:34', 'signedOut'),
+(229, 22, '2024-06-03 10:01:45', NULL, 'signedIn'),
+(230, 2, '2024-06-03 10:56:36', NULL, 'signedIn'),
+(231, 24, '2024-06-03 11:09:29', NULL, 'signedIn'),
+(232, 23, '2024-06-03 11:48:35', '2024-06-03 17:04:59', 'signedOut'),
+(233, 54, '2024-06-03 12:08:57', '2024-06-03 17:02:17', 'signedOut'),
+(234, 51, '2024-06-03 12:10:36', '2024-06-03 17:03:10', 'signedOut'),
+(235, 85, '2024-06-03 13:06:47', NULL, 'signedIn'),
+(236, 86, '2024-06-03 13:08:48', NULL, 'signedIn'),
+(237, 21, '2024-06-03 13:27:01', NULL, 'signedIn'),
+(238, 87, '2024-06-03 14:48:22', NULL, 'signedIn'),
+(239, 6, '2024-06-03 14:58:35', NULL, 'signedIn'),
+(240, 27, '2024-06-03 15:01:56', '2024-06-03 17:05:46', 'signedOut'),
+(241, 7, '2024-06-03 15:03:57', '2024-06-03 17:04:30', 'signedOut'),
+(242, 26, '2024-06-03 15:41:42', NULL, 'signedIn'),
+(243, 43, '2024-06-03 15:42:12', '2024-06-03 17:02:53', 'signedOut'),
+(244, 88, '2024-06-03 15:44:41', NULL, 'signedIn'),
+(245, 89, '2024-06-03 15:46:19', NULL, 'signedIn'),
+(246, 15, '2024-06-03 15:53:53', NULL, 'signedIn'),
+(247, 34, '2024-06-03 15:57:48', '2024-06-03 16:41:21', 'signedOut'),
+(248, 72, '2024-06-03 16:08:45', '2024-06-03 16:32:41', 'signedOut');
 
 -- --------------------------------------------------------
 
@@ -311,7 +389,21 @@ INSERT INTO `users` (`id`, `username`, `email`, `password`, `name`, `surname`, `
 (72, 'Young,Heart', '', '$2y$10$INaxHcyuILrQVengs3AiueVCZ8QfrdDxzjPT1hIk2v0OJtdgemYAq', 'Wayne', 'chikanyambidze', 'member', '0000-00-00', 0, '', '', 0, 0, 0, ''),
 (73, 'Ms.sunshine', '', '$2y$10$J.Q5yhDGCYKKoL7NyoLt5OIWjE1h2BEZAV9/iflUXJcUXcrJ6.z.y', 'Lumeka', 'Maleho', 'member', '0000-00-00', 0, '', '', 0, 0, 0, ''),
 (74, 'Mbali', '', '$2y$10$UQrKhnV4oszf6jqe6gvw8ObIXG4pj0oKEbUG5EZ/sMq6pYT4b3e9C', 'Mbalenhle', 'Mazibuko', 'member', '0000-00-00', 0, '', '', 0, 0, 0, ''),
-(75, 'Ntomb', '', '$2y$10$DUVPbiNz2XYzA0A9KOEGLe0cUPG5O6MMxGs7tU7t2UE1Ki9eAeo1K', 'Ntumbifuthi', 'Wagne', 'member', '0000-00-00', 0, '', '', 0, 0, 0, '');
+(75, 'Ntomb', '', '$2y$10$DUVPbiNz2XYzA0A9KOEGLe0cUPG5O6MMxGs7tU7t2UE1Ki9eAeo1K', 'Ntumbifuthi', 'Wagne', 'member', '0000-00-00', 0, '', '', 0, 0, 0, ''),
+(76, 'Oscar', '', '$2y$10$Eb3GLsUlzvGYdYwpCqFs0ejlavNTNKtHLiPjRRukfuLLkHRFkF3G.', 'Oscar', 'Ratali', 'member', '0000-00-00', 0, '', '', 0, 0, 0, ''),
+(77, 'killt', '', '$2y$10$5z0/qhOF5Tzhk55nfI2AWOfuTWEitK8PCEgZXHMXZxU50AsqdVGua', 'Anton ', 'Magunde', 'member', '0000-00-00', 0, '', '', 0, 0, 0, ''),
+(78, 'bmw', '', '$2y$10$NJLIbfsdWQn1nCt.eG2jn.7o92kdhylT7eDqGDF9MXVHT3TxIsX5i', 'Bima', 'Mabasa', 'member', '0000-00-00', 0, '', '', 0, 0, 0, ''),
+(79, 'KWAnele', '', '$2y$10$sPM8FQPCGz5.yRIDIAo31OnR5XNavxEpWMRYpHscmnPkgsnNnEJ3a', 'Kwanele', 'Tshabalala', 'member', '0000-00-00', 0, '', '', 0, 0, 0, ''),
+(80, 'sneh', '', '$2y$10$prxiHZOTVPPiDb5ajPg28.ltT3ibPb9SPhWtUKUeXLq70FAJJPYkG', 'Snethemba', 'Nhleko', 'member', '0000-00-00', 0, '', '', 0, 0, 0, ''),
+(81, 'teko', '', '$2y$10$sQ0hSUf3ORjnMkSzmBpG9edQl1XqiGtAPsahMB.jDGxEM1aftrHPe', 'teko', 'thabana', 'member', '0000-00-00', 0, '', '', 0, 0, 0, ''),
+(82, 'lethu', '', '$2y$10$oLN.QoIPlPpiHqrrUJiMrOj.6nFphULJp7ePVvaH1gqsvepc3vzBS', 'Werter', 'Mors', 'member', '0000-00-00', 0, '', '', 0, 0, 0, ''),
+(83, 'kkb', '', '$2y$10$zvRx5e29oWlgZLT70DzWUurSKyWlzvuwHqn9X/potGBvLIY2oGc1.', 'karabo', 'Mukize', 'member', '0000-00-00', 0, '', '', 0, 0, 0, ''),
+(84, 'freestyleking', '', '$2y$10$PtaSYBuuLQHFsQmjp37lu..snrkcc15XQcVZCJAH6qehWqzf.IYAS', 'Junior Mashudu', 'Ntuli', 'member', '0000-00-00', 0, '', '', 0, 0, 0, ''),
+(85, 'DJ Appsolute', '', '$2y$10$dsYBQZTKxm/uKxI0Dv35J.QaGhrChATUnCwPLpdHE44EdzX8/LaBO', 'Aphiwe', 'Valashiya ', 'member', '0000-00-00', 0, '', '', 0, 0, 0, ''),
+(86, 'r4xx', '', '$2y$10$MMiKI3yauH8bk0XcEog3yep35o4ZsvDstmKhBVVHSGr8Jx/LDwzfC', 'Oratilwe', 'dlabongo', 'mentor', '0000-00-00', 0, '', '', 0, 0, 0, ''),
+(87, 'kamvaimange', '', '$2y$10$fHlw4kS8s0mevScbmFkifuYIrgx9KlX7LLAjrPHTR.PcF4KD59w.m', 'kamva', 'madze', 'member', '0000-00-00', 0, '', '', 0, 0, 0, ''),
+(88, 'Amo Mahlaku', '', '$2y$10$rwMuPeLNO7KLyiOX/xwwZeuJ/AwvX/abDrfEUp./UWWNRhEFiLIZW', 'Amohelang', 'Mahlaku', 'member', '0000-00-00', 0, '', '', 0, 0, 0, ''),
+(89, 'Amila Gogo', '', '$2y$10$Q6YkQnaZ8yFpAVEUiGZd2uWg/WT8jHZ6Blyl5MKweHSBBKEIna7fW', 'Amila', 'Gogo', 'member', '0000-00-00', 0, '', '', 0, 0, 0, '');
 
 --
 -- Indexes for dumped tables
@@ -338,13 +430,13 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `attendance`
 --
 ALTER TABLE `attendance`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=171;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=249;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(100) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=76;
+  MODIFY `id` int(100) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=90;
 
 --
 -- Constraints for dumped tables
