@@ -1,5 +1,4 @@
 <?php
-session_start();
 require 'server.php'; // Include your database connection
 
 // Check if user is logged in

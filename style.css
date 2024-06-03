@@ -350,7 +350,7 @@ form select option{
     grid-template-rows: repeat(16,1fr);
     gap: 12px;
     background: linear-gradient(180deg, #1E6CB4 25.96%, #393A7B 111.57%);
-    height: 93vh;
+    height: 100vh;
     padding: 2em;
 }
 
