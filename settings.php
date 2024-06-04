@@ -148,8 +148,8 @@ include 'profile_updater.php';
                         <label for="username">Username:</label>
                         <input type="text" id="username" name="username" value="<?php echo htmlspecialchars($userData['username']); ?>" required><br>
 
-                        <label for="email">Email:</label>
-                        <input type="email" id="email" name="email" value="<?php echo htmlspecialchars($userData['email']); ?>" required><br>
+                        <!-- <label for="email">Email:</label> -->
+                        <!-- <input type="email" id="email" name="email" value="<?php echo htmlspecialchars($userData['email']); ?>" required><br> -->
 
                         <?php if ($userType === 'admin'): ?>
                             <label for="user_type">User Type:</label>
