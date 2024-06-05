@@ -1071,7 +1071,24 @@ __________________________________________________
       box-shadow: 0 0 20px rgba(140, 200, 110, 1);
     }
   } 
-  
+
+
+/*User list*/
+table{
+    border: 1px solid #000;
+    margin-left: 20px;
+   
+}   
+
+table thead{
+    background-color: #2F2E41;
+    color: #fff;
+    
+}
+
+th, td {
+    padding: 15px;
+  }
 
 
 /*Settings Styles*/

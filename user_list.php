@@ -9,7 +9,7 @@ if ($_SESSION['user_type'] !== 'admin') {
 }
 
 // Fetch all users
-$sql = "SELECT id, username, email, user_type FROM users";
+$sql = "SELECT * FROM users";
 $result = mysqli_query($conn, $sql);
 ?>
 
@@ -27,7 +27,8 @@ $result = mysqli_query($conn, $sql);
             <tr>
                 <th>ID</th>
                 <th>Username</th>
-                <th>Email</th>
+                <th>Name</th>
+                <th>Surname</th>
                 <th>User Type</th>
                 <th>Actions</th>
             </tr>
@@ -37,7 +38,8 @@ $result = mysqli_query($conn, $sql);
             <tr>
                 <td><?php echo $row['id']; ?></td>
                 <td><?php echo $row['username']; ?></td>
-                <td><?php echo $row['email']; ?></td>
+                <td><?php echo $row['name']; ?></td>
+                <td><?php echo $row['surname']; ?></td> 
                 <td><?php echo $row['user_type']; ?></td>
                 <td>
                     <a href="edit_user.php?id=<?php echo $row['id']; ?>">Edit</a>
