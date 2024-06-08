@@ -137,34 +137,26 @@ include 'profile_updater.php';
             <div class="content_section_settings">
                 <h1>Settings</h1>
                 <div class="settingsContainer">
-                <h2>Update Profile</h2>
-                    <?php if ($errorMsg): ?>
-                        <div style="color: red;"><?php echo $errorMsg; ?></div>
-                    <?php endif; ?>
-                    <?php if ($successMsg): ?>
-                        <div style="color: green;"><?php echo $successMsg; ?></div>
-                    <?php endif; ?>
-                    <form method="post" action="">
-                        <label for="username">Username:</label>
-                        <input type="text" id="username" name="username" value="<?php echo htmlspecialchars($userData['username']); ?>" required><br>
+                    <div class="settingsNav">
+                        <ul>
+                            <a href="" class="SettigsNav_active"><li>Profile</li></a>
+                            <a href="user_list.php"><li>Manage Members</li></a>
+                            <a href=""><li>Approve members</li></a>
+                        </ul>
+                    </div>
+                    <div class="editProTop">
 
-                        <!-- <label for="email">Email:</label> -->
-                        <!-- <input type="email" id="email" name="email" value="<?php echo htmlspecialchars($userData['email']); ?>" required><br> -->
+                    </div>
+                    <div class="editProBottom">
+                        
+                            
+                        <div class="passEdit">
 
-                        <?php if ($userType === 'admin'): ?>
-                            <label for="user_type">User Type:</label>
-                            <select id="user_type" name="user_type" required>
-                                <option value="member" <?php echo $userData['user_type'] === 'member' ? 'selected' : ''; ?>>Member</option>
-                                <option value="mentor" <?php echo $userData['user_type'] === 'mentor' ? 'selected' : ''; ?>>Mentor</option>
-                                <option value="admin" <?php echo $userData['user_type'] === 'admin' ? 'selected' : ''; ?>>Admin</option>
-                            </select><br>
-                        <?php endif; ?>
+                        </div>
+                    </div>
 
-                        <label for="password">Password (leave blank to keep current password):</label>
-                        <input type="password" id="password" name="password"><br>
-
-                        <button type="submit">Update Profile</button>
-                    </form>
+                    
+                   
                 </div>
             </div>
         </section>
