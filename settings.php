@@ -20,8 +20,8 @@ include 'profile_updater.php';
     <title>Home</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body >
-    <main id="container-home">
+<body id="settings">
+    <main id="container-settings">
         <section id="nav_section">
             <div class="nav">
                 <ul>
@@ -133,22 +133,34 @@ include 'profile_updater.php';
             
         </section>
         
-        <section id="main_section">
+        <section id="settings_main_section">
             <div class="content_section_settings">
                 <h1>Settings</h1>
                 <div class="settingsContainer">
                     <div class="settingsNav">
-                        <ul>
+
+                        <a href="">Prifile</a>
+                        <a href="">Manage Members</a>
+                        <a href="">Approve Members</a>
+                        <!-- <ul>
                             <a href="" class="SettigsNav_active"><li>Profile</li></a>
                             <a href="user_list.php"><li>Manage Members</li></a>
                             <a href=""><li>Approve members</li></a>
-                        </ul>
+                        </ul> -->
                     </div>
-                    <div class="editProTop">
 
+                    <div class="editProTop">
+                        <div class="image-container">
+                            <img id="main-image" src="image1.jpg" alt="Main Image">
+                            <i id="change-icon" class="icon">🔄</i>
+                        </div>
                     </div>
+
                     <div class="editProBottom">
-                        
+                        <form action="">
+                        <label for="">Name</label>
+                        <input type="text">
+                        </form>
                             
                         <div class="passEdit">
 
