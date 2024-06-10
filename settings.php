@@ -139,8 +139,8 @@ include 'profile_updater.php';
                 <div class="settingsContainer">
                     <div class="settingsNav">
 
-                        <a href="">Prifile</a>
-                        <a href="">Manage Members</a>
+                        <a href="settings.php">Prifile</a>
+                        <a href="user_list.php">Manage Members</a>
                         <a href="">Approve Members</a>
                         <!-- <ul>
                             <a href="" class="SettigsNav_active"><li>Profile</li></a>

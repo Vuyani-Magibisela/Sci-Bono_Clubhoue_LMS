@@ -1083,11 +1083,12 @@ __________________________________________________
   } 
 
 
-/*User list*/
+  /*User list*/
+
 table{
     border: 1px solid #000;
     margin-left: 20px;
-   
+    background-color: #e3e3e3;
 }   
 
 table thead{
@@ -1099,6 +1100,23 @@ table thead{
 th, td {
     padding: 15px;
   }
+
+
+  #container-userlist{
+    /* display: grid;
+    grid-template-columns: repeat(16,1fr);
+    grid-template-rows: repeat(16,1fr);
+    gap: 12px; */
+    background: linear-gradient(180deg, #1E6CB4 25.96%, #393A7B 111.57%);
+    height: 100vh;
+    padding: 2em;
+  }
+
+  #cotainer-userlist h1{
+    font-size: 28px;
+    color: #fff;
+  }
+
 
 
 /*Settings Styles*/
