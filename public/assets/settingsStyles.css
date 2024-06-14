@@ -1,0 +1,55 @@
+#SettigsNav_active{
+    background: #6C63FF;
+    color: #fff;
+}
+
+.userlist table{
+  margin: 0 auto;
+}
+
+.editBtn{
+    width: 100px;
+    height: 34px;
+    background: #F29A2E;
+    border-radius: 2px;
+    padding: 2px;
+    margin: auto;
+
+    font-family: 'Source Code Pro';
+    font-style: normal;
+    font-weight: 500;
+    font-size: 12px;
+    line-height: 20px;
+    text-transform: uppercase;
+    text-decoration: none;
+    color: #FFFFFF;
+    cursor: pointer;
+}
+
+
+.editBtn:hover{
+    background: #8CC86E;
+}
+
+
+.passEdit{
+    background: #D0CDE1;
+    padding: 2em;
+}
+.passEdit button{
+    padding: 5px 22px;
+    width: 131px;
+    height: 43px;
+    background: #f29a2e;
+    border-radius: 10px;
+
+    color: #ffffff;
+    font-family: Source Code Pro;
+    font-size: 24px;
+    font-weight: 700;
+    text-align: center;
+}
+.image-container
+.userlist-Title{
+    color: #2F2E41;
+}

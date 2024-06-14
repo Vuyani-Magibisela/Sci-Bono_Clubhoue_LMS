@@ -10,7 +10,6 @@ include 'profile_updater.php';
 ?>
 
 
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -19,6 +18,7 @@ include 'profile_updater.php';
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Home</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="./public/assets/settingsStyles.css">
 </head>
 <body id="settings">
     <main id="container-settings">
@@ -139,7 +139,7 @@ include 'profile_updater.php';
                 <div class="settingsContainer">
                     <div class="settingsNav">
 
-                        <a href="settings.php">Prifile</a>
+                        <a id="SettigsNav_active" href="settings.php">Profile</a>
                         <a href="user_list.php">Manage Members</a>
                         <a href="">Approve Members</a>
                         <!-- <ul>
@@ -157,14 +157,31 @@ include 'profile_updater.php';
                     </div>
 
                     <div class="editProBottom">
-                        <form action="">
-                        <label for="">Name</label>
-                        <input type="text">
-                        </form>
+                        <h1>Edit Profile</h1>
+                        <!-- User information -->
+                        <form action="update_user.php" method="post">
+                            <input type="hidden" name="id" value="<?php echo $user['id']; ?>">
+                            <label for="username">Username:</label>
+                            <input type="text" id="username" name="username" value="<?php echo $user['username']; ?>" required>
+                                    
+                            <label for="email">Email:</label>
+                            <input type="email" id="email" name="email" value="<?php echo $user['email']; ?>" required>
+                                    
+                            <label for="user_type">User Type:</label>
+                            <select id="user_type" name="user_type" required>
+                                <option value="member" <?php if ($user['user_type'] == 'member') echo 'selected'; ?>>Member</option>
+                                <option value="mentor" <?php if ($user['user_type'] == 'mentor') echo 'selected'; ?>>Mentor</option>
+                                <option value="admin" <?php if ($user['user_type'] == 'admin') echo 'selected'; ?>>Admin</option>
+                            </select>
                             
-                        <div class="passEdit">
+                            <div class="passEdit">
+                                <label for="password">Password:</label>
+                                <input type="password" id="password" name="password" placeholder="Leave blank to keep current password">     
+                                <button type="submit">Update User</button>
+                            </div>                                                    
+                        </form>  
+                            
 
-                        </div>
                     </div>
 
                     
