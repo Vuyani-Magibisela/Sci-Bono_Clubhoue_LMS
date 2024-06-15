@@ -7,6 +7,17 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true) {
 }
 
 include 'profile_updater.php';
+
+
+// Fetch the current logged-in user's data
+$userId = $_SESSION['user_id'];
+$sql = "SELECT * FROM users WHERE id = ?";
+$stmt = $conn->prepare($sql);
+$stmt->bind_param("i", $userId);
+$stmt->execute();
+$result = $stmt->get_result();
+$user = $result->fetch_assoc();
+
 ?>
 
 
@@ -16,7 +27,7 @@ include 'profile_updater.php';
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home</title>
+    <title>Settings | Profile</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="./public/assets/settingsStyles.css">
 </head>

@@ -17,7 +17,7 @@ $result = mysqli_query($conn, $sql);
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>User Management</title>
+    <title>Settings | User Management</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="./public/assets/settingsStyles.css">
 </head>

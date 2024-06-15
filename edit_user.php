@@ -27,7 +27,7 @@ if (isset($_GET['id'])) {
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Edit User</title>
+    <title>Settings | Edit User</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body id="editUser">
