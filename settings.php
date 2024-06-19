@@ -174,7 +174,8 @@ $user = $result->fetch_assoc();
                             <input type="hidden" name="id" value="<?php echo $user['id']; ?>">
                             <label for="username">Username:</label>
                             <input type="text" id="username" name="username" value="<?php echo $user['username']; ?>" required>
-                                    
+                            <label for="name">Name:</label>
+                            <input type="text" id="name" name="name" value="<?php echo $user['name']; ?>" required>
                             <label for="email">Email:</label>
                             <input type="email" id="email" name="email" value="<?php echo $user['email']; ?>" required>
                                     
