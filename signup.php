@@ -13,7 +13,7 @@
 	?>
 	<main id="contianer-signup">
 		<div class="signup_img">
-			<img src="public/images/SignIn_Img.png" alt="Large image of a mobile phone, human standing next to it."  width="301" height="303">
+			<img src="public/assets/images/SignIn_Img.png" alt="Large image of a mobile phone, human standing next to it."  width="301" height="303">
 		</div>
 
 		<div class="signup_form">

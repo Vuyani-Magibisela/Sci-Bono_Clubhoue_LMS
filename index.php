@@ -17,7 +17,7 @@
     <main id="container-index">
 
         <div class="hero-img">
-            <img src="public/images/Login_img.png" alt="Illustrations of youth using technology" >
+            <img src="public/assets/images/Login_img.png" alt="Illustrations of youth using technology" >
         </div>
 
         <div class="log_signup-section">

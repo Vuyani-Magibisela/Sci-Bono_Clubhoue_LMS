@@ -162,20 +162,20 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true) {
                                     }
                                 ?>
                             </h4>
-                            <!-- <img src="public/images/bell.svg" width="20px" /> -->
+                            <!-- <img src="public/assets/images/bell.svg" width="20px" /> -->
                         </div>
 
                         <div class="proImag" >
-                            <img src="public/images/ui-user-profile-negative.svg" width="20px" />
+                            <img src="public/assets/images/ui-user-profile-negative.svg" width="20px" />
                         </div>
                         <?php endif ?>
                     </div>
 
                     <div class="branding">
                         
-                            <img class="sb_Logo" src="public/images/Sci-Bono logo White.png" alt="Logo of Sci-Bono Discovery Centre">
+                            <img class="sb_Logo" src="public/assets/images/Sci-Bono logo White.png" alt="Logo of Sci-Bono Discovery Centre">
                             
-                            <img class="tcn_Logo"src="public/images/TheClubhouse_Logo_White_Large.png" alt="Logo of The Clubhouse Network">
+                            <img class="tcn_Logo"src="public/assets/images/TheClubhouse_Logo_White_Large.png" alt="Logo of The Clubhouse Network">
                             
                     </div>
                

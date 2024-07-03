@@ -1,0 +1,10 @@
+.header {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    background-color: #393A7B;
+    color: #fff;
+    padding: 20px;
+    align-items: center;
+    filter: drop-shadow(#000 0em 0em 0.5em);
+}
+

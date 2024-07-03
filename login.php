@@ -11,6 +11,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Login Page</title>
 	<link rel="stylesheet" href="style.css">
+	<link rel="stylesheet" href="public/assets/css/style">
 	<script>
 		function validateForm() {
 			var username = document.forms["loginForm"]["username"].value;
@@ -33,7 +34,7 @@
 	?>
 	<main id="container-login">
 		<div class="login_img">
-			<img src="public/images/SignIn_Img.png" alt="Large image of a mobile phone, human standing next to it."  width="301" height="303">
+			<img src="public/assets/images/SignIn_Img.png" alt="Large image of a mobile phone, human standing next to it."  width="301" height="303">
 		</div>
 		<div class="login_form">
 			<div>

@@ -16,7 +16,7 @@ while ($row = mysqli_fetch_assoc($result)) {
     $memberCards .= '
         <div class="member-cards">
             <div class="memberImg" alt="User Profile Picture">
-                <img src="public/images/memberImage.png" alt="Image of member">
+                <img src="public/assets/images/memberImage.png" alt="Image of member">
             </div>
             <div class="memberName">
                 <h3>'.$username.'</h3>

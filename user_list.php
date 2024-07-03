@@ -19,7 +19,7 @@ $result = mysqli_query($conn, $sql);
     <meta charset="UTF-8">
     <title>Settings | User Management</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="./public/assets/settingsStyles.css">
+    <link rel="stylesheet" href="./public/assets/css/settingsStyles.css">
 </head>
 <body id="userlist">
 <main id="container-settings">
