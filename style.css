@@ -33,7 +33,7 @@
     /* 
     --------------End CSS Rest---------------
     ___________________________________________
-    */header
+    */
 
 /* Body Styling */
 /* html, body {
@@ -253,12 +253,16 @@
 
 /* Styling for sign up form */
 
+/* #signup{
+    overflow: hidden;
+} */
+
 #contianer-signup{
     display: grid;
     grid-template-columns: 30% 60%;
     background: linear-gradient(180deg, #1E6CB4 25.96%, #393A7B 111.57%);
     margin: 0 auto;
-    height: 100vh;
+    height: auto;
 }
 
 .signup_img{
@@ -324,11 +328,11 @@ text-transform: uppercase;
 color: #ffffff;
 }
 
-.signup_form div h2{
+.signup_form div h3{
     font-family: 'Source Code Pro';
     font-style: normal;
     font-weight: 600;
-    font-size: 24px;
+    font-size: 18px;
     line-height: 30px;
     text-transform: uppercase;
     color: #fff;
@@ -668,6 +672,10 @@ margin-left: 2em;
 
 
 /* Sign in Page Styling */
+#signin{
+    overflow: hidden;
+}
+
 
 #signin-container{
     background: linear-gradient(180deg, #1E6CB4 25.96%, #393A7B 111.57%);

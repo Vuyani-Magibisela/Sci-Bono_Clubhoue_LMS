@@ -15,6 +15,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Get the form data
     $name = $_POST['name'];
     $surname = $_POST['surname'];
+    $userType = $_POST['gender'];
     $username = $_POST['username'];
     $userType = $_POST['user_type'];
     $password = $_POST['password'];
@@ -23,7 +24,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $hashed_password = password_hash($password, PASSWORD_DEFAULT);
 
     // Prepare the SQL statement
-    $sql = "INSERT INTO users (name, surname, username, user_type, password) VALUES (?, ?, ?, ?, ?)";
+    $sql = "INSERT INTO users (name, surname, gender, username, user_type, password) VALUES (?, ?, ?, ?, ?, ?)";
     $stmt = mysqli_prepare($conn, $sql);
 
     if (!$stmt) {

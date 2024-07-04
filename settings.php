@@ -162,7 +162,7 @@ $user = $result->fetch_assoc();
 
                     <div class="editProTop">
                         <div class="image-container">
-                            <img id="main-image" src="image1.jpg" alt="Main Image">
+                            <img id="main-image" src="image1.jpg" alt="Profile Image">
                             <i id="change-icon" class="icon">🔄</i>
                         </div>
                     </div>
@@ -171,13 +171,13 @@ $user = $result->fetch_assoc();
                         <h1>Edit Profile</h1>
                         <!-- User information -->
                         <form action="update_user.php" method="post">
-                            <input type="hidden" name="id" value="<?php echo $user['id']; ?>">
-                            <label for="username">Username:</label>
-                            <input type="text" id="username" name="username" value="<?php echo $user['username']; ?>" required>
-                            <label for="name">Name:</label>
-                            <input type="text" id="name" name="name" value="<?php echo $user['name']; ?>" required>
-                            <label for="email">Email:</label>
-                            <input type="email" id="email" name="email" value="<?php echo $user['email']; ?>" required>
+                            <input type="hidden" name="id" value="<?php echo $user['id']; ?>"> <br>
+                            <label for="username">Username:</label> <br>
+                            <input type="text" id="username" name="username" value="<?php echo $user['username']; ?>" required> <br>
+                            <label for="name">Name:</label> <br>
+                            <input type="text" id="name" name="name" value="<?php echo $user['name']; ?>" required> <br>
+                            <label for="email">Email:</label> <br>
+                            <input type="email" id="email" name="email" value="<?php echo $user['email']; ?>" required> <br>
                                     
                             <label for="user_type">User Type:</label>
                             <select id="user_type" name="user_type" required>
