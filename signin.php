@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daily Register</title>
     <link rel="sytlesheet" href="style.css">
-    <link rel="stylesheet" href="screenSizes.css">
+    <link rel="stylesheet" href="public/css/screenSizes.css">
 
 </head>
 <body id="signin">

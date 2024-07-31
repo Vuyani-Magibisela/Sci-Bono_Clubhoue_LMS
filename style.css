@@ -91,7 +91,7 @@
 #container-index{
     display: grid;
     grid-template-columns: 56% 46%;
-    width: 76.563em;
+    width: auto;
     align-items: center;
 }
 

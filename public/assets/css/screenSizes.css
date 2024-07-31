@@ -1,4 +1,4 @@
-.header {
+/* .header {
     display: grid;
     grid-template-columns: auto 1fr auto;
     background-color: #393A7B;
@@ -6,5 +6,72 @@
     padding: 20px;
     align-items: center;
     filter: drop-shadow(#000 0em 0em 0.5em);
-}
+} */
 
+
+/* Base styles (Mobile First approach) */
+body {
+    font-size: 16px;
+    /* Add your base styles here */
+  }
+  
+  /* Small devices (landscape phones, 576px and up) */
+  @media screen and (min-width: 36em) {
+    body {
+      font-size: 16px;
+    }
+
+    #container-index .hero-img img:nth-child(1){
+        display: none;
+    }
+    
+    #container-index .hero-img img:nth-child(2){
+        display: block;
+    }
+
+
+    
+    /* End of Small devices */
+  }
+  
+  /* Medium devices (tablets, 768px and up) */
+  @media screen and (min-width: 48em) {
+    body {
+      font-size: 17px;
+    }
+    /* Add your styles for medium devices here */
+  }
+  
+  /* Large devices (desktops, 992px and up) */
+  @media screen and (min-width: 62em) {
+    body {
+      font-size: 18px;
+    }
+    /* Add your styles for large devices here */
+  }
+  
+  /* Extra large devices (large desktops, 1200px and up) */
+  @media screen and (min-width: 75em) {
+    body {
+      font-size: 19px;
+    }
+
+    
+    #container-index .hero-img img:nth-child(1){
+        display: block;
+    }
+    #container-index .hero-img img:nth-child(2){
+        display: none;
+    }
+
+
+    /* Add your styles for extra large devices here */
+  }
+  
+  /* Extra extra large devices (TV, 1400px and up) */
+  @media screen and (min-width: 87.5em) {
+    body {
+      font-size: 20px;
+    }
+    /* Add your styles for extra extra large devices here */
+  }
