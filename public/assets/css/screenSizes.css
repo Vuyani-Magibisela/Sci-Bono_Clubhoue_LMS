@@ -15,8 +15,8 @@ body {
     /* Add your base styles here */
   }
   
-  /* Small devices (landscape phones, 576px and up) */
-  @media screen and (min-width: 36em) {
+  /* Small devices (landscape phones, 360px and up) */
+  @media screen and (min-width: 22.5em) {
     body {
       font-size: 16px;
     }
@@ -28,7 +28,9 @@ body {
     #container-index .hero-img img:nth-child(2){
         display: block;
     }
-
+    .header {
+      display: none;
+    }
 
     
     /* End of Small devices */
@@ -62,6 +64,9 @@ body {
     }
     #container-index .hero-img img:nth-child(2){
         display: none;
+    }
+    .header {
+      display: grid;
     }
 
 
