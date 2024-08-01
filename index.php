@@ -15,7 +15,7 @@
     ?>
 
     <main id="container-index">
-
+        <div id="top"></div>
         <div class="hero-img">
             <img src="public/assets/images/Login_img.png" alt="Illustrations of youth using technology" >
             <img src="public/assets/images/MobileLoginImg.svg" alt="Large image of a mobile phone, human standing next to it."  width="301" height="303">

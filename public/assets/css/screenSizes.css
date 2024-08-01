@@ -14,6 +14,19 @@ body {
     font-size: 16px;
     /* Add your base styles here */
   }
+
+  #top{
+    position:absolute;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 5em;
+    z-index: 2;
+    background-color: red;
+    clip-path: path("M375 106C375 106 330.765 70.5 164.383 70.5C-2 70.5 -2 52.5 -2 52.5L-2 -223L375 -223L375 106Z");
+  }
+
+
   
   /* Small devices (landscape phones, 360px and up) */
   @media screen and (min-width: 22.5em) {
@@ -27,7 +40,27 @@ body {
     
     #container-index .hero-img img:nth-child(2){
         display: block;
+        width: auto;
     }
+    #container-index{
+      margin: 0 auto;
+    }
+
+    #container-index::before{
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 360px;
+      height: 200px;
+      background: #393A7B;
+      margin: 0 auto;
+      z-index: 1;
+      clip-path: path("M375 106C375 106 330.765 70.5 164.383 70.5C-2 70.5 -2 52.5 -2 52.5L-2 -223L375 -223L375 106Z");
+    }
+
+  
+    /*Styles the header file*/
     .header {
       display: none;
     }
@@ -67,6 +100,9 @@ body {
     }
     .header {
       display: grid;
+    }
+    #top{
+      display: none;
     }
 
 
