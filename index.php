@@ -13,9 +13,21 @@
     <?php
     include 'header.php';
     ?>
-
+    <div id="top">
+        <svg width="0" height="0" style="position: absolute;">
+            <defs>
+                <clipPath id="topClip" clipPathUnits="objectBoundingBox">
+                <path d="M1 0.46c0 0-0.118-0.15-0.562-0.15C-0.005 0.31-0.005 0.23-0.005 0.23L-0.005 -0.98L1 -0.98L1 0.46Z" />
+                </clipPath>
+            </defs>
+        </svg>
+        
+        <div class="title-center">
+                <h1>Sci-Bono Clubhouse</h1>
+        </div>
+    </div>
     <main id="container-index">
-        <div id="top"></div>
+        
         <div class="hero-img">
             <img src="public/assets/images/Login_img.png" alt="Illustrations of youth using technology" >
             <img src="public/assets/images/MobileLoginImg.svg" alt="Large image of a mobile phone, human standing next to it."  width="301" height="303">

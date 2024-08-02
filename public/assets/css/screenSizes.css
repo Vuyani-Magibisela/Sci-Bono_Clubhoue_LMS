@@ -15,16 +15,6 @@ body {
     /* Add your base styles here */
   }
 
-  #top{
-    position:absolute;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 5em;
-    z-index: 2;
-    background-color: red;
-    clip-path: path("M375 106C375 106 330.765 70.5 164.383 70.5C-2 70.5 -2 52.5 -2 52.5L-2 -223L375 -223L375 106Z");
-  }
 
 
   
@@ -33,6 +23,32 @@ body {
     body {
       font-size: 16px;
     }
+     
+    #top {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100vw; /* Use viewport width */
+      height: 15em;
+      z-index: 2;
+      background-color: #393A7B;
+      clip-path: url(#topClip);
+    }
+
+    #top .title-center h1{
+      font-size: 18px;
+      color: #fff;
+  
+    }
+
+    #container-index{
+      display: grid;
+      grid-template-rows: 1fr 1fr;
+      margin: 0 auto;
+      width: 100%;
+      background: none;
+      box-shadow: none;
+    }
 
     #container-index .hero-img img:nth-child(1){
         display: none;
@@ -40,24 +56,29 @@ body {
     
     #container-index .hero-img img:nth-child(2){
         display: block;
-        width: auto;
-    }
-    #container-index{
-      margin: 0 auto;
+        width: 100%;
     }
 
-    #container-index::before{
-      content: '';
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 360px;
-      height: 200px;
-      background: #393A7B;
-      margin: 0 auto;
-      z-index: 1;
-      clip-path: path("M375 106C375 106 330.765 70.5 164.383 70.5C-2 70.5 -2 52.5 -2 52.5L-2 -223L375 -223L375 106Z");
+    .hero-img{
+      background: #fff;
+      border-radius: 0%;
+      width: 100%;
+      grid-column: span 2;
+      grid-row: 1/2;
     }
+
+    .log_signup-section{
+      background: none;
+      grid-column: span 2;
+      grid-row: 2/3;
+    }
+    .log_signup-section .login{
+      color: #fff;
+    }
+
+
+
+
 
   
     /*Styles the header file*/
@@ -74,6 +95,27 @@ body {
     body {
       font-size: 17px;
     }
+
+    #top {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100vw; /* Use viewport width */
+      height: 25em;
+      z-index: 2;
+      background-color: #393A7B;
+      clip-path: url(#topClip);
+    }
+
+    
+    #top .title-center h1{
+      font-size: 25px;
+      color: #fff;
+  
+    }
+
+
+
     /* Add your styles for medium devices here */
   }
   
@@ -82,6 +124,8 @@ body {
     body {
       font-size: 18px;
     }
+
+
     /* Add your styles for large devices here */
   }
   
@@ -94,6 +138,7 @@ body {
     
     #container-index .hero-img img:nth-child(1){
         display: block;
+        width: 100%;
     }
     #container-index .hero-img img:nth-child(2){
         display: none;
@@ -103,6 +148,26 @@ body {
     }
     #top{
       display: none;
+    }
+    #container-index{
+      background: #6C63FF;
+      grid-template-rows: 1fr;
+      margin: 4em;
+      width: 90%;
+    }
+
+    .hero-img{
+      background: #fff;
+      border-radius: 51px 0 0 51px;
+      width: 100%;
+      grid-column: 1/2;
+      grid-row: 1/2;
+    }
+
+    .log_signup-section{
+      grid-column: 2/3;
+      grid-row: 1/2;
+
     }
 
 
