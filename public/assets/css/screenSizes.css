@@ -83,7 +83,10 @@ body {
     .log_signup-section{
       position: relative;
       margin-top: 10em;
+      /* width: 100vw;
+      height: 50em; */
     }
+    
     #bottom{
       position: absolute;
       bottom: 0;
