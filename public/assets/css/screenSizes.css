@@ -82,6 +82,7 @@ body {
     }
     .log_signup-section{
       position: relative;
+      margin-top: 10em;
     }
     #bottom{
       position: absolute;
