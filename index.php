@@ -32,8 +32,18 @@
             <img src="public/assets/images/Login_img.png" alt="Illustrations of youth using technology" >
             <img src="public/assets/images/MobileLoginImg.svg" alt="Large image of a mobile phone, human standing next to it."  width="301" height="303">
         </div>
-
+        
         <div class="log_signup-section">
+            <div id="bottom">
+                <svg width="0" height="0" style="position: absolute;">
+                    <defs>
+                        <clipPath id="bottomClip" clipPathUnits="objectBoundingBox">
+                        <path d="M0.202236 0C0.202236 0 -13.0081 87.0038 174.108 87.0038C361.225 87.0038 375 139.377 375 139.377V609H0.202236V0Z" />
+                        </clipPath>
+                    </defs>
+                </svg>
+            </div>
+
             <div >
                 <a href="signup.php"><button class="signup" >Sign Up</button></a>
             </div>

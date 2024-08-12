@@ -75,16 +75,24 @@ body {
     .log_signup-section .login{
       color: #fff;
     }
-
-
-
-
-
   
     /*Styles the header file*/
     .header {
       display: none;
     }
+    .log_signup-section{
+      position: relative;
+    }
+    #bottom{
+      position: absolute;
+      bottom: 0;
+      width: 100vw;
+      height: 100%;
+      z-index: 999;
+      background-color: red;
+      clip-path: url(#bottomClip);
+    }
+
 
     
     /* End of Small devices */
