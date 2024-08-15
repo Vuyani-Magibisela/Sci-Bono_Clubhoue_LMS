@@ -1,3 +1,7 @@
+body{
+    background-color: red;
+}
+
 #SettigsNav_active{
     background: #6C63FF;
     color: #fff;
@@ -31,7 +35,6 @@
     background: #8CC86E;
 }
 
-
 .passEdit{
     background: #D0CDE1;
     padding: 2em;
@@ -52,4 +55,33 @@
 .image-container
 .userlist-Title{
     color: #2F2E41;
+}
+
+
+  /* Settings Edit Profile */
+
+.editProBottom form label{
+    font-size: 1.5em;
+}
+
+.editProBottom form input{
+    font-size: 1rem;
+
+}
+
+.editProBottom form input{
+    width: 360px;
+    height: 39px;
+    background: #514e7f;
+    border-radius: 5px;
+    -webkit-box-shadow: inset 0px 0px 30px 2px rgba(47,46,65,0.4);
+    -moz-box-shadow: inset 0px 0px 30px 2px rgba(47,46,65,0.4);
+    box-shadow: inset 0px 0px 30px 2px rgba(47,46,65,0.4);
+    /*Font*/
+    padding: 0.5em;
+    margin-bottom: 2em;
+    color: #f2f2f2;
+    font-family: Source Code Pro;
+    font-size: 15px;
+    font-weight: 500;
 }

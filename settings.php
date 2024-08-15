@@ -29,7 +29,7 @@ $user = $result->fetch_assoc();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Settings | Profile</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="./public/assets/settingsStyles.css">
+    <link rel="stylesheet" href="./public/assets/css/settingsStyles.css">
 </head>
 <body id="settings">
     <main id="container-settings">
@@ -177,14 +177,24 @@ $user = $result->fetch_assoc();
                             <label for="name">Name:</label> <br>
                             <input type="text" id="name" name="name" value="<?php echo $user['name']; ?>" required> <br>
                             <label for="email">Email:</label> <br>
-                            <input type="email" id="email" name="email" value="<?php echo $user['email']; ?>" required> <br>
-                                    
-                            <label for="user_type">User Type:</label>
-                            <select id="user_type" name="user_type" required>
-                                <option value="member" <?php if ($user['user_type'] == 'member') echo 'selected'; ?>>Member</option>
-                                <option value="mentor" <?php if ($user['user_type'] == 'mentor') echo 'selected'; ?>>Mentor</option>
-                                <option value="admin" <?php if ($user['user_type'] == 'admin') echo 'selected'; ?>>Admin</option>
-                            </select>
+                            <input type="text" id="surname" name="surname" value="<?php echo $user['surname']; ?>" required> <br>
+                            <label for="email">Email:</label> <br>
+                            <input type="email" id="email" name="email" value="<?php echo $user['email']; ?>" required> <br>                                                        
+                            
+                            <?php 
+                            if (isset($_SESSION['user_type'])) {
+                                $userType = $_SESSION['user_type'];
+                                if ($userType === "admin"): ?>
+                                    <label for="user_type">User Type:</label>
+
+                                    <select id="user_type" name="user_type" required>
+                                        <option value="member" <?php if ($user['user_type'] == 'member') echo 'selected'; ?>>Member</option>
+                                        <option value="mentor" <?php if ($user['user_type'] == 'mentor') echo 'selected'; ?>>Mentor</option>
+                                        <option value="admin" <?php if ($user['user_type'] == 'admin') echo 'selected'; ?>>Admin</option>
+                                    </select>
+                                <?php endif; 
+                            }
+                            ?>
                             
                             <div class="passEdit">
                                 <label for="password">Password:</label>

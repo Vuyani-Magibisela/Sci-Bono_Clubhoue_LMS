@@ -1152,6 +1152,7 @@ th, td {
 #settings{
     overflow: hidden;
 }
+
 #container-settings{
     display: grid;
     grid-template-columns: repeat(16,1fr);
@@ -1171,7 +1172,6 @@ th, td {
     padding-bottom: 0px;
     overflow: hidden;
 }
-
 
 .content_section_settings{
     background: #2F2E41;
@@ -1215,7 +1215,6 @@ th, td {
     overflow: hidden;
 }
 
-
   .settingsNav a{
     font-family: 'Source Code Pro';
     font-style: normal;
@@ -1228,10 +1227,6 @@ th, td {
     display: block;
   }
 
-  .SettigsNav_active a{
-    background: red;
-}
-
 
   .settingsNav a:hover{
     background-color: #6C63FF;
@@ -1240,7 +1235,7 @@ th, td {
 
  /*edit propic and username style*/
 
-.editProTop {
+ .editProTop {
     grid-area: Profile;
     background: #D0CDE1;
     max-width: 1920px;
@@ -1249,7 +1244,6 @@ th, td {
   }
 
 
-  
 .editProBottom {
     grid-area: details;
     background-color: #514E7F;
@@ -1283,6 +1277,7 @@ th, td {
     font-weight: 500;
     padding-bottom: 15px;
 }
+
 .passEdit input{
     width: 360px;
     height: 39px;
@@ -1317,9 +1312,10 @@ th, td {
     cursor: pointer;
 }
 
-
-
- 
+  /* Settings Edit Profile */
+  .editProBottom h1{
+    
+  }
 
 
 
