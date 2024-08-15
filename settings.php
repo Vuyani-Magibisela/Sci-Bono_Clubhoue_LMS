@@ -171,30 +171,64 @@ $user = $result->fetch_assoc();
                         <h1>Edit Profile</h1>
                         <!-- User information -->
                         <form action="update_user.php" method="post">
-                            <input type="hidden" name="id" value="<?php echo $user['id']; ?>"> <br>
-                            <label for="username">Username:</label> <br>
-                            <input type="text" id="username" name="username" value="<?php echo $user['username']; ?>" required> <br>
-                            <label for="name">Name:</label> <br>
-                            <input type="text" id="name" name="name" value="<?php echo $user['name']; ?>" required> <br>
-                            <label for="email">Email:</label> <br>
-                            <input type="text" id="surname" name="surname" value="<?php echo $user['surname']; ?>" required> <br>
-                            <label for="email">Email:</label> <br>
-                            <input type="email" id="email" name="email" value="<?php echo $user['email']; ?>" required> <br>                                                        
-                            
-                            <?php 
-                            if (isset($_SESSION['user_type'])) {
-                                $userType = $_SESSION['user_type'];
-                                if ($userType === "admin"): ?>
-                                    <label for="user_type">User Type:</label>
 
-                                    <select id="user_type" name="user_type" required>
-                                        <option value="member" <?php if ($user['user_type'] == 'member') echo 'selected'; ?>>Member</option>
-                                        <option value="mentor" <?php if ($user['user_type'] == 'mentor') echo 'selected'; ?>>Mentor</option>
-                                        <option value="admin" <?php if ($user['user_type'] == 'admin') echo 'selected'; ?>>Admin</option>
-                                    </select>
-                                <?php endif; 
-                            }
-                            ?>
+                            <div class="memberDetails">
+                                <h1>Member Details</h1>
+                                <input type="hidden" name="id" value="<?php echo $user['id']; ?>"> <br>
+                                <?php 
+                                    if (isset($_SESSION['user_type'])) {
+                                        $userType = $_SESSION['user_type'];
+                                        if ($userType === "admin"): ?>
+                                            <label for="user_type">User Type:</label>
+
+                                            <select id="user_type" name="user_type" required>
+                                                <option value="member" <?php if ($user['user_type'] == 'member') echo 'selected'; ?>>Member</option>
+                                                <option value="mentor" <?php if ($user['user_type'] == 'mentor') echo 'selected'; ?>>Mentor</option>
+                                                <option value="admin" <?php if ($user['user_type'] == 'admin') echo 'selected'; ?>>Admin</option>
+                                            </select>
+                                        <?php endif; 
+                                    }
+                                ?><br>
+                                <label for="username">Username:</label> <br>
+                                <input type="text" id="username" name="username" value="<?php echo $user['username']; ?>" required> <br>
+                                
+                                <label for="name">Name:</label> <br>
+                                <input type="text" id="name" name="name" value="<?php echo $user['name']; ?>" required> <br>
+                                
+                                <label for="email">Surname:</label> <br>
+                                <input type="text" id="surname" name="surname" value="<?php echo $user['surname']; ?>" required> <br>
+                                
+                                <label for="email">Email:</label> <br>
+                                <input type="email" id="email" name="email" value="<?php echo $user['email']; ?>" required> <br>                                                        
+                                
+                                <label for="dob">Date of Birth:</label> <br>
+                                <input type="date" id="dob" name="dob" value="<?php echo $user['date of birth']; ?>" required> <br>
+        
+                                <label for="grade">Grade:</label> <br>
+                                <input type="number" id="grade" name="grade" min="0" max="999" value="<?php echo $user['grade']; ?>" required> <br>
+                                
+                                <label for="school">School:</label> <br>
+                                <input type="text" id="school" name="school" value="<?php echo $user['school']; ?>" required> <br>
+                            </div>
+
+                            <div class="parentDetails">
+                                <h1>Parent Details</h1>
+                                <label for="parent">Parent Name:</label> <br>
+                                <input type="text" id="parent" name="parent" value="<?php echo $user['parent']; ?>" required> <br>
+                                
+                                <label for="parent_email">Parent Email:</label> <br>
+                                <input type="email" id="parent_email" name="parent_email" value="<?php echo $user['parent_email']; ?>" required> <br>
+                                
+                                <label for="learner_number">Learner Number:</label> <br>
+                                <input type="text" id="learner_number" name="learner_number" value="<?php echo $user['leaner_number']; ?>" required> <br>
+                                
+                                <label for="parent_number">Parent Number:</label> <br>
+                                <input type="tel" id="parent_number" name="parent_number" value="<?php echo $user['parent_number']; ?>" required> <br>
+                                
+                                <label for="relationship">Relationship:</label> <br>
+                                <input type="text" id="relationship" name="relationship" value="<?php echo $user['Relationship']; ?>" required> <br>
+                            </div>
+                            
                             
                             <div class="passEdit">
                                 <label for="password">Password:</label>
