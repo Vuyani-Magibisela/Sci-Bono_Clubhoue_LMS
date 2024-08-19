@@ -30,6 +30,7 @@ $user = $result->fetch_assoc();
     <title>Settings | Profile</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="./public/assets/css/settingsStyles.css">
+    <link rel="stylesheet" href="./public/assets/css/screenSizes.css">
 </head>
 <body id="settings">
     <main id="container-settings">
@@ -202,7 +203,7 @@ $user = $result->fetch_assoc();
                                 <input type="email" id="email" name="email" value="<?php echo $user['email']; ?>" required> <br>                                                        
                                 
                                 <label for="dob">Date of Birth:</label> <br>
-                                <input type="date" id="dob" name="dob" value="<?php echo $user['date of birth']; ?>" required> <br>
+                                <input type="date" id="dob" name="dob" value="<?php echo $user['date_of_birth']; ?>" required> <br>
         
                                 <label for="grade">Grade:</label> <br>
                                 <input type="number" id="grade" name="grade" min="0" max="999" value="<?php echo $user['grade']; ?>" required> <br>
