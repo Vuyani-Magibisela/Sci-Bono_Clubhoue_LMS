@@ -20,6 +20,7 @@ $result = mysqli_query($conn, $sql);
     <title>Settings | User Management</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="./public/assets/css/settingsStyles.css">
+    <link rel="stylesheet" href="./public/assets/css/screenSizes.css">
 </head>
 <body id="userlist">
 <main id="container-settings">

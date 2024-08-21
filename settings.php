@@ -163,8 +163,16 @@ $user = $result->fetch_assoc();
 
                     <div class="editProTop">
                         <div class="image-container">
-                            <img id="main-image" src="image1.jpg" alt="Profile Image">
-                            <i id="change-icon" class="icon">🔄</i>
+                            <div id="proImage">
+                                <img  src="image1.jpg" alt="Profile Image">
+                                <i id="change-icon" class="icon">🔄</i>
+                            </div>
+                            
+                            <div class="usrID">
+                                <h1><?php echo $user['name']; ?></h1>
+                                <h1><?php echo $user['surname']; ?></h1>
+                            </div>
+                            
                         </div>
                     </div>
 
@@ -204,33 +212,50 @@ $user = $result->fetch_assoc();
                                 
                                 <label for="dob">Date of Birth:</label> <br>
                                 <input type="date" id="dob" name="dob" value="<?php echo $user['date_of_birth']; ?>" required> <br>
-        
-                                <label for="grade">Grade:</label> <br>
-                                <input type="number" id="grade" name="grade" min="0" max="999" value="<?php echo $user['grade']; ?>" required> <br>
+                                <!-- if mamber is admin or mentor dont show school details -->
+                                <?php 
+                                    if (isset($_SESSION['user_type'])) {
+                                        $userType = $_SESSION['user_type'];
+                                        if ($userType === "member"): ?>
+                                            
+                                            <label for="grade">Grade:</label> <br>
+                                            <input type="number" id="grade" name="grade" min="0" max="999" value="<?php echo $user['grade']; ?>" required> <br>
+                                    
+                                            <label for="school">School:</label> <br>
+                                            <input type="text" id="school" name="school" value="<?php echo $user['school']; ?>" required> <br>
+                                        
+                                        <?php endif; 
+                                    }
                                 
-                                <label for="school">School:</label> <br>
-                                <input type="text" id="school" name="school" value="<?php echo $user['school']; ?>" required> <br>
+                               
+                                ?>
                             </div>
-
-                            <div class="parentDetails">
-                                <h1>Parent Details</h1>
-                                <label for="parent">Parent Name:</label> <br>
-                                <input type="text" id="parent" name="parent" value="<?php echo $user['parent']; ?>" required> <br>
-                                
-                                <label for="parent_email">Parent Email:</label> <br>
-                                <input type="email" id="parent_email" name="parent_email" value="<?php echo $user['parent_email']; ?>" required> <br>
-                                
-                                <label for="learner_number">Learner Number:</label> <br>
-                                <input type="text" id="learner_number" name="learner_number" value="<?php echo $user['leaner_number']; ?>" required> <br>
-                                
-                                <label for="parent_number">Parent Number:</label> <br>
-                                <input type="tel" id="parent_number" name="parent_number" value="<?php echo $user['parent_number']; ?>" required> <br>
-                                
-                                <label for="relationship">Relationship:</label> <br>
-                                <input type="text" id="relationship" name="relationship" value="<?php echo $user['Relationship']; ?>" required> <br>
-                            </div>
-                            
-                            
+                            <!-- If member is Admin or Mentor dont show Parent Details -->
+                            <?php
+                            if (isset($_SESSION['user_type'])) {
+                                        $userType = $_SESSION['user_type'];
+                                        if ($userType === "member"): ?>           
+                                            <div class="parentDetails">
+                                                <h1>Parent Details</h1>
+                                                <label for="parent">Parent Name:</label> <br>
+                                                <input type="text" id="parent" name="parent" value="<?php echo $user['parent']; ?>" required> <br>
+                                                
+                                                <label for="parent_email">Parent Email:</label> <br>
+                                                <input type="email" id="parent_email" name="parent_email" value="<?php echo $user['parent_email']; ?>" required> <br>
+                                                
+                                                <label for="learner_number">Learner Number:</label> <br>
+                                                <input type="text" id="learner_number" name="learner_number" value="<?php echo $user['leaner_number']; ?>" required> <br>
+                                                
+                                                <label for="parent_number">Parent Number:</label> <br>
+                                                <input type="tel" id="parent_number" name="parent_number" value="<?php echo $user['parent_number']; ?>" required> <br>
+                                                
+                                                <label for="relationship">Relationship:</label> <br>
+                                                <input type="text" id="relationship" name="relationship" value="<?php echo $user['Relationship']; ?>" required> <br>
+                                            </div>
+                                        <?php endif; 
+                                }
+                            ?>
+            
                             <div class="passEdit">
                                 <label for="password">Password:</label>
                                 <input type="password" id="password" name="password" placeholder="Leave blank to keep current password">     

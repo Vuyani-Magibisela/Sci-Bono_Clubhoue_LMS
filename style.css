@@ -83,79 +83,7 @@
 }
 
 /* index main stying */
-#index{
-    background: #393A7B;
-}
 
-
-#container-index{
-    display: grid;
-    grid-template-columns: 50% auto;
-    width: auto;
-    align-items: center;
-}
-
-#container-index{
-    margin: 2.5em 9.8em;
-    background: #6C63FF;
-    box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.25);
-    border-radius: 3.188em;
-}
-
-
-
-.hero-img{
-    background:#ffffff;
-    grid-column: 1/2;
-    border-radius: 51px 0 0 51px;
-    width: auto;
-}
-
-.hero-img img{
-    position: relative;
-    width: 100%;
-}
-
-.log_signup-section{
-    grid-column: 2/3;
-    margin: auto;
-    align-items: center;
-}
-
-.signup{
-    width: 286px;
-    height: 57px;
-    background: #F29A2E;
-    border-radius: 10px;
-    text-align: center;
-    cursor: pointer;
-    text-decoration: none;
-    font-size: 2em;
-    color: #444053;
-    font-family: Arial, Helvetica, sans-serif;
-}
-
-.log_signup-section p{
-    margin-bottom: 0.5em; 
-    color: #ffffff;
-    font-family: 'Source code Pro';
-    text-transform: uppercase;
-}
-
-.login{
-    width: 286px;
-    height: 57px;
-    background-color: rgba(255, 255, 255, 0);
-    border: 2px solid #FFFFFF;
-    border-radius: 10px;
-    text-align: center;
-    cursor: pointer;
-    text-decoration: none;
-    font-size: 2em;
-    color: #444053;
-    font-family: Arial, Helvetica, sans-serif;
-
-}
 
 
 /* Styling the login page */
@@ -1150,7 +1078,7 @@ th, td {
 
 /*Settings Styles*/
 #settings{
-    overflow: hidden;
+    overflow: scroll;
 }
 
 #container-settings{
@@ -1160,8 +1088,8 @@ th, td {
     gap: 12px;
     background: linear-gradient(180deg, #1E6CB4 25.96%, #393A7B 111.57%);
     height: 100%;
-    padding: 2em;
-    overflow: hidden;
+    padding: 1em;
+
 }
 
 #settings_main_section{
@@ -1233,93 +1161,11 @@ th, td {
   }
 
 
- /*edit propic and username style*/
-
- .editProTop {
-    grid-area: Profile;
-    background: #D0CDE1;
-    max-width: 1920px;
-    margin: 1em;
-    border-radius: 8px;
-  }
 
 
-.editProBottom {
-    grid-area: details;
-    background-color: #514E7F;
-    max-width: 1920px;
-    height: 0 auto;
-    margin: 1em;
-    border-radius: 8px;
-  }
 
-  .editProBottom {
-    padding: 2em;
-  }
-
-  .editProBottom form{
-    background: #fff;
-    padding: 0.5em;
-    
-    }
-
-.passEdit{
-    position:relative;
-    background: #D0CDE1;
-    border-radius: 10px;
-    margin: 1em;
-    padding: 2em;
-}
-.passEdit :nth-child(1){
-    color: #6c63ff;
-    font-family: Source Code Pro;
-    font-size: 20px;
-    font-weight: 500;
-    padding-bottom: 15px;
-}
-
-.passEdit input{
-    width: 360px;
-    height: 39px;
-    background: #514e7f;
-    border-radius: 5px;
-    -webkit-box-shadow: inset 0px 0px 30px 2px rgba(47,46,65,0.4);
-    -moz-box-shadow: inset 0px 0px 30px 2px rgba(47,46,65,0.4);
-    box-shadow: inset 0px 0px 30px 2px rgba(47,46,65,0.4);
-    /*Font*/
-    padding: 0.5em;
-    color: #f2f2f2;
-    font-family: Source Code Pro;
-    font-size: 15px;
-    font-weight: 500;
-}
-
-.passEdit :nth-child(4){
-    position:absolute;
-    top: 70px;
-    right: 25px;
-    padding: 5px 22px;
-    width: 131px;
-    height: 43px;
-    background: #f29a2e;
-    border-radius: 10px;
-
-    color: #ffffff;
-    font-family: Source Code Pro;
-    font-size: 16px;
-    font-weight: 400;
-    text-align: center;
-    cursor: pointer;
-}
 
   /* Settings Edit Profile */
-  .editProBottom h1{
-    
-  }
-
-  .parentDetails h1{
-    color: #000;
-  }
 
 
 
