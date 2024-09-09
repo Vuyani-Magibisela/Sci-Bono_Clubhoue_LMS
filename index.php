@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Landpage</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="./public/assets/css/screenSizes.css">
 
 </head>
 <body id="index">
@@ -44,13 +45,13 @@
                 </svg>
             </div>
 
-            <div >
-                <a href="signup.php"><button class="signup" >Sign Up</button></a>
+            <div class="signup">
+                <a href="signup.php"><button class="signupBtn" >Sign Up</button></a>
             </div>
             
             <p>Already a member</p>
-            <div>
-                <a href="login.php" ><button class="login" >Log In</button></a>
+            <div >
+                <a href="login.php" ><button class="loginBtn" >Log In</button></a>
             </div>
         </div>
 
