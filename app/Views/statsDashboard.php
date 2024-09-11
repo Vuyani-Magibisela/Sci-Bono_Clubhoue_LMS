@@ -1,49 +1,20 @@
+<?php
+session_start();
+// Check if user is logged in
+if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true) {
+	header("Location: login.php");
+	exit;
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Attendance Statistics Dashboard</title>
-    <link rel="stylesheet" href="../public/assets/css/statsDashboardStyle.css">
+    <link rel="stylesheet" href="../../public/assets/css/statsDashboardStyle.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <style>
-      body {
-            font-family: Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
-        }
-    h1 {
-        text-align: center;
-        color: #2c3e50;
-    }
-
-    .dashboard {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-        gap: 20px;
-    }
-    .card {
-        background-color: #f7f7f7;
-        border-radius: 8px;
-        padding: 20px;
-        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-    }
-    .card h2 {
-        margin-top: 0;
-        color: #3498db;
-    }
-    #totalMembers {
-        font-size: 2em;
-        font-weight: bold;
-        color: #2980b9;
-    }
-    canvas {
-        max-width: 100%;
-    }  
-    </style>
 </head>
 <body>
     <h1>Attendance Statistics Dashboard</h1>
@@ -65,6 +36,9 @@
             <canvas id="dailyAttendanceChart"></canvas>
         </div>
     </div>
+
+    <h2>Recent Program Data</h2>
+    <div id="programData"></div>
 
     <script>
         // Simulated data (replace with actual data from your Python script)
@@ -114,6 +88,22 @@
         createChart('monthlyTrendChart', 'line', monthlyTrend.labels, monthlyTrend.data, 'Monthly Unique Members');
         createChart('weeklyAttendanceChart', 'bar', weeklyAttendance.labels, weeklyAttendance.data, 'Weekly Unique Members');
         createChart('dailyAttendanceChart', 'line', dailyAttendance.labels, dailyAttendance.data, 'Daily Unique Members');
-    </script>
+        
+         // Display program data
+        const programData = <?php echo $programDataJSON; ?>;
+        const programDataContainer = document.getElementById('programData');
+
+        programData.forEach(program => {
+            const programDiv = document.createElement('div');
+            programDiv.className = 'card';
+            programDiv.innerHTML = `
+                <h3>${program.program_name}</h3>
+                <p>Participants: ${program.participants}</p>
+                <p>Narrative: ${program.narrative}</p>
+                ${program.image_path ? `<img src="${program.image_path}" alt="${program.program_name}" style="max-width: 100%;">` : ''}
+            `;
+            programDataContainer.appendChild(programDiv);
+        });
+   </script>
 </body>
 </html>
