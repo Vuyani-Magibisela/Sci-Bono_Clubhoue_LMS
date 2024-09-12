@@ -42,14 +42,14 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true) {
 
     <script>
         // Simulated data (replace with actual data from your Python script)
-        const totalUniqueMembers = 150;
+        const totalUniqueMembers = 69;
         const monthlyTrend = {
-            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-            data: [100, 120, 110, 130, 140, 150]
+            labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Nov', 'Dec'],
+            data: [ 0, 0, 0, 0, 0, 1, 5, 68, 12, 0, 0, 0]
         };
         const weeklyAttendance = {
-            labels: ['Week 1', 'Week 2', 'Week 3', 'Week 4'],
-            data: [80, 90, 85, 95]
+            labels: ['Week 23', 'Week 25', 'Week 27', 'Week 28', 'Week 28', 'Week 31', 'Week 33', 'Week 34', 'Week 35', 'Week 36'],
+            data: [1, 1, 2, 2, 1, 37, 49, 25, 12]
         };
         const dailyAttendance = {
             labels: [...Array(30).keys()].map(i => `Day ${i+1}`),
@@ -90,6 +90,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true) {
         createChart('dailyAttendanceChart', 'line', dailyAttendance.labels, dailyAttendance.data, 'Daily Unique Members');
         
          // Display program data
+        /*
         const programData = <?php echo $programDataJSON; ?>;
         const programDataContainer = document.getElementById('programData');
 
@@ -103,7 +104,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true) {
                 ${program.image_path ? `<img src="${program.image_path}" alt="${program.program_name}" style="max-width: 100%;">` : ''}
             `;
             programDataContainer.appendChild(programDiv);
-        });
+        });*/
    </script>
 </body>
 </html>
