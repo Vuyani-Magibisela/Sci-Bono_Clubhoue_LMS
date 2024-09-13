@@ -124,6 +124,7 @@ $programDataJSON = json_encode($programData);
                 <h3>${program.title}</h3>
                 <p>Participants: ${program.participants}</p>
                 <p>Narrative: ${program.narrative}</p>
+                <p>Challenges: ${program.challenges}</p>
                 ${program.image_path ? `<img src="${program.image_path}" alt="${program.title}" style="max-width: 100%;">` : ''}
             `;
             programDataContainer.appendChild(programDiv);

@@ -66,9 +66,18 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true) {
                 <label for="program${programCount}">Program:</label>
                 <select name="programs[]" id="program${programCount}" required>
                     <option value="">Select a program</option>
-                    <option value="Program A">Program A</option>
-                    <option value="Program B">Program B</option>
-                    <option value="Program C">Program C</option>
+                    <?php
+                    // Fetch programs from the database
+                    // Database connection details
+                    require '../Controllers/addProgams.php';
+
+                    if ($result->num_rows > 0) {
+                        while($row = $result->fetch_assoc()) {
+                            echo "<option value='" . $row["id"] . "'>" . htmlspecialchars($row["title"]) . "</option>";
+                        }
+                    }
+           
+                    ?>
                 </select>
 
                 <label for="participants${programCount}">Number of Participants:</label>
