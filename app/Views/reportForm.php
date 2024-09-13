@@ -2,7 +2,7 @@
 session_start();
 // Check if user is logged in
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true) {
-	header("Location: login.php");
+	header("Location: ../../login.php");
 	exit;
 }
 ?>
@@ -18,15 +18,24 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true) {
 </head>
 <body id="reportForm">
     <h1>Program Data Input</h1>
-    <form id="programForm" action="submit_program_data.php" method="post" enctype="multipart/form-data">
+    <form id="programForm" action="../Controllers/submit_report_data.php" method="post" enctype="multipart/form-data">
         <div id="programForms">
             <div class="program-form">
-                <label for="program0">Program:</label>
+            <label for="program0">Program:</label>
                 <select name="programs[]" id="program0" required>
                     <option value="">Select a program</option>
-                    <option value="Program A">Program A</option>
-                    <option value="Program B">Program B</option>
-                    <option value="Program C">Program C</option>
+                    <?php
+                    // Fetch programs from the database
+                    // Database connection details
+                    require '../Controllers/addProgams.php';
+
+                    if ($result->num_rows > 0) {
+                        while($row = $result->fetch_assoc()) {
+                            echo "<option value='" . $row["id"] . "'>" . htmlspecialchars($row["title"]) . "</option>";
+                        }
+                    }
+           
+                    ?>
                 </select>
 
                 <label for="participants0">Number of Participants:</label>
@@ -34,6 +43,9 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true) {
 
                 <label for="narrative0">Narrative:</label>
                 <textarea name="narratives[]" id="narrative0" rows="4" required></textarea>
+                
+                <label for="narrative0">Challenges:</label>
+                <textarea name="challenges[]" id="challenges0" rows="4" required></textarea>
 
                 <label for="image0">Upload Image:</label>
                 <input type="file" name="images[]" id="image0" accept="image/*">

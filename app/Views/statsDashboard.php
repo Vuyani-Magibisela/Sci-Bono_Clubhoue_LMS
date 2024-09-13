@@ -2,10 +2,33 @@
 session_start();
 // Check if user is logged in
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true) {
-	header("Location: login.php");
+	header("Location: ../../login.php");
 	exit;
 }
+require '../../server.php';
+
+// Fetch program data
+$sql = "SELECT *
+        FROM clubhouse_reports
+        JOIN clubhouse_programs
+        ON clubhouse_reports.program_name = clubhouse_programs.id;";
+$result = $conn->query($sql);
+
+$programData = array();
+if ($result->num_rows > 0) {
+    while($row = $result->fetch_assoc()) {
+        $programData[] = $row;
+    }
+}
+
+$conn->close();
+
+// Convert PHP array to JSON for JavaScript
+$programDataJSON = json_encode($programData);
+
 ?>
+
+
 
 <!DOCTYPE html>
 <html lang="en">
@@ -90,7 +113,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true) {
         createChart('dailyAttendanceChart', 'line', dailyAttendance.labels, dailyAttendance.data, 'Daily Unique Members');
         
          // Display program data
-        /*
+        
         const programData = <?php echo $programDataJSON; ?>;
         const programDataContainer = document.getElementById('programData');
 
@@ -98,13 +121,13 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true) {
             const programDiv = document.createElement('div');
             programDiv.className = 'card';
             programDiv.innerHTML = `
-                <h3>${program.program_name}</h3>
+                <h3>${program.title}</h3>
                 <p>Participants: ${program.participants}</p>
                 <p>Narrative: ${program.narrative}</p>
-                ${program.image_path ? `<img src="${program.image_path}" alt="${program.program_name}" style="max-width: 100%;">` : ''}
+                ${program.image_path ? `<img src="${program.image_path}" alt="${program.title}" style="max-width: 100%;">` : ''}
             `;
             programDataContainer.appendChild(programDiv);
-        });*/
+        });
    </script>
 </body>
 </html>

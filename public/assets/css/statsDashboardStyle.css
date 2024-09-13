@@ -7,9 +7,7 @@ body {
     margin: 0 auto;
     padding: 20px;
 }
-#reportForm{
-    max-width: 800px;
-}
+
 
 h1 {
 text-align: center;
@@ -45,6 +43,10 @@ max-width: 100%;
 }  
 
 /* ReportForm Styling */
+#reportForm{
+    max-width: 800px;
+}
+
 form {
     background-color: #f7f7f7;
     border-radius: 8px;
@@ -80,4 +82,9 @@ button {
 }
 button:hover {
     background-color: #2980b9;
+}
+
+/* Add Clubhouse PRograms Styling */
+#addPrograms{
+    max-width: 800px;
 }
