@@ -8,6 +8,7 @@ require '../../server.php';
 $sql = "SELECT * FROM clubhouse_programs";
 $result = mysqli_query($conn, $sql);
 
+
 // Function to sanitize input
 function sanitize_input($data) {
     $data = trim($data);
