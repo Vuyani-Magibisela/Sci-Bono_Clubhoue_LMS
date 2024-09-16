@@ -27,8 +27,19 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true) {
                     <?php
                     // Fetch programs from the database
                     // Database connection details
-                    require '../Controllers/addProgams.php';
+                    $servername = "localhost";
+                    $username = "root";
+                    $password = "";
+                    $dbname = "accounts";
 
+                    $conn = new mysqli($servername, $username, $password, $dbname);
+                    if ($conn->connect_error) {
+                        die("Connection failed: " . $conn->connect_error);
+                    }
+
+                    $sql = "SELECT id, title FROM clubhouse_programs";
+                    $result = $conn->query($sql);
+                    
                     if ($result->num_rows > 0) {
                         while($row = $result->fetch_assoc()) {
                             echo "<option value='" . $row["id"] . "'>" . htmlspecialchars($row["title"]) . "</option>";
@@ -44,11 +55,11 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true) {
                 <label for="narrative0">Narrative:</label>
                 <textarea name="narratives[]" id="narrative0" rows="4" required></textarea>
                 
-                <label for="narrative0">Challenges:</label>
+                <label for="challenges0">Challenges:</label>
                 <textarea name="challenges[]" id="challenges0" rows="4" required></textarea>
 
                 <label for="image0">Upload Image:</label>
-                <input type="file" name="images[]" id="image0" accept="image/*">
+                <input type="file" name="images[]" id="image0" accept="image/*" multiple required>
             </div>
         </div>
         <button type="button" id="addProgram">Add New Program</button>
@@ -69,13 +80,15 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true) {
                     <?php
                     // Fetch programs from the database
                     // Database connection details
-                    require '../Controllers/addProgams.php';
-
+                    // Reopen database connection
+                    $conn = new mysqli($servername, $username, $password, $dbname);
+                    $result = $conn->query($sql);
                     if ($result->num_rows > 0) {
                         while($row = $result->fetch_assoc()) {
                             echo "<option value='" . $row["id"] . "'>" . htmlspecialchars($row["title"]) . "</option>";
                         }
                     }
+                    $conn->close();
            
                     ?>
                 </select>
@@ -85,6 +98,9 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true) {
 
                 <label for="narrative${programCount}">Narrative:</label>
                 <textarea name="narratives[]" id="narrative${programCount}" rows="4" required></textarea>
+                
+                <label for="challenges${programCount}">Challenges:</label>
+                <textarea name="challenges[]" id="challenges0" rows="4" required></textarea>
 
                 <label for="image${programCount}">Upload Image:</label>
                 <input type="file" name="images[]" id="image${programCount}" accept="image/*">

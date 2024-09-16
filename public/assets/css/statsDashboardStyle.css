@@ -88,3 +88,17 @@ button:hover {
 #addPrograms{
     max-width: 800px;
 }
+
+/* Program Data */
+
+#programData .card{
+    margin-bottom: 1.5rem;
+}
+
+#programData .card img{
+    width: 250px;
+}
+
+#programData .image-container{
+    width: 100%;
+}

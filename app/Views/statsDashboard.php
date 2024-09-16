@@ -125,8 +125,10 @@ $programDataJSON = json_encode($programData);
                 <p>Participants: ${program.participants}</p>
                 <p>Narrative: ${program.narrative}</p>
                 <p>Challenges: ${program.challenges}</p>
-                ${program.image_path ? `<img src="${program.image_path}" alt="${program.title}" style="max-width: 100%;">` : ''}
-            `;
+                <div class="image-container">
+                ${program.image_path ? `<img src="../../public/assets/uploads/images/${program.image_path}" alt="${program.title}" style="max-width: 100%;">` : ''}
+                </div>
+                `;
             programDataContainer.appendChild(programDiv);
         });
    </script>
