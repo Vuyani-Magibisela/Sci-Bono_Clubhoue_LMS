@@ -5,6 +5,14 @@ body {
     /* Add your base styles here */
   }
 
+.error{
+  position: absolute;
+  top: 0px;
+  text-align: center;
+  background-color: red;
+  padding: 1em;
+}
+
   /* index Styling */
   #index{
     background: #393A7B;

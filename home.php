@@ -5,6 +5,9 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true) {
 	header("Location: login.php");
 	exit;
 }
+
+// Include the auto-logout script to track inactivity
+include '/app/Controllers/sessionTimer.php';
 ?>
 
 <!DOCTYPE html>
