@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Aug 16, 2024 at 04:51 AM
+-- Generation Time: Oct 10, 2024 at 08:25 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.0.30
 
@@ -85,6 +85,62 @@ INSERT INTO `attendance` (`id`, `user_id`, `checked_in`, `checked_out`, `sign_in
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `clubhouse_programs`
+--
+
+CREATE TABLE `clubhouse_programs` (
+  `id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `learning_outcomes` text DEFAULT NULL,
+  `target_age_group` varchar(50) DEFAULT NULL,
+  `duration` varchar(50) DEFAULT NULL,
+  `max_participants` int(11) DEFAULT NULL,
+  `materials_needed` text DEFAULT NULL,
+  `difficulty_level` enum('Beginner','Intermediate','Advanced') DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `clubhouse_programs`
+--
+
+INSERT INTO `clubhouse_programs` (`id`, `title`, `description`, `learning_outcomes`, `target_age_group`, `duration`, `max_participants`, `materials_needed`, `difficulty_level`, `created_at`, `updated_at`) VALUES
+(1, 'FTC', 'Robotics Competition for members between the ages of 12 - 18 years old. The FTC Season starts in September and ends in April.', 'Engineering\r\nMechanical Design\r\nMarketing \r\nLogistics\r\nPresentation skills', '12-18 years', '8 months', 10, 'FTC REV Robotics Starter Kit\r\nFTC REV Robotics Expansion kit\r\n', 'Advanced', '2024-09-13 10:24:39', '2024-09-13 12:39:11'),
+(2, 'Robotics Workshop', 'Hands-on experience with building and programming robots', 'Basic robotics principles and programming skills', '12-16 years', '2 hours', 10, 'Robot kits, laptops', 'Intermediate', '2024-09-13 10:24:39', '2024-09-13 10:24:39'),
+(3, 'Digital Art Creation', 'Explore digital art tools and techniques', 'Proficiency in digital drawing and image editing', '10-14 years', '1.5 hours', 12, 'Tablets with drawing apps', 'Beginner', '2024-09-13 10:24:39', '2024-09-13 10:24:39'),
+(4, 'FLL', 'FLL is great', 'Coding and Robotics', '9-16 years', '6 Months', 10, '0', 'Beginner', '2024-09-13 14:44:13', '2024-09-13 14:44:13'),
+(5, 'FLL', 'FLL is great', 'Coding and Robotics', '9-16 years', '6 Months', 10, '0', 'Beginner', '2024-09-13 14:47:07', '2024-09-13 14:47:07');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `clubhouse_reports`
+--
+
+CREATE TABLE `clubhouse_reports` (
+  `id` int(11) NOT NULL,
+  `program_name` varchar(255) NOT NULL,
+  `participants` int(11) NOT NULL,
+  `narrative` text DEFAULT NULL,
+  `challenges` text DEFAULT NULL,
+  `image_path` varchar(255) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `clubhouse_reports`
+--
+
+INSERT INTO `clubhouse_reports` (`id`, `program_name`, `participants`, `narrative`, `challenges`, `image_path`, `created_at`) VALUES
+(1, '1', 4, 'FTC is nice', 'internet please', '2024-09/66e448b212080_FWAC0DJIDYKNTLY.jpg', '2024-09-13 14:14:10'),
+(2, '1', 3, 'FTC always the best', 'Internet as always', '2024-09/66e459fca872b_FWAC0DJIDYKNTLY.jpg', '2024-09-13 15:27:56'),
+(3, '3', 24, 'Summer camp', 'Hot', '2024-09/66e889ae59f47_pikaso_texttoimage_Futuristic-robot-cyberspace-digital-world-revoluti.jpeg', '2024-09-16 19:40:30');
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `users`
 --
 
@@ -111,7 +167,7 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `username`, `email`, `password`, `name`, `surname`, `user_type`, `date_of_birth`, `grade`, `school`, `parent`, `parent_email`, `leaner_number`, `parent_number`, `Relationship`) VALUES
-(1, 'vuyani_magibisela', '', '$2y$10$OEkQUqNT9pp8F.oBn/nAquaBuxyo7.8a0QCiWLXw37ECwvzXWNZDy', 'Vuyani', 'Magibisela', 'admin', '0000-00-00', 0, 0, 0, '0', 0, 0, ''),
+(1, 'vuyani_magibisela', 'vuyani.magibisela@sci-bono.co.za', '$2y$10$OEkQUqNT9pp8F.oBn/nAquaBuxyo7.8a0QCiWLXw37ECwvzXWNZDy', 'Vuyani', 'Magibisela', 'admin', '0000-00-00', 0, 0, 0, '0', 0, 0, ''),
 (2, 'itumeleng_kgakane', 'itum@gmail.com', '$2y$10$djcIfQ1gSBbtbe7dKgbphO6myGetqJ0t6F.SGlpbDvp.sOn53iSBK', 'Itumeleng', 'Kgakane', 'member', '0000-00-00', 0, 0, 0, '0', 0, 0, ''),
 (4, 'themba_magibisela', '', '13378', 'Themba', 'Magibisela', 'mentor', '0000-00-00', 0, 0, 0, '0', 0, 0, ''),
 (5, 'themba_kgakane', '', '$2y$10$MF.CYKDPS86B4KofOayZWuSDP7ETZtLpiVXnyDO2aU3bnn4K8BHzW', 'Themba', 'Kgakane', 'mentor', '0000-00-00', 0, 0, 0, '0', 0, 0, ''),
@@ -133,6 +189,18 @@ ALTER TABLE `attendance`
   ADD KEY `user_id` (`user_id`);
 
 --
+-- Indexes for table `clubhouse_programs`
+--
+ALTER TABLE `clubhouse_programs`
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `clubhouse_reports`
+--
+ALTER TABLE `clubhouse_reports`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `users`
 --
 ALTER TABLE `users`
@@ -147,6 +215,18 @@ ALTER TABLE `users`
 --
 ALTER TABLE `attendance`
   MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=49;
+
+--
+-- AUTO_INCREMENT for table `clubhouse_programs`
+--
+ALTER TABLE `clubhouse_programs`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT for table `clubhouse_reports`
+--
+ALTER TABLE `clubhouse_reports`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `users`
