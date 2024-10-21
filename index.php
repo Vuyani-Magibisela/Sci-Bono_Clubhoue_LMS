@@ -7,6 +7,17 @@
     <title>Landpage</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="./public/assets/css/screenSizes.css">
+    <!--Google analytics
+	================================================-->
+	<!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-156064280-1"></script>
+	<script>
+	window.dataLayer = window.dataLayer || [];
+	function gtag(){dataLayer.push(arguments);}
+	gtag('js', new Date());
+
+	gtag('config', 'UA-156064280-1');
+	</script>
 
 </head>
 <body id="index">
