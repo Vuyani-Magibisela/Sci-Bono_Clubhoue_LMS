@@ -1,5 +1,9 @@
 <?php
 	session_start();
+
+	if (isset($_GET['timeout']) && $_GET['timeout'] == 1) {
+		echo '<p class="error">You have been logged out due to inactivity.</p>';
+	}
 ?>
 
 <!DOCTYPE html>
@@ -10,6 +14,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Login Page</title>
 	<link rel="stylesheet" href="style.css">
+	<link rel="stylesheet" href="public/assets/css/screenSizes.css">
 	<link rel="stylesheet" href="public/assets/css/style">
 	<script>
 		function validateForm() {
