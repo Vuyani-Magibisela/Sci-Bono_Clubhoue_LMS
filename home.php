@@ -7,7 +7,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true) {
 }
 
 // Include the auto-logout script to track inactivity
-include '/app/Controllers/sessionTimer.php';
+include 'app/Controllers/sessionTimer.php';
 ?>
 
 <!DOCTYPE html>

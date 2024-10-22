@@ -1,10 +1,14 @@
 <?php
-session_start();
+//Check if the session is not already started
+if (session_status() == PHP_SESSION_NONE) {
+    session_start();
+}
+
 // Database connection details
-require '../../server.php';
+require '__DIR__ . ../../server.php';
 
 // Set the inactivity timeout in seconds (e.g., 15 minutes)
-$inactivityTimeout = 60; // 15 minutes
+$inactivityTimeout = 30; // 15 minutes
 
 // Check if the last activity time is set in the session
 if (isset($_SESSION['last_activity'])) {
