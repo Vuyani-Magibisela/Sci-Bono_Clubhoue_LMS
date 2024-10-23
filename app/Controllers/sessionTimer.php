@@ -1,4 +1,5 @@
 <?php
+ob_start();
 //Check if the session is not already started
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
@@ -31,3 +32,5 @@ if (isset($_SESSION['last_activity'])) {
 
 // Update the last activity timestamp
 $_SESSION['last_activity'] = time();
+// End output buffering
+ob_end_flush();
