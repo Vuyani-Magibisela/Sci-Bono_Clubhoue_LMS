@@ -8,7 +8,7 @@ if (session_status() == PHP_SESSION_NONE) {
 require '__DIR__ . ../../server.php';
 
 // Set the inactivity timeout in seconds (e.g., 15 minutes)
-$inactivityTimeout = 30; // 15 minutes
+$inactivityTimeout = 600; // 10 minutes
 
 // Check if the last activity time is set in the session
 if (isset($_SESSION['last_activity'])) {
