@@ -212,6 +212,14 @@ $user = $result->fetch_assoc();
                                 
                                 <label for="dob">Date of Birth:</label> <br>
                                 <input type="date" id="dob" name="dob" value="<?php echo $user['date_of_birth']; ?>" required> <br>
+                                
+                                <label for="gender">Gender:</label> <br>
+                                <select id="gender" name="gender">
+                                    <option value="Male">Male</option>
+                                    <option value="Female">Female</option>
+                                    <option value="Other">Other</option>
+                                </select> <br>
+
                                 <!-- if mamber is admin or mentor dont show school details -->
                                 <?php 
                                     if (isset($_SESSION['user_type'])) {

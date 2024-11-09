@@ -269,6 +269,14 @@ body {
       margin-bottom:0.5em ;
     }
 
+    .editProBottom form select{
+      font-size: 2rem;
+      margin-bottom: 0.5em;
+      width: max-content;
+      padding: 0.5em;
+      border-radius: 5px;
+    }
+
     .memberDetails{
       grid-column: 1/2;
       grid-row: 1/2;
