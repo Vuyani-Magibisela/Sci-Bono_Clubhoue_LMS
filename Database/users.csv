@@ -1,107 +1,219 @@
-"id","username","email","password","name","surname","user_type","date of birth","grade","school","parent","parent email","leaner number","parent number","Relationship"
-"1","vuyani_magibisela",,"$2y$10$IE3MPGo.tWLf37S9o4m3eeXWOdFh7cx2ZMfk9ytkoCYULKBzGuJOO","vuyani","M","admin","0000-00-00","0",,,"0","0","0",
-"2","Katlego.Mentor",,"$2y$10$Yvo3g66RXZwdP/U.qwsLMey/q1G1lQkg1onOD/Ke45o2t69XS1OF2","Katlego","Maphosa","mentor","0000-00-00","0",,,"0","0","0",
-"4","King",,"$2y$10$zyo/GWr2GQ/rlpUFhxvQZuLonb80n07DVoQrtFhxGiy8GkvHjBJd6","Naziwe","Nhlapho","mentor","0000-00-00","0",,,"0","0","0",
-"5","Dunani",,"$2y$10$ugRFycH1KwY4eqEIxJjRbu4IjjZVoK.UVaCb4wIsH8MWrP/Rfe7dS","Dunani","Mathebula","mentor","0000-00-00","0",,,"0","0","0",
-"6","Tetelo Aphane",,"$2y$10$kC/B38dIUJJFWnKe3E478OYlWPQyQ8dY9y0OxJ.pXCpM9N6t7I2bi","Tetelo","Aphane","mentor","0000-00-00","0",,,"0","0","0",
-"7","andrew klaas",,"$2y$10$SlgEspwt5IKwVICp/Ui7k./p31TGr9WRNMjbETfANUPdP/RdpSeYG","andrew","klaas","member","0000-00-00","0",,,"0","0","0",
-"8","JIMMY JAMES",,"$2y$10$IEegmpQODPLiWsQrmN2kS.kzQxgyH6MJXLYqfXt1qfVrFeYbI2Aem","Zaine","Shafiq","member","0000-00-00","0",,,"0","0","0",
-"9","sam",,"$2y$10$sxxzEzOj6Ab0l7LdF6WiIeekeFUsE0HUngZHR1uYuzM/VXvKLWEFO","Bonga","Miya","member","0000-00-00","0",,,"0","0","0",
-"10","malinga",,"$2y$10$BD/wH34QHnzqJDpVwG05bu95xirTtF/Qt56JCrGny/Pz9t4CDWIN.","wandile","miya","member","0000-00-00","0",,,"0","0","0",
-"11","kgalalelo",,"$2y$10$EZ.R9I/9iZlEK6L7lkSf2O87vWhJDkNJgTBCYtukdaRqYIKk83qzO","Glory","Motsosi","member","0000-00-00","0",,,"0","0","0",
-"12","Yamkela","y@gmail.com","$2y$10$foLU0IwHqvjh9FJQW7cA8uO6MAL9L.KFXnSlWjn0XB3kNnkeYIg5q","Yamkela","Zozi","member","0000-00-00","0",,,"0","0","0",
-"13","Ntando Goqo","ntando@sci-bono.co.za","$2y$10$VexMr7RFF31BZL5EZg8w8.i8q.0eoXUGg4mxc43kYcKamYjZaWRwS","Ntando","Goqo","member","0000-00-00","0",,,"0","0","0",
-"14","Kwanele Tshabalala","kwanele@sci-bono.co.za","$2y$10$3qc5qbaY6jemCCEUubXF4eJe5b3V/NGsYP5w.KDlN6biscsQ7kVzy","Kwanele","Tshabalala","member","0000-00-00","0",,,"0","0","0",
-"15","Sickomotions_",,"$2y$10$kjf.8bljFeDb272dnU6IBu9UrnYfNdWegg8mPZSHoqowoT.PhURju","Orapeleng","Letlhatlhe","member","0000-00-00","0",,,"0","0","0",
-"16","Enhle",,"$2y$10$y.eHiLBNaYqgjq65lpGGFe.UrkTOPtJwuznrj/DpuEsWRCCltrpYi","Azola Ntwenhle","Ndabankulu","member","0000-00-00","0",,,"0","0","0",
-"17","Kaizen",,"$2y$10$7hMkwWnD5OH0cLYNPotluu3m4t3MdNuNLwgjijgn9XdUt9wzg6aFm","Maqhawe","Tshabangu","member","0000-00-00","0",,,"0","0","0",
-"18","Banele Dhlamini",,"$2y$10$X9S3PfXruLD6IYZkmh4fWOUHtsIgJAdGZvzsFlUiI0JbCfM0j5yyC","Banele","Dhlamini","member","0000-00-00","0",,,"0","0","0",
-"19","djtfcradkanp",,"$2y$10$Rp6K7l.iAGZ0g0axOOPXy.mNdnu17maLp.c3UwsxjsUlvvK5SoYxa","pashley","moyo","member","0000-00-00","0",,,"0","0","0",
-"20","Lathi",,"$2y$10$mPq9jpQHs/Ql6rBXfZI/2e5HSyfSeHiy.S8buBooy8FCghkvaTID6","Lathi","Ngoma","member","0000-00-00","0",,,"0","0","0",
-"21","KiRAH",,"$2y$10$jJW8RttHRuYVBdb4S5OOzeUOfI58mHOMBE/D9XmVGKmMOzW3B.0BK","Lungani Philani","Mbatha","member","0000-00-00","0",,,"0","0","0",
-"22","S@310",,"$2y$10$jPCorVUkA..Wqub1PSHwd.GonsB4yvWKDeEjtmsOpl/EKS6TtlQPW","Nhlanhla","Ndebele","mentor","0000-00-00","0",,,"0","0","0",
-"23","Sphiri",,"$2y$10$KxrzfT9L7t/WOkF1RcuMmOnRXiG4yQQvxoBGy0S7jgISabZd7Y.lS","Simphiwe","Phiri","mentor","0000-00-00","0",,,"0","0","0",
-"24","Oro waAfrika",,"$2y$10$M5r2I8k1oA3jtEVtdSoP4u733CvqiPQdji2sjwmTW9ZgB/EgG35u.","Sabelo","Njakazi","member","0000-00-00","0",,,"0","0","0",
-"25","Mvelo","mvelo@gmail.com","$2y$10$J/xpKDL2CAFXJOuo4THqAuPJnhpEu1NupS1XN.N4ofvhczE33kqke","Mvelo","Shongwe","member","0000-00-00","0",,,"0","0","0",
-"26","SANDZAMAN",,"$2y$10$tpMhouHwHayL/7HDq.tk.uigUmXmdpsLZ5EKuYKuWEQeG5M5Tv3la","Sanele","Mbatha","member","0000-00-00","0",,,"0","0","0",
-"27","msizimagwaza",,"$2y$10$GfJMAsWowBlRYGWQgWnloecN38RUFO.ykU4e5d9C55ip.cR2blafO","Msizi","Magwaza","member","0000-00-00","0",,,"0","0","0",
-"28","samukelomnguni485",,"$2y$10$pVzRrzXURhNzddNza.nPWeZKR/SgtP.mHCuhH4rm0pjn9GgpwCDy.","Samukelo","Mnguni","member","0000-00-00","0",,,"0","0","0",
-"29","Thato",,"$2y$10$8BYo9EkJlxIc1agQVZva7erAXav0Om7ZNtf.Lua9zIm3pmkLrnVRK","Thato","Monnaruri","member","0000-00-00","0",,,"0","0","0",
-"30","Olwethu",,"$2y$10$MIT/HPMMpn5kEWNUfiruLOvmcAq97IM91BpHbsxFMvmhJt/a26L5e","Olwethu","Biyase","member","0000-00-00","0",,,"0","0","0",
-"31","Zakhele",,"$2y$10$se/AzLDEgq7mRz9Rh5dDgew5rpN1RQynFL052A6O3MdnXcwsaf9/a","Zakele","Luthuli","member","0000-00-00","0",,,"0","0","0",
-"32","wren",,"$2y$10$b9x.bd7FBHcnsRI6hi7Fm.rmlKVB3HW.8XVRvnv8BV2mOOaquKgHy","wren","mafuya","member","0000-00-00","0",,,"0","0","0",
-"33","Lebo",,"$2y$10$moReDK8r2rwN4kzhntASauQertFA26E5NEDUZyOPSllmEihL4Jb0i","Lebohang","Motaung","member","0000-00-00","0",,,"0","0","0",
-"34","mo vlogz ",,"$2y$10$Gio8k7weHv4Cd2RYuhlFDuWloJiYFEONBuQH/BZewbQHX7zTNEP1y","tshiamo ","sediblwane","member","0000-00-00","0",,,"0","0","0",
-"35","max",,"$2y$10$pJ6cnmSbFkGWXWI4FFyKpuI7Z8X8MPdHfOCS3SiwgbLBgnVEhW/KK","Bandile","Ndlovu","member","0000-00-00","0",,,"0","0","0",
-"36","QueenMafia","nkyaniso@sci-bono.co.za","$2y$10$UmLIJxnXWHAf.Se7mDqnGOftkMaqGqXV9IKUMWgW2764Q2jDNiUXy","Nkanyiso","Shongwe","member","0000-00-00","0",,,"0","0","0",
-"37","wayne",,"$2y$10$Pehd/6OXLrlUwe/jgrV/Vu0HxLEKcyUgW7WVXFj4srr/xxFZt.Rum","Thembalami","Mthembo","member","0000-00-00","0",,,"0","0","0",
-"38","AB THE KING",,"$2y$10$ZPUFIkOjm7A2weYmCDRbfeU9tjYNpmPi14t8Jjodgz68UQEPku4kK","Abongile","Ndamane","member","0000-00-00","0",,,"0","0","0",
-"39","wesorted",,"$2y$10$WCHx.DM8ii38QV2OT1e.feMAD.gp5EwcvchOwkAQ1Js7G8QKrlm/i","Beki","Dube","member","0000-00-00","0",,,"0","0","0",
-"40","ulytroman",,"$2y$10$qoSWwuq/Kc73lN2jH7Mmxuqaos2ceNTqGkNMxUcndYRsSBjT3DCxa","gomolemo","matlou","member","0000-00-00","0",,,"0","0","0",
-"41","nimah",,"$2y$10$ilsewscTSGJvaA3eFgF0aOKwf5sFmmENQb9og4cOONh9si5f9tfxG","nimah","adeyemi","member","0000-00-00","0",,,"0","0","0",
-"42","aphendulwe","aphendulwe@Sci-bono.co.za","$2y$10$SD5s3ufvMl.A7OqIND1Ie.UsXGxQA8fjVhRkLRuezZGxN424tR7gG","Aphendulwe","mbadu","member","0000-00-00","0",,,"0","0","0",
-"43","Qhayiya",,"$2y$10$sLopS/kWE3OFeu50FOBx9eFfX3DKTB6ySOqrQaAdYMrtCfCGnFF3q"," Qhayiya","Mbadu","member","0000-00-00","0",,,"0","0","0",
-"44","GhostJnr",,"$2y$10$3ILnBf6g8oGOfmtoGxBbaOM2pSL79Y0xucGI09XffvdwREt8NQJLG","Siphosihle","Ndwandwe","member","0000-00-00","0",,,"0","0","0",
-"45","ntumbuluko","ntum@sci-bono.co.za","$2y$10$RHx9ROoEzUuWau5RBwKjy.xkrYtTZxInKVkAx4oMeWTHiqSYKacQi","ntumbuluko","mokwena","member","0000-00-00","0",,,"0","0","0",
-"46","bxddiee",,"$2y$10$78dlLug.RuL7Ykh7ph893uxnJ2u1XnfOd2R8ECZ1g/ght5/X7SlJa","Mosa","Makgalo","member","0000-00-00","0",,,"0","0","0",
-"47","Xero222",,"$2y$10$YXaOyg.gm6hYxqCLZYdG.u5Q1vaL..yTD/u8mr1WhqBZ7ESvBOeDq","phathu","mubva","member","0000-00-00","0",,,"0","0","0",
-"48","Lisa",,"$2y$10$s8DyE2ngwsBPkmAZ3FooPuq7p/LkoMFf2Cg3U58FFiDApYEkKPFua","Princess","Dube","member","0000-00-00","0",,,"0","0","0",
-"49","Letlhogonolo",,"$2y$10$iRSQd.ICD7Z2FkJjG6GdhO.4sbeSn729cAvFtaGSOKVQR0VsddWhW","Letlhogonolo","Motlhabane","member","0000-00-00","0",,,"0","0","0",
-"50","Lwazi",,"$2y$10$pY9Q1lCLxQMIyOoZLhKhge77oYVoFPqT8xQt7DHYCnNWfwUUEv3gm","Lwazi","Nomame","member","0000-00-00","0",,,"0","0","0",
-"51","Siqiniseko",,"$2y$10$FcYgDyQBOIeL5s5O8qDo4OtO/dR9LGvb9vFO8hZNTFwRAtow4bckq","Siqiniseko","Radebe","member","0000-00-00","0",,,"0","0","0",
-"52","casanova",,"$2y$10$uqNKCkwWxVhNqaGwziHUv.V70MhAbJ3PxHM8btAbhYHrsdEvmbOqy","Bukosi","Maleho","member","0000-00-00","0",,,"0","0","0",
-"53","andre",,"$2y$10$24LlPUXiNVRW2cMsoRk5r.W6f8G1E9fK0gOK/bd1I3NRD5tJIww4i","Lwandle","Madze","member","0000-00-00","0",,,"0","0","0",
-"54","lunikho",,"$2y$10$G3kJNQ3O8lECkPRQOB7d6.PHwdYosxAQdqmrbmlK6/R9U3RmRw7Fe","Emeka","Gumede","member","0000-00-00","0",,,"0","0","0",
-"55","kat",,"$2y$10$m.uL.1gonKp5l/YITlHXGePiwyaNuMXel5Q.ig0upNqBZABnfEb7O","Katlego","Radebe","member","0000-00-00","0",,,"0","0","0",
-"56","junior",,"$2y$10$8aZF8uc/m9FlxdkkwwwOveQl6XlhE6gooWoiYlHMZAKT8YCa3baLe","Ntumbuluko","Mokwena","member","0000-00-00","0",,,"0","0","0",
-"57","JOJO",,"$2y$10$Qa.ftg5qh98uiLFcZ2of6uRLkGw6X9M4lNNlkpYK9H.w3ePL99n4i","LERATO","MLOTSHWA","member","0000-00-00","0",,,"0","0","0",
-"58","DRIPPEEZY213",,"$2y$10$9TFsX9ArWMLaStysdgCCfO8HcSJ2714dwrNWPCiz/AppyLF3K3vlm","SABELO","FELEM","member","0000-00-00","0",,,"0","0","0",
-"59","SPONO",,"$2y$10$s5mMHK8mzhMZx4t075i7x.2xB1aGHM7vSt3zygDj3J.aqv/hVEBXS","MASEGO","MOSUKWA","member","0000-00-00","0",,,"0","0","0",
-"60","Tim Senn",,"$2y$10$NmXNTmdKiV7nzThJh1O1sO1u9TTuoCV0Ep/nkHzRlW/m5ewkcrxgC","Tim","Senoamadi","member","0000-00-00","0",,,"0","0","0",
-"61","hearts4kutlwiii",,"$2y$10$iRfrhPlneBBA0E/8MF2lDuCEpZS5l2vvNj0Iyk4A5qJJt2CiORMVW","kutlwano","ngubane","member","0000-00-00","0",,,"0","0","0",
-"62","kutlwano",,"$2y$10$TikYqtOg0pjKr.TaeJzv0OdTZhWVuWedlzEL1/NE8KkbjTE2hCR8y","Kutlwano","skhosana","member","0000-00-00","0",,,"0","0","0",
-"63","Blitzgamer715","jd@gmail.com","$2y$10$1HGaywjBTOt42XyDINCGcO7aE3o7OZpXGKZNbNlCN9/ZUvEWK8jzu","Christian","Muitabayi","member","0000-00-00","0",,,"0","0","0",
-"64","dark night",,"$2y$10$.3DByEvUfR506cKP1itrbu6OXHhJbcNBjjVhz9oJwjh47j2giJOZS","prince","beans","member","0000-00-00","0",,,"0","0","0",
-"65","gene",,"$2y$10$L7rUrk7A7hV49xlpgFbW.ulS30OFho.vIEyMfa221FHC9VWYBYkS6","bokang","msibi","member","0000-00-00","0",,,"0","0","0",
-"66","Kutlwano",,"$2y$10$QtHHY/ZimYBloFUGyQBWjOEjv3rPOHTfNw/Y6pusTrdUWOEzJ05Zy","Tumelo","Nkosi","member","0000-00-00","0",,,"0","0","0",
-"67","wtfsam",,"$2y$10$XsyKBSaHxwGf9JcueZE/0.S.K2Frzj0OdAOoO0iAUhfaqKvx7HuCK","Samuel","kazadi","member","0000-00-00","0",,,"0","0","0",
-"68","Pammy",,"$2y$10$T6tKPHMrfasQw7v6/fACo.J95HV7iLyLc3KlZbmsRqXVcNsRSSudW","Pamela","Ngwenya","mentor","0000-00-00","0",,,"0","0","0",
-"69","cynthia",,"$2y$10$kvKAmvBbPfwaqTbACn4ay./wBwh0c94HyfUo4.p6yydi0CTbCd5eC","Cynthia","Siziba","mentor","0000-00-00","0",,,"0","0","0",
-"70","ZenBot_",,"$2y$10$I/tGaSwhoi4ulmQ.ykvd1utcsBHqI40wXXcPWyu9XFOnKAN6Zt.HG","Kgwedi","Sehume","member","0000-00-00","0",,,"0","0","0",
-"71","LifeVitim",,"$2y$10$Vukr73N4wUpmWZgJTRuTt.udXNt3hsabJMZx3jDtP8gTBH4pUzkdS","Tsebo ","Sehume","member","0000-00-00","0",,,"0","0","0",
-"72","Young,Heart",,"$2y$10$INaxHcyuILrQVengs3AiueVCZ8QfrdDxzjPT1hIk2v0OJtdgemYAq","Wayne","chikanyambidze","member","0000-00-00","0",,,"0","0","0",
-"73","Ms.sunshine",,"$2y$10$J.Q5yhDGCYKKoL7NyoLt5OIWjE1h2BEZAV9/iflUXJcUXcrJ6.z.y","Lumeka","Maleho","member","0000-00-00","0",,,"0","0","0",
-"74","Mbali",,"$2y$10$UQrKhnV4oszf6jqe6gvw8ObIXG4pj0oKEbUG5EZ/sMq6pYT4b3e9C","Mbalenhle","Mazibuko","member","0000-00-00","0",,,"0","0","0",
-"75","Ntomb",,"$2y$10$DUVPbiNz2XYzA0A9KOEGLe0cUPG5O6MMxGs7tU7t2UE1Ki9eAeo1K","Ntumbifuthi","Wagne","member","0000-00-00","0",,,"0","0","0",
-"76","Oscar",,"$2y$10$Eb3GLsUlzvGYdYwpCqFs0ejlavNTNKtHLiPjRRukfuLLkHRFkF3G.","Oscar","Ratali","member","0000-00-00","0",,,"0","0","0",
-"77","killt",,"$2y$10$5z0/qhOF5Tzhk55nfI2AWOfuTWEitK8PCEgZXHMXZxU50AsqdVGua","Anton ","Magunde","member","0000-00-00","0",,,"0","0","0",
-"78","bmw",,"$2y$10$NJLIbfsdWQn1nCt.eG2jn.7o92kdhylT7eDqGDF9MXVHT3TxIsX5i","Bima","Mabasa","member","0000-00-00","0",,,"0","0","0",
-"79","KWAnele",,"$2y$10$sPM8FQPCGz5.yRIDIAo31OnR5XNavxEpWMRYpHscmnPkgsnNnEJ3a","Kwanele","Tshabalala","member","0000-00-00","0",,,"0","0","0",
-"80","sneh",,"$2y$10$prxiHZOTVPPiDb5ajPg28.ltT3ibPb9SPhWtUKUeXLq70FAJJPYkG","Snethemba","Nhleko","member","0000-00-00","0",,,"0","0","0",
-"81","teko",,"$2y$10$sQ0hSUf3ORjnMkSzmBpG9edQl1XqiGtAPsahMB.jDGxEM1aftrHPe","teko","thabana","member","0000-00-00","0",,,"0","0","0",
-"82","lethu",,"$2y$10$oLN.QoIPlPpiHqrrUJiMrOj.6nFphULJp7ePVvaH1gqsvepc3vzBS","Werter","Mors","member","0000-00-00","0",,,"0","0","0",
-"83","kkb",,"$2y$10$zvRx5e29oWlgZLT70DzWUurSKyWlzvuwHqn9X/potGBvLIY2oGc1.","karabo","Mukize","member","0000-00-00","0",,,"0","0","0",
-"84","freestyleking",,"$2y$10$PtaSYBuuLQHFsQmjp37lu..snrkcc15XQcVZCJAH6qehWqzf.IYAS","Junior Mashudu","Ntuli","member","0000-00-00","0",,,"0","0","0",
-"85","DJ Appsolute",,"$2y$10$dsYBQZTKxm/uKxI0Dv35J.QaGhrChATUnCwPLpdHE44EdzX8/LaBO","Aphiwe","Valashiya ","member","0000-00-00","0",,,"0","0","0",
-"86","r4xx",,"$2y$10$MMiKI3yauH8bk0XcEog3yep35o4ZsvDstmKhBVVHSGr8Jx/LDwzfC","Oratilwe","dlabongo","mentor","0000-00-00","0",,,"0","0","0",
-"87","kamvaimange",,"$2y$10$fHlw4kS8s0mevScbmFkifuYIrgx9KlX7LLAjrPHTR.PcF4KD59w.m","kamva","madze","member","0000-00-00","0",,,"0","0","0",
-"88","Amo Mahlaku",,"$2y$10$rwMuPeLNO7KLyiOX/xwwZeuJ/AwvX/abDrfEUp./UWWNRhEFiLIZW","Amohelang","Mahlaku","member","0000-00-00","0",,,"0","0","0",
-"89","Amila Gogo",,"$2y$10$Q6YkQnaZ8yFpAVEUiGZd2uWg/WT8jHZ6Blyl5MKweHSBBKEIna7fW","Amila","Gogo","member","0000-00-00","0",,,"0","0","0",
-"90","CJ","cj@sci.co.za","$2y$10$vHy9zwN2RNpw7wUy05MNtO.ExpLDkUhBPaOb76vTUIIgFZ1L8oYsa","nshuti","mukize","member","0000-00-00","0",,,"0","0","0",
-"91","RELEBOHILE",,"$2y$10$.oRZcv5CCboqLz3S64S.V.KXbSBaojfgxmKm4teLtq9JK8Z/Wfc4K","Relebohile","Semu","member","0000-00-00","0",,,"0","0","0",
-"92","mrss_seemela",,"$2y$10$1L/QeLEsi0OjNTSx4k4wJeu7AepdZ/S72ox00MFAAaeM3PPFw9lPS","alwande","sibanyoni","member","0000-00-00","0",,,"0","0","0",
-"93","zeezee",,"$2y$10$4VbFy9ITmr8cWCtOfER.ce0dtpftMQfV2maLMpFmqdtjO/mxr7w4m","Zizipho","Mokhachane","member","0000-00-00","0",,,"0","0","0",
-"94","hlehle",,"$2y$10$ld9TeXEq1q1/qBW2BEJlQO6Ir5dwVOugTMoTVI/j6oCiZhYOoKvV2","asemahle ","mdekazi","member","0000-00-00","0",,,"0","0","0",
-"95","XXLESH BABY",,"$2y$10$Y0vO1dg26pkZ31RZSi5YROeDCXd9TREEmQxHi9AHQfjYi6PSksnK.","Liyakha","Ntengento","member","0000-00-00","0",,,"0","0","0",
-"96","TLATSE-BOI",,"$2y$10$KbH0QgxQLclAf0TRWsmr5eIxtQzQc8hgPbwrQvg7C1sYQGa/5t5C2","Mahlatase","Seemela","member","0000-00-00","0",,,"0","0","0",
-"97","Loyiso",,"$2y$10$d2zpxOCV3Jqj3mHuX4TUz.wbXhNpRBxfatm7GFb.DVAB8BVw0MVfm","Loyiso","ludidi","member","0000-00-00","0",,,"0","0","0",
-"98","Njunju",,"$2y$10$mZetG2tMBBCWHZ8/.7iOFuRg7Yfli5.2mnTxXwxOu.7X/0Zcfp9m2","Katlego","Masondo","member","0000-00-00","0",,,"0","0","0",
-"99","Gik",,"$2y$10$7oeyzKfJvskshUj1japRAeRC2glQXk2YBBUow/aWVy5bVNfYESdKu","Godswill","Onyewueke","member","0000-00-00","0",,,"0","0","0",
-"100","ntombi",,"$2y$10$KrqBKTe7Y3IZFmwJQiCx3Oz43S/eLHhrOaw9cKHu.el7ODsfb4TCm","Ntombi","Khumalo","member","0000-00-00","0",,,"0","0","0",
-"101","lebohang",,"$2y$10$ben/9I5uY5RkG.KUZfqkN.EIy/uxX6P5WA/kHQM1hEFskY2DDiv62","lebohang","motaung","member","0000-00-00","0",,,"0","0","0",
-"102","fav.daughter",,"$2y$10$JdZs1/fCuIDkBRyurBkt3eTTkIpegmtH.uP/6dSt3oMA3VKC1HCKa","Nonkululeko","Shongwe","mentor","0000-00-00","0",,,"0","0","0",
-"103","nyasha",,"$2y$10$So4TtrowezFsclprmYcziecouZ0F/AgR3iLDY/hoN8GjkMaqwrSV.","nyasha","buthelezi","member","0000-00-00","0",,,"0","0","0",
-"104","KG",,"$2y$10$JRxKSVkQAgGvuVWhWhGoBOt046FldCe72nANt2/A9XBqLFowiAPli","Kagiso","Mphathi","member","0000-00-00","0",,,"0","0","0",
-"105","Ronaldo",,"$2y$10$BBgyHG/u6KbXu4GQukxBy.MrpJkeRbk8igk/5JFt4Xt.P97v7atci","Albert","Cossa","member","0000-00-00","0",,,"0","0","0",
-"106","Blessings",,"$2y$10$p67O4Rwdus2m2boOmTNdW.ydP.pBdifXuNVDJ4PkiILaW3NkAme6i","Blessings","Shongwe","member","0000-00-00","0",,,"0","0","0",
-"107","hate",,"$2y$10$f8pVAuU4nsW1MEVb3CLaJu0dd9yC7oSM/iiqlek6ngyl.Wn76UhEi","nondumiso","shongwe","member","0000-00-00","0",,,"0","0","0",
+"id","username","email","password","name","surname","user_type","date_of_birth","Gender","grade","school","parent","parent_email","leaner_number","parent_number","Relationship"
+"1","vuyani_magibisela","vuyani.magibisela@sci-bono.co.za","$2y$10$OEkQUqNT9pp8F.oBn/nAquaBuxyo7.8a0QCiWLXw37ECwvzXWNZDy","Vuyani","Magibisela","admin","0000-00-00","Male","0",,,"0","0","0",
+"2","Katlego.Mentor",,"$2y$10$Yvo3g66RXZwdP/U.qwsLMey/q1G1lQkg1onOD/Ke45o2t69XS1OF2","Katlego","Maphosa","mentor","0000-00-00","Male","0",,,"0","0","0",
+"4","King",,"$2y$10$zyo/GWr2GQ/rlpUFhxvQZuLonb80n07DVoQrtFhxGiy8GkvHjBJd6","Naziwe","Nhlapho","mentor","0000-00-00","Male","0",,,"0","0","0",
+"5","Dunani",,"$2y$10$ugRFycH1KwY4eqEIxJjRbu4IjjZVoK.UVaCb4wIsH8MWrP/Rfe7dS","Dunani","Mathebula","mentor","0000-00-00","Male","0",,,"0","0","0",
+"6","Tetelo Aphane","new_user@example.com","$2y$10$kC/B38dIUJJFWnKe3E478OYlWPQyQ8dY9y0OxJ.pXCpM9N6t7I2bi","Tetelo","Aphane","mentor","2000-01-01","Male","0","0","0",,"0","0",
+"7","andrew klaas","default@example.com","$2y$10$SlgEspwt5IKwVICp/Ui7k./p31TGr9WRNMjbETfANUPdP/RdpSeYG","Andrew","Klaas","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"8","JIMMY JAMES",,"$2y$10$IEegmpQODPLiWsQrmN2kS.kzQxgyH6MJXLYqfXt1qfVrFeYbI2Aem","Zaine","Shafiq","member","0000-00-00","Male","0",,,"0","0","0",
+"9","sam",,"$2y$10$sxxzEzOj6Ab0l7LdF6WiIeekeFUsE0HUngZHR1uYuzM/VXvKLWEFO","Bonga","Miya","member","0000-00-00","Male","0",,,"0","0","0",
+"10","malinga",,"$2y$10$BD/wH34QHnzqJDpVwG05bu95xirTtF/Qt56JCrGny/Pz9t4CDWIN.","wandile","miya","member","0000-00-00","Male","0",,,"0","0","0",
+"11","kgalalelo",,"$2y$10$EZ.R9I/9iZlEK6L7lkSf2O87vWhJDkNJgTBCYtukdaRqYIKk83qzO","Glory","Motsosi","member","0000-00-00","Male","0",,,"0","0","0",
+"12","Yamkela","y@gmail.com","$2y$10$foLU0IwHqvjh9FJQW7cA8uO6MAL9L.KFXnSlWjn0XB3kNnkeYIg5q","Yamkela","Zozi","member","0000-00-00","Male","0",,,"0","0","0",
+"13","Ntando Goqo","ntando@sci-bono.co.za","$2y$10$VexMr7RFF31BZL5EZg8w8.i8q.0eoXUGg4mxc43kYcKamYjZaWRwS","Ntando","Goqo","member","0000-00-00","Male","0",,,"0","0","0",
+"14","Kwanele Tshabalala","kwanele@sci-bono.co.za","$2y$10$3qc5qbaY6jemCCEUubXF4eJe5b3V/NGsYP5w.KDlN6biscsQ7kVzy","Kwanele","Tshabalala","member","0000-00-00","Male","0",,,"0","0","0",
+"15","Sickomotions_",,"$2y$10$kjf.8bljFeDb272dnU6IBu9UrnYfNdWegg8mPZSHoqowoT.PhURju","Orapeleng","Letlhatlhe","member","0000-00-00","Male","0",,,"0","0","0",
+"16","Enhle",,"$2y$10$y.eHiLBNaYqgjq65lpGGFe.UrkTOPtJwuznrj/DpuEsWRCCltrpYi","Azola Ntwenhle","Ndabankulu","member","0000-00-00","Male","0",,,"0","0","0",
+"17","Kaizen",,"$2y$10$7hMkwWnD5OH0cLYNPotluu3m4t3MdNuNLwgjijgn9XdUt9wzg6aFm","Maqhawe","Tshabangu","member","0000-00-00","Male","0",,,"0","0","0",
+"18","Banele Dhlamini",,"$2y$10$X9S3PfXruLD6IYZkmh4fWOUHtsIgJAdGZvzsFlUiI0JbCfM0j5yyC","Banele","Dhlamini","member","0000-00-00","Male","0",,,"0","0","0",
+"19","djtfcradkanp",,"$2y$10$Rp6K7l.iAGZ0g0axOOPXy.mNdnu17maLp.c3UwsxjsUlvvK5SoYxa","pashley","moyo","member","0000-00-00","Male","0",,,"0","0","0",
+"20","Lathi","ngoma.lathitha@gmail.com","$2y$10$tyjNH9AGWGO5C9937mV1P.yXHYnBP2vgtR01YgG.xQa967KxPJBRy","Lathi","Ngoma","member","0000-00-00","Male","0",,,"0","0","0",
+"21","KiRAH",,"$2y$10$jJW8RttHRuYVBdb4S5OOzeUOfI58mHOMBE/D9XmVGKmMOzW3B.0BK","Lungani Philani","Mbatha","member","0000-00-00","Male","0",,,"0","0","0",
+"22","S@310",,"$2y$10$jPCorVUkA..Wqub1PSHwd.GonsB4yvWKDeEjtmsOpl/EKS6TtlQPW","Nhlanhla","Ndebele","mentor","0000-00-00","Male","0",,,"0","0","0",
+"23","Sphiri",,"$2y$10$KxrzfT9L7t/WOkF1RcuMmOnRXiG4yQQvxoBGy0S7jgISabZd7Y.lS","Simphiwe","Phiri","mentor","0000-00-00","Male","0",,,"0","0","0",
+"24","Oro waAfrika",,"$2y$10$M5r2I8k1oA3jtEVtdSoP4u733CvqiPQdji2sjwmTW9ZgB/EgG35u.","Sabelo","Njakazi","member","0000-00-00","Male","0",,,"0","0","0",
+"25","Mvelo","mvelo@gmail.com","$2y$10$J/xpKDL2CAFXJOuo4THqAuPJnhpEu1NupS1XN.N4ofvhczE33kqke","Mvelo","Shongwe","member","0000-00-00","Male","0",,,"0","0","0",
+"26","SANDZAMAN",,"$2y$10$tpMhouHwHayL/7HDq.tk.uigUmXmdpsLZ5EKuYKuWEQeG5M5Tv3la","Sanele","Mbatha","member","0000-00-00","Male","0",,,"0","0","0",
+"27","msizimagwaza",,"$2y$10$GfJMAsWowBlRYGWQgWnloecN38RUFO.ykU4e5d9C55ip.cR2blafO","Msizi","Magwaza","member","0000-00-00","Male","0",,,"0","0","0",
+"28","samukelomnguni485",,"$2y$10$pVzRrzXURhNzddNza.nPWeZKR/SgtP.mHCuhH4rm0pjn9GgpwCDy.","Samukelo","Mnguni","member","0000-00-00","Male","0",,,"0","0","0",
+"29","Thato",,"$2y$10$8BYo9EkJlxIc1agQVZva7erAXav0Om7ZNtf.Lua9zIm3pmkLrnVRK","Thato","Monnaruri","member","0000-00-00","Male","0",,,"0","0","0",
+"30","Olwethu",,"$2y$10$MIT/HPMMpn5kEWNUfiruLOvmcAq97IM91BpHbsxFMvmhJt/a26L5e","Olwethu","Biyase","member","0000-00-00","Male","0",,,"0","0","0",
+"31","Zakhele","luthulizakhele34@gmail.com","$2y$10$W9leXeKI/dxHPVG70bfkXuyR93rs2vErt60KCWzVC1nUnEo0lxLL.","Zakele","Luthuli","member","0000-00-00","Male","0",,,"0","0","0",
+"32","wren","wren@sci-bono.co.za","$2y$10$i7gFZy1IG4dPRdWfExIJWO1ORj7qlRX2h/7L2DO0NyXFfYNejVKVy","wren","mafuya","member","0000-00-00","Male","0",,,"0","0","0",
+"33","Lebo",,"$2y$10$moReDK8r2rwN4kzhntASauQertFA26E5NEDUZyOPSllmEihL4Jb0i","Lebohang","Motaung","member","0000-00-00","Male","0",,,"0","0","0",
+"34","mo vlogz ",,"$2y$10$Gio8k7weHv4Cd2RYuhlFDuWloJiYFEONBuQH/BZewbQHX7zTNEP1y","tshiamo ","sediblwane","member","0000-00-00","Male","0",,,"0","0","0",
+"35","max",,"$2y$10$pJ6cnmSbFkGWXWI4FFyKpuI7Z8X8MPdHfOCS3SiwgbLBgnVEhW/KK","Bandile","Ndlovu","member","0000-00-00","Male","0",,,"0","0","0",
+"36","QueenMafia","nkyaniso@sci-bono.co.za","$2y$10$UmLIJxnXWHAf.Se7mDqnGOftkMaqGqXV9IKUMWgW2764Q2jDNiUXy","Nkanyiso","Shongwe","member","0000-00-00","Male","0",,,"0","0","0",
+"37","wayne",,"$2y$10$Pehd/6OXLrlUwe/jgrV/Vu0HxLEKcyUgW7WVXFj4srr/xxFZt.Rum","Thembalami","Mthembo","member","0000-00-00","Male","0",,,"0","0","0",
+"38","AB THE KING",,"$2y$10$ZPUFIkOjm7A2weYmCDRbfeU9tjYNpmPi14t8Jjodgz68UQEPku4kK","Abongile","Ndamane","member","0000-00-00","Male","0",,,"0","0","0",
+"39","wesorted",,"$2y$10$WCHx.DM8ii38QV2OT1e.feMAD.gp5EwcvchOwkAQ1Js7G8QKrlm/i","Beki","Dube","member","0000-00-00","Male","0",,,"0","0","0",
+"40","ulytroman",,"$2y$10$qoSWwuq/Kc73lN2jH7Mmxuqaos2ceNTqGkNMxUcndYRsSBjT3DCxa","gomolemo","matlou","member","0000-00-00","Male","0",,,"0","0","0",
+"41","nimah",,"$2y$10$ilsewscTSGJvaA3eFgF0aOKwf5sFmmENQb9og4cOONh9si5f9tfxG","nimah","adeyemi","member","0000-00-00","Male","0",,,"0","0","0",
+"42","aphendulwe","aphendulwe@Sci-bono.co.za","$2y$10$LzKnlUCov.UVjwy7frIuXeTBO5AcCewoBdB1pc.28OJrcKI6kNL22","Aphendulwe","mbadu","member","0000-00-00","Male","0",,,"0","0","0",
+"43","Qhayiya","Qhayiya.m@sci-bono.co.za","$2y$10$oquQvwVp8tHhsDqQavXVVehwlKTrFSCPMF1.XhiThpNtKS0ae4atG"," Qhayiya","Mbadu","member","0000-00-00","Male","0",,,"0","0","0",
+"44","GhostJnr",,"$2y$10$3ILnBf6g8oGOfmtoGxBbaOM2pSL79Y0xucGI09XffvdwREt8NQJLG","Siphosihle","Ndwandwe","member","0000-00-00","Male","0",,,"0","0","0",
+"45","ntumbuluko","ntum@sci-bono.co.za","$2y$10$RHx9ROoEzUuWau5RBwKjy.xkrYtTZxInKVkAx4oMeWTHiqSYKacQi","ntumbuluko","mokwena","member","0000-00-00","Male","0",,,"0","0","0",
+"46","bxddiee",,"$2y$10$78dlLug.RuL7Ykh7ph893uxnJ2u1XnfOd2R8ECZ1g/ght5/X7SlJa","Mosa","Makgalo","member","0000-00-00","Male","0",,,"0","0","0",
+"47","Xero222",,"$2y$10$YXaOyg.gm6hYxqCLZYdG.u5Q1vaL..yTD/u8mr1WhqBZ7ESvBOeDq","phathu","mubva","member","0000-00-00","Male","0",,,"0","0","0",
+"48","Lisa",,"$2y$10$s8DyE2ngwsBPkmAZ3FooPuq7p/LkoMFf2Cg3U58FFiDApYEkKPFua","Princess","Dube","member","0000-00-00","Male","0",,,"0","0","0",
+"49","Letlhogonolo",,"$2y$10$iRSQd.ICD7Z2FkJjG6GdhO.4sbeSn729cAvFtaGSOKVQR0VsddWhW","Letlhogonolo","Motlhabane","member","0000-00-00","Male","0",,,"0","0","0",
+"50","Lwazi",,"$2y$10$pY9Q1lCLxQMIyOoZLhKhge77oYVoFPqT8xQt7DHYCnNWfwUUEv3gm","Lwazi","Nomame","member","0000-00-00","Male","0",,,"0","0","0",
+"51","Siqiniseko","siqiniseko@sci-bono.co.za","$2y$10$LHneCrtr6BSVdO6y83LEGep071lBl5RJoSHnlFnSC5Wg3QpVqDc8.","Siqiniseko","Radebe","member","0000-00-00","Male","0",,,"0","0","0",
+"52","casanova",,"$2y$10$uqNKCkwWxVhNqaGwziHUv.V70MhAbJ3PxHM8btAbhYHrsdEvmbOqy","Bukosi","Maleho","member","0000-00-00","Male","0",,,"0","0","0",
+"53","andre",,"$2y$10$24LlPUXiNVRW2cMsoRk5r.W6f8G1E9fK0gOK/bd1I3NRD5tJIww4i","Lwandle","Madze","member","0000-00-00","Male","0",,,"0","0","0",
+"54","lunikho",,"$2y$10$G3kJNQ3O8lECkPRQOB7d6.PHwdYosxAQdqmrbmlK6/R9U3RmRw7Fe","Emeka","Gumede","member","0000-00-00","Male","0",,,"0","0","0",
+"55","kat",,"$2y$10$m.uL.1gonKp5l/YITlHXGePiwyaNuMXel5Q.ig0upNqBZABnfEb7O","Katlego","Radebe","member","0000-00-00","Male","0",,,"0","0","0",
+"56","junior",,"$2y$10$8aZF8uc/m9FlxdkkwwwOveQl6XlhE6gooWoiYlHMZAKT8YCa3baLe","Ntumbuluko","Mokwena","member","0000-00-00","Male","0",,,"0","0","0",
+"57","JOJO",,"$2y$10$Qa.ftg5qh98uiLFcZ2of6uRLkGw6X9M4lNNlkpYK9H.w3ePL99n4i","LERATO","MLOTSHWA","member","0000-00-00","Male","0",,,"0","0","0",
+"58","DRIPPEEZY213",,"$2y$10$9TFsX9ArWMLaStysdgCCfO8HcSJ2714dwrNWPCiz/AppyLF3K3vlm","SABELO","FELEM","member","0000-00-00","Male","0",,,"0","0","0",
+"59","SPONO","masegomoshukwa@gmail.com","$2y$10$nGD1w/Hfxyt4HC1y9uLY/uBeIpLPFYSCRESBfnesOPivP3RkKcAPa","MASEGO","MOSUKWA","member","0000-00-00","Male","0",,,"0","0","0",
+"60","Tim Senn",,"$2y$10$NmXNTmdKiV7nzThJh1O1sO1u9TTuoCV0Ep/nkHzRlW/m5ewkcrxgC","Tim","Senoamadi","member","0000-00-00","Male","0",,,"0","0","0",
+"61","hearts4kutlwiii",,"$2y$10$iRfrhPlneBBA0E/8MF2lDuCEpZS5l2vvNj0Iyk4A5qJJt2CiORMVW","kutlwano","ngubane","member","0000-00-00","Male","0",,,"0","0","0",
+"62","kutlwano",,"$2y$10$TikYqtOg0pjKr.TaeJzv0OdTZhWVuWedlzEL1/NE8KkbjTE2hCR8y","Kutlwano","skhosana","member","0000-00-00","Male","0",,,"0","0","0",
+"63","Blitzgamer715","jd@gmail.com","$2y$10$1HGaywjBTOt42XyDINCGcO7aE3o7OZpXGKZNbNlCN9/ZUvEWK8jzu","Christian","Muitabayi","member","0000-00-00","Male","0",,,"0","0","0",
+"64","dark night",,"$2y$10$.3DByEvUfR506cKP1itrbu6OXHhJbcNBjjVhz9oJwjh47j2giJOZS","prince","beans","member","0000-00-00","Male","0",,,"0","0","0",
+"65","gene",,"$2y$10$L7rUrk7A7hV49xlpgFbW.ulS30OFho.vIEyMfa221FHC9VWYBYkS6","bokang","msibi","member","0000-00-00","Male","0",,,"0","0","0",
+"66","Kutlwano",,"$2y$10$QtHHY/ZimYBloFUGyQBWjOEjv3rPOHTfNw/Y6pusTrdUWOEzJ05Zy","Tumelo","Nkosi","member","0000-00-00","Male","0",,,"0","0","0",
+"67","wtfsam",,"$2y$10$XsyKBSaHxwGf9JcueZE/0.S.K2Frzj0OdAOoO0iAUhfaqKvx7HuCK","Samuel","kazadi","member","0000-00-00","Male","0",,,"0","0","0",
+"68","Pammy","ngwenyasithandweyinkosi613@gmail.com","$2y$10$W1uuspY68H7LkgIws6gc3u345oYIyHlvjb/6tCicD.9OoUUV9a8f6","Pamela","Ngwenya","mentor","0000-00-00","Male","0",,,"0","0","0",
+"69","cynthia",,"$2y$10$kvKAmvBbPfwaqTbACn4ay./wBwh0c94HyfUo4.p6yydi0CTbCd5eC","Cynthia","Siziba","mentor","0000-00-00","Male","0",,,"0","0","0",
+"70","ZenBot_",,"$2y$10$I/tGaSwhoi4ulmQ.ykvd1utcsBHqI40wXXcPWyu9XFOnKAN6Zt.HG","Kgwedi","Sehume","member","0000-00-00","Male","0",,,"0","0","0",
+"71","LifeVitim",,"$2y$10$Vukr73N4wUpmWZgJTRuTt.udXNt3hsabJMZx3jDtP8gTBH4pUzkdS","Tsebo ","Sehume","member","0000-00-00","Male","0",,,"0","0","0",
+"72","Young,Heart",,"$2y$10$INaxHcyuILrQVengs3AiueVCZ8QfrdDxzjPT1hIk2v0OJtdgemYAq","Wayne","chikanyambidze","member","0000-00-00","Male","0",,,"0","0","0",
+"73","Ms.sunshine","maleholumeka@gmail.com","$2y$10$Nhy.C27ZxA4JJFJy565pteMXtnnu.BU.Y.BT1iEyLXOIetwFQtHhC","Lumeka","Maleho","member","0000-00-00","Male","0",,,"0","0","0",
+"74","Mbali",,"$2y$10$UQrKhnV4oszf6jqe6gvw8ObIXG4pj0oKEbUG5EZ/sMq6pYT4b3e9C","Mbalenhle","Mazibuko","member","0000-00-00","Male","0",,,"0","0","0",
+"75","Ntomb",,"$2y$10$DUVPbiNz2XYzA0A9KOEGLe0cUPG5O6MMxGs7tU7t2UE1Ki9eAeo1K","Ntumbifuthi","Wagne","member","0000-00-00","Male","0",,,"0","0","0",
+"76","Oscar",,"$2y$10$Eb3GLsUlzvGYdYwpCqFs0ejlavNTNKtHLiPjRRukfuLLkHRFkF3G.","Oscar","Ratali","member","0000-00-00","Male","0",,,"0","0","0",
+"77","killt",,"$2y$10$5z0/qhOF5Tzhk55nfI2AWOfuTWEitK8PCEgZXHMXZxU50AsqdVGua","Anton ","Magunde","member","0000-00-00","Male","0",,,"0","0","0",
+"78","bmw","bima.mabas@sci-bono.co.za","$2y$10$NQ8hwklLb6aGVdkjRstLGeTvPhpj5P1GPIY5WqWW3zP2rnsMEk6pi","Bima","Mabasa","member","0000-00-00","Male","0",,,"0","0","0",
+"79","KWAnele",,"$2y$10$sPM8FQPCGz5.yRIDIAo31OnR5XNavxEpWMRYpHscmnPkgsnNnEJ3a","Kwanele","Tshabalala","member","0000-00-00","Male","0",,,"0","0","0",
+"80","sneh",,"$2y$10$prxiHZOTVPPiDb5ajPg28.ltT3ibPb9SPhWtUKUeXLq70FAJJPYkG","Snethemba","Nhleko","member","0000-00-00","Male","0",,,"0","0","0",
+"81","teko",,"$2y$10$sQ0hSUf3ORjnMkSzmBpG9edQl1XqiGtAPsahMB.jDGxEM1aftrHPe","teko","thabana","member","0000-00-00","Male","0",,,"0","0","0",
+"82","lethu",,"$2y$10$oLN.QoIPlPpiHqrrUJiMrOj.6nFphULJp7ePVvaH1gqsvepc3vzBS","Werter","Mors","member","0000-00-00","Male","0",,,"0","0","0",
+"83","kkb",,"$2y$10$zvRx5e29oWlgZLT70DzWUurSKyWlzvuwHqn9X/potGBvLIY2oGc1.","karabo","Mukize","member","0000-00-00","Male","0",,,"0","0","0",
+"84","freestyleking",,"$2y$10$PtaSYBuuLQHFsQmjp37lu..snrkcc15XQcVZCJAH6qehWqzf.IYAS","Junior Mashudu","Ntuli","member","0000-00-00","Male","0",,,"0","0","0",
+"85","DJ Appsolute",,"$2y$10$dsYBQZTKxm/uKxI0Dv35J.QaGhrChATUnCwPLpdHE44EdzX8/LaBO","Aphiwe","Valashiya ","member","0000-00-00","Male","0",,,"0","0","0",
+"86","r4xx",,"$2y$10$MMiKI3yauH8bk0XcEog3yep35o4ZsvDstmKhBVVHSGr8Jx/LDwzfC","Oratilwe","dlabongo","mentor","0000-00-00","Male","0",,,"0","0","0",
+"87","kamvaimange",,"$2y$10$fHlw4kS8s0mevScbmFkifuYIrgx9KlX7LLAjrPHTR.PcF4KD59w.m","kamva","madze","member","0000-00-00","Male","0",,,"0","0","0",
+"88","Amo Mahlaku",,"$2y$10$rwMuPeLNO7KLyiOX/xwwZeuJ/AwvX/abDrfEUp./UWWNRhEFiLIZW","Amohelang","Mahlaku","member","0000-00-00","Male","0",,,"0","0","0",
+"89","Amila Gogo",,"$2y$10$Q6YkQnaZ8yFpAVEUiGZd2uWg/WT8jHZ6Blyl5MKweHSBBKEIna7fW","Amila","Gogo","member","0000-00-00","Male","0",,,"0","0","0",
+"90","CJ","cj@sci.co.za","$2y$10$rclcYopbSpLlFiiScJYDL.YSh1iVmHLnYZ36yHxwNVC/vbydQMpBa","nshuti","mukize","member","0000-00-00","Male","0",,,"0","0","0",
+"91","RELEBOHILE",,"$2y$10$.oRZcv5CCboqLz3S64S.V.KXbSBaojfgxmKm4teLtq9JK8Z/Wfc4K","Relebohile","Semu","member","0000-00-00","Male","0",,,"0","0","0",
+"92","mrss_seemela",,"$2y$10$1L/QeLEsi0OjNTSx4k4wJeu7AepdZ/S72ox00MFAAaeM3PPFw9lPS","alwande","sibanyoni","member","0000-00-00","Male","0",,,"0","0","0",
+"93","zeezee",,"$2y$10$4VbFy9ITmr8cWCtOfER.ce0dtpftMQfV2maLMpFmqdtjO/mxr7w4m","Zizipho","Mokhachane","member","0000-00-00","Male","0",,,"0","0","0",
+"94","hlehle",,"$2y$10$ld9TeXEq1q1/qBW2BEJlQO6Ir5dwVOugTMoTVI/j6oCiZhYOoKvV2","asemahle ","mdekazi","member","0000-00-00","Male","0",,,"0","0","0",
+"95","XXLESH BABY",,"$2y$10$Y0vO1dg26pkZ31RZSi5YROeDCXd9TREEmQxHi9AHQfjYi6PSksnK.","Liyakha","Ntengento","member","0000-00-00","Male","0",,,"0","0","0",
+"96","TLATSE-BOI",,"$2y$10$KbH0QgxQLclAf0TRWsmr5eIxtQzQc8hgPbwrQvg7C1sYQGa/5t5C2","Mahlatase","Seemela","member","0000-00-00","Male","0",,,"0","0","0",
+"97","Loyiso",,"$2y$10$d2zpxOCV3Jqj3mHuX4TUz.wbXhNpRBxfatm7GFb.DVAB8BVw0MVfm","Loyiso","ludidi","member","0000-00-00","Male","0",,,"0","0","0",
+"98","Njunju",,"$2y$10$mZetG2tMBBCWHZ8/.7iOFuRg7Yfli5.2mnTxXwxOu.7X/0Zcfp9m2","Katlego","Masondo","member","0000-00-00","Male","0",,,"0","0","0",
+"99","Gik","rataliosgar22@gmail.com","$2y$10$YnBLf/X5/ix43cTCzj.tQOvi9SsQiqd0ipl1HEldOq2kF/JdhnmMC","Godswill","Onyewueke","member","0000-00-00","Male","0",,,"0","0","0",
+"100","ntombi",,"$2y$10$KrqBKTe7Y3IZFmwJQiCx3Oz43S/eLHhrOaw9cKHu.el7ODsfb4TCm","Ntombi","Khumalo","member","0000-00-00","Male","0",,,"0","0","0",
+"101","lebohang",,"$2y$10$ben/9I5uY5RkG.KUZfqkN.EIy/uxX6P5WA/kHQM1hEFskY2DDiv62","lebohang","motaung","member","0000-00-00","Male","0",,,"0","0","0",
+"102","fav.daughter",,"$2y$10$JdZs1/fCuIDkBRyurBkt3eTTkIpegmtH.uP/6dSt3oMA3VKC1HCKa","Nonkululeko","Shongwe","mentor","0000-00-00","Male","0",,,"0","0","0",
+"103","nyasha",,"$2y$10$So4TtrowezFsclprmYcziecouZ0F/AgR3iLDY/hoN8GjkMaqwrSV.","nyasha","buthelezi","member","0000-00-00","Male","0",,,"0","0","0",
+"104","KG",,"$2y$10$JRxKSVkQAgGvuVWhWhGoBOt046FldCe72nANt2/A9XBqLFowiAPli","Kagiso","Mphathi","member","0000-00-00","Male","0",,,"0","0","0",
+"105","Ronaldo",,"$2y$10$BBgyHG/u6KbXu4GQukxBy.MrpJkeRbk8igk/5JFt4Xt.P97v7atci","Albert","Cossa","member","0000-00-00","Male","0",,,"0","0","0",
+"106","Blessings","shongweblessings9@gamil.com","$2y$10$Hi5LQPCkXeceA/r7FdJxTOYm6w/sDqz5XW.akc0pVX6XBC/gHmpIq","Blessings","Shongwe","member","0000-00-00","Male","0",,,"0","0","0",
+"107","hate",,"$2y$10$f8pVAuU4nsW1MEVb3CLaJu0dd9yC7oSM/iiqlek6ngyl.Wn76UhEi","nondumiso","shongwe","member","0000-00-00","Male","0",,,"0","0","0",
+"108","welcome","default@example.com","$2y$10$uzFKlL4NwQeB9rW73j9Im.rGaoPH7DsxrAXbJUWHiP9f0pjZjeyJi","Welcome","Nkomo","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"109","osinachi","default@example.com","$2y$10$yyK3MQ0czj/MPnEJ6/qbzex4XDrj2yp7iIX01Mi2CVoQGhDOiXPj6","osinachi","mordecai","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"110","Esethu","default@example.com","$2y$10$vzlHt1jdBu1pKc3/6Hb.5uPMrh8mUp5zRwgzoSPA8//3BjfDECagS","esethu","mordecai","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"111","Denzo","default@example.com","$2y$10$PhdcfhRAjVEKezLMs.reoOjSllcDr8335HuIP32yXPU7kuyxBk7FW","Denilson","Sibanda","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"112","prince","default@example.com","$2y$10$QEfhfD7UYsR1ZhpoRtpY/e9OcPw7s0vt4ilVKjw/jTyrpAmpnEsae","prince","nkomo","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"113","btw.itu","default@example.com","$2y$10$GLhuMdNd5x0jKFrfJhMdNeGW6fp4OKT/e.6bgJMFj7BFB4psdCpNy","Itumeleng","Mogmi","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"114","Lehlie","default@example.com","$2y$10$lym9OP08TRUwo90g3mykfuwev1aJCQqh6mJnwSDdXiWYjrUIFT00q","Lehlie ","Bothelezi","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"115","Olwethu","default@example.com","$2y$10$Dowkx0ytx6r41WCnwENU3uAL.2NSLo6UeAt424x3h9XAxNmCjHo2S","Olwethu","Gabela","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"116","maestro","default@example.com","$2y$10$X/mDG4ILuYZNBfbFZdlWIuUUam4C70Tkffi0EECjqUuOr4uVgx4d.","blessing","mabitsela","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"117","ofentse","default@example.com","$2y$10$N5zrl4EeX5MyUUhFQNIqzeKyGhv5kUqQEK7jK2OhUQmEi9.QknSjq","ofentse","mabitsela","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"118","TKcreates345","default@example.com","$2y$10$OBkVQMKtz3ZlnrcuANAJz.o2xw.VHsJpR2FWQTRPx9G6JiFuaCEKe","tumelo","makgalo","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"119","Reitshepile","default@example.com","$2y$10$SD7c20k.rqfzaqqq1B0ytOxRd95mdVH/y50ztxcR/F8CxE21UpTZ2","Reitshepile","Omwony","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"120","CC","default@example.com","$2y$10$doVZfJHiRCw7PGUk/PW8huFJKVx0Cf7hXI2JyxDHqzPf0HB8QPM6.","Courage","Ncube","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"121","Joshua","default@example.com","$2y$10$g4kMfK.Hx6B0yQtxBh2oduDrm.A4Vbvj7lMqkggygWyAzHSpzP5a2","Joshua","Ogbonna","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"122","magifthela","default@example.com","$2y$10$n7svk91VLnZiLO21P8hrDeei8Yz.s2bWFJ6suLfoIjKBaC4yRomMm","gift","dube","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"123","simkhonze","default@example.com","$2y$10$K6AkVT8cDqqARsx19DCNYuwHC5Q0QENWXGBbj0xZPuM2CP2vxM116","simkhonze ","mwelase","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"124","junior","default@example.com","$2y$10$dabLTs2SMQobcEGoPn5/geISzrYsd8YDQB9SpZM.s86OdCmok8YSG","junior","nduku","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"125","lsg r2010","default@example.com","$2y$10$p6j2pQ.5RzXVcI/cR4xQJOEOYkKFxmWE9gE/pfaef77NNwxPiVI6K","lesego","rakgoho","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"126","mathido","default@example.com","$2y$10$Cb9F7jCEhnuTq82cAllUfeeXXw/LDrNduRmli43NP7/AhnbePb61G","tayanda","mngqeta","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"127","modest45","default@example.com","$2y$10$O8G.8rVfb6k5uxUIxvGY0OTBR7XjHrmlZTk2qZKflKabRy/yUzy7K","bongumusa","mlotshwa","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"128","Athi","default@example.com","$2y$10$oxlTpSU4dJcrKeYRy0wuDeW9SSO6RfAXY/Dqmj4CtzZXVrkqhCtpW","Athi ","Ntsimbi","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"129","Divine","default@example.com","$2y$10$XtIzFnckFWkWBHTYKXWbrOlLsUTUeFGRdIAT8R0LfGQu/RUOhP0yu","Divine","Ogbonna","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"130","Lihle","default@example.com","$2y$10$puZMH5E4hOVybPI6QsBUSeRlLq6X2dyzSSt4edQQhF4I7he88QsJ2","Lihle","Buthelezi","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"131","just_milk","default@example.com","$2y$10$b67hDa0utZAzYv2z6w4a.O1iGigWl.MhTLJd0Y36UbN67XrlZYHdy","keith","banda","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"132","sk","default@example.com","$2y$10$ZHxA9C1Oy1c5059fsBivI.32LFMERrSCGmaVDfqF1NWAsdcFMAoj2","Junior","Ikenna","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"133","juno","default@example.com","$2y$10$s247L6x07hVCphvrbLDAtO8Xl5.DwcZ.ENQKqV10SmGGUzf1Via9i","mbawane","ndwandwe","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"134","KAT","default@example.com","$2y$10$aNsISs2/0KGQtP4M8tgNrehG28htydzRRLNWpXoH6xz.O.WZJHN4G","Katlego","Mmolawa","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"135","Boi","default@example.com","$2y$10$I1KVejzWj6D5.vXpYzPZt.axAE8SemUA.i1BT3pFrrbzJ9SFrJ4fW","Boingotlo","Monnakgotia","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"136","Carlos Kanye ","default@example.com","$2y$10$EXpqouPxsYw6O6haEjz2N.dr/4Oln03WwFlEZ7y9yuRZWL1ETKKUC","Carlos","Kanye","mentor",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"137","SIBUSISO XABA","default@example.com","$2y$10$P2RgO9yclNjln/k1BbYg4OkIF/ihGjhWgh2MJ9UxtCUEKRR21ucsy","SIBUSISO","XABA","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"138","Arone","default@example.com","$2y$10$MIgYh7FoYKc91jOcN/DGdetlW.VaJR1mbcG4kvn7BT8QIwPKrXLsW","Unathi","Maxhakana","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"139","vivajuist16","default@example.com","$2y$10$dV914CO/xuF7ZoULiKLaier1GcFsiaVp/zpPcyoc0WRkC5fQ3Sbci","SIBUSISO","XABA","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"140","mbali","default@example.com","$2y$10$04ivGXSX0Hxh47ou3IiAXeWiOz5QnL3Y3yZeQPtN.7As9/dtjD.v6","siphokazi","ngonyama","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"141","monica","default@example.com","$2y$10$AvZC9eNZsorami.dfF6Sf.Mxn8K6U449eFOLnWtW9Qow/6/v9VPqC","monica","willemse","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"142","aurellis.daisy","default@example.com","$2y$10$SOtTEBFbSH7bsjzvZXGjoezrn.mTMSq0xNaugY42Kxz.gBzQW/w06","Nosipho","Ngonyama","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"143","poppy","default@example.com","$2y$10$CoA69hEnkbXyy60aSiF4Re5rnrbYqGB53RiKe/OcP11S8380XQJmm","poppy","ngonyama","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"144","Darren Botha","default@example.com","$2y$10$hu1BEYWmWBQVmriOh5VZxuikVvsa03N/ytCmnQkniAiLagRmAlyDa","darren","Botha","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"145","k.b","default@example.com","$2y$10$4z7NYmxCOl4Lrp3X5FXXxud7YOPw9rVKxfs/Bgjp4gTydqvPXXDQK","karabo","moremedi","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"146","boko","default@example.com","$2y$10$8F9stNkgTrY.GImaAwbhOOB3SXTlCe2nl4vTW7QDWOctc3AuE13am","boikanyo","letsapa","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"147","kungawo","default@example.com","$2y$10$PHCbOqimNMeyX3X6Nn31XuQoAJ.BGr4ZlzRpnaaTnONuPv73hfcX.","kungawo","nompula","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"148","ntando","default@example.com","$2y$10$fOQHK8.bZrNZLfJc1TKxoeM6.0RI/HWFfbeVZGKFtB.Y/KVf5ygTa","ntando","mpofu","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"149","Daniel","default@example.com","$2y$10$gq3hWyUKBsxE1ha720bj7O.ptVy8.LRqnhuxxQ2lV348OgTRHzpba","Daniel","Turner","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"150","DENZEL","default@example.com","$2y$10$FqOtAybj5QFYj4DXawuqKuPBIxRaSdlxdWsFjBvnf1M/QA92/AWM.","Denzel","MaNGISI","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"151","Theophilus","default@example.com","$2y$10$zjsxxchlzjXanmHo3WXA0eSTTAomppRA9oUVE27TAbu8UZormhK0q","Theophilus","Sibanda","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"152","Trens33","default@example.com","$2y$10$ajBm.Sjp1UAZ76v61Osh6.nqNQNIcWAvaA6vo9UTdoBSZCIgprc8i","Mawande","Ndlelambi","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"153","marang","default@example.com","$2y$10$nXzbfqEUmrcLNSKPDXouHOzpQXwfQEcBatWOPyUq7lrDR4z1Of5WC","Marang","Matshaba","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"154","lesedi","default@example.com","$2y$10$vm9Tta08u3tBv4nmy9NDeO16jGW0RSj4RzfhiIe9x0h4mU1.Roinq","lesedi","meree","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"155","Lethabo","default@example.com","$2y$10$zfLzBPW0Ubd8UCNNFmqFru.YxPgTOM3gFr8SoMdf5EFmkkws8EPc.","Lethabo ","Mokhele","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"156","Hloni","default@example.com","$2y$10$yPFeh/KF12SAj/ACy3nRIOUYaafh0637MkdWO7SI/mJeg0EAEeApO","HLoni","Mokhele","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"157","Atle","default@example.com","$2y$10$Eka7sXTtJkQfCmYYSfceHe8VOH24nFgmYJ7ynEiIEceE4IPe83hQS","Atlegang ","Mokhele","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"158","SamKay","default@example.com","$2y$10$ta1qJue.0aCpx.LR9y2WEuyNGV2nWDK8exuCjiODPOmiOJbIVD/ye","Samkelo","Mnguni","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"159","buhle","default@example.com","$2y$10$HxnkN8TijzP1u7TmND9Ocu0rlvwIVtG.F3vCOqcj1UFTu7tkl1Op2","Banele","Mpofu","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"160","lesego","default@example.com","$2y$10$LJLsqeVa836QOSDFZ2huT.HLieA.6gM8qkGuydyoexhqPofP9jMTm","Lesego","Mphekgoane","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"161","RD Dylan","default@example.com","$2y$10$LU4gKP4xyDgXuLy4ZlBBC.G8TXTrYmRC1OZx.6qYFUR9ErffBmQ2y","Dylan","mushore","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"162","RD Dylan","default@example.com","$2y$10$cUvDor8QPXQ5go/vvVT6K.CzoVCBTK76tLQtJNV9KQ/3JcVKZ14VS","Dylan","mushore","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"163","RD Dylan","default@example.com","$2y$10$I/zL4E2uFNRT0p1k.8XPHenvORsZ96XJIvsiXzoyZFZ72yVDgGqAu","Dylan","mushore","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"164","RD Lesego","default@example.com","$2y$10$Lu8ypWhLLGU4DfJSad6JaOMPPOsK7c3Lg9nzwzptdOXLQBiyo.Lzq","Lesego","Mphekgoane","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"165","Warren","default@example.com","$2y$10$/5hc.vvxiAWyvD/MrmbB/eVLDL.HHfPwkiT0AgYpu23zx/RToQgqW","Sibusiso","Moyo","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"166","mimi","default@example.com","$2y$10$4xrNWoh8MFpmyT8Kj.ukHOOfm6ltvqW/3JjIqtrbJeGLdrpBwjggq","emihle","janjties","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"167","Amukelani","default@example.com","$2y$10$jT2yFpoN5P1MSFap04SJL.lOBJFZ8/mxGgBoe5NKpBpjMBOkfVSX2","Amukelani","Ngema","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"168","samkelo","default@example.com","$2y$10$fq2VbgHqwPm4lHcdl7iRguz4dYf1QBPRFYOcnPfSgPF/wGEPie6My","tshwanelo","lerotha","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"169","samkelo","default@example.com","$2y$10$O6SVnjMtdMVFVo238jdF2ebGQaV29QiPZaoC9KvdaeP/bPGA0Te32","tshwanelo","lerotha","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"170","thabang123","default@example.com","$2y$10$w2mn5/1k9iOT1zIfL47fNe4cwgOM7BOGUNF6vDO0zhtInlOcOkjfi","thabang","buthelezi","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"171","MKYH","default@example.com","$2y$10$agA2Y5SWus1XFZNIh/TaAekQe1tbvS80jCOZt5ix3wSaw2cPPJ0hO","AFTJWB","CDUO","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"172","kwanele","default@example.com","$2y$10$w80FKB4WTJU1VPAPF/FHfeK22RPpBCuPXsrEP1mhwyeoM585JmqVm","sphamandla","makhaye","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"173","kwanele","default@example.com","$2y$10$3Xk3lOBuH3qlu1uK1KEi2.PeYLxPaweJfAXdHhJ3FT7IiMgCBiVmK","sphamandla","makhaye","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"174","siya","default@example.com","$2y$10$1PZ0lxHLFCCq0HhHIMlHdu.2clrzmBWDVMSyLahhiaTWSkx4Pk/ea","siyabulela","ndzeku","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"175","musa","default@example.com","$2y$10$07vEQGMEI1KxpU2msRdJwujG9tj2TTfKj2ZU1Q4AACK2mZojTJIMu","musa","khumalo","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"176","ITUMELENG","default@example.com","$2y$10$0ODo0WL3yOvPi8nY588b/.gv856grRbUdGfFApK/m5SrQPi7MI/Lq","ITUMELENG","STHOLE","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"177","phiiisma","default@example.com","$2y$10$sqd2PuiNWJSbh9JZyJZPmuJ0zTXEelP3WAIRSL6jr1X1c54u.spLO","amahle","khumalo","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"178","smilo","default@example.com","$2y$10$yRMy5wZ2nnzA1l.m79ljf.dx.4mVPrwU0QaxoJYDT50GHdnM7ksRS","nosmilo","buthelezi","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"179","lusa","default@example.com","$2y$10$Y3S6Y/OkFuPbOCuhRZbUOOzhzVvIyvqgsKnxBQRjKvwyQD.f6bL8i","lusanele","mtshali","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"180","gift","default@example.com","$2y$10$9ekfchSznV5wIg9Kw13Xoewnkl19ZAXfJSgzCljZs.SohZQt9zs0a","gift","seole","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"181","kabadi","default@example.com","$2y$10$Chn5b/OD7JcnvJ3rgD/e0ubOYaRc.dHIcVwTzFPkfC4FZ.TJfN8gu","kabadi","makhaye","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"182","anele","default@example.com","$2y$10$YoK4Y9Zv9h/ri54NUSE93eRGORNtmKhIgAm5qghro/nK1t3L5TWTW","anele","sithole","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"183","lwazi","default@example.com","$2y$10$I7b7riN90unVFnr1Pfug5Oc7fuwJy1o6hE8uk0E0mTXeV1cUzmLtu","lwazi","mchunu","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"184","Part2","default@example.com","$2y$10$zwt/yBsPApRqtZgk6dTYxuZHZHJlxvitJHYpwUZUM.wqkpqEy8Pji","Phathu","Mubva","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"185","tk","default@example.com","$2y$10$e9u7bpGgdZYN61AVbTZkjO/T9Bov6tVbWpnRHftbATOE9gmclTxrG","Thando","Ngubae","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"186","lesdi","default@example.com","$2y$10$/tTE/Xn/QqStnmremVSwGeUTNSv3S3Bm6o9k.Xqb25wRxcAxEfkv6","Lesdi","Nxelo","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"187","uminathi","default@example.com","$2y$10$uNtyzmh.6M67QYYL12aKquj5Q19SBb13pAO.zvLxTP00Yj3JrHdhm","uminathi","reshane","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"188","thandekile","default@example.com","$2y$10$UCAHjvleEzLl0YnApawIGeG/smyhGlUGUNRO4SFvF.oKERPbj2KBi","thandekile","massingue","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"189","melokhuhle","default@example.com","$2y$10$NAS2tnBR5MK0qcGT0nv5xuAKVF3oRNZavAFX7AHMaw42I/xQUsukq","melokhuhle","thiyane","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"190","sinentlantla","default@example.com","$2y$10$SZWmzR7G9drQUqDcUrJo1.IaYVtnGSVuPeU8MaI9lGVyuGMV0unz2","sinentlantla","showeni","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"191","noluthando","default@example.com","$2y$10$JfrYNC/3fF50Unkw1FsiV.k1tP3nhTpWks8drL0hfmnP4wrbq39Um","noluthando ","ndlovu","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"192","kamogelo","default@example.com","$2y$10$p1AYT.7HQdqlWuUl9eF6DuXcEE8KdEy9y9TsNGsgQaB1KPQh9O4W2","kamogelo","mvelase","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"193","lisolethu","default@example.com","$2y$10$pGTTqU8STrJWf8dfT/5N8uVTIOSdOA/0DoMCzlrqvZArAOroJtqzO","lisolethu","showeni","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"194","Gojo","default@example.com","$2y$10$TDBR4DE50d4A6O3DAhW97eogxHUEbAPOOSu/h9RzNUxVyKI1b.23m","Faisal","Ali","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"195","nathi","default@example.com","$2y$10$tadUR9/9afqiV8Qu.S/EPe7YobWPVv9G9ZYeTJ8WjYJHwsVVhX6Ru","nathi","phakathi","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"196","sfiso","default@example.com","$2y$10$JPb3z8SrN67g9eSpUKSSjuWbEva9afSFetDZ.uKehfzDZz3BR5x9m","sfiso","phakathi","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"197","krishen123","default@example.com","$2y$10$.gIGAWZh2F0Jkama1ti8DuFG5lvlweeoL0UJHVTxBlCz8x/rktIr.","krishen","mangota","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"198","Sky","default@example.com","$2y$10$M3xt1s8FlxNCndhYfqVuo.ejvGBAre0ynbi2t0ouk15AL6ot1UVX6","Nobuhle","Ngubane","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"199","Siya","default@example.com","$2y$10$Vmo2ZLj8820TitraE7zUYOTjKl0IB9LB9bdahXELB9gn/aOR92FtG","Olothando ","Mjakuja","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"200","spesihle","default@example.com","$2y$10$F7maRawITvrEwvCi4pfbBeA/ElJshjlTSiDGcY.VXgUxc1e0A7/Kq","sphesihle","ngubane","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"201","Letlotlo","default@example.com","$2y$10$T4S3L8eQX4hETZPSNOXbjumIt4DC3jYgvToYWZITTBoFWGbKvN.Bu","Leon","Mosiane","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"202","Willton","default@example.com","$2y$10$n8drcyNqm465n0NxDM8mkuSOTZ7OtN.1CMyjECNZY.zRQBxAKiJVe","Willton","Naanje","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"203","Kutlawano","default@example.com","$2y$10$0aOZuAWEA0Z4XQ.0Z4Xq5Oj/DH3cYrP9r2JLGZCHlXo9fX6SV/kCu","Kutlawano","Jali","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"204","Leoboi404","default@example.com","$2y$10$oAYbPKH1/.PcuQgmw23wb.4bAVE49zm.nTECVsGJOHeGw0tXrpJwm","lesedi","chaba","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"205","jpboi","default@example.com","$2y$10$0geIVlXdtUVgrqfrZfIG3OK0u7GXDaBqw6nYKdwa9Xmew11DOxeDS","dylan","sapabwe","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"206","Owa","default@example.com","$2y$10$5y0SAlr60iUWrV5IB4TVgeNU2RByJL9UXDrRa9savmGIRTzMpYB/q","Owami","Ndaba","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"207","Sbuda","default@example.com","$2y$10$WhIppmH2wUMPA5ACGbFk3.A/hCCI64hypI/c2kM78Uprndgz1QMA.","sibusiso","ngonyama","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"208","sanndlovu","default@example.com","$2y$10$1oEJS3lLXaAIFu9NsiN6uOJIij9rmIY8NtLWjFV6h.OpUXBg3p0fK","Sandile","Ndlovu","mentor",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"209","Azole","default@example.com","$2y$10$NkEtpZmW2V.p50Vlj8yfk.2A0dM.BDFCWFnnxeKejREaCDT8KPO/q","Juniour","Pumelo","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"210","king","default@example.com","$2y$10$DXKYaOXuQ.HL29bHKOf.BOLoAgxA.dOy9Xfbp1C5cjtelrACW2AQm","Gcina","Velakubi","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"211","g slime","default@example.com","$2y$10$73a5vaeR8VtK3C.sf07vwe.FC.UG1aCLRT8q42o3rinUtAXaDGTEq","akhanya","mnci","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"212","DD.ODylan","default@example.com","$2y$10$Ip9i97LYjF/19/xroMr0WOA/wkA8LwFoExpsuTs7RwPK5AZ9Ojova","dylan ","Dube","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"213","DD.ODylan","default@example.com","$2y$10$nTKGxg6SznKLpiDX8GKPkeYQY.gZSxcUJBt1Z10..uPdP4xGCIZoa","dylan ","Dube","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"214","Pepe","default@example.com","$2y$10$YMOinEG1g/z4E6Lo6tboVeTTZepjFbOTxBJYxdMrJZlaMD30Jg7Z.","Siphesihle","Cukana","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"215","thato","default@example.com","$2y$10$18VJYCMb36NpvIIgQS651Owqu4B6FxZBdMA9TV5O.k6FkQY40jUpi","Thato","Ledwaba","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"216","linda","default@example.com","$2y$10$6Qx4CTLoNETAGit8cbQAxuWpjLEpVR5QWIqUW.15REje/4I4BPUK2","linda","mdontswa","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"217","Ntsako","default@example.com","$2y$10$ViKQxOVkW6ME0DpoHwNg6OARyqJOLwnHLJIBhdbXlmbg.jC/1Ns6O","Ntsako","Muravha","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"218","Ayo","default@example.com","$2y$10$QXwy4MirZqmhWVR3xeToV.rgUrlf1AxL.S4fuxFRRucm09cCsUOqe","Ayanda","Dladla","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
+"219","Siya","default@example.com","$2y$10$ni.V6Go5xoi9ygelU9x4qe2IEK6FG3bCEx1TwvAygMz3PUbuQE1VO","Siyabonga","Mthethwa","member",NULL,"Male",NULL,NULL,NULL,NULL,NULL,NULL,NULL
