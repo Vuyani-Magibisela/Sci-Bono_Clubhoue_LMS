@@ -1,11 +1,24 @@
 <?php
-include __DIR__ . '/../Models/dashboardStats.php';
-
-//error logging
+// Force PHP to show all errors
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
+if (!file_exists(__DIR__ . '/../Models/dashboardStats.php')) {
+    die("Error: File not found - " . __DIR__ . '/../Models/dashboardStats.php');
+}
+
+include __DIR__ . '/../Models/dashboardStats.php';
+
+echo "Included successfully!";
+
+
+//error logging
+// ini_set('display_errors', 1);
+// ini_set('display_startup_errors', 1);
+// $error = error_reporting(E_ALL);
+
+// echo $error;
 ?>
 
 <!DOCTYPE html>
