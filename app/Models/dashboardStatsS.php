@@ -11,8 +11,8 @@ if ($conn->connect_error) {
     die("Connection failed: " . $conn->connect_error);
 }
 
-// Check if the accounts database exists and is accessible
-if (!$conn->select_db('accounts')) {
+// Check if the vuyanjcb_users database exists and is accessible
+if (!$conn->select_db('vuyanjcb_users')) {
     die("Database selection failed: " . $conn->error);
 }
 
@@ -22,9 +22,9 @@ $selectedMonth = isset($_GET['month']) ? intval($_GET['month']) : 0;
 // Fetch total unique members (for selected month or all months)
 $totalMembersQuery = $selectedMonth > 0 
     ? "SELECT COUNT(DISTINCT user_id) AS total_unique_members 
-       FROM accounts.attendance 
+       FROM vuyanjcb_users.attendance 
        WHERE MONTH(checked_out) = $selectedMonth" 
-    : "SELECT COUNT(DISTINCT user_id) AS total_unique_members FROM accounts.attendance";
+    : "SELECT COUNT(DISTINCT user_id) AS total_unique_members FROM vuyanjcb_users.attendance";
 $totalMembersResult = $conn->query($totalMembersQuery);
 if (!$totalMembersResult) {
     die("Query failed: " . $conn->error);
@@ -36,13 +36,13 @@ $monthlyTrendQuery = $selectedMonth > 0
     ? "SELECT 
         MONTH(checked_out) AS month, 
         COUNT(DISTINCT user_id) AS unique_members
-       FROM accounts.attendance
+       FROM vuyanjcb_users.attendance
        WHERE MONTH(checked_out) = $selectedMonth
        GROUP BY MONTH(checked_out)"
     : "SELECT 
         MONTH(checked_out) AS month, 
         COUNT(DISTINCT user_id) AS unique_members
-       FROM accounts.attendance
+       FROM vuyanjcb_users.attendance
        GROUP BY MONTH(checked_out)
        ORDER BY month";
 $monthlyTrendResult = $conn->query($monthlyTrendQuery);
@@ -59,7 +59,7 @@ $weeklyAttendanceQuery = $selectedMonth > 0
     ? "SELECT 
         YEARWEEK(checked_out) AS week, 
         COUNT(DISTINCT user_id) AS unique_members
-       FROM accounts.attendance
+       FROM vuyanjcb_users.attendance
        WHERE MONTH(checked_out) = $selectedMonth
        GROUP BY YEARWEEK(checked_out)
        ORDER BY week DESC
@@ -67,7 +67,7 @@ $weeklyAttendanceQuery = $selectedMonth > 0
     : "SELECT 
         YEARWEEK(checked_out) AS week, 
         COUNT(DISTINCT user_id) AS unique_members
-       FROM accounts.attendance
+       FROM vuyanjcb_users.attendance
        GROUP BY YEARWEEK(checked_out)
        ORDER BY week DESC
        LIMIT 10";
@@ -87,14 +87,14 @@ $dailyAttendanceQuery = $selectedMonth > 0
     ? "SELECT 
         DATE(checked_out) AS day, 
         COUNT(DISTINCT user_id) AS unique_members
-       FROM accounts.attendance
+       FROM vuyanjcb_users.attendance
        WHERE MONTH(checked_out) = $selectedMonth
        GROUP BY DATE(checked_out)
        ORDER BY day"
     : "SELECT 
         DATE(checked_out) AS day, 
         COUNT(DISTINCT user_id) AS unique_members
-       FROM accounts.attendance
+       FROM vuyanjcb_users.attendance
        WHERE checked_out >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
        GROUP BY DATE(checked_out)
        ORDER BY day";
