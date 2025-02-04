@@ -7,28 +7,27 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true) {
 }
 require '../../server.php';
 
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
-
-// Check if the accounts database exists and is accessible
-if (!$conn->select_db('accounts')) {
-    die("Database selection failed: " . $conn->error);
+// Get selected year from GET parameter, default to current year
+$selectedYear = isset($_GET['year']) ? intval($_GET['year']) : date('Y');
+// Generate year options (e.g., last 5 years)
+$currentYear = date('Y');
+$yearOptions = array();
+for ($year = $currentYear; $year >= $currentYear - 4; $year--) {
+    $yearOptions[$year] = $year;
 }
 
 // Get selected month from GET parameter, default to all months
 $selectedMonth = isset($_GET['month']) ? intval($_GET['month']) : 0;
 
-// Fetch total unique members (for selected month or all months)
+// Fetch total unique members (for selected YEAR, Month or all months)
 $totalMembersQuery = $selectedMonth > 0 
     ? "SELECT COUNT(DISTINCT user_id) AS total_unique_members 
        FROM accounts.attendance 
-       WHERE MONTH(checked_out) = $selectedMonth" 
-    : "SELECT COUNT(DISTINCT user_id) AS total_unique_members FROM accounts.attendance";
+       WHERE MONTH(checked_out) = $selectedMonth 
+       AND YEAR(checked_out) = $selectedYear" 
+    : "SELECT COUNT(DISTINCT user_id) AS total_unique_members 
+        FROM accounts.attendance WHERE YEAR(checked_out) = $selectedYear";
 $totalMembersResult = $conn->query($totalMembersQuery);
-if (!$totalMembersResult) {
-    die("Query failed: " . $conn->error);
-}
 $totalUniqueMembers = $totalMembersResult->fetch_assoc()['total_unique_members'];
 
 // Fetch monthly attendance trend (filtered or all months)
@@ -37,12 +36,13 @@ $monthlyTrendQuery = $selectedMonth > 0
         MONTH(checked_out) AS month, 
         COUNT(DISTINCT user_id) AS unique_members
        FROM accounts.attendance
-       WHERE MONTH(checked_out) = $selectedMonth
+       WHERE MONTH(checked_out) = $selectedMonth AND YEAR(checked_out) = $selectedYear
        GROUP BY MONTH(checked_out)"
     : "SELECT 
         MONTH(checked_out) AS month, 
         COUNT(DISTINCT user_id) AS unique_members
        FROM accounts.attendance
+       WHERE YEAR(checked_out) = $selectedYear
        GROUP BY MONTH(checked_out)
        ORDER BY month";
 $monthlyTrendResult = $conn->query($monthlyTrendQuery);
@@ -61,6 +61,7 @@ $weeklyAttendanceQuery = $selectedMonth > 0
         COUNT(DISTINCT user_id) AS unique_members
        FROM accounts.attendance
        WHERE MONTH(checked_out) = $selectedMonth
+       AND YEAR(checked_out) = $selectedYear
        GROUP BY YEARWEEK(checked_out)
        ORDER BY week DESC
        LIMIT 10"
@@ -68,6 +69,7 @@ $weeklyAttendanceQuery = $selectedMonth > 0
         YEARWEEK(checked_out) AS week, 
         COUNT(DISTINCT user_id) AS unique_members
        FROM accounts.attendance
+       WHERE YEAR(checked_out) = $selectedYear
        GROUP BY YEARWEEK(checked_out)
        ORDER BY week DESC
        LIMIT 10";
@@ -89,13 +91,15 @@ $dailyAttendanceQuery = $selectedMonth > 0
         COUNT(DISTINCT user_id) AS unique_members
        FROM accounts.attendance
        WHERE MONTH(checked_out) = $selectedMonth
+       AND YEAR(checked_out) = $selectedYear
        GROUP BY DATE(checked_out)
        ORDER BY day"
     : "SELECT 
         DATE(checked_out) AS day, 
         COUNT(DISTINCT user_id) AS unique_members
        FROM accounts.attendance
-       WHERE checked_out >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
+       WHERE YEAR(checked_out) = $selectedYear
+       AND checked_out >= DATE_SUB(CURDATE(), INTERVAL 30 DAY)
        GROUP BY DATE(checked_out)
        ORDER BY day";
 $dailyAttendanceResult = $conn->query($dailyAttendanceQuery);
@@ -107,16 +111,18 @@ while ($row = $dailyAttendanceResult->fetch_assoc()) {
     $dayData[] = $row['unique_members'];
 }
 
-// Fetch program data (filtered by selected month)
+// Fetch program data 
 $programQuery = $selectedMonth > 0
     ? "SELECT cr.* 
        FROM clubhouse_reports cr
        JOIN clubhouse_programs cp ON cr.program_name = cp.id
-       WHERE MONTH(cr.created_at) = $selectedMonth"
+       WHERE MONTH(cr.created_at) = $selectedMonth
+       AND YEAR(cr.created_at) = $selectedYear"
     : "SELECT *
-       FROM clubhouse_reports
-       JOIN clubhouse_programs
-       ON clubhouse_reports.program_name = clubhouse_programs.id";
+       FROM clubhouse_reports cr
+       JOIN clubhouse_programs cp
+       ON cr.program_name = cp.id
+       WHERE YEAR(cr.created_at) = $selectedYear";
 $programResult = $conn->query($programQuery);
 
 $programData = array();

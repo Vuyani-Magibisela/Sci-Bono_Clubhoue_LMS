@@ -1,24 +1,15 @@
 <?php
 // Force PHP to show all errors
-ini_set('display_errors', 1);
-ini_set('display_startup_errors', 1);
-error_reporting(E_ALL);
-
-if (!file_exists(__DIR__ . '/../Models/dashboardStats.php')) {
-    die("Error: File not found - " . __DIR__ . '/../Models/dashboardStats.php');
-}
-
-include __DIR__ . '/../Models/dashboardStats.php';
-
-echo "Included successfully!";
-
-
-//error logging
 // ini_set('display_errors', 1);
 // ini_set('display_startup_errors', 1);
-// $error = error_reporting(E_ALL);
+// error_reporting(E_ALL);
 
-// echo $error;
+// if (!file_exists(__DIR__ . '/../Models/dashboardStats.php')) {
+//     die("Error: File not found - " . __DIR__ . '/../Models/dashboardStats.php');
+// }
+
+include __DIR__ . '/../Models/dashboardStats.php';
+// echo "Included successfully!";
 ?>
 
 <!DOCTYPE html>
@@ -43,6 +34,17 @@ echo "Included successfully!";
 </head>
 <body>
     <h1>Attendance Statistics Dashboard</h1>
+    <!-- Year Filter Dropdown -->
+    <div class="filter-container">
+    <div class="year-filter">
+        <select id="yearSelector" onchange="filterByYearMonth()">
+            <?php foreach ($yearOptions as $year): ?>
+                <option value="<?php echo $year; ?>" <?php echo ($selectedYear == $year ? 'selected' : ''); ?>>
+                    <?php echo $year; ?>
+                </option>
+            <?php endforeach; ?>
+        </select>
+    </div>
 
     <!-- Month Filter Dropdown -->
     <div class="month-filter">
@@ -127,9 +129,10 @@ echo "Included successfully!";
         }
 
         // Function to filter by month
-        function filterByMonth() {
-            const selectedMonth = document.getElementById('monthSelector').value;
-            window.location.href = `?month=${selectedMonth}`;
+        function filterByYearMonth() {
+        const selectedYear = document.getElementById('yearSelector').value;
+        const selectedMonth = document.getElementById('monthSelector').value;
+        window.location.href = `?year=${selectedYear}&month=${selectedMonth}`;
         }
 
         // Display program data

@@ -102,3 +102,17 @@ button:hover {
 #programData .image-container{
     width: 100%;
 }
+
+/* Year and Month Filter styling */
+.filter-container {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.year-filter select,
+.month-filter select {
+    padding: 10px;
+    font-size: 16px;
+}
