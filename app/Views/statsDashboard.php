@@ -35,9 +35,8 @@ include __DIR__ . '/../Models/dashboardStats.php';
 <body>
     <h1>Attendance Statistics Dashboard</h1>
     <!-- Year Filter Dropdown -->
-    <div class="filter-container">
     <div class="year-filter">
-        <select id="yearSelector" onchange="filterByYearMonth()">
+        <select id="yearSelector">
             <?php foreach ($yearOptions as $year): ?>
                 <option value="<?php echo $year; ?>" <?php echo ($selectedYear == $year ? 'selected' : ''); ?>>
                     <?php echo $year; ?>
@@ -48,7 +47,7 @@ include __DIR__ . '/../Models/dashboardStats.php';
 
     <!-- Month Filter Dropdown -->
     <div class="month-filter">
-        <select id="monthSelector" onchange="filterByMonth()">
+        <select id="monthSelector">
             <option value="0">All Months</option>
             <?php foreach ($monthOptions as $monthNum => $monthName): ?>
                 <option value="<?php echo $monthNum; ?>" <?php echo ($selectedMonth == $monthNum ? 'selected' : ''); ?>>
@@ -115,7 +114,42 @@ include __DIR__ . '/../Models/dashboardStats.php';
             });
         }
 
-        // Initialize charts on page load
+        // Create a function to get URL parameters
+        function getUrlParameter(name) {
+            const urlParams = new URLSearchParams(window.location.search);
+            return urlParams.get(name);
+        }
+
+        // Function to update charts and data
+        function updateDashboard() {
+            const selectedYear = document.getElementById('yearSelector').value;
+            const selectedMonth = document.getElementById('monthSelector').value;
+            
+            // Show loading state if needed
+            document.body.style.cursor = 'wait';
+            
+            // Redirect with new parameters
+            window.location.href = `?year=${selectedYear}&month=${selectedMonth}`;
+        }
+
+        // Add event listeners to both selectors
+        document.addEventListener('DOMContentLoaded', function() {
+            const yearSelector = document.getElementById('yearSelector');
+            const monthSelector = document.getElementById('monthSelector');
+            
+            // Set initial values from URL if they exist
+            const urlYear = getUrlParameter('year');
+            const urlMonth = getUrlParameter('month');
+            
+            if (urlYear) yearSelector.value = urlYear;
+            if (urlMonth) monthSelector.value = urlMonth;
+            
+            // Add change event listeners
+            yearSelector.addEventListener('change', updateDashboard);
+            monthSelector.addEventListener('change', updateDashboard);
+        });
+
+        // Initialize charts when page loads
         function initCharts() {
             // Destroy existing charts if they exist
             if (monthlyTrendChart) monthlyTrendChart.destroy();
@@ -126,13 +160,6 @@ include __DIR__ . '/../Models/dashboardStats.php';
             monthlyTrendChart = createChart('monthlyTrendChart', 'line', monthlyTrend.labels, monthlyTrend.data, 'Monthly Unique Members');
             weeklyAttendanceChart = createChart('weeklyAttendanceChart', 'bar', weeklyAttendance.labels, weeklyAttendance.data, 'Weekly Unique Members');
             dailyAttendanceChart = createChart('dailyAttendanceChart', 'line', dailyAttendance.labels, dailyAttendance.data, 'Daily Unique Members');
-        }
-
-        // Function to filter by month
-        function filterByYearMonth() {
-        const selectedYear = document.getElementById('yearSelector').value;
-        const selectedMonth = document.getElementById('monthSelector').value;
-        window.location.href = `?year=${selectedYear}&month=${selectedMonth}`;
         }
 
         // Display program data

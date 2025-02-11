@@ -163,18 +163,22 @@ $result = mysqli_query($conn, $sql);
                             </thead>
 
                             <tbody>
-                                <?php while ($row = mysqli_fetch_assoc($result)): ?>
-                                <tr>
-                                    <td><?php echo $row['id']; ?></td>
-                                    <td><?php echo $row['username']; ?></td>
-                                    <td><?php echo $row['name']; ?></td>
-                                    <td><?php echo $row['surname']; ?></td> 
-                                    <td><?php echo $row['user_type']; ?></td>
-                                    <td>
-                                        <a class="editBtn" href="edit_user.php?id=<?php echo $row['id']; ?>">Edit</a>
-                                    </td>
-                                </tr>
-                                <?php endwhile; ?>
+                                <?php foreach ($users as $list_user): ?>
+                                    <tr>
+                                        <td><?php echo htmlspecialchars($list_user['username']); ?></td>
+                                        <td><?php echo htmlspecialchars($list_user['email']); ?></td>
+                                        <td><?php echo htmlspecialchars($list_user['user_type']); ?></td>
+                                        <td>
+                                            <?php 
+                                            // Show edit link based on permissions
+                                            if ($_SESSION['user_type'] === 'admin' || 
+                                                ($_SESSION['user_type'] === 'mentor' && $list_user['user_type'] === 'member')): 
+                                            ?>
+                                                <a href="settings.php?user_id=<?php echo $list_user['id']; ?>">Edit</a>
+                                            <?php endif; ?>
+                                        </td>
+                                    </tr>
+                                <?php endforeach; ?>
                             </tbody>
                         </table>
                     </div>   

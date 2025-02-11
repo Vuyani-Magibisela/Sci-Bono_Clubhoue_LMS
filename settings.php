@@ -1,22 +1,40 @@
 <?php
-session_start();
+session_start(); // Start the session first
+
 // Check if user is logged in
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true) {
-	header("Location: login.php");
-	exit;
+    header("Location: login.php");
+    exit;
 }
 
-include 'profile_updater.php';
+// Include database connection
+require 'server.php'; // Make sure this path is correct
 
+// Now get the user IDs and types
+$editing_user_id = isset($_GET['user_id']) ? intval($_GET['user_id']) : $_SESSION['user_id'];
+$current_user_type = $_SESSION['user_type'];
 
-// Fetch the current logged-in user's data
-$userId = $_SESSION['user_id'];
+// Fetch the user being edited
 $sql = "SELECT * FROM users WHERE id = ?";
 $stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $userId);
+$stmt->bind_param("i", $editing_user_id);
 $stmt->execute();
-$result = $stmt->get_result();
-$user = $result->fetch_assoc();
+$user = $stmt->get_result()->fetch_assoc();
+
+// Check permissions
+$can_edit = false;
+if ($current_user_type === 'admin') {
+    $can_edit = true; // Admin can edit anyone
+} elseif ($current_user_type === 'mentor' && $user['user_type'] === 'member') {
+    $can_edit = true; // Mentor can edit members
+} elseif ($editing_user_id === $_SESSION['user_id']) {
+    $can_edit = true; // Users can edit themselves
+}
+
+if (!$can_edit) {
+    header("Location: settings.php"); // Redirect if not authorized
+    exit;
+}
 
 ?>
 
@@ -178,100 +196,88 @@ $user = $result->fetch_assoc();
 
                     <div class="editProBottom">
                         <h1>Edit Profile</h1>
-                        <!-- User information -->
                         <form action="update_user.php" method="post">
-
                             <div class="memberDetails">
                                 <h1>Member Details</h1>
-                                <input type="hidden" name="id" value="<?php echo $user['id']; ?>"> <br>
-                                <?php 
-                                    if (isset($_SESSION['user_type'])) {
-                                        $userType = $_SESSION['user_type'];
-                                        if ($userType === "admin"): ?>
-                                            <label for="user_type">User Type:</label>
+                                <input type="hidden" name="id" value="<?php echo $user['id']; ?>">
 
-                                            <select id="user_type" name="user_type" required>
-                                                <option value="member" <?php if ($user['user_type'] == 'member') echo 'selected'; ?>>Member</option>
-                                                <option value="mentor" <?php if ($user['user_type'] == 'mentor') echo 'selected'; ?>>Mentor</option>
-                                                <option value="admin" <?php if ($user['user_type'] == 'admin') echo 'selected'; ?>>Admin</option>
-                                            </select>
-                                        <?php endif; 
-                                    }
-                                ?><br>
-                                <label for="username">Username:</label> <br>
-                                <input type="text" id="username" name="username" value="<?php echo $user['username']; ?>" required> <br>
-                                
-                                <label for="name">Name:</label> <br>
-                                <input type="text" id="name" name="name" value="<?php echo $user['name']; ?>" required> <br>
-                                
-                                <label for="email">Surname:</label> <br>
-                                <input type="text" id="surname" name="surname" value="<?php echo $user['surname']; ?>" required> <br>
-                                
-                                <label for="email">Email:</label> <br>
-                                <input type="email" id="email" name="email" value="<?php echo $user['email']; ?>" required> <br>                                                        
-                                
-                                <label for="dob">Date of Birth:</label> <br>
-                                <input type="date" id="dob" name="dob" value="<?php echo $user['date_of_birth']; ?>" required> <br>
-                                
-                                <label for="gender">Gender:</label> <br>
-                                <select id="gender" name="gender">
-                                    <option value="Male">Male</option>
-                                    <option value="Female">Female</option>
-                                    <option value="Other">Other</option>
-                                </select> <br>
+                                <?php if ($current_user_type === 'admin'): ?>
+                                    <label for="user_type">User Type:</label>
+                                    <select id="user_type" name="user_type" required>
+                                        <option value="member" <?php echo ($user['user_type'] == 'member') ? 'selected' : ''; ?>>Member</option>
+                                        <option value="mentor" <?php echo ($user['user_type'] == 'mentor') ? 'selected' : ''; ?>>Mentor</option>
+                                        <option value="admin" <?php echo ($user['user_type'] == 'admin') ? 'selected' : ''; ?>>Admin</option>
+                                    </select>
+                                <?php endif; ?>
 
-                                <!-- if mamber is admin or mentor dont show school details -->
-                                <?php 
-                                    if (isset($_SESSION['user_type'])) {
-                                        $userType = $_SESSION['user_type'];
-                                        if ($userType === "member"): ?>
-                                            
-                                            <label for="grade">Grade:</label> <br>
-                                            <input type="number" id="grade" name="grade" min="0" max="999" value="<?php echo $user['grade']; ?>" required> <br>
-                                    
-                                            <label for="school">School:</label> <br>
-                                            <input type="text" id="school" name="school" value="<?php echo $user['school']; ?>" required> <br>
+                                <!-- Basic details for all users -->
+                                <label for="username">Username:</label>
+                                <input type="text" id="username" name="username" value="<?php echo $user['username']; ?>" required><br>
+                                
+                                <label for="name">Name:</label>
+                                <input type="text" id="name" name="name" value="<?php echo $user['name']; ?>" required><br>
+                                
+                                <label for="surname">Surname:</label>
+                                <input type="text" id="surname" name="surname" value="<?php echo $user['surname']; ?>" required><br>
+                                
+                                <label for="email">Email:</label>
+                                <input type="email" id="email" name="email" value="<?php echo $user['email']; ?>" required><br>
+                                
+                                <label for="dob">Date of Birth:</label>
+                                <input type="date" id="dob" name="dob" value="<?php echo $user['date_of_birth']; ?>" required><br>
+                                
+                                <label for="center">Center:</label>
+                                <select id="center" name="center" required><br>
+                                    <option value="Sci-Bono Clubhouse" <?php echo ($user['Center'] == 'Sci-Bono Clubhouse') ? 'selected' : ''; ?>>Sci-Bono Clubhouse</option>
+                                    <option value="Waverly Girls Solar Lab" <?php echo ($user['Center'] == 'Waverly Girls Solar Lab') ? 'selected' : ''; ?>>Waverly Girls Solar Lab</option>
+                                    <option value="Mapetla Solar Lab" <?php echo ($user['Center'] == 'Mapetla Solar Lab') ? 'selected' : ''; ?>>Mapetla Solar Lab</option>
+                                    <option value="Emdeni Solar Lab" <?php echo ($user['Center'] == 'Emdeni Solar Lab') ? 'selected' : ''; ?>>Emdeni Solar Lab</option>
+                                </select>
+
+                                <label for="gender">Gender:</label>
+                                <select id="gender" name="gender" required><br>
+                                    <option value="Male" <?php echo ($user['Gender'] == 'Male') ? 'selected' : ''; ?>>Male</option>
+                                    <option value="Female" <?php echo ($user['Gender'] == 'Female') ? 'selected' : ''; ?>>Female</option>
+                                    <option value="Other" <?php echo ($user['Gender'] == 'Other') ? 'selected' : ''; ?>>Other</option>
+                                </select>
+
+                                <!-- School details only shown for members -->
+                                <?php if ($user['user_type'] === 'member'): ?>
+                                    <div class="school-details">
+                                        <h2>School Details</h2>
+                                        <label for="grade">Grade:</label>
+                                        <input type="number" id="grade" name="grade" min="1" max="12" value="<?php echo $user['grade']; ?>" required><br>
                                         
-                                        <?php endif; 
-                                    }
-                                
-                               
-                                ?>
-                            </div>
-                            <!-- If member is Admin or Mentor dont show Parent Details -->
-                            <?php
-                            if (isset($_SESSION['user_type'])) {
-                                        $userType = $_SESSION['user_type'];
-                                        if ($userType === "member"): ?>           
-                                            <div class="parentDetails">
-                                                <h1>Parent Details</h1>
-                                                <label for="parent">Parent Name:</label> <br>
-                                                <input type="text" id="parent" name="parent" value="<?php echo $user['parent']; ?>" required> <br>
-                                                
-                                                <label for="parent_email">Parent Email:</label> <br>
-                                                <input type="email" id="parent_email" name="parent_email" value="<?php echo $user['parent_email']; ?>" required> <br>
-                                                
-                                                <label for="learner_number">Learner Number:</label> <br>
-                                                <input type="text" id="learner_number" name="learner_number" value="<?php echo $user['leaner_number']; ?>" required> <br>
-                                                
-                                                <label for="parent_number">Parent Number:</label> <br>
-                                                <input type="tel" id="parent_number" name="parent_number" value="<?php echo $user['parent_number']; ?>" required> <br>
-                                                
-                                                <label for="relationship">Relationship:</label> <br>
-                                                <input type="text" id="relationship" name="relationship" value="<?php echo $user['Relationship']; ?>" required> <br>
-                                            </div>
-                                        <?php endif; 
-                                }
-                            ?>
-            
-                            <div class="passEdit">
-                                <label for="password">Password:</label>
-                                <input type="password" id="password" name="password" placeholder="Leave blank to keep current password">     
-                                <button type="submit">Update User</button>
-                            </div>                                                    
-                        </form>  
-                            
+                                        <label for="school">School:</label>
+                                        <input type="text" id="school" name="school" value="<?php echo $user['school']; ?>" required><br>
+                                        
+                                        <label for="learner_number">Learner Number:</label>
+                                        <input type="text" id="learner_number" name="learner_number" value="<?php echo $user['leaner_number']; ?>" required><br>
+                                    </div>
 
+                                    <div class="parent-details">
+                                        <h2>Parent Details</h2>
+                                        <label for="parent">Parent Name:</label>
+                                        <input type="text" id="parent" name="parent" value="<?php echo $user['parent']; ?>" required><br>
+                                        
+                                        <label for="parent_email">Parent Email:</label>
+                                        <input type="email" id="parent_email" name="parent_email" value="<?php echo $user['parent_email']; ?>" required><br>
+                                        
+                                        <label for="parent_number">Parent Number:</label>
+                                        <input type="tel" id="parent_number" name="parent_number" pattern="[0-9]{10}" value="<?php echo $user['parent_number']; ?>" required><br>
+                                        
+                                        <label for="relationship">Relationship:</label>
+                                        <input type="text" id="relationship" name="relationship" value="<?php echo $user['Relationship']; ?>" required><br>
+                                    </div>
+                                <?php endif; ?>
+
+                                <div class="passEdit">
+                                    <label for="password">Password:</label>
+                                    <input type="password" id="password" name="password" placeholder="Leave blank to keep current password">
+                                    <button type="submit">Update User</button>
+                                </div>
+                            </div>
+                        </form>
                     </div>
 
                     
