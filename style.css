@@ -35,6 +35,13 @@
     ___________________________________________
     */
 
+    html, body {
+        height: 100vh;
+        margin: 0;
+        padding: 0;
+        /* overflow: hidden; */
+    }
+
 /* Body Styling */
 /* html, body {
     height: 100%;
@@ -84,6 +91,87 @@
 
 /* index main stying */
 
+/* Base styles for index page */
+
+
+#index {
+    min-height: 100vh;
+    background: linear-gradient(180deg, #1E6CB4 25.96%, #393A7B 111.57%);
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    padding: 1rem;
+}
+
+#container-index {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin: 2rem;
+    background: #6C63FF;
+    border-radius: 3.188rem;
+    box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.25);
+    overflow: hidden;
+}
+
+.hero-img {
+    background: #ffffff;
+    border-radius: 51px 0 0 51px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.hero-img img {
+    max-width: 100%;
+    height: 0 auto;
+    object-fit: contain;
+}
+
+.log_signup-section {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: 2rem;
+    gap: 1rem;
+}
+
+.log_signup-section p {
+    color: #ffffff;
+    font-family: 'Source Code Pro', monospace;
+    text-transform: uppercase;
+    margin: 0.5rem 0;
+}
+
+.signupBtn, .loginBtn {
+    width: 100%;
+    max-width: 286px;
+    padding: 1rem;
+    font-size: clamp(1rem, 2vw, 2rem);
+    font-family: 'Source Code Pro', monospace;
+    text-align: center;
+    text-transform: uppercase;
+    text-decoration: none;
+    border-radius: 10px;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.signupBtn {
+    background: #F29A2E;
+    color: #ffffff;
+}
+
+.loginBtn {
+    background-color: transparent;
+    border: 2px solid #FFFFFF;
+    color: #ffffff;
+}
 
 
 /* Styling the login page */
@@ -93,32 +181,44 @@
     grid-template-columns: 30% 60%;
     background: linear-gradient(180deg, #1E6CB4 25.96%, #393A7B 111.57%);
     margin: 0 auto;
-    height: 82vh;
+    height: 100%;
+    gap: 10%;
+    padding: 2rem;
 }
 
 .login_img{
     display: flex;
     justify-content: center;
+    align-items: center;
     grid-column: 1/2;
     background: #1E6CB4;
     box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.25); 
+    border-radius: 10px;
     /* width: 100%;
     height: 100%; */
 }
 
 .login_img img{
-    margin: auto auto;
+    max-width: 100%;
+    height: auto;
+    padding: 1rem;
 }
 
+.login_form{
+    grid-column: 2/3;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 500px;
+}
 
 .login_form > div{
     margin-top: 8em;
+    padding: 0 1rem;
 
 }
 
 .login_form h2{
     font-family: 'Source Code Pro';
-    font-style: normal;
     font-weight: 700;
     font-size: 36px;
     line-height: 45px;
@@ -129,11 +229,23 @@
 
 }
 
+.input_field{
+    width: 100%;
+    height: 2.5em;
+    background-color: rgba(255, 255, 255, 0);
+    border-bottom: 2px solid #fff;
+    padding: 0.5em;
+    font-family: 'Source Code Pro';
+    color: #fff;
+    font-size: 1rem;
+}
+
 .btn{
-    width: 286px;
+    width: 100%;
+    max-width: 286px;
     height: 57px; 
     background-color: rgba(255, 255, 255, 0);
-    font-size: 2em;
+    font-size: 1.5em;
     font-weight: 600;
     font-family: 'Source Code Pro';
     text-align: center;
@@ -144,40 +256,34 @@
     border: 2px solid #FFFFFF;
     border-radius: 10px;
     padding: 10px;
-    margin-bottom: 1em;
+    margin: 1em 0;
+    transition: background-color 0.3s ease;
 }
 
-.input_field{
-    width: 20em;
-    height: 2em;
-    background-color: rgba(255, 255, 255, 0);
-    border-bottom: 2px solid #fff;
-    padding: auto;
-    font-family: 'Source Code Pro';
-    color: #fff;
+.btn:hover {
+    background-color: rgb(255, 255, 255, 0.1);
 }
 
 .login_form form > label{
-    font-family: 'Source Code Pro';
-    font-size: 1.5rem;
+    font-family: 'Source Code Pro', monospace;
+    font-size: 1.25rem;
     color: #fff;
+    display: block;
+    margin-bottom: 0.5;
     
 }
 .login_form form > a{
-    font-size: 16px;
-    font-family: 'Source Code Pro';
+    font-size: 1rem;
+    font-family: 'Source Code Pro', monospace;
     color: #fff;
     text-decoration: none;
+    display: block;
+    text-align: center;
+    margin-top: 1rem;
 }
 
 .login_form form > a:hover{
     color: #F29A2E;
-}
-
-.login_form{
-    grid-column: 2/3;
-    margin: 0 auto;
-    
 }
 
 /* Styling for sign up form */
@@ -189,9 +295,35 @@
 #contianer-signup{
     display: grid;
     grid-template-columns: 30% 60%;
-    background: linear-gradient(180deg, #1E6CB4 25.96%, #393A7B 111.57%);
+    gap: 10%;
+    min-height: 100vh;
+    width: 100%;
     margin: 0 auto;
-    height: auto;
+    padding: 2rem;
+    position: relative;
+    background: linear-gradient(180deg, #1E6CB4 25.96%, #393A7B 111.57%);
+    background-attachment: fixed;
+    overflow-y: auto;
+}
+
+.signupBtn, .loginBtn {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #F29A2E;
+    color: white;
+    text-decoration: none;
+    border-radius: 5px;
+    font-family: 'Source Code Pro';
+    font-style: normal;
+    font-weight: 600;
+    font-size: 16px;
+    text-transform: uppercase;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+.signupBtn:hover, .loginBtn:hover {
+    background-color: #d88519;
 }
 
 .signup_img{
@@ -1161,11 +1293,124 @@ th, td {
   }
 
 
-
-
-
-
   /* Settings Edit Profile */
 
 
 
+/* Media Queries */
+@media screen and (max-width: 1200px) {
+    /* #container-signup {
+        grid-template-columns: 35% 55%;
+        gap: 10%;
+    }
+    #container-login {
+        grid-template-columns: 35% 55%;
+        gap: 10%;
+    } */
+}
+
+@media screen and (max-width: 992px) {
+    /* #container-login {
+        grid-template-columns: 40% 50%;
+        gap: 10%;
+    }
+
+    .login_form h2 {
+        font-size: 2rem;
+    }
+
+    .btn {
+        font-size: 1.25em;
+    } */
+}
+
+@media screen and (max-width: 768px) {    
+    /* #container-signup {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+        padding: 1rem;
+    }
+
+    #container-login {
+        grid-template-columns: 1fr;
+        gap: 2rem;
+    }
+
+    .login_img {
+        grid-column: 1/-1;
+        max-width: 300px;
+        margin: 0 auto;
+        padding: 1rem;
+    }
+
+    .login_form {
+        grid-column: 1/-1;
+    }
+
+    .login_form > div {
+        margin-top: 2em;
+    }
+
+    .login_form h2 {
+        font-size: 1.75rem;
+        margin-bottom: 1.5em;
+    } */
+}
+
+@media screen and (max-width: 480px) {
+    /* #container-login {
+        padding: 1rem;
+    }
+
+    .login_img {
+        max-width: 250px;
+    }
+
+    .login_form h2 {
+        font-size: 1.5rem;
+    }
+
+    .login_form form > label {
+        font-size: 1rem;
+    }
+
+    .input_field {
+        font-size: 0.9rem;
+    }
+
+    .btn {
+        height: 45px;
+        font-size: 1em;
+    } */
+}
+
+/* Support for smaller screens */
+@media screen and (max-width: 320px) {
+    /* .login_img {
+        max-width: 200px;
+    }
+
+    .login_form h2 {
+        font-size: 1.25rem;
+    }
+
+    .btn {
+        height: 40px;
+        font-size: 0.9em;
+    } */
+}
+
+/* Height-based media queries */
+@media screen and (max-height: 600px) {
+    /* #container-login {
+        min-height: 100vh;
+    }
+
+    .login_form > div {
+        margin-top: 1em;
+    }
+
+    .login_form h2 {
+        margin-bottom: 1em;
+    } */
+}

@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Landpage</title>
-    <link rel="stylesheet" href="style.css">
+    <!-- <link rel="stylesheet" href="style.css"> -->
     <link rel="stylesheet" href="./public/assets/css/screenSizes.css">
     <!--Google analytics
 	================================================-->
@@ -42,7 +42,7 @@
         
         <div class="hero-img">
             <img src="public/assets/images/Login_img.png" alt="Illustrations of youth using technology" >
-            <img src="public/assets/images/MobileLoginImg.svg" alt="Large image of a mobile phone, human standing next to it."  width="301" height="303">
+            <img src="public/assets/images/MobileLoginImg.svg" alt="Large image of a mobile phone, human standing next to it." width="301" height="303" >
         </div>
         
         <div class="log_signup-section">
@@ -57,12 +57,12 @@
             </div>
 
             <div class="signup">
-                <a href="signup.php"><button class="signupBtn" >Sign Up</button></a>
+                <a href="signup.php" class="signupBtn">Sign Up</a>
             </div>
             
             <p>Already a member</p>
             <div >
-                <a href="login.php" ><button class="loginBtn" >Log In</button></a>
+                <a href="login.php" class="loginBtn" >Log In</a>
             </div>
         </div>
 

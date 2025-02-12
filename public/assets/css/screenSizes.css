@@ -16,28 +16,38 @@ body {
   /* index Styling */
   #index{
     background: #393A7B;
+    min-height: 100vh;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding-bottom: 2em;  /*Check on it later */
   }
 
 
   #container-index{
+      flex: 1;
       display: grid;
       grid-template-columns: 50% auto;
-      width: auto;
-      align-items: center;
-  }
-
-  #container-index{
-      margin: 2.5em 9.8em;
+      margin: 0 auto;
+      max-width: 1400px;
       background: #6C63FF;
       box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.25);
       border-radius: 3.188em;
+      min-height: 400px;
+      margin: 0 auto;  
+      width: 100%; 
   }
 
   .hero-img{
       background:#ffffff;
       grid-column: 1/2;
       border-radius: 51px 0 0 51px;
-      width: auto;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
   }
 
   .hero-img img{
@@ -47,50 +57,75 @@ body {
 
 
 .log_signup-section{
-    margin: auto;
+  grid-column: 2/3;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2em;
   }
   
-.log_signup-section{
-  grid-column: 2/3;
-  margin: auto;
-  align-items: center;
+.log_signup-section p{
+  margin: 1em 0; 
+  color: #ffffff;
+  font-family: 'Source code Pro' monospace;
+  text-transform: uppercase;
+  text-align: center;
 }
 
-
-.log_signup-section p{
-  margin-bottom: 0.5em; 
-  color: #ffffff;
-  font-family: 'Source code Pro';
-  text-transform: uppercase;
+/* Ensure links don't interfere with button styling */
+.log_signup-section a {
+  text-decoration: none;
+  display: inline-block;
 }
 
   
-  .signupBtn {
-    width: 286px;
-    height: 57px;
-    background: #F29A2E;
-    border-radius: 10px;
-    text-align: center;
-    cursor: pointer;
-    text-decoration: none;
-    font-size: 2em;
-    color: #444053;
-    font-family: Arial, Helvetica, sans-serif;
-}
-
-.loginBtn{
+/* Button Styles */
+.signupBtn, .loginBtn {
+  display: inline-block;
   width: 286px;
-  height: 57px;
-  background-color: rgba(255, 255, 255, 0);
-  border: 2px solid #FFFFFF;
-  border-radius: 10px;
+  padding: 15px 0;
   text-align: center;
+  font-size: 1.5em;
+  font-family: 'Source Code Pro', monospace;
+  text-transform: uppercase;
   cursor: pointer;
   text-decoration: none;
-  font-size: 2em;
-  color: #f5f5f5;
-  font-family: Arial, Helvetica, sans-serif;
+  border-radius: 10px;
+  transition: background-color 0.3s ease;
+  z-index: 2;
+}
 
+
+.signupBtn {
+  background: #F29A2E;
+  color: #ffffff;
+  border: none;
+}
+
+.loginBtn {
+  background-color: transparent;
+  color: #ffffff;
+  border: 2px solid #FFFFFF;
+}
+
+.signupBtn:hover {
+  background: #e08518;
+}
+
+.loginBtn:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+}
+
+#bottom{
+  position: absolute;
+  bottom: 0;
+  width: 100vw;
+  height: 100%;
+  z-index: 1;
+  pointer-events: none;
+  /* background-color: red; */
+  /* clip-path: url(#bottomClip); */
 }
 
 
@@ -98,9 +133,10 @@ body {
   /* Small devices (landscape phones, 360px and up) */
   @media screen and (min-width: 22.5em) {
     body {
+      
       font-size: 16px;
     }
-     
+
     #top {
       position: absolute;
       top: 0;
@@ -121,38 +157,53 @@ body {
     #container-index{
       display: grid;
       position: relative;
-      grid-template-rows: 1fr 1fr;
-      margin: 0 auto;
-      width: 100%;
-      background: none;
-      box-shadow: none;
+      grid-template-columns: 1fr;
+      grid-template-rows: auto auto;
+      margin: 1em;
+      height: auto;
+      min-height: calc(100vh - 100px);
     }
 
-    #container-index .hero-img img:nth-child(1){
+    .hero-img img:first-child{
         display: none;
     }
     
-    #container-index .hero-img img:nth-child(2){
+    .hero-img img:last-child{
         display: block;
         width: 100%;
     }
 
     .hero-img{
-      background: #fff;
-      border-radius: 0%;
-      width: 100%;
-      grid-column: span 2;
+      grid-column: 1/-1;
       grid-row: 1/2;
+      border-radius: 51px 51px 0 0;
+      padding: 1em;
     }
 
     .log_signup-section{
-      background: none;
-      grid-column: span 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      width: 100%;
+      
+      grid-column: 1/-1;
       grid-row: 2/3;
+      padding: 1.5em;
     }
     .log_signup-section .login{
       color: #fff;
     }
+
+    .signupBtn, .loginBtn {
+      width: 240px;
+      font-size: 1.2em;
+      z-index: 2;
+  }
+
+  .log_signup-section p {
+    margin: 1rem 0;
+    font-size: 1em;
+}
   
     /*Styles the header file*/
     .header {
@@ -160,16 +211,7 @@ body {
     }
 
     
-    #bottom{
-      position: absolute;
-      bottom: 0;
-      width: 100vw;
-      height: 100%;
-      z-index: 999;
-      /* background-color: red; */
-      /* clip-path: url(#bottomClip); */
-    }
-
+ 
 
     
     /* End of Small devices */
@@ -179,6 +221,14 @@ body {
   @media screen and (min-width: 48em) {
     body {
       font-size: 17px;
+    }
+
+    #index {
+      padding-bottom: 2em;  /* Smaller padding for smaller screens */
+    }
+    
+    #container-index {
+        min-height: 300px;
     }
 
 
@@ -200,7 +250,21 @@ body {
   
     }
 
+    #container-index {
+        margin: 0.5em;
+        border-radius: 2em;
+    }
 
+    .hero-img {
+        border-radius: 2em 2em 0 0;
+    }
+
+    .signupBtn, .loginBtn {
+        width: 200px;
+        font-size: 1em;
+        padding: 12px 0;
+        z-index: 2;
+    }
 
     /* Add your styles for medium devices here */
   }
@@ -211,6 +275,44 @@ body {
       font-size: 18px;
     }
 
+    #bottom{
+      display: none;
+    }
+
+        #container-index .hero-img img:first-child{
+        display: block;
+        width: 100%;
+    }
+    #container-index .hero-img img:last-child{
+        display: none;
+    }
+    .header {
+      display: grid;
+      width: 100%;
+    }
+    #top{
+      display: none;
+    }
+    #container-index{
+      background: #6C63FF;
+      grid-template-rows: 1fr;
+      margin: 4em;
+      width: 90%;
+    }
+
+    .hero-img{
+      background: #fff;
+      border-radius: 51px 0 0 51px;
+      width: 100%;
+      grid-column: 1/2;
+      grid-row: 1/2;
+    }
+
+    .log_signup-section{
+      grid-column: 2/3;
+      grid-row: 1/2;
+      
+    }  
 
      /*edit propic and username style*/
     .image-container {
@@ -373,15 +475,16 @@ body {
       font-size: 19px;
     }
     /* index styling */
+ 
     log_signup-section{
       margin-top: auto;
     }
 
-    #container-index .hero-img img:nth-child(1){
+    #container-index .hero-img img:first-child{
         display: block;
         width: 100%;
     }
-    #container-index .hero-img img:nth-child(2){
+    #container-index .hero-img img:last-child{
         display: none;
     }
     .header {
@@ -392,9 +495,8 @@ body {
     }
     #container-index{
       background: #6C63FF;
+      grid-template-columns: 50% auto;
       grid-template-rows: 1fr;
-      margin: 4em;
-      width: 90%;
     }
 
     .hero-img{
