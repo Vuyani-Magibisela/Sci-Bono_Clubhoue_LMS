@@ -1,16 +1,34 @@
 <?php
 session_start();
-require 'server.php';
-
-// Check if the user is an admin
-if ($_SESSION['user_type'] !== 'admin') {
-    header('Location: home.php');
+// Check if user is logged in
+if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true) {
+    header("Location: login.php");
     exit;
 }
 
-// Fetch all users
-$sql = "SELECT * FROM users";
-$result = mysqli_query($conn, $sql);
+// Check if user has permission to view this page
+if (!in_array($_SESSION['user_type'], ['admin', 'mentor'])) {
+    header("Location: home.php");
+    exit;
+}
+
+require 'server.php';
+
+// Fetch users based on permissions
+if ($_SESSION['user_type'] === 'admin') {
+    // Admin can see all users
+    $sql = "SELECT * FROM users ORDER BY name ASC";
+    $stmt = $conn->prepare($sql);
+} else {
+    // Mentors can only see members
+    $sql = "SELECT * FROM users WHERE user_type = 'member' ORDER BY name ASC";
+    $stmt = $conn->prepare($sql);
+}
+
+$stmt->execute();
+$result = $stmt->get_result();
+$users = $result->fetch_all(MYSQLI_ASSOC);
+
 ?>
 
 <!DOCTYPE html>
@@ -153,28 +171,33 @@ $result = mysqli_query($conn, $sql);
                         <table>
                             <thead>
                                 <tr>
-                                    <th>ID</th>
-                                    <th>Username</th>
                                     <th>Name</th>
                                     <th>Surname</th>
+                                    <th>Username</th>
+                                    <th>Email</th>
                                     <th>User Type</th>
+                                    <th>Center</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
-
                             <tbody>
-                                <?php foreach ($users as $list_user): ?>
+                                <?php foreach ($users as $user): ?>
                                     <tr>
-                                        <td><?php echo htmlspecialchars($list_user['username']); ?></td>
-                                        <td><?php echo htmlspecialchars($list_user['email']); ?></td>
-                                        <td><?php echo htmlspecialchars($list_user['user_type']); ?></td>
+                                        <td><?php echo htmlspecialchars($user['name']); ?></td>
+                                        <td><?php echo htmlspecialchars($user['surname']); ?></td>
+                                        <td><?php echo htmlspecialchars($user['username']); ?></td>
+                                        <td><?php echo htmlspecialchars($user['email']); ?></td>
+                                        <td><?php echo htmlspecialchars($user['user_type']); ?></td>
+                                        <td><?php echo htmlspecialchars($user['Center']); ?></td>
                                         <td>
-                                            <?php 
-                                            // Show edit link based on permissions
-                                            if ($_SESSION['user_type'] === 'admin' || 
-                                                ($_SESSION['user_type'] === 'mentor' && $list_user['user_type'] === 'member')): 
-                                            ?>
-                                                <a href="settings.php?user_id=<?php echo $list_user['id']; ?>">Edit</a>
+                                            <?php if ($_SESSION['user_type'] === 'admin' || 
+                                                    ($_SESSION['user_type'] === 'mentor' && $user['user_type'] === 'member')): ?>
+                                                <a href="settings.php?user_id=<?php echo $user['id']; ?>" class="edit-btn">Edit</a>
+                                                <?php if ($_SESSION['user_type'] === 'admin'): ?>
+                                                    <a href="delete_user.php?id=<?php echo $user['id']; ?>" 
+                                                    class="delete-btn" 
+                                                    onclick="return confirm('Are you sure you want to delete this user?')">Delete</a>
+                                                <?php endif; ?>
                                             <?php endif; ?>
                                         </td>
                                     </tr>

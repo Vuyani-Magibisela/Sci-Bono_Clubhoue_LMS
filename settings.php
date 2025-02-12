@@ -210,6 +210,8 @@ if (!$can_edit) {
                                     </select>
                                 <?php endif; ?>
 
+                                <br>
+
                                 <!-- Basic details for all users -->
                                 <label for="username">Username:</label>
                                 <input type="text" id="username" name="username" value="<?php echo $user['username']; ?>" required><br>
