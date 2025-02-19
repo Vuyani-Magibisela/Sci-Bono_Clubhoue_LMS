@@ -1,38 +1,54 @@
 <?php
 session_start(); // Start the session first
-
-// Check if user is logged in
-if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true) {
-    header("Location: login.php");
-    exit;
-}
-
 // Include database connection
 require 'server.php'; // Make sure this path is correct
 
-// Now get the user IDs and types
-$editing_user_id = isset($_GET['user_id']) ? intval($_GET['user_id']) : $_SESSION['user_id'];
-$current_user_type = $_SESSION['user_type'];
-
-// Fetch the user being edited
-$sql = "SELECT * FROM users WHERE id = ?";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $editing_user_id);
-$stmt->execute();
-$user = $stmt->get_result()->fetch_assoc();
-
-// Check permissions
-$can_edit = false;
-if ($current_user_type === 'admin') {
-    $can_edit = true; // Admin can edit anyone
-} elseif ($current_user_type === 'mentor' && $user['user_type'] === 'member') {
-    $can_edit = true; // Mentor can edit members
-} elseif ($editing_user_id === $_SESSION['user_id']) {
-    $can_edit = true; // Users can edit themselves
+// Check if user is logged in
+if (!isset($_SESSION['loggedin'])) {
+    header('Location: login.php');
+    exit;
 }
 
-if (!$can_edit) {
-    header("Location: settings.php"); // Redirect if not authorized
+    // Get the current user's type and ID
+    $current_user_type = $_SESSION['user_type'];
+    $current_user_id = $_SESSION['user_id'];
+    
+    // Get the ID of the user being edited
+    $editing_user_id = $current_user_id; // Default to current user
+
+    // If an ID is provided in the URL and user is admin/mentor, use that instead
+    if (isset($_GET['id']) && ($current_user_type === 'admin' || $current_user_type === 'mentor')) {
+        $editing_user_id = $_GET['id'];
+    }
+
+    // Fetch the user being edited
+    $sql = "SELECT * FROM users WHERE id = ?";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $editing_user_id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $user = $result->fetch_assoc();
+
+// Check if user exists and permissions
+if ($user) {
+    // User found, continue with permissions check
+    $can_edit = false;
+    if ($current_user_type === 'admin') {
+        $can_edit = true; // Admin can edit anyone
+    } elseif ($current_user_type === 'mentor' && $user['user_type'] === 'member') {
+        $can_edit = true; // Mentor can edit members
+    } elseif ($editing_user_id == $current_user_id) {
+        $can_edit = true; // Users can edit themselves
+    }
+
+    if (!$can_edit) {
+        $_SESSION['error_message'] = "You don't have permission to edit this user.";
+        header('Location: settings.php');
+        exit;
+    }
+} else {
+    $_SESSION['error_message'] = "User not found.";
+    header('Location: home.php');
     exit;
 }
 
