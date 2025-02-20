@@ -28,22 +28,6 @@ body {
     padding-bottom: 2em;  /*Check on it later */
   }
 
-
-  #container-index{
-      /* flex: 1;
-      display: grid;
-      grid-template-columns: 50% auto;
-      margin: 10rem auto;
-      max-width: 1400px;
-      background: #6C63FF;
-      box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.25);
-      border-radius: 3.188em;
-      min-height: 400px;
-      margin: 0 auto;  
-      width: 100%;  */
-  }
-
-  
   #container-index{
     display: grid;
     grid-template-columns: 1fr;
@@ -54,11 +38,6 @@ body {
     gap: 1rem;
     height: 100vh;
     margin: 0;
-    /* position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;  */
     overflow: hidden; 
     background: #6C63FF;
     box-shadow: 4px 4px 4px rgba(0, 0, 0, 0.25);
@@ -298,19 +277,8 @@ body {
   color: #F29A2E;
 }
 
-#contianer-signup{
-  /* display: grid;
-  grid-template-columns: 30% 60%;
-  gap: 10%;
-  min-height: 100vh;
-  width: 100%;
-  margin: 0 auto;
-  padding: 2rem;
-  position: relative;
-  background: linear-gradient(180deg, #1E6CB4 25.96%, #393A7B 111.57%);
-  background-attachment: fixed;
-  overflow-y: auto; */
-}
+/* Style for SignUp Form */
+
 
 #contianer-signup{
   display: grid;
@@ -319,6 +287,7 @@ body {
   min-height: 100vh;
   width: 100%;
   margin: 0;
+  margin-right: 20em;
   padding: 1rem;
   position: relative;
   background: linear-gradient(180deg, #1E6CB4 25.96%, #393A7B 111.57%);
@@ -332,6 +301,35 @@ body {
 
 .signup_form {
   padding: 1rem;
+  width: 100%;
+  max-width: 500px;
+  margin: 0 auto;
+}
+
+#signup_form {
+  width: 100%;
+}
+
+.input_field {
+  width: 100%;
+  padding: 0.8em;
+  margin-bottom: 1em;
+  background: rgba(255, 255, 255, 0.1);
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  border-radius: 5px;
+  color: #FFFFFF;
+  font-size: 1rem;
+}
+
+#signup_form select {
+  width: 100%;
+  padding: 0.8em;
+  margin-bottom: 1em;
+  background: rgba(0, 0, 0, 0.25);
+  color: #fff;
+  font-family: 'Source Code Pro';
+  font-size: 1rem;
+  border-radius: 8px;
 }
 
 .signup_form h1 {
@@ -352,6 +350,123 @@ body {
   font-size: 1.2rem;
   margin-bottom: 2rem;
   text-align: center;
+}
+
+
+/* #signup{
+    overflow: hidden;
+} */
+
+.signupBtn {
+  display: inline-block;
+  padding: 10px 20px;
+  background-color: #F29A2E;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  font-family: 'Source Code Pro';
+  font-style: normal;
+  font-weight: 600;
+  font-size: 16px;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.signupBtn:hover {
+  background-color: #d88519;
+}
+
+.signup_img{
+  display: flex;
+  justify-content: center;
+  grid-column: 1/2;
+  box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.25); 
+}
+
+.signup_img img{
+  margin: auto auto;
+}
+
+.signup_form{
+  grid-column: 2/3;
+  margin: 0 auto;
+}
+
+.signup_form > div{
+  margin-top: 3em;
+}
+
+.btn_signup{
+  width: 100%;
+  max-width: 286px;
+  height: 57px; 
+  background-color: #F29A2E;
+  font-size: 1.2em;
+  font-weight: 600;
+  font-family: 'Source Code Pro';
+  text-align: center;
+  text-transform: uppercase;
+  cursor: pointer;
+  color: #fff;
+  text-align: center;
+  border-radius: 10px;
+  padding: 15px;
+  margin-bottom: 0.2em;
+}
+
+.signup_form form > label{
+  font-family: 'Source Code Pro';
+  font-size: 1.5rem;
+  color: #fff;  
+}
+
+.signup_form form > a{
+  font-size: 16px;
+  font-family: 'Source Code Pro';
+  color: #fff;
+  text-decoration: none;
+}
+
+.signup_form form > a:hover{
+  color: #F29A2E;
+}
+.signup_form div h1{
+  font-family: 'Source Code Pro';
+font-style: normal;
+font-weight: 600;
+font-size: 36px;
+line-height: 45px;
+text-transform: uppercase;
+color: #ffffff;
+}
+
+.signup_form div h3{
+  font-family: 'Source Code Pro';
+  font-style: normal;
+  font-weight: 600;
+  font-size: 18px;
+  line-height: 30px;
+  text-transform: uppercase;
+  color: #fff;
+}
+
+form select option{
+  font-size: 25px;
+}
+
+#signup_form > select{
+  background-color: rgba(0, 0, 0, 0.25);
+  color: #fff;
+  font-family: 'Source Code Pro';
+  font-size: 1.5rem;
+  width: 13.5em;
+  height: 2em;
+  padding: 0.5em;
+  border-radius: 8px;
+}
+#signup_form > select option{
+  background-color: #6C63FF;
 }
  
   /* Small devices (landscape phones, 360px and up) */
@@ -496,6 +611,18 @@ body {
         border-radius: 2em 2em 0 0;
     }
 
+    .signup_form {
+      padding: 2rem;
+    }
+  
+    .input_field, #signup_form select {
+      font-size: 1.1rem;
+    }
+  
+    .btn_signup {
+      font-size: 1.4em;
+    }
+
     .signupBtn, .loginBtn {
         width: 200px;
         font-size: 1em;
@@ -570,6 +697,45 @@ body {
       grid-row: 1/2;
       
     }  
+
+    /* Sign UP Form Desktop */
+    #contianer-signup{
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 2rem;
+      min-height: 100vh;
+      width: 100%;
+      margin: 0;
+      margin-top: 5em;
+      padding: 2rem;
+      position: relative;
+      background: linear-gradient(180deg, #1E6CB4 25.96%, #393A7B 111.57%);
+      background-attachment: fixed;
+      overflow-y: auto;
+    }
+
+
+    .signup_img img{
+      display: block;
+      width: 60%;
+      height: auto;
+      max-width: 400px;
+    }
+
+    .signup_img {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      background: #1E6CB4;
+      box-shadow: 0px 0px 8px rgba(0, 0, 0, 0.25);
+      border-radius: 10px;
+    }
+
+    .signup_form {
+      padding: 2rem;
+      max-width: 600px;
+    }
+
 
      /*edit propic and username style*/
     .image-container {
@@ -792,6 +958,12 @@ body {
       grid-row: 1/2;
       
     }  
+
+    /* Sign UP Form Large Desktop */
+    #contianer-signup {
+      max-width: 1400px;
+      margin: 5em auto;
+    }
     /* Settings Form Styling */
     
 

@@ -32,22 +32,30 @@
 					<input class="input_field" type="text" name="username" id="username" required><br><br>
 					
 					<label for="gender">Gender</label><br><br>
-					<select name="gender">
+					<select name="gender" id="gender" required>
 						<option value="Male">Male</option>
 						<option value="Female">Female</option>
 						<option value="Other">Other</option>
-						<option value="Other">Prefer not to say</option>
 					</select><br><br>
 
 					<label for="uesr_type">Member Type</label><br><br>
-					<select name="user_type">
+					<select name="user_type" id="user_type">
 						<option value="member">Member</option>
 						<option value="mentor">Mentor</option>
 						<option value="admin">Admin</option>
-						<option value="admin">alumni</option>
-						<option value="admin">community</option>
+						<option value="member">Alumni</option>
+						<option value="member">community</option>
 					</select><br><br>
 
+					<label for="uesr_type">Clubhouse Center</label><br><br>
+					<select id="center" name="center" required>
+						<option value="Sci-Bono Clubhouse">Sci-Bono Clubhouse</option>
+						<option value="Waverly Girls Solar Lab">Waverly Girls Solar Lab</option>
+						<option value="Mapetla Solar Lab">Mapetla Solar Lab</option>
+						<option value="Emdeni Solar Lab">Emdeni Solar Lab</option>
+					</select><br><br>
+
+					
 					<label for="password">Password:</label><br><br>
 					<input class="input_field" type="password" name="password" id="password" required><br><br>
 					

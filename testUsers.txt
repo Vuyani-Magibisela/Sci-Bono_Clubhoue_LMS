@@ -27,5 +27,9 @@ UserName: lebo_skhosana
 UserType: Admin
 Password: 12345
 
+UserName: linda_skhosana    
+UserType: Alumni
+Password: 12345
+
 
 
