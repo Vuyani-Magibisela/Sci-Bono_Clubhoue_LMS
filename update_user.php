@@ -2,15 +2,42 @@
 session_start();
 require 'server.php';
 
-// Check if the user is logged in and has appropriate permissions
-if (!isset($_SESSION['loggedin']) || !in_array($_SESSION['user_type'], ['admin', 'mentor'])) {
-    header('Location: home.php');
+// Check if user is logged in
+if (!isset($_SESSION['loggedin'])) {
+    header('Location: login.php');
     exit;
 }
 
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-    // Get all form data
     $userId = $_POST['id'];
+    $current_user_type = $_SESSION['user_type'];
+    $current_user_id = $_SESSION['user_id'];
+
+    // Check permissions
+    $can_edit = false;
+    if ($current_user_type === 'admin') {
+        $can_edit = true;
+    } elseif ($current_user_type === 'mentor' && $userId != $current_user_id) {
+        // Check if target user is a member
+        $check_sql = "SELECT user_type FROM users WHERE id = ?";
+        $check_stmt = $conn->prepare($check_sql);
+        $check_stmt->bind_param("i", $userId);
+        $check_stmt->execute();
+        $result = $check_stmt->get_result();
+        $user_data = $result->fetch_assoc();
+        $can_edit = ($user_data['user_type'] === 'member');
+        $check_stmt->close();
+    } elseif ($userId == $current_user_id) {
+        $can_edit = true;
+    }
+
+    if (!$can_edit) {
+        $_SESSION['error_message'] = "You don't have permission to edit this user.";
+        header('Location: settings.php');
+        exit;
+    }
+
+    // Get form data
     $username = $_POST['username'];
     $email = $_POST['email'];
     $name = $_POST['name'];
@@ -31,126 +58,73 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $relationship = isset($_POST['relationship']) ? $_POST['relationship'] : null;
 
     try {
-        // Build the SQL query based on user type
+        // Build SQL based on user type and whether password is being updated
         if (!empty($password)) {
             $hashedPassword = password_hash($password, PASSWORD_DEFAULT);
-            if ($userType === 'member') {
-                $sql = "UPDATE users SET 
-                        username = ?, 
-                        email = ?, 
-                        name = ?, 
-                        surname = ?, 
-                        user_type = ?, 
-                        date_of_birth = ?, 
-                        Gender = ?, 
-                        Center = ?, 
-                        grade = ?, 
-                        school = ?, 
-                        parent = ?, 
-                        parent_email = ?, 
-                        leaner_number = ?, 
-                        parent_number = ?, 
-                        Relationship = ?,
-                        password = ? 
-                        WHERE id = ?";
-                $stmt = $conn->prepare($sql);
-                $stmt->bind_param(
-                    "ssssssssssssssssi", 
-                    $username, $email, $name, $surname, 
-                    $userType, $date_of_birth, $gender, 
-                    $center, $grade, $school, 
-                    $parent, $parent_email, $learner_number, 
-                    $parent_number, $relationship, $hashedPassword, 
-                    $userId
-                );
-            } else {
-                $sql = "UPDATE users SET 
-                        username = ?, 
-                        email = ?, 
-                        name = ?, 
-                        surname = ?, 
-                        user_type = ?, 
-                        date_of_birth = ?, 
-                        Gender = ?, 
-                        Center = ?,
-                        password = ? 
-                        WHERE id = ?";
-                $stmt = $conn->prepare($sql);
-                $stmt->bind_param(
-                    "sssssssssi", 
-                    $username, $email, $name, $surname, 
-                    $userType, $date_of_birth, $gender, 
-                    $center, $hashedPassword, $userId
-                );
-            }
+            // Include password in update
+            $sql = "UPDATE users SET 
+                    username = ?, 
+                    email = ?, 
+                    name = ?, 
+                    surname = ?, 
+                    date_of_birth = ?, 
+                    Gender = ?, 
+                    Center = ?,
+                    password = ? ";
+            $params = [$username, $email, $name, $surname, $date_of_birth, $gender, $center, $hashedPassword];
+            $types = "ssssssss";
         } else {
-            if ($userType === 'member') {
-                $sql = "UPDATE users SET 
-                        username = ?, 
-                        email = ?, 
-                        name = ?, 
-                        surname = ?, 
-                        user_type = ?, 
-                        date_of_birth = ?, 
-                        Gender = ?, 
-                        Center = ?, 
-                        grade = ?, 
-                        school = ?, 
-                        parent = ?, 
-                        parent_email = ?, 
-                        leaner_number = ?, 
-                        parent_number = ?, 
-                        Relationship = ? 
-                        WHERE id = ?";
-                $stmt = $conn->prepare($sql);
-                $stmt->bind_param(
-                    "sssssssssssssssi", 
-                    $username, $email, $name, $surname, 
-                    $userType, $date_of_birth, $gender, 
-                    $center, $grade, $school, 
-                    $parent, $parent_email, $learner_number, 
-                    $parent_number, $relationship, $userId
-                );
-            } else {
-                $sql = "UPDATE users SET 
-                        username = ?, 
-                        email = ?, 
-                        name = ?, 
-                        surname = ?, 
-                        user_type = ?, 
-                        date_of_birth = ?, 
-                        Gender = ?, 
-                        Center = ? 
-                        WHERE id = ?";
-                $stmt = $conn->prepare($sql);
-                $stmt->bind_param(
-                    "ssssssssi", 
-                    $username, $email, $name, $surname, 
-                    $userType, $date_of_birth, $gender, 
-                    $center, $userId
-                );
-            }
+            // Exclude password from update
+            $sql = "UPDATE users SET 
+                    username = ?, 
+                    email = ?, 
+                    name = ?, 
+                    surname = ?, 
+                    date_of_birth = ?, 
+                    Gender = ?, 
+                    Center = ? ";
+            $params = [$username, $email, $name, $surname, $date_of_birth, $gender, $center];
+            $types = "sssssss";
         }
 
-        // Execute the statement
+        // Add user type if admin is editing
+        if ($current_user_type === 'admin' && $userType) {
+            $sql .= ", user_type = ? ";
+            $params[] = $userType;
+            $types .= "s";
+        }
+
+        // Add member-specific fields if applicable
+        if ($userType === 'member' || (!$userType && $current_user_type === 'member')) {
+            $sql .= ", grade = ?, school = ?, leaner_number = ?, parent = ?, parent_email = ?, parent_number = ?, Relationship = ? ";
+            $params = array_merge($params, [$grade, $school, $learner_number, $parent, $parent_email, $parent_number, $relationship]);
+            $types .= "ssissss";
+        }
+
+        $sql .= "WHERE id = ?";
+        $params[] = $userId;
+        $types .= "i";
+
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param($types, ...$params);
+
         if ($stmt->execute()) {
-            $_SESSION['success_message'] = "User updated successfully!";
+            $_SESSION['success_message'] = "Profile updated successfully!";
+            // Redirect based on context
+            if ($current_user_type === 'admin' && $userId != $current_user_id) {
+                header('Location: user_list.php');
+            } else {
+                header('Location: settings.php');
+            }
         } else {
-            $_SESSION['error_message'] = "Error updating user: " . $stmt->error;
+            $_SESSION['error_message'] = "Error updating profile: " . $stmt->error;
+            header('Location: settings.php');
         }
-
-        // Close the statement
         $stmt->close();
-        
     } catch (Exception $e) {
         $_SESSION['error_message'] = "Error: " . $e->getMessage();
+        header('Location: settings.php');
     }
-
-    // Close the connection
-    $conn->close();
-
-    // Redirect back to settings or user list
-    header('Location: ' . ($_SESSION['user_type'] === 'admin' ? 'user_list.php' : 'settings.php'));
     exit;
 }
 ?>

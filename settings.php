@@ -14,12 +14,7 @@ if (!isset($_SESSION['loggedin'])) {
     $current_user_id = $_SESSION['user_id'];
     
     // Get the ID of the user being edited
-    $editing_user_id = $current_user_id; // Default to current user
-
-    // If an ID is provided in the URL and user is admin/mentor, use that instead
-    if (isset($_GET['id']) && ($current_user_type === 'admin' || $current_user_type === 'mentor')) {
-        $editing_user_id = $_GET['id'];
-    }
+    $editing_user_id = isset($_GET['id']) ? $_GET['id'] : $current_user_id;
 
     // Fetch the user being edited
     $sql = "SELECT * FROM users WHERE id = ?";
@@ -29,28 +24,22 @@ if (!isset($_SESSION['loggedin'])) {
     $result = $stmt->get_result();
     $user = $result->fetch_assoc();
 
-// Check if user exists and permissions
-if ($user) {
-    // User found, continue with permissions check
+    // Check permissions
     $can_edit = false;
-    if ($current_user_type === 'admin') {
-        $can_edit = true; // Admin can edit anyone
-    } elseif ($current_user_type === 'mentor' && $user['user_type'] === 'member') {
-        $can_edit = true; // Mentor can edit members
-    } elseif ($editing_user_id == $current_user_id) {
-        $can_edit = true; // Users can edit themselves
+    if ($user) {
+        if ($current_user_type === 'admin') {
+            $can_edit = true; // Admin can edit anyone
+        } elseif ($current_user_type === 'mentor' && $user['user_type'] === 'member') {
+            $can_edit = true; // Mentor can edit members
+        } elseif ($editing_user_id == $current_user_id) {
+            $can_edit = true; // Users can edit themselves
+        }
     }
 
     if (!$can_edit) {
-        $_SESSION['error_message'] = "You don't have permission to edit this user.";
-        header('Location: settings.php');
+        header('Location: home.php');
         exit;
     }
-} else {
-    $_SESSION['error_message'] = "User not found.";
-    header('Location: home.php');
-    exit;
-}
 
 ?>
 
