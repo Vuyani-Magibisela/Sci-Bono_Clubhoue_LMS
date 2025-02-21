@@ -541,6 +541,24 @@ form select option{
     margin: 1rem 0;
     font-size: 1em;
 }
+  /* Signup Form Mobile Style */
+
+    .signup_img{
+      display: none;
+    }
+
+    .signup_form{
+      padding: 1rem; 
+      width: 100%;
+      max-width: 100%;
+      /* margin: 0 auto; */
+      margin-right: 10rem;
+    }
+
+    .input_field {
+      width: 100%;
+   
+    }
   
     /*Styles the header file*/
     .header {
@@ -717,9 +735,9 @@ form select option{
 
     .signup_img img{
       display: block;
-      width: 60%;
+      width: 70%;
       height: auto;
-      max-width: 400px;
+      /* max-width: 100%; */
     }
 
     .signup_img {
@@ -745,6 +763,7 @@ form select option{
       width: 10em;
       padding: 1em;
     }
+
     #proImage{
       grid-column: 1/2;
       width: max-content;
@@ -961,7 +980,7 @@ form select option{
 
     /* Sign UP Form Large Desktop */
     #contianer-signup {
-      max-width: 1400px;
+      max-width: 100%;
       margin: 5em auto;
     }
     /* Settings Form Styling */
