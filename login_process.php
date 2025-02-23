@@ -1,8 +1,5 @@
 <?php
-	session_start();
-?>
-
-<?php
+session_start();
 require 'server.php';
 
 // If the form is submitted
@@ -22,34 +19,27 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $row = mysqli_fetch_assoc($result);
 
         if (password_verify($password, $row['password'])) {
-            // Redirect to home page if the password is correct
-            // Start session
-            session_start();
+            // Set session variables and redirect to home page if the password is correct
             $_SESSION['loggedin'] = true;
             $_SESSION['username'] = $username;
-            $_SESSION['user_type'] = $row['user_type']; // Store the user_type in session
+            $_SESSION['user_type'] = $row['user_type'];
             $_SESSION['user_id'] = $row['id']; 
 
             header("Location: home.php");
             exit;
         } else {
             // Password is incorrect, redirect to login page with error message
-            session_start();
             $_SESSION['login_error'] = "Incorrect password";
             header("Location: login.php");
             exit;
         }
     } else {
         // Username does not exist, redirect to login page with error message
-        session_start();
         $_SESSION['login_error'] = "Username not found";
         header("Location: login.php");
         exit;
     }
 }
 
-
-
 mysqli_close($conn);
 ?>
-
