@@ -800,7 +800,7 @@ form select option{
 
     .editProBottom form{
       display: grid;
-      background: #fff;
+      background: #514E7F;
       grid-template-columns: 2fr;
       grid-template-rows: 2fr;
       gap: 1.5em;
@@ -814,7 +814,7 @@ form select option{
     }
 
     .editProBottom form select{
-      font-size: 2rem;
+      font-size: 1em;
       margin-bottom: 0.5em;
       width: max-content;
       padding: 0.5em;

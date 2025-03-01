@@ -14,8 +14,8 @@ if(isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
 <html lang="en">
 <head>
     <title></title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="public\assets\css\screenSizes.css">
+    <!-- <link rel="stylesheet" href="style.css"> -->
+    <!-- <link rel="stylesheet" href="public\assets\css\screenSizes.css"> -->
 
 </head>
 <body>
