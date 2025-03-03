@@ -6,13 +6,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Daily Register</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="public/css/screenSizes.css">
+    <!-- <link rel="stylesheet" href="public/css/screenSizes.css"> -->
+    <link rel="stylesheet" href="public/assets/css/header.css">
 
 </head>
 <body id="signin">
+    <div class="header">
+        <?php
+            include 'header.php';
+        ?>
+    </div>
+
     <?php 
-    include 'header.php';
-    include 'display_users.php'
+        include 'display_users.php'
     ?>
 
     <main id="signin-container">

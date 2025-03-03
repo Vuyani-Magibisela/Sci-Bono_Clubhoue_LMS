@@ -30,9 +30,103 @@ include __DIR__ . '/../Models/dashboardStats.php';
             padding: 10px;
             font-size: 16px;
         }
+        /* Mobile First  */
+
+        .header {
+        display: none !important;
+        }
+
+        /* Desktop */
+        @media (min-width: 1024px) {
+        .header {
+            display: grid !important;
+            grid-template-columns: auto 1fr auto;
+            background-color: #2980b9;
+            color: #fff;
+            align-items: center;
+            justify-content: center; 
+            align-content: center;
+            box-shadow: 0 0 15px 0 rgba(0, 0, 0, 0.9);
+            border-radius: 5px;
+        }
+        
+        .logo-left img {
+            width: 60%;
+            height: auto;
+            margin: 0 auto;
+            padding: 1rem 0;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .title-center {
+            text-align: center;
+            font-family: Arial, Helvetica, sans-serif;
+            font-style: normal;
+            font-weight: 600;
+            font-size: 18px;
+            line-height: 45px;
+            text-transform: uppercase;
+            margin: 0 auto;
+            width: max-content;
+            padding: 1rem 0;
+        }
+
+        .title-center h1 {
+           color: #ffffff;
+        }
+
+        .logo-right img {
+            width: 40%;
+            height: auto;
+            margin: 0 auto;
+            padding: 1rem 0;
+
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+}
+
+
+
     </style>
 </head>
 <body>
+
+    <header class="header">
+        <div class="logo-left">
+            <a href="../../home.php"><img src="../../public/assets/images/Sci-Bono logo White.png" alt="Left Logo" width="" height="121"></a>
+        </div>
+        <div class="title-center">
+            <h1>Sci-Bono Clubhouse Reports</h1>
+        </div>
+        <div class="logo-right">
+            <img src="../../public/assets/images/TheClubhouse_Logo_White_Large.png" alt="Right Logo" width="" height="110">
+        </div>
+    </header> 
+
+    <nav class="navigation">
+        <a href="../../home.php"> 
+            <div class="dashboardLink">
+                <h3>Dashbord</h3>
+            </div>
+        </a>
+       <a href="./reportForm.php">
+            <div class="CreateReport">
+                <h3>Create Report</h3>
+            </div>
+       </a>
+        <a href="./addClubhouseProgram.php">
+            <div class="addProgram">
+                <h3>Add Program</h3>
+            </div>
+        </a>
+       
+    </nav>
+
     <h1>Attendance Statistics Dashboard</h1>
     <!-- Year Filter Dropdown -->
     <div class="year-filter">
@@ -76,7 +170,7 @@ include __DIR__ . '/../Models/dashboardStats.php';
         </div>
     </div>
 
-    <h2>Recent Program Data</h2>
+    <h2>Monthly Reports</h2>
     <div id="programData"></div>
 
     <script>

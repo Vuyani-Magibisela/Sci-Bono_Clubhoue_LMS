@@ -16,6 +16,8 @@
 	<link rel="stylesheet" href="style.css">
 	<link rel="stylesheet" href="public/assets/css/screenSizes.css">
 	<link rel="stylesheet" href="public/assets/css/style">
+	<link rel="stylesheet" href="public/assets/css/cssRest.css">
+	<link rel="stylesheet" href="public/assets/css/header.css">
 	<script>
 		function validateForm() {
 			var username = document.forms["loginForm"]["username"].value;
@@ -33,9 +35,12 @@
 	</script>
 </head>
 <body>
-	<?php 
-		include 'header.php';
-	?>
+	<div class="header">
+		<?php
+			include 'header.php';
+		?>
+	</div>
+
 	<main id="container-login">
 		<div class="login_img">
 			<img src="public/assets/images/SignIn_Img.png" alt="Large image of a mobile phone, human standing next to it."  width="301" height="303">

@@ -1,51 +1,67 @@
 /* index header styling */
-
+/* Mobile First */
 .header {
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    background-color: #393A7B;
-    color: #fff;
-    align-items: center;
-    justify-content: center; 
-    align-content: center;
-    box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.9);
+    display: none !important;
 }
 
 
-.logo-left {
+/* Tablet */
+@media (min-width: 768px) {
+
+}
+
+/* Desktop */
+@media (min-width: 1024px) {
+    .header {
+        display: grid !important;
+        grid-template-columns: auto 1fr auto;
+        background-color: #393A7B;
+        color: #fff;
+        align-items: center;
+        justify-content: center; 
+        align-content: center;
+        box-shadow: 0 0 20px 0 rgba(0, 0, 0, 0.9);
+        
+    }
     
-    /* justify-self: start; */
-    margin: 0 auto;
-}
+    .logo-left {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
 
-.logo-left img {
-    width: 30%;
-    height: auto;
-    margin: 0 auto;
-    padding: 1rem 0;
-}
+    .logo-left img {
+        width: 30%;
+        height: auto;
+        margin: 0 auto;
+        padding: 1rem 0;
+    }
 
-.title-center {
-    text-align: center;
-    font-family: Arial, Helvetica, sans-serif;
-    font-style: normal;
-    font-weight: 600;
-    font-size: 36px;
-    line-height: 45px;
-    text-transform: uppercase;
-    margin: 0 auto;
-    width: max-content;
-    padding: 1rem 0;
-}
+    .title-center {
+        text-align: center;
+        font-family: Arial, Helvetica, sans-serif;
+        font-style: normal;
+        font-weight: 600;
+        font-size: 36px;
+        line-height: 45px;
+        text-transform: uppercase;
+        margin: 0 auto;
+        width: max-content;
+        padding: 1rem 0;
+    }
 
-.logo-right {
-    /* justify-self: end; */
-    
-}
+    .logo-right {
+   
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        
+    }
 
-.logo-right img {
-    width: 25%;
-    height: auto;
-    margin: 0 auto;
-    padding: 1rem 0;
+    .logo-right img {
+        width: 25%;
+        height: auto;
+        margin: 0 auto;
+        padding: 1rem 0;
+    }
 }

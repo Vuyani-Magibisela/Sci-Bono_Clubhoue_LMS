@@ -7,9 +7,9 @@ body {
   background: linear-gradient(180deg, #1E6CB4 25.96%, #393A7B 111.57%);
 }
 
-.header{
+/* .header{
   display: none !important;
-}
+} */
 
 #container-signup {
   display: flex;
@@ -186,9 +186,6 @@ label {
 /* Desktop */
 @media (min-width: 1024px) {
   
-  .header{
-    display: flex !important;
-  }
   
   #container-signup {
     flex-direction: row;

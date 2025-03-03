@@ -8,6 +8,34 @@ body {
     padding: 20px;
 }
 
+/* Navigation Styling */
+.navigation {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin-bottom: 20px;
+}
+
+.navigation a{
+    text-decoration: none;
+    color: inherit;
+    display: block;
+}
+
+.dashboardLink , .CreateReport, .addProgram{
+    background-color: #3498db;
+    border-radius: 8px;
+    padding: 1px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    text-align: center;
+    margin-top: 1em;
+}
+
+.dashboardLink, .addProgram, .CreateReport,  h3{
+    color: #ffffff;
+    font-size: 1em;
+    font-weight: bold;
+}
 
 h1 {
 text-align: center;
@@ -115,4 +143,54 @@ button:hover {
 .month-filter select {
     padding: 10px;
     font-size: 16px;
+}
+
+/* Tablet */
+@media (min-width: 768px) { 
+
+
+}
+
+/* Desktop */
+@media (min-width: 1024px) { 
+    .navigation {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+        gap: 20px;
+        margin-bottom: 20px;
+    }
+
+    .navigation a{
+        text-decoration: none;
+        color: inherit;
+        display: block;
+    }
+
+    .dashboardLink , .CreateReport, .addProgram{
+        background-color: #3498db;
+        border-radius: 8px;
+        padding: 1px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        text-align: center;
+        margin-top: 2em;
+    }
+
+    .dashboardLink, .addProgram, .CreateReport,  h3{
+        color: #ffffff;
+        font-size: 1em;
+        font-weight: bold;
+    }
+
+    .navigation .dashboardLink:hover {
+        background-color: #F29A2E;
+        /* transform: scale(1.09); */
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
+     .CreateReport:hover, .addProgram:hover {
+        background-color: #F29A2E;
+        /* transform: scale(1.09); */
+        box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    }
+
 }

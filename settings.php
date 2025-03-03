@@ -217,7 +217,7 @@ if (!isset($_SESSION['loggedin'])) {
                             if (isset($_SESSION['user_type'])) {
                                 $userType = $_SESSION['user_type'];
                                 if ($userType === "admin"): ?>
-                                    <a href="reports.php">
+                                    <a href="app/Views/statsDashboard.php">
                                         <svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
                                             <path d="M50 15H10C8.61929 15 7.5 16.1193 7.5 17.5V50C7.5 51.3807 8.61929 52.5 10 52.5H50C51.3807 52.5 52.5 51.3807 52.5 50V17.5C52.5 16.1193 51.3807 15 50 15Z" fill="#6C63FF" stroke="#F29A2E" stroke-width="2" stroke-linejoin="round"/>
                                             <path d="M22.437 30.0103H37.437" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>

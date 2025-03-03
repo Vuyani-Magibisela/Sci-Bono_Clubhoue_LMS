@@ -8,6 +8,7 @@
     <!-- <link rel="stylesheet" href="style.css"> -->
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="./public/assets/css/screenSizes.css">
+    <link rel="stylesheet" href="./public/assets/css/header.css">
     <!--Google analytics
 	================================================-->
 	<!-- Global site tag (gtag.js) - Google Analytics -->
@@ -22,10 +23,12 @@
 
 </head>
 <body id="index">
-
-    <?php
-    include 'header.php';
-    ?>
+    <div class="header">
+        <?php
+        include 'header.php';
+        ?>                           
+    </div>
+    
     <div id="top">
         <svg width="0" height="0" style="position: absolute;">
             <defs>
