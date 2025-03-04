@@ -4,12 +4,60 @@
 // ini_set('display_startup_errors', 1);
 // error_reporting(E_ALL);
 
-// if (!file_exists(__DIR__ . '/../Models/dashboardStats.php')) {
-//     die("Error: File not found - " . __DIR__ . '/../Models/dashboardStats.php');
-// }
-
 include __DIR__ . '/../Models/dashboardStats.php';
-// echo "Included successfully!";
+
+// Get year and month filters
+$selectedYear = isset($_GET['year']) ? $_GET['year'] : date('Y');
+$selectedMonth = isset($_GET['month']) ? $_GET['month'] : '0'; // 0 means all months
+
+// Fetch monthly reports data
+require '../../server.php';
+
+$monthlyReports = [];
+$reportSql = "SELECT mr.*, 
+              MONTH(mr.report_date) as month_num, 
+              YEAR(mr.report_date) as year_num 
+              FROM monthly_reports mr 
+              WHERE YEAR(mr.report_date) = ?";
+
+// Add month filter if specified
+$params = [$selectedYear];
+if ($selectedMonth != '0') {
+    $reportSql .= " AND MONTH(mr.report_date) = ?";
+    $params[] = $selectedMonth;
+}
+
+$reportSql .= " ORDER BY mr.report_date DESC";
+$reportStmt = $conn->prepare($reportSql);
+
+// Bind parameters based on count
+if (count($params) == 1) {
+    $reportStmt->bind_param("s", $params[0]);
+} else {
+    $reportStmt->bind_param("ss", $params[0], $params[1]);
+}
+
+$reportStmt->execute();
+$reportResult = $reportStmt->get_result();
+
+while ($report = $reportResult->fetch_assoc()) {
+    // Get month name
+    $monthNum = $report['month_num'];
+    $monthName = date('F', mktime(0, 0, 0, $monthNum, 1, 2000));
+    
+    // Fetch activity count
+    $activitySql = "SELECT COUNT(*) as activity_count FROM monthly_report_activities WHERE report_id = ?";
+    $activityStmt = $conn->prepare($activitySql);
+    $activityStmt->bind_param("i", $report['id']);
+    $activityStmt->execute();
+    $activityResult = $activityStmt->get_result();
+    $activityCount = $activityResult->fetch_assoc()['activity_count'];
+    
+    // Add to reports array
+    $report['month_name'] = $monthName;
+    $report['activity_count'] = $activityCount;
+    $monthlyReports[] = $report;
+}
 ?>
 
 <!DOCTYPE html>
@@ -30,8 +78,100 @@ include __DIR__ . '/../Models/dashboardStats.php';
             padding: 10px;
             font-size: 16px;
         }
+        
+        /* Monthly reports cards */
+        .monthly-reports-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .monthly-report-card {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            overflow: hidden;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .monthly-report-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+        
+        .monthly-report-header {
+            background: #2980b9;
+            color: white;
+            padding: 15px;
+            font-size: 18px;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .monthly-report-content {
+            padding: 15px;
+        }
+        
+        .report-stat {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .report-stat:last-child {
+            border-bottom: none;
+        }
+        
+        .report-actions {
+            display: flex;
+            justify-content: center;
+            padding: 15px;
+            gap: 10px;
+        }
+        
+        .report-actions a {
+            padding: 8px 15px;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .view-report {
+            background: #2980b9;
+            color: white;
+            flex: 1;
+        }
+        
+        .edit-report {
+            background: #f39c12;
+            color: white;
+            flex: 1;
+        }
+        
+        .no-reports {
+            background: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        
+        .no-reports a {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 8px 15px;
+            background: #2980b9;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            font-weight: bold;
+        }
+        
         /* Mobile First  */
-
         .header {
         display: none !important;
         }
@@ -88,10 +228,7 @@ include __DIR__ . '/../Models/dashboardStats.php';
             justify-content: center;
             align-items: center;
         }
-}
-
-
-
+    }
     </style>
 </head>
 <body>
@@ -111,10 +248,10 @@ include __DIR__ . '/../Models/dashboardStats.php';
     <nav class="navigation">
         <a href="../../home.php"> 
             <div class="dashboardLink">
-                <h3>Dashbord</h3>
+                <h3>Dashboard</h3>
             </div>
         </a>
-       <a href="./reportForm.php">
+       <a href="./monthlyReportForm.php">
             <div class="CreateReport">
                 <h3>Create Report</h3>
             </div>
@@ -124,33 +261,37 @@ include __DIR__ . '/../Models/dashboardStats.php';
                 <h3>Add Program</h3>
             </div>
         </a>
-       
     </nav>
 
     <h1>Attendance Statistics Dashboard</h1>
-    <!-- Year Filter Dropdown -->
-    <div class="year-filter">
-        <select id="yearSelector">
-            <?php foreach ($yearOptions as $year): ?>
-                <option value="<?php echo $year; ?>" <?php echo ($selectedYear == $year ? 'selected' : ''); ?>>
-                    <?php echo $year; ?>
-                </option>
-            <?php endforeach; ?>
-        </select>
+    
+    <!-- Filters Section -->
+    <div class="filters-section">
+        <!-- Year Filter Dropdown -->
+        <div class="year-filter">
+            <select id="yearSelector">
+                <?php foreach ($yearOptions as $year): ?>
+                    <option value="<?php echo $year; ?>" <?php echo ($selectedYear == $year ? 'selected' : ''); ?>>
+                        <?php echo $year; ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
+
+        <!-- Month Filter Dropdown -->
+        <div class="month-filter">
+            <select id="monthSelector">
+                <option value="0">All Months</option>
+                <?php foreach ($monthOptions as $monthNum => $monthName): ?>
+                    <option value="<?php echo $monthNum; ?>" <?php echo ($selectedMonth == $monthNum ? 'selected' : ''); ?>>
+                        <?php echo $monthName; ?>
+                    </option>
+                <?php endforeach; ?>
+            </select>
+        </div>
     </div>
 
-    <!-- Month Filter Dropdown -->
-    <div class="month-filter">
-        <select id="monthSelector">
-            <option value="0">All Months</option>
-            <?php foreach ($monthOptions as $monthNum => $monthName): ?>
-                <option value="<?php echo $monthNum; ?>" <?php echo ($selectedMonth == $monthNum ? 'selected' : ''); ?>>
-                    <?php echo $monthName; ?>
-                </option>
-            <?php endforeach; ?>
-        </select>
-    </div>
-
+    <!-- Attendance Stats Dashboard -->
     <div class="dashboard">
         <div class="card">
             <h2>Total Unique Members</h2>
@@ -170,8 +311,52 @@ include __DIR__ . '/../Models/dashboardStats.php';
         </div>
     </div>
 
-    <h2>Monthly Reports</h2>
-    <div id="programData"></div>
+    <!-- Monthly Reports Section -->
+    <section class="monthly-reports-section">
+        <div class="section-header">
+            <h2>Monthly Reports</h2>
+            <a href="./monthlyReportForm.php" class="btn-primary">Create New Report</a>
+        </div>
+        
+        <?php if (empty($monthlyReports)): ?>
+            <div class="no-reports">
+                <p>No monthly reports found for the selected period.</p>
+                <!-- <a href="./monthlyReportForm.php">Create New Report</a> -->
+            </div>
+        <?php else: ?>
+            <div class="monthly-reports-grid">
+                <?php foreach ($monthlyReports as $report): ?>
+                    <div class="monthly-report-card">
+                        <div class="monthly-report-header">
+                            <?php echo $report['month_name'] . ' ' . $report['year_num']; ?>
+                        </div>
+                        <div class="monthly-report-content">
+                            <div class="report-stat">
+                                <span>Total Attendees:</span>
+                                <span><?php echo $report['total_attendees']; ?></span>
+                            </div>
+                            <div class="report-stat">
+                                <span>Activities:</span>
+                                <span><?php echo $report['activity_count']; ?></span>
+                            </div>
+                            <div class="report-stat">
+                                <span>Created:</span>
+                                <span><?php echo date('M j, Y', strtotime($report['created_at'])); ?></span>
+                            </div>
+                        </div>
+                        <div class="report-actions">
+                            <a href="./monthlyReportView.php?year=<?php echo $report['year_num']; ?>&month=<?php echo str_pad($report['month_num'], 2, '0', STR_PAD_LEFT); ?>" class="view-report">View</a>
+                            <a href="./monthlyReportForm.php?edit=<?php echo $report['id']; ?>" class="edit-report">Edit</a>
+                        </div>
+                    </div>
+                <?php endforeach; ?>
+            </div>
+        <?php endif; ?>
+    </section>
+
+    <!-- Program Data Section -->
+    <!-- <h2>Program Reports</h2>
+    <div id="programData"></div> -->
 
     <script>
         // Parse JSON data from PHP

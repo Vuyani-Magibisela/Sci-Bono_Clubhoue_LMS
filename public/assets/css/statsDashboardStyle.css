@@ -22,7 +22,7 @@ body {
     display: block;
 }
 
-.dashboardLink , .CreateReport, .addProgram{
+.dashboardLink , .viewReports, .CreateReport, .addProgram{
     background-color: #3498db;
     border-radius: 8px;
     padding: 1px;
@@ -160,13 +160,15 @@ button:hover {
         margin-bottom: 20px;
     }
 
+    
+
     .navigation a{
         text-decoration: none;
         color: inherit;
         display: block;
     }
 
-    .dashboardLink , .CreateReport, .addProgram{
+    .dashboardLink, .viewReports, .CreateReport, .addProgram{
         background-color: #3498db;
         border-radius: 8px;
         padding: 1px;
@@ -187,7 +189,7 @@ button:hover {
         box-shadow: 0 5px 15px rgba(0,0,0,0.1);
     }
 
-     .CreateReport:hover, .addProgram:hover {
+     .CreateReport:hover, .addProgram:hover, .viewReports:hover {
         background-color: #F29A2E;
         /* transform: scale(1.09); */
         box-shadow: 0 5px 15px rgba(0,0,0,0.1);
