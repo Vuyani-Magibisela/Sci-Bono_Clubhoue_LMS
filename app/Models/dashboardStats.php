@@ -111,6 +111,83 @@ while ($row = $dailyAttendanceResult->fetch_assoc()) {
     $dayData[] = $row['unique_members'];
 }
 
+// Gender distribution query
+$genderDistributionQuery = $selectedMonth > 0 
+    ? "SELECT u.Gender, COUNT(DISTINCT a.user_id) as count
+       FROM attendance a
+       JOIN users u ON a.user_id = u.id
+       WHERE MONTH(a.checked_out) = $selectedMonth 
+       AND YEAR(a.checked_out) = $selectedYear
+       GROUP BY u.Gender"
+    : "SELECT u.Gender, COUNT(DISTINCT a.user_id) as count
+       FROM attendance a
+       JOIN users u ON a.user_id = u.id
+       WHERE YEAR(a.checked_out) = $selectedYear
+       GROUP BY u.Gender";
+       
+$genderResult = $conn->query($genderDistributionQuery);
+
+$genderLabels = [];
+$genderData = [];
+while ($row = $genderResult->fetch_assoc()) {
+    $genderLabels[] = $row['Gender'];
+    $genderData[] = $row['count'];
+}
+
+// Age group distribution
+$ageGroupQuery = $selectedMonth > 0 
+    ? "SELECT 
+        CASE 
+            WHEN TIMESTAMPDIFF(YEAR, u.date_of_birth, CONCAT($selectedYear, '-', $selectedMonth, '-01')) BETWEEN 9 AND 12 THEN '9-12'
+            WHEN TIMESTAMPDIFF(YEAR, u.date_of_birth, CONCAT($selectedYear, '-', $selectedMonth, '-01')) BETWEEN 13 AND 14 THEN '13-14'
+            WHEN TIMESTAMPDIFF(YEAR, u.date_of_birth, CONCAT($selectedYear, '-', $selectedMonth, '-01')) BETWEEN 15 AND 16 THEN '15-16'
+            WHEN TIMESTAMPDIFF(YEAR, u.date_of_birth, CONCAT($selectedYear, '-', $selectedMonth, '-01')) BETWEEN 17 AND 18 THEN '17-18'
+            ELSE 'Other'
+        END AS age_group,
+        COUNT(DISTINCT a.user_id) as count
+      FROM attendance a
+      JOIN users u ON a.user_id = u.id
+      WHERE MONTH(a.checked_out) = $selectedMonth 
+      AND YEAR(a.checked_out) = $selectedYear
+      AND u.date_of_birth IS NOT NULL
+      GROUP BY age_group
+      ORDER BY age_group"
+    : "SELECT 
+        CASE 
+            WHEN TIMESTAMPDIFF(YEAR, u.date_of_birth, CONCAT($selectedYear, '-01-01')) BETWEEN 9 AND 12 THEN '9-12'
+            WHEN TIMESTAMPDIFF(YEAR, u.date_of_birth, CONCAT($selectedYear, '-01-01')) BETWEEN 13 AND 14 THEN '13-14'
+            WHEN TIMESTAMPDIFF(YEAR, u.date_of_birth, CONCAT($selectedYear, '-01-01')) BETWEEN 15 AND 16 THEN '15-16'
+            WHEN TIMESTAMPDIFF(YEAR, u.date_of_birth, CONCAT($selectedYear, '-01-01')) BETWEEN 17 AND 18 THEN '17-18'
+            ELSE 'Other'
+        END AS age_group,
+        COUNT(DISTINCT a.user_id) as count
+      FROM attendance a
+      JOIN users u ON a.user_id = u.id
+      WHERE YEAR(a.checked_out) = $selectedYear
+      AND u.date_of_birth IS NOT NULL
+      GROUP BY age_group
+      ORDER BY age_group";
+
+$ageGroupResult = $conn->query($ageGroupQuery);
+
+$ageGroupLabels = [];
+$ageGroupData = [];
+while ($row = $ageGroupResult->fetch_assoc()) {
+    $ageGroupLabels[] = $row['age_group'];
+    $ageGroupData[] = $row['count'];
+}
+
+// Convert gender and age group data to JSON for JavaScript
+$genderDistributionJSON = json_encode([
+    'labels' => $genderLabels,
+    'data' => $genderData
+]);
+
+$ageGroupJSON = json_encode([
+    'labels' => $ageGroupLabels,
+    'data' => $ageGroupData
+]);
+
 // Fetch program data 
 $programQuery = $selectedMonth > 0
     ? "SELECT cr.* 
