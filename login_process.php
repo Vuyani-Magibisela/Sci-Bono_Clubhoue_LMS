@@ -11,6 +11,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Check if the user exists in the database
     $sql = "SELECT * FROM users WHERE username=?";
     $stmt = mysqli_prepare($conn, $sql);
+    
+    // Check if prepare statement was successful
+    if ($stmt === false) {
+        die('Error in prepare statement: ' . mysqli_error($conn));
+    }
+    
     mysqli_stmt_bind_param($stmt, 's', $username);
     mysqli_stmt_execute($stmt);
     $result = mysqli_stmt_get_result($stmt);
