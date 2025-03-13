@@ -6,14 +6,11 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true) {
     exit;
 }
 
-// Include auto-logout script
+// Include the auto-logout script to track inactivity
 include 'app/Controllers/sessionTimer.php';
 
 // Include dashboard data loader
-include 'app/Models/dashboard-data-loader.php';
-
-// Include the auto-logout script to track inactivity
-include 'app/Controllers/sessionTimer.php';
+require_once 'app/Models/dashboard-data-loader.php';
 ?>
 
 <!DOCTYPE html>
@@ -22,151 +19,488 @@ include 'app/Controllers/sessionTimer.php';
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Clubhouse Dashboard</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="public/assets/css/header.css">
-    <link rel="stylesheet" href="public/assets/css/screenSizes.css">
+    <title>Clubhouse Social</title>
+    <link rel="stylesheet" href="./public/assets/css/homeStyle.css">
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="public/assets/css/homeStyle.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
-<body >
-    <!-- Loading Spinner (Hidden by default) -->
-    <div class="loading" style="display: none;">
+
+<!-- Loading Spinner (Hidden by default) -->
+<div class="loading" style="display: none;">
         <div class="spinner"></div>
     </div>
 
-    <!-- Mobile Menu Toggle Button -->
-    <button class="mobile-menu-toggle" id="mobileMenuToggle">
-        <i class="fas fa-bars"></i>
-    </button>
-
-    <!-- Main Dashboard Container -->
-    <div class="dashboard-container">
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="logo">
+                <img src="public/assets/images/Sci-Bono logo White.png" alt="Sci-Bono Clubhouse">
+                <span>SCI-BONO CLUBHOUSE</span>
+            </div>
+            <div class="search-bar">
+                <input type="text" class="search-input" placeholder="Search the Clubhouse...">
+            </div>
+            <div class="header-icons">
+                <div class="icon-btn" data-tooltip="Notifications">
+                    <i class="fas fa-bell"></i>
+                </div>
+                <div class="icon-btn" data-tooltip="Messages">
+                    <i class="fas fa-comment-dots"></i>
+                </div>
+                <div class="user-profile">
+                    <div class="avatar">
+                        <?php if(isset($_SESSION['username'])) : ?>
+                            <?php echo substr($_SESSION['username'], 0, 1); ?>
+                        <?php else : ?>
+                            <i class="fas fa-user"></i>
+                        <?php endif; ?>
+                    </div>
+                    <div class="user-name">
+                        <?php if(isset($_SESSION['username'])) echo $_SESSION['username']; ?>
+                    </div>
+                </div>
+            </div>
+        </header>
+                            
         <!-- Sidebar Navigation -->
-        <aside class="sidebar" id="sidebar">
-            <div class="sidebar-logo">
-                <!-- Logo can go here if needed -->
+        <nav class="sidebar">
+            <div class="menu-group">
+                <div class="menu-item active">
+                    <div class="menu-icon">
+                        <i class="fas fa-home"></i>
+                    </div>
+                    <div class="menu-text">Home</div>
+                </div>
+                <div class="menu-item">
+                    <div class="menu-icon">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="menu-text">Profile</div>
+                </div>
+                <div class="menu-item">
+                    <div class="menu-icon">
+                        <i class="fas fa-comment-dots"></i>
+                    </div>
+                    <div class="menu-text">Messages</div>
+                </div>
+                <div class="menu-item">
+                    <div class="menu-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="menu-text"><a href="./members.php">Members</a></div>
+                </div>
+                <div class="menu-item">
+                    <div class="menu-icon">
+                        <i class="fas fa-newspaper"></i>
+                    </div>
+                    <div class="menu-text">Feed</div>
+                </div>
+                <div class="menu-item">
+                    <div class="menu-icon">
+                        <i class="fas fa-bookmark"></i>
+                    </div>
+                    <div class="menu-text"><a href="./app/Views/learn.php">learn</a></div>
+                </div>
+                <div class="menu-item">
+                    <div class="menu-icon">
+                        <i class="fas fa-calendar-alt"></i>
+                    </div>
+                    <div class="menu-text"><a href="./signin.php">Daily Register</a></div>
+                </div>
+                <div class="menu-item">
+                    <div class="menu-icon">
+                        <i class="fas fa-photo-video"></i>
+                    </div>
+                    <div class="menu-text"><a href="./app/Views/projects.php">Projects</a></div>
+                </div>
             </div>
             
-            <ul class="nav-menu">
-                <li>
-                    <a href="home.php" class="active">
-                        <svg class="nav-icon" width="30" height="30" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M11 23V53H49V23L30 8L11 23Z" fill="#6C63FF" stroke="#F29A2E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M23.75 36.25V52.5H36.25V36.25H23.75Z" fill="#F29A2E" stroke="#F29A2E" stroke-width="2" stroke-linejoin="round"/>
-                            <path d="M11.25 52.5H48.75" stroke="#F29A2E" stroke-width="2" stroke-linecap="round"/>
-                        </svg>
-                        Home
-                    </a>
-                </li>
-                <li>
-                    <a href="projects.php">
-                        <svg class="nav-icon" width="30" height="30" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M55 36.25H5V52.5H55V36.25Z" fill="#6C63FF" stroke="#F29A2E" stroke-width="2" stroke-linejoin="round"/>
-                            <path d="M44.375 47.5C46.1009 47.5 47.5 46.1009 47.5 44.375C47.5 42.6491 46.1009 41.25 44.375 41.25C42.6491 41.25 41.25 42.6491 41.25 44.375C41.25 46.1009 42.6491 47.5 44.375 47.5Z" fill="white"/>
-                            <path d="M5 36.2498L11.298 6.24878H48.7756L55 36.2498" stroke="#F29A2E" stroke-width="2" stroke-linejoin="round"/>
-                        </svg>
-                        Projects
-                    </a>
-                </li>
-                <li>
-                    <a href="members.php">
-                        <svg class="nav-icon" width="30" height="30" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M52.5 10H7.5C6.11929 10 5 11.1193 5 12.5V47.5C5 48.8807 6.11929 50 7.5 50H52.5C53.8807 50 55 48.8807 55 47.5V12.5C55 11.1193 53.8807 10 52.5 10Z" stroke="#F29A2E" stroke-width="2" stroke-linejoin="round"/>
-                            <path d="M21.25 31.25C24.0114 31.25 26.25 29.0114 26.25 26.25C26.25 23.4886 24.0114 21.25 21.25 21.25C18.4886 21.25 16.25 23.4886 16.25 26.25C16.25 29.0114 18.4886 31.25 21.25 31.25Z" fill="#6C63FF" stroke="#F29A2E" stroke-width="2" stroke-linejoin="round"/>
-                            <path d="M28.75 38.75C28.75 34.6079 25.3921 31.25 21.25 31.25C17.1079 31.25 13.75 34.6079 13.75 38.75" stroke="#F29A2E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                        Members
-                    </a>
-                </li>
-                <li>
-                    <a href="learn.php">
-                        <svg class="nav-icon" width="30" height="30" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M40 7.5H27.5V52.5H40V7.5Z" fill="#6C63FF" stroke="#F29A2E" stroke-width="2" stroke-linejoin="round"/>
-                            <path d="M52.5 7.5H40V52.5H52.5V7.5Z" fill="#6C63FF" stroke="#F29A2E" stroke-width="2" stroke-linejoin="round"/>
-                            <path d="M12.5 7.5L22.5 8.75L18.125 52.5L7.5 51.25L12.5 7.5Z" fill="#6C63FF" stroke="#F29A2E" stroke-width="2" stroke-linejoin="round"/>
-                        </svg>
-                        Learn
-                    </a>
-                </li>
-                <li>
-                    <a href="signin.php">
-                        <svg class="nav-icon" width="30" height="30" viewBox="0 0 66 66" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M33 59.125C47.4284 59.125 59.125 47.4284 59.125 33C59.125 18.5716 47.4284 6.875 33 6.875C18.5716 6.875 6.875 18.5716 6.875 33C6.875 47.4284 18.5716 59.125 33 59.125Z" fill="#6C63FF" stroke="#F29A2E" stroke-width="2"/>
-                            <path d="M49.5083 33.817V33.8156C49.5083 29.822 46.2708 26.5845 42.2771 26.5845H23.7229C19.7292 26.5845 16.4918 29.822 16.4918 33.8156V33.817C16.4918 37.8106 19.7292 41.0481 23.7229 41.0481H42.2771C46.2708 41.0481 49.5083 37.8106 49.5083 33.817Z" fill="#8CC86E" stroke="white" stroke-width="2"/>
-                        </svg>
-                        Sign In
-                    </a>
-                </li>
-                <?php if (isset($_SESSION['user_type']) && $_SESSION['user_type'] === "admin"): ?>
-                <li>
-                    <a href="app/Views/statsDashboard.php">
-                        <svg class="nav-icon" width="30" height="30" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M50 15H10C8.61929 15 7.5 16.1193 7.5 17.5V50C7.5 51.3807 8.61929 52.5 10 52.5H50C51.3807 52.5 52.5 51.3807 52.5 50V17.5C52.5 16.1193 51.3807 15 50 15Z" fill="#6C63FF" stroke="#F29A2E" stroke-width="2" stroke-linejoin="round"/>
-                            <path d="M22.437 30.0103H37.437" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M7.5 16.25L16.25 6.25H43.75L52.5 16.25" stroke="#F29A2E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                        Reports
-                    </a>
-                </li>
-                <?php endif; ?>
-                <li>
-                    <a href="settings.php">
-                        <svg class="nav-icon" width="30" height="30" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg">
-                            <path d="M30 50H8.75C6.67894 50 5 48.3211 5 46.25V13.75C5 11.6789 6.67894 10 8.75 10H51.25C53.3211 10 55 11.6789 55 13.75V28.8235" stroke="#F29A2E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                            <path d="M5 13.75C5 11.6789 6.67894 10 8.75 10H51.25C53.3211 10 55 11.6789 55 13.75V25H5V13.75Z" fill="#6C63FF" stroke="#F29A2E" stroke-width="2"/>
-                        </svg>
-                        Settings
-                    </a>
-                </li>
-            </ul>
-
-            <div class="logout-container">
-                <a href="logout_process.php">
-                    <button class="logout-btn">Logout</button>
-                </a>
-            </div>
-        </aside>
-
-<!-- Main Content Area -->
-<main class="main-content">
-    <!-- Header Section -->
-    <header class="dashboard-header">
-        <div class="announcement">
-            <div class="announcement-box">
-                <h4>Announcements</h4>
-                <h6><?php echo date("l, F jS, Y"); ?></h6>
-            </div>
-        </div>
-        <div class="user-info">
-            <div class="user-details">
-                <div class="user-avatar">
-                    <i class="fas fa-user"></i>
+            <div class="menu-group">
+                <div class="menu-title">Groups</div>
+                <?php foreach ($clubhousePrograms as $program): ?>
+                <div class="menu-item">
+                    <div class="menu-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="menu-text"><?php echo htmlspecialchars($program['title']); ?></div>
                 </div>
-                <div class="user-name">
-                    <?php if(isset($_SESSION['loggedin'])) : ?>
-                        <h3><?php echo $_SESSION['username']; ?></h3>
-                        <?php if (isset($_SESSION['user_type'])) : ?>
-                            <div class="user-role"><?php echo $_SESSION['user_type']; ?></div>
+                <?php endforeach; ?>
+            </div>
+            
+            <!-- Admin links shown only to admin users -->
+            <?php if (isset($_SESSION['user_type']) && $_SESSION['user_type'] === "admin"): ?>
+            <div class="menu-group">
+                <div class="menu-title">Admin</div>
+                <div class="menu-item">
+                    <div class="menu-icon">
+                        <i class="fas fa-chart-bar"></i>
+                    </div>
+                    <div class="menu-text"><a href="./app/Views/statsDashboard.php">Reports</a></div>
+                </div>
+                <div class="menu-item">
+                    <div class="menu-icon">
+                        <i class="fas fa-cog"></i>
+                    </div>
+                    <div class="menu-text"><a href="./settings.php">Settings</a></div>
+                </div>
+            </div>
+            <?php endif; ?>
+            
+            <div class="menu-item" onclick="window.location.href='logout_process.php'">
+                <div class="menu-icon">
+                    <i class="fas fa-sign-out-alt"></i>
+                </div>
+                <div class="menu-text">Log out</div>
+            </div>
+        </nav>
+
+        <!-- Main Content Area -->
+        <main class="main-content">
+            <!-- Post Creation -->
+            <div class="create-post">
+                <div class="post-input">
+                    <div class="avatar">
+                        <?php if(isset($_SESSION['username'])) : ?>
+                            <?php echo substr($_SESSION['username'], 0, 1); ?>
+                        <?php else : ?>
+                            <i class="fas fa-user"></i>
                         <?php endif; ?>
+                    </div>
+                    <input type="text" placeholder="What's on your mind?">
+                </div>
+                <div class="post-actions">
+                    <div class="post-action">
+                        <i class="fas fa-image photo-icon"></i>
+                        <span>Photo</span>
+                    </div>
+                    <div class="post-action">
+                        <i class="fas fa-link link-icon"></i>
+                        <span>Link</span>
+                    </div>
+                    <div class="post-action">
+                        <i class="fas fa-smile emoji-icon"></i>
+                        <span>Feeling</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Feed -->
+            <div class="feed">
+                <!-- Member Posts Section -->
+                <?php if (!empty($memberPosts)): ?>
+                    <?php foreach ($memberPosts as $post): ?>
+                        <div class="post">
+                            <div class="post-header">
+                                <div class="post-user">
+                                    <div class="avatar" style="background-color: <?php echo getAvatarColor($post['user_id']); ?>">
+                                        <?php echo getInitials($post['name'] . ' ' . $post['surname']); ?>
+                                    </div>
+                                    <div class="post-info">
+                                        <div class="post-author"><?php echo htmlspecialchars($post['name'] . ' ' . $post['surname']); ?></div>
+                                        <div class="post-meta"><?php echo htmlspecialchars($post['formatted_date']); ?></div>
+                                    </div>
+                                </div>
+                                <div class="post-options">
+                                    <i class="fas fa-ellipsis-h"></i>
+                                </div>
+                            </div>
+                            <div class="post-content">
+                                <div class="post-text">
+                                    <?php echo htmlspecialchars($post['description']); ?>
+                                </div>
+                                <div class="post-images">
+                                    <?php if (isset($post['image']) && file_exists('public/assets/uploads/images/' . $post['image'])): ?>
+                                        <div class="post-image">
+                                            <img src="public/assets/uploads/images/<?php echo htmlspecialchars($post['image']); ?>" alt="<?php echo htmlspecialchars($post['title']); ?>">
+                                        </div>
+                                    <?php else: ?>
+                                        <div class="post-image">
+                                            <img src="https://source.unsplash.com/random/600x400?<?php echo urlencode($post['tags'][0] ?? 'technology'); ?>" alt="Project Image">
+                                        </div>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                            <div class="post-stats">
+                                <div class="like-count">
+                                    <i class="fas fa-thumbs-up" style="color: var(--primary);"></i>
+                                    <span><?php echo rand(5, 50); ?></span>
+                                </div>
+                                <div class="comment-share-count">
+                                    <span><?php echo rand(1, 20); ?> comments</span>
+                                    <span><?php echo rand(0, 5); ?> shares</span>
+                                </div>
+                            </div>
+                            <div class="post-buttons">
+                                <div class="post-button like-btn">
+                                    <i class="far fa-thumbs-up"></i>
+                                    <span>Like</span>
+                                </div>
+                                <div class="post-button comment-btn">
+                                    <i class="far fa-comment"></i>
+                                    <span>Comment</span>
+                                </div>
+                                <div class="post-button share-btn">
+                                    <i class="far fa-share-square"></i>
+                                    <span>Share</span>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <div class="post">
+                        <div class="post-content" style="text-align: center; padding: 2rem;">
+                            <div class="post-text">
+                                No posts yet. Be the first to share something with the community!
+                            </div>
+                        </div>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </main>
+
+        <!-- Right Sidebar -->
+        <aside class="right-sidebar">
+            <!-- Upcoming Events Section -->
+            <div class="sidebar-section">
+                <div class="section-header">
+                    <div class="section-title">Your upcoming events</div>
+                    <div class="section-more">See All</div>
+                </div>
+                <div class="event-list">
+                    <?php if (empty($upcomingEvents)): ?>
+                        <div style="text-align: center; color: #65676b;">
+                            No upcoming events at this time.
+                        </div>
+                    <?php else: ?>
+                        <?php foreach ($upcomingEvents as $event): ?>
+                            <div class="event-item">
+                                <div class="event-icon">
+                                    <i class="fas fa-calendar-day"></i>
+                                </div>
+                                <div class="event-details">
+                                    <div class="event-name"><?php echo htmlspecialchars($event['title']); ?></div>
+                                    <div class="event-info">
+                                        <?php echo htmlspecialchars($event['formatted_date'] . ' • ' . $event['time']); ?>
+                                    </div>
+                                    <div class="event-info">
+                                        <i class="fas fa-map-marker-alt"></i> <?php echo htmlspecialchars($event['location']); ?>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
                     <?php endif; ?>
                 </div>
             </div>
-        </div>
-    </header>
+            
+          <!-- Learning Progress (Optional) -->
+          <div class="sidebar-section">
+                <div class="section-header">
+                    <div class="section-title">Your learning</div>
+                    <div class="section-more">See All</div>
+                </div>
+                <div class="learning-progress-mini">
+                    <div class="course-progress">
+                        <div class="course-info">
+                            <strong>Robotics</strong>
+                            <span>65% complete</span>
+                        </div>
+                        <div class="progress-bar-container" style="height: 6px; background: #eee; border-radius: 3px; margin: 5px 0;">
+                            <div class="progress-bar" style="width: 65%; height: 100%; background: var(--primary); border-radius: 3px;"></div>
+                        </div>
+                    </div>
+                    <div class="course-progress">
+                        <div class="course-info">
+                            <strong>Web Development</strong>
+                            <span>40% complete</span>
+                        </div>
+                        <div class="progress-bar-container" style="height: 6px; background: #eee; border-radius: 3px; margin: 5px 0;">
+                            <div class="progress-bar" style="width: 40%; height: 100%; background: var(--primary); border-radius: 3px;"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
-    <!-- Dashboard Content Area -->
-    <section class="dashboard-content">
-        <div class="content-grid">
-            <!-- Place the Dynamic Dashboard Content here -->
-            <?php include 'app/Views/dynamic-dashboard-content.php'; ?>
-            <!-- Alternatively, you can copy and paste the content directly here -->
-        </div>
-    </section>
-</main>
-        <script src="public/assets/js/homedashboard.js"></script>
+            <!-- Birthdays Section -->
+            <div class="sidebar-section">
+                <div class="section-header">
+                    <div class="section-title">Birthdays</div>
+                </div>
+                <div class="birthdays-list">
+                    <?php 
+                    // This would come from your database in a real implementation
+                    $birthdays = [];
+                    if (isset($userBirthdays)) {
+                        $birthdays = $userBirthdays;
+                    }
+                    ?>
+                    
+                    <?php if (empty($birthdays)): ?>
+                        <div class="birthday-item">
+                            <div class="birthday-icon">
+                                <i class="fas fa-birthday-cake"></i>
+                            </div>
+                            <div class="birthday-info">
+                                <strong>Bob Hammond</strong> turns 28 years old today
+                            </div>
+                        </div>
+                        <div class="birthday-item">
+                            <div class="birthday-icon">
+                                <i class="fas fa-birthday-cake"></i>
+                            </div>
+                            <div class="birthday-info">
+                                <strong>Haarper Mitchell</strong> turns 21 years old tomorrow
+                            </div>
+                        </div>
+                    <?php else: ?>
+                        <?php foreach ($birthdays as $birthday): ?>
+                            <div class="birthday-item">
+                                <div class="birthday-icon">
+                                    <i class="fas fa-birthday-cake"></i>
+                                </div>
+                                <div class="birthday-info">
+                                    <?php echo $birthday['message']; ?>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    <?php endif; ?>
+                </div>
+            </div>
+            
+            <!-- Community Chats Section -->
+            <div class="sidebar-section">
+                <div class="section-header">
+                    <div class="section-title">Community chats</div>
+                    <div class="section-more">See All</div>
+                </div>
+                <div class="chat-list">
+                    <div class="chat-item">
+                        <div class="avatar chat-avatar">
+                            <img src="https://source.unsplash.com/random/100x100?robot" alt="Robotics Chat">
+                            <div class="online-indicator"></div>
+                        </div>
+                        <div class="chat-info">
+                            <strong>Robotics Team</strong>
+                        </div>
+                    </div>
+                    <div class="chat-item">
+                        <div class="avatar chat-avatar">
+                            <img src="https://source.unsplash.com/random/100x100?code" alt="Coding Chat">
+                            <div class="online-indicator"></div>
+                        </div>
+                        <div class="chat-info">
+                            <strong>Coding Club</strong>
+                        </div>
+                    </div>
+                    <div class="chat-item">
+                        <div class="avatar chat-avatar">
+                            <img src="https://source.unsplash.com/random/100x100?art" alt="Digital Art Chat">
+                        </div>
+                        <div class="chat-info">
+                            <strong>Digital Artists</strong>
+                        </div>
+                    </div>
+                    <div class="chat-item">
+                        <div class="avatar chat-avatar">
+                            <img src="https://source.unsplash.com/random/100x100?music" alt="Music Chat">
+                        </div>
+                        <div class="chat-info">
+                            <strong>Music Production</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Online Contacts -->
+            <div class="sidebar-section">
+                <div class="section-header">
+                    <div class="section-title">Online contacts</div>
+                </div>
+                <div class="chat-list">
+                    <div class="chat-item">
+                        <div class="avatar chat-avatar">
+                            <div style="background-color: #3F51B5; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 500;">ML</div>
+                            <div class="online-indicator"></div>
+                        </div>
+                        <div class="chat-info">
+                            <strong>Mark Larsen</strong>
+                        </div>
+                    </div>
+                    <div class="chat-item">
+                        <div class="avatar chat-avatar">
+                            <div style="background-color: #009688; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 500;">ER</div>
+                            <div class="online-indicator"></div>
+                        </div>
+                        <div class="chat-info">
+                            <strong>Ethan Reynolds</strong>
+                        </div>
+                    </div>
+                    <div class="chat-item">
+                        <div class="avatar chat-avatar">
+                            <div style="background-color: #FF5722; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 500;">AT</div>
+                            <div class="online-indicator"></div>
+                        </div>
+                        <div class="chat-info">
+                            <strong>Ava Thompson</strong>
+                        </div>
+                    </div>
+                    <div class="chat-item">
+                        <div class="avatar chat-avatar">
+                            <div style="background-color: #607D8B; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 500;">HM</div>
+                        </div>
+                        <div class="chat-info">
+                            <strong>Haarper Mitchell</strong>
+                        </div>
+                    </div>
+                    <div class="chat-item">
+                        <div class="avatar chat-avatar">
+                            <div style="background-color: #9C27B0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 500;">PM</div>
+                        </div>
+                        <div class="chat-info">
+                            <strong>Pablo Morandi</strong>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+  
+        </aside>
+    </div>
+    <!-- Mobile Navigation (visible on mobile only) -->
+    <nav class="mobile-nav">
+            <a href="home.php" class="mobile-menu-item active">
+                <div class="mobile-menu-icon">
+                    <i class="fas fa-home"></i>
+                </div>
+                <span>Home</span>
+            </a>
+            <a href="friends.php" class="mobile-menu-item">
+                <div class="mobile-menu-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <span>Friends</span>
+            </a>
+            <a href="messages.php" class="mobile-menu-item">
+                <div class="mobile-menu-icon">
+                    <i class="fas fa-comment-dots"></i>
+                </div>
+                <span>Messages</span>
+            </a>
+            <a href="notifications.php" class="mobile-menu-item">
+                <div class="mobile-menu-icon">
+                    <i class="fas fa-bell"></i>
+                </div>
+                <span>Notifications</span>
+            </a>
+            <a href="profile.php" class="mobile-menu-item">
+                <div class="mobile-menu-icon">
+                    <i class="fas fa-user"></i>
+                </div>
+                <span>Profile</span>
+            </a>
+        </nav>
+    <script src="./public/assets/js/homedashboard.js"></script>
 </body>
+</html>
 </html>
