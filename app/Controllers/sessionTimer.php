@@ -1,12 +1,12 @@
 <?php
 ob_start();
-//Check if the session is not already started
+// Check if the session is not already started
 if (session_status() == PHP_SESSION_NONE) {
     session_start();
 }
 
 // Database connection details
-require '__DIR__ . ../../server.php';
+require __DIR__ . '/../../server.php';
 
 // Set the inactivity timeout in seconds (e.g., 15 minutes)
 $inactivityTimeout = 600; // 10 minutes
