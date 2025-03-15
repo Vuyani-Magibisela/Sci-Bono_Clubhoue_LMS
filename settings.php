@@ -1,7 +1,7 @@
 <?php
 session_start(); // Start the session first
 // Include database connection
-require 'server.php'; // Make sure this path is correct
+require 'server.php'; 
 
 // Check if user is logged in
 if (!isset($_SESSION['loggedin'])) {

@@ -1,5 +1,6 @@
 <?php
 session_start();
+
 // Check if user is logged in
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true) {
     header("Location: login.php");
@@ -143,7 +144,7 @@ require_once 'app/Models/dashboard-data-loader.php';
                     <div class="menu-icon">
                         <i class="fas fa-cog"></i>
                     </div>
-                    <div class="menu-text"><a href="./settings.php">Settings</a></div>
+                    <div class="menu-text"><a href="./app/Views/settings.php">Settings</a></div>
                 </div>
             </div>
             <?php endif; ?>
