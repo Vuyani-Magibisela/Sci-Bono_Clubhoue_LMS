@@ -161,7 +161,7 @@ if (!$can_edit) {
                 <div class="settings-content">
                     <!-- Profile header with image -->
                     <div class="profile-header">
-                                                    <div class="profile-image-container">
+                        <div class="profile-image-container">
                             <img src="../../public/assets/images/ui-user-profile-negative.svg" alt="Profile" id="profile-image" class="profile-image" style="display: none;">
                             <div class="profile-image-placeholder"><?php echo substr($user['name'], 0, 1); ?></div>
                             <input type="file" id="profile-image-input" accept="image/*" style="display: none;">
@@ -188,12 +188,12 @@ if (!$can_edit) {
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label for="first-name" class="form-label">First Name</label>
-                                        <input type="text" id="first-name" name="name" class="form-control" value="<?php echo $user['name']; ?>" required>
+                                        <input type="text" id="first-name" name="name" class="form-control input-control" value="<?php echo $user['name']; ?>" required>
                                         <div class="error-message"></div>
                                     </div>
                                     <div class="form-group">
                                         <label for="surname" class="form-label">Surname</label>
-                                        <input type="text" id="surname" name="surname" class="form-control" value="<?php echo $user['surname']; ?>" required>
+                                        <input type="text" id="surname" name="surname" class="form-control input-control" value="<?php echo $user['surname']; ?>" required>
                                         <div class="error-message"></div>
                                     </div>
                                 </div>
@@ -201,7 +201,7 @@ if (!$can_edit) {
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label for="username" class="form-label">Username</label>
-                                        <input type="text" id="username" name="username" class="form-control" value="<?php echo $user['username']; ?>" required>
+                                        <input type="text" id="username" name="username" class="form-control input-control" value="<?php echo $user['username']; ?>" required>
                                         <div class="error-message"></div>
                                     </div>
                                     <div class="form-group">
@@ -230,7 +230,7 @@ if (!$can_edit) {
                                     <div class="form-group">
                                         <div id="other_nationality_div" style="display: <?php echo (isset($user['nationality']) && !in_array($user['nationality'], ['South African', 'Afghan', 'Albanian', 'Algerian', 'British', 'Chinese', 'Egyptian', 'French', 'German', 'Indian', 'Nigerian', 'Zambian', 'Zimbabwean']) && !empty($user['nationality'])) ? 'block' : 'none'; ?>;">
                                             <label for="other_nationality" class="form-label">Specify Nationality</label>
-                                            <input type="text" id="other_nationality" name="other_nationality" class="form-control" value="<?php echo (isset($user['nationality']) && !in_array($user['nationality'], ['South African', 'Afghan', 'Albanian', 'Algerian', 'British', 'Chinese', 'Egyptian', 'French', 'German', 'Indian', 'Nigerian', 'Zambian', 'Zimbabwean']) && !empty($user['nationality'])) ? $user['nationality'] : ''; ?>" placeholder="Specify nationality">
+                                            <input type="text" id="other_nationality" name="other_nationality" class="form-control input-control" value="<?php echo (isset($user['nationality']) && !in_array($user['nationality'], ['South African', 'Afghan', 'Albanian', 'Algerian', 'British', 'Chinese', 'Egyptian', 'French', 'German', 'Indian', 'Nigerian', 'Zambian', 'Zimbabwean']) && !empty($user['nationality'])) ? $user['nationality'] : ''; ?>" placeholder="Specify nationality">
                                         </div>
                                     </div>
                                 </div>
@@ -238,7 +238,7 @@ if (!$can_edit) {
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label for="sa-id-number" class="form-label">SA ID Number</label>
-                                        <input type="text" id="sa-id-number" name="id_number" class="form-control" value="<?php echo isset($user['id_number']) ? $user['id_number'] : ''; ?>">
+                                        <input type="text" id="sa-id-number" name="id_number" class="form-control input-control" value="<?php echo isset($user['id_number']) ? $user['id_number'] : ''; ?>">
                                         <div class="error-message"></div>
                                         <span class="form-hint">South African ID numbers are 13 digits long</span>
                                     </div>
@@ -256,7 +256,7 @@ if (!$can_edit) {
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label for="dob" class="form-label">Date of Birth</label>
-                                        <input type="date" id="dob" name="dob" class="form-control" value="<?php echo $user['date_of_birth']; ?>" required>
+                                        <input type="date" id="dob" name="dob" class="form-control input-control" value="<?php echo $user['date_of_birth']; ?>" required>
                                         <div class="error-message"></div>
                                     </div>
                                     <div class="form-group">
@@ -280,7 +280,7 @@ if (!$can_edit) {
                                     <div class="form-group">
                                         <div id="other_language_div" style="display: <?php echo (isset($user['home_language']) && !in_array($user['home_language'], ['Afrikaans', 'English', 'isiNdebele', 'isiXhosa', 'isiZulu', 'Sepedi', 'Sesotho', 'Setswana']) && !empty($user['home_language'])) ? 'block' : 'none'; ?>;">
                                             <label for="other_language" class="form-label">Specify Language</label>
-                                            <input type="text" id="other_language" name="other_language" class="form-control" value="<?php echo (isset($user['home_language']) && !in_array($user['home_language'], ['Afrikaans', 'English', 'isiNdebele', 'isiXhosa', 'isiZulu', 'Sepedi', 'Sesotho', 'Setswana']) && !empty($user['home_language'])) ? $user['home_language'] : ''; ?>" placeholder="Specify language">
+                                            <input type="text" id="other_language" name="other_language" class="form-control input-control" value="<?php echo (isset($user['home_language']) && !in_array($user['home_language'], ['Afrikaans', 'English', 'isiNdebele', 'isiXhosa', 'isiZulu', 'Sepedi', 'Sesotho', 'Setswana']) && !empty($user['home_language'])) ? $user['home_language'] : ''; ?>" placeholder="Specify language">
                                         </div>
                                     </div>
                                 </div>
@@ -288,12 +288,12 @@ if (!$can_edit) {
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label for="email" class="form-label">Email</label>
-                                        <input type="email" id="email" name="email" class="form-control" value="<?php echo $user['email']; ?>" required>
+                                        <input type="email" id="email" name="email" class="form-control input-control" value="<?php echo $user['email']; ?>" required>
                                         <div class="error-message"></div>
                                     </div>
                                     <div class="form-group">
                                         <label for="cell-number" class="form-label">Cell Number</label>
-                                        <input type="text" id="cell-number" name="cell_number" class="form-control phone-input" value="<?php echo isset($user['leaner_number']) ? $user['leaner_number'] : ''; ?>">
+                                        <input type="text" id="cell-number" name="cell_number" class="form-control phone-input input-control" value="<?php echo isset($user['leaner_number']) ? $user['leaner_number'] : ''; ?>">
                                         <div class="error-message"></div>
                                     </div>
                                 </div>
@@ -335,12 +335,12 @@ if (!$can_edit) {
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label for="address-street" class="form-label">Street</label>
-                                        <input type="text" id="address-street" name="address_street" class="form-control" value="<?php echo isset($user['address_street']) ? $user['address_street'] : ''; ?>">
+                                        <input type="text" id="address-street" name="address_street" class="form-control input-control" value="<?php echo isset($user['address_street']) ? $user['address_street'] : ''; ?>">
                                         <div class="error-message"></div>
                                     </div>
                                     <div class="form-group">
                                         <label for="address-suburb" class="form-label">Suburb/Township</label>
-                                        <input type="text" id="address-suburb" name="address_suburb" class="form-control" value="<?php echo isset($user['address_suburb']) ? $user['address_suburb'] : ''; ?>">
+                                        <input type="text" id="address-suburb" name="address_suburb" class="form-control input-control" value="<?php echo isset($user['address_suburb']) ? $user['address_suburb'] : ''; ?>">
                                         <div class="error-message"></div>
                                     </div>
                                 </div>
@@ -348,7 +348,7 @@ if (!$can_edit) {
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label for="address-city" class="form-label">City</label>
-                                        <input type="text" id="address-city" name="address_city" class="form-control" value="<?php echo isset($user['address_city']) ? $user['address_city'] : ''; ?>">
+                                        <input type="text" id="address-city" name="address_city" class="form-control input-control" value="<?php echo isset($user['address_city']) ? $user['address_city'] : ''; ?>">
                                         <div class="error-message"></div>
                                     </div>
                                     <div class="form-group">
@@ -372,29 +372,14 @@ if (!$can_edit) {
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label for="address-postal-code" class="form-label">Postal Code</label>
-                                        <input type="text" id="address-postal-code" name="address_postal_code" class="form-control" value="<?php echo isset($user['address_postal_code']) ? $user['address_postal_code'] : ''; ?>">
+                                        <input type="text" id="address-postal-code" name="address_postal_code" class="form-control input-control" value="<?php echo isset($user['address_postal_code']) ? $user['address_postal_code'] : ''; ?>">
                                         <div class="error-message"></div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         
-                        <!-- Password Section -->
-                        <div class="form-section">
-                            <div class="form-section-header">
-                                <h3 class="form-section-title">Password</h3>
-                            </div>
-                            <div class="form-section-content">
-                                <div class="form-row">
-                                    <div class="form-group">
-                                        <label for="password" class="form-label">New Password</label>
-                                        <input type="password" id="password" name="password" class="form-control" placeholder="Leave blank to keep current password">
-                                        <div class="error-message"></div>
-                                        <span class="form-hint">Only fill this if you want to change your password</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+
                         
                         <?php if ($user['user_type'] === 'member'): ?>
                         <!-- School Information Section (Only for Members) -->
@@ -406,7 +391,7 @@ if (!$can_edit) {
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label for="school" class="form-label">School Name</label>
-                                        <input type="text" id="school" name="school" class="form-control" value="<?php echo $user['school']; ?>" required>
+                                        <input type="text" id="school" name="school" class="form-control input-control" value="<?php echo $user['school']; ?>" required>
                                         <div class="error-message"></div>
                                     </div>
                                     <div class="form-group">
@@ -423,7 +408,7 @@ if (!$can_edit) {
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label for="learner-number" class="form-label">Learner Number</label>
-                                        <input type="text" id="learner-number" name="learner_number" class="form-control" value="<?php echo $user['leaner_number']; ?>">
+                                        <input type="text" id="learner-number" name="learner_number" class="form-control input-control" value="<?php echo $user['leaner_number']; ?>">
                                         <div class="error-message"></div>
                                     </div>
                                 </div>
@@ -439,12 +424,12 @@ if (!$can_edit) {
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label for="parent" class="form-label">Parent/Guardian Name</label>
-                                        <input type="text" id="parent" name="parent" class="form-control" value="<?php echo $user['parent']; ?>" required>
+                                        <input type="text" id="parent" name="parent" class="form-control input-control" value="<?php echo $user['parent']; ?>" required>
                                         <div class="error-message"></div>
                                     </div>
                                     <div class="form-group">
                                         <label for="relationship" class="form-label">Relationship</label>
-                                        <input type="text" id="relationship" name="relationship" class="form-control" value="<?php echo $user['Relationship']; ?>" required>
+                                        <input type="text" id="relationship" name="relationship" class="form-control input-control" value="<?php echo $user['Relationship']; ?>" required>
                                         <div class="error-message"></div>
                                     </div>
                                 </div>
@@ -452,12 +437,12 @@ if (!$can_edit) {
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label for="parent-email" class="form-label">Parent Email</label>
-                                        <input type="email" id="parent-email" name="parent_email" class="form-control" value="<?php echo $user['parent_email']; ?>" required>
+                                        <input type="email" id="parent-email" name="parent_email" class="form-control input-control" value="<?php echo $user['parent_email']; ?>" required>
                                         <div class="error-message"></div>
                                     </div>
                                     <div class="form-group">
                                         <label for="parent-number" class="form-label">Parent Phone</label>
-                                        <input type="tel" id="parent-number" name="parent_number" class="form-control phone-input" value="<?php echo $user['parent_number']; ?>" required>
+                                        <input type="tel" id="parent-number" name="parent_number" class="form-control phone-input input-control" value="<?php echo $user['parent_number']; ?>" required>
                                         <div class="error-message"></div>
                                     </div>
                                 </div>
@@ -474,12 +459,12 @@ if (!$can_edit) {
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label for="emergency-contact-name" class="form-label">Contact Name</label>
-                                        <input type="text" id="emergency-contact-name" name="emergency_contact_name" class="form-control" value="<?php echo isset($user['emergency_contact_name']) ? $user['emergency_contact_name'] : ''; ?>">
+                                        <input type="text" id="emergency-contact-name" name="emergency_contact_name" class="form-control input-control" value="<?php echo isset($user['emergency_contact_name']) ? $user['emergency_contact_name'] : ''; ?>">
                                         <div class="error-message"></div>
                                     </div>
                                     <div class="form-group">
                                         <label for="emergency-contact-relationship" class="form-label">Relationship</label>
-                                        <input type="text" id="emergency-contact-relationship" name="emergency_contact_relationship" class="form-control" value="<?php echo isset($user['emergency_contact_relationship']) ? $user['emergency_contact_relationship'] : ''; ?>">
+                                        <input type="text" id="emergency-contact-relationship" name="emergency_contact_relationship" class="form-control input-control" value="<?php echo isset($user['emergency_contact_relationship']) ? $user['emergency_contact_relationship'] : ''; ?>">
                                         <div class="error-message"></div>
                                     </div>
                                 </div>
@@ -487,12 +472,12 @@ if (!$can_edit) {
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label for="emergency-contact-phone" class="form-label">Phone Number</label>
-                                        <input type="tel" id="emergency-contact-phone" name="emergency_contact_phone" class="form-control phone-input" value="<?php echo isset($user['emergency_contact_phone']) ? $user['emergency_contact_phone'] : ''; ?>">
+                                        <input type="tel" id="emergency-contact-phone" name="emergency_contact_phone" class="form-control phone-input input-control" value="<?php echo isset($user['emergency_contact_phone']) ? $user['emergency_contact_phone'] : ''; ?>">
                                         <div class="error-message"></div>
                                     </div>
                                     <div class="form-group">
                                         <label for="emergency-contact-email" class="form-label">Email</label>
-                                        <input type="email" id="emergency-contact-email" name="emergency_contact_email" class="form-control" value="<?php echo isset($user['emergency_contact_email']) ? $user['emergency_contact_email'] : ''; ?>">
+                                        <input type="email" id="emergency-contact-email" name="emergency_contact_email" class="form-control input-control" value="<?php echo isset($user['emergency_contact_email']) ? $user['emergency_contact_email'] : ''; ?>">
                                         <div class="error-message"></div>
                                     </div>
                                 </div>
@@ -500,7 +485,7 @@ if (!$can_edit) {
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label for="emergency-contact-address" class="form-label">Address</label>
-                                        <textarea id="emergency-contact-address" name="emergency_contact_address" class="form-control form-textarea"><?php echo isset($user['emergency_contact_address']) ? $user['emergency_contact_address'] : ''; ?></textarea>
+                                        <textarea id="emergency-contact-address" name="emergency_contact_address" class="form-control form-textarea input-control"><?php echo isset($user['emergency_contact_address']) ? $user['emergency_contact_address'] : ''; ?></textarea>
                                         <div class="error-message"></div>
                                     </div>
                                 </div>
@@ -517,12 +502,12 @@ if (!$can_edit) {
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label for="interests" class="form-label">What are your interests?</label>
-                                        <textarea id="interests" name="interests" class="form-control form-textarea"><?php echo isset($user['interests']) ? $user['interests'] : ''; ?></textarea>
+                                        <textarea id="interests" name="interests" class="form-control form-textarea input-control"><?php echo isset($user['interests']) ? $user['interests'] : ''; ?></textarea>
                                         <div class="error-message"></div>
                                     </div>
                                     <div class="form-group">
                                         <label for="role-models" class="form-label">Who are your role models?</label>
-                                        <textarea id="role-models" name="role_models" class="form-control form-textarea"><?php echo isset($user['role_models']) ? $user['role_models'] : ''; ?></textarea>
+                                        <textarea id="role-models" name="role_models" class="form-control form-textarea input-control"><?php echo isset($user['role_models']) ? $user['role_models'] : ''; ?></textarea>
                                         <div class="error-message"></div>
                                     </div>
                                 </div>
@@ -530,7 +515,7 @@ if (!$can_edit) {
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label for="goals" class="form-label">What are your goals?</label>
-                                        <textarea id="goals" name="goals" class="form-control form-textarea"><?php echo isset($user['goals']) ? $user['goals'] : ''; ?></textarea>
+                                        <textarea id="goals" name="goals" class="form-control form-textarea input-control"><?php echo isset($user['goals']) ? $user['goals'] : ''; ?></textarea>
                                         <div class="error-message"></div>
                                     </div>
                                 </div>
@@ -549,18 +534,35 @@ if (!$can_edit) {
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label for="computer-skills" class="form-label">What can you do on a computer?</label>
-                                        <textarea id="computer-skills" name="computer_skills" class="form-control form-textarea"><?php echo isset($user['computer_skills']) ? $user['computer_skills'] : ''; ?></textarea>
+                                        <textarea id="computer-skills" name="computer_skills" class="form-control form-textarea input-control"><?php echo isset($user['computer_skills']) ? $user['computer_skills'] : ''; ?></textarea>
                                         <div class="error-message"></div>
                                     </div>
                                     <div class="form-group">
                                         <label for="computer-skills-source" class="form-label">Where did you learn your computer skills?</label>
-                                        <textarea id="computer-skills-source" name="computer_skills_source" class="form-control form-textarea"><?php echo isset($user['computer_skills_source']) ? $user['computer_skills_source'] : ''; ?></textarea>
+                                        <textarea id="computer-skills-source" name="computer_skills_source" class="form-control form-textarea input-control"><?php echo isset($user['computer_skills_source']) ? $user['computer_skills_source'] : ''; ?></textarea>
                                         <div class="error-message"></div>
                                     </div>
                                 </div>
                             </div>
                         </div>
                         <?php endif; ?>
+
+                        <!-- Password Section -->
+                        <div class="form-section">
+                            <div class="form-section-header">
+                                <h3 class="form-section-title">Password</h3>
+                            </div>
+                            <div class="form-section-content">
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="password" class="form-label">New Password</label>
+                                        <input type="password" id="password" name="password" class="form-control input-control" placeholder="Leave blank to keep current password">
+                                        <div class="error-message"></div>
+                                        <span class="form-hint">Only fill this if you want to change your password</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>                        
                         
                         <!-- Form Actions -->
                         <div class="form-actions">

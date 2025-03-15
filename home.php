@@ -470,37 +470,37 @@ require_once 'app/Models/dashboard-data-loader.php';
     </div>
     <!-- Mobile Navigation (visible on mobile only) -->
     <nav class="mobile-nav">
-            <a href="home.php" class="mobile-menu-item active">
-                <div class="mobile-menu-icon">
-                    <i class="fas fa-home"></i>
-                </div>
-                <span>Home</span>
-            </a>
-            <a href="friends.php" class="mobile-menu-item">
-                <div class="mobile-menu-icon">
-                    <i class="fas fa-users"></i>
-                </div>
-                <span>Friends</span>
-            </a>
-            <a href="messages.php" class="mobile-menu-item">
-                <div class="mobile-menu-icon">
-                    <i class="fas fa-comment-dots"></i>
-                </div>
-                <span>Messages</span>
-            </a>
-            <a href="notifications.php" class="mobile-menu-item">
-                <div class="mobile-menu-icon">
-                    <i class="fas fa-bell"></i>
-                </div>
-                <span>Notifications</span>
-            </a>
-            <a href="profile.php" class="mobile-menu-item">
-                <div class="mobile-menu-icon">
-                    <i class="fas fa-user"></i>
-                </div>
-                <span>Profile</span>
-            </a>
-        </nav>
+        <a href="home.php" class="mobile-menu-item active">
+            <div class="mobile-menu-icon">
+                <i class="fas fa-home"></i>
+            </div>
+            <span>Home</span>
+        </a>
+        <a href="members.php" class="mobile-menu-item">
+            <div class="mobile-menu-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <span>Members</span>
+        </a>
+        <a href="app/Views/messages.php" class="mobile-menu-item">
+            <div class="mobile-menu-icon">
+                <i class="fas fa-comment-dots"></i>
+            </div>
+            <span>Messages</span>
+        </a>
+        <a href="app/Views/projects.php" class="mobile-menu-item">
+            <div class="mobile-menu-icon">
+                <i class="fas fa-project-diagram"></i>
+            </div>
+            <span>Projects</span>
+        </a>
+        <a href="app/Views/settings.php" class="mobile-menu-item">
+            <div class="mobile-menu-icon">
+                <i class="fas fa-cog"></i>
+            </div>
+            <span>Settings</span>
+        </a>
+    </nav>
     <script src="./public/assets/js/homedashboard.js"></script>
 </body>
 </html>

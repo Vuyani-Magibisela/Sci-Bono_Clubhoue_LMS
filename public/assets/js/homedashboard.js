@@ -62,10 +62,12 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Post creation
     const postInput = document.querySelector('.post-input input');
-    postInput.addEventListener('focus', function() {
-        // In a real implementation, this might expand to a full post creation form
-        alert('Post creation form would expand here');
-    });
+    if (postInput) {
+        postInput.addEventListener('focus', function() {
+            // In a real implementation, this might expand to a full post creation form
+            alert('Post creation form would expand here');
+        });
+    }
     
     // Post actions
     const postActions = document.querySelectorAll('.post-action');
@@ -76,34 +78,95 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
     
-    // Simulate page transition when clicking on menu items
+    // Sidebar menu navigation with loading animation
     const menuItems = document.querySelectorAll('.menu-item:not(.active)');
     menuItems.forEach(item => {
-        item.addEventListener('click', function() {
+        item.addEventListener('click', function(e) {
+            // Check if there's a link inside
+            const link = this.querySelector('a');
+            if (link) {
+                // If there's a link, let it handle the navigation
+                // We just show the loading animation
+                showLoader();
+                return; // Don't prevent default; let the link work
+            }
+            
+            // If there's no link, prevent default behavior and handle it here
+            e.preventDefault();
             simulateLoading();
-            // In a real implementation, this would navigate to the page
-            // Here we just simulate page load
-            setTimeout(() => {
-                const menuText = this.querySelector('.menu-text');
-                if (menuText) {
-                    alert(`Navigating to ${menuText.textContent} page`);
+            
+            // Get the menu text
+            const menuText = this.querySelector('.menu-text');
+            if (menuText) {
+                // Determine where to navigate based on the menu text
+                let targetUrl = '';
+                switch(menuText.textContent.toLowerCase()) {
+                    case 'home':
+                        targetUrl = 'home.php';
+                        break;
+                    case 'profile':
+                        targetUrl = 'app/Views/profile.php';
+                        break;
+                    case 'messages':
+                        targetUrl = 'app/Views/messages.php';
+                        break;
+                    case 'members':
+                        targetUrl = 'members.php';
+                        break;
+                    case 'feed':
+                        targetUrl = 'feed.php';
+                        break;
+                    case 'learn':
+                        targetUrl = 'app/Views/learn.php';
+                        break;
+                    case 'daily register':
+                        targetUrl = 'signin.php';
+                        break;
+                    case 'projects':
+                        targetUrl = 'app/Views/projects.php';
+                        break;
+                    case 'reports':
+                        targetUrl = 'app/Views/statsDashboard.php';
+                        break;
+                    case 'settings':
+                        targetUrl = 'app/Views/settings.php';
+                        break;
+                    default:
+                        targetUrl = '#';
+                        break;
                 }
-            }, 1000);
+                
+                // Navigate to the target URL after a short delay to show the loading animation
+                if (targetUrl !== '#') {
+                    setTimeout(() => {
+                        window.location.href = targetUrl;
+                    }, 500);
+                }
+            }
         });
     });
     
-    // Mobile menu functionality
-    const mobileMenuItems = document.querySelectorAll('.mobile-menu-item:not(.active)');
+    // Mobile menu functionality with real navigation
+    const mobileMenuItems = document.querySelectorAll('.mobile-menu-item');
     mobileMenuItems.forEach(item => {
-        item.addEventListener('click', function(e) {
-            e.preventDefault();
-            simulateLoading();
-            // In a real implementation, this would navigate to the page
-            // Here we just simulate page load
-            setTimeout(() => {
-                alert(`Navigating to ${this.querySelector('span').textContent} page`);
-            }, 1000);
-        });
+        // We'll only add event listeners to items that don't have the active class
+        if (!item.classList.contains('active')) {
+            item.addEventListener('click', function(e) {
+                // Only show loading and handle navigation if it's a link
+                const href = this.getAttribute('href');
+                
+                // If it's a valid href and not just "#"
+                if (href && href !== '#') {
+                    e.preventDefault(); // Prevent default link behavior
+                    showLoader(); // Show loading animation
+                    
+                    // Navigate to the href after a short delay
+                    setTimeout(() => {
+                        window.location.href = href;
+                    }, 500);
+                }
+            });
+        }
     });
     
     // Post options menu
