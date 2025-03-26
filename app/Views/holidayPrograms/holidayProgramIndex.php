@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sci-Bono Clubhouse Holiday Programs</title>
     <link rel="stylesheet" href="../../../public/assets/css/holidayProgramIndex.css">
+    <link rel="stylesheet" href="../../../public/assets/css/holidayProgramStyles.css">
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
@@ -12,7 +13,7 @@
 </head>
 <body>
     <!-- Header from main site -->
-   <?php include '../../../header.php'; ?>
+   <?php include './holidayPrograms-header.php'; ?>
     
     <!-- Hero Section -->
     <section class="hero">
@@ -44,7 +45,7 @@
                     <p>All programs are guided by skilled mentors who provide personalized support throughout the journey.</p>
                 </div>
                 <div class="about-image">
-                    <img src="../../public/assets/images/clubhouse-students.jpg" alt="Students at Sci-Bono Clubhouse" onerror="this.src='https://source.unsplash.com/random/800x600?students'">
+                    <img src="../../../public/assets/images/clubhouse-students.jpg" alt="Students at Sci-Bono Clubhouse" onerror="this.src=''">
                 </div>
             </div>
         </div>
@@ -109,7 +110,7 @@
                 // Display each program
                 foreach ($holidayPrograms as $program) {
                     $registrationStatus = $program["registration_open"] ? 
-                        "<a href='holiday-registration.php?program_id={$program['id']}' class='register-btn'>Register Now</a>" : 
+                        "<a href='holidayProgramRegistration.php?program_id={$program['id']}' class='register-btn'>Register Now</a>" : 
                         "<span class='coming-soon'>Registration Opens Soon</span>";
                     
                     echo "

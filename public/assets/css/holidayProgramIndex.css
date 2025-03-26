@@ -142,7 +142,7 @@ section:nth-child(even) {
 
 /* Hero Section */
 .hero {
-    background: linear-gradient(rgba(41, 41, 91, 0.7), rgba(41, 41, 91, 0.7)), url('../../public/assets/images/hero-background.jpg');
+    background: linear-gradient(rgba(41, 41, 91, 0.7), rgba(41, 41, 91, 0.7)), url('../images/hero-background.jpg');
     background-size: cover;
     background-position: center;
     background-repeat: no-repeat;
@@ -152,6 +152,7 @@ section:nth-child(even) {
     position: relative;
 }
 
+
 .hero::after {
     content: '';
     position: absolute;
@@ -159,7 +160,7 @@ section:nth-child(even) {
     left: 0;
     right: 0;
     height: 80px;
-    background: linear-gradient(transparent, var(--light));
+    /* background: linear-gradient(transparent, var(--light)); */
 }
 
 .hero-content {
