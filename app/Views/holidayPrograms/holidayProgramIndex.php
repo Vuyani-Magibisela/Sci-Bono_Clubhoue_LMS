@@ -68,7 +68,7 @@
                     [
                         "id" => 1,
                         "term" => "Term 1",
-                        "dates" => "March 29 - April 7, 2025",
+                        "dates" => "March 31 - April 4, 2025",
                         "theme" => "Multi-Media - Digital Design",
                         "description" => "Dive into the world of digital media creation, learning graphic design, video editing, and animation techniques.",
                         "icon" => "fas fa-photo-video",
@@ -177,7 +177,7 @@
     </section>
     
     <!-- Testimonials -->
-    <section class="testimonials">
+    <!-- <section class="testimonials">
         <div class="container">
             <div class="section-header">
                 <h2>What Previous Participants Say</h2>
@@ -227,7 +227,7 @@
             </div>
         </div>
     </section>
-    
+     -->
     <!-- FAQ Section -->
     <section class="faq">
         <div class="container">

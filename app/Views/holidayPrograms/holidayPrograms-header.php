@@ -1,8 +1,8 @@
 <?php
 // Start session if not already started
-if(session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+// if(session_status() === PHP_SESSION_NONE) {
+//     session_start();
+// }
 
 // Get the current page to highlight the correct nav item
 $current_page = basename($_SERVER['PHP_SELF']);
