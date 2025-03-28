@@ -68,7 +68,7 @@
                     [
                         "id" => 1,
                         "term" => "Term 1",
-                        "dates" => "March 31 - April 4, 2025",
+                        "dates" => "March 31 - April 11, 2025",
                         "theme" => "Multi-Media - Digital Design",
                         "description" => "Dive into the world of digital media creation, learning graphic design, video editing, and animation techniques.",
                         "icon" => "fas fa-photo-video",
@@ -126,7 +126,7 @@
                             <p>{$program['description']}</p>
                             <div class='program-action'>
                                 {$registrationStatus}
-                                <a href='holiday-program-details.php?id={$program['id']}' class='details-link'>View Details</a>
+                                <a href='./holiday-program-details-term1.php?id={$program['id']}' class='details-link'>View Details</a>
                             </div>
                         </div>
                     </div>";
@@ -226,8 +226,8 @@
                 <button id="next-testimonial"><i class="fas fa-chevron-right"></i></button>
             </div>
         </div>
-    </section>
-     -->
+    </section> -->
+    
     <!-- FAQ Section -->
     <section class="faq">
         <div class="container">
@@ -336,8 +336,8 @@
                 <div class="footer-contact">
                     <h3>Contact Us</h3>
                     <p><i class="fas fa-map-marker-alt"></i> Sci-Bono Discovery Centre, Corner of Miriam Makeba & Helen Joseph Streets, Newtown, Johannesburg</p>
-                    <p><i class="fas fa-phone"></i> +27 11 639 8400</p>
-                    <p><i class="fas fa-envelope"></i> clubhouse@sci-bono.co.za</p>
+                    <p><i class="fas fa-phone"></i> +27 11 639 8463</p>
+                    <p><i class="fas fa-envelope"></i> vuyani.magibisela@sci-bono.co.za</p>
                     <div class="social-links">
                         <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
                         <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
