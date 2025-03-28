@@ -79,9 +79,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_registration'])
     $guardianEmail = filter_var(trim($_POST['guardian_email']), FILTER_SANITIZE_EMAIL);
     
     // Emergency contact
-    $emergencyContactName = htmlspecialchars(trim($_POST['emergency_contact_name']));
-    $emergencyContactRelationship = htmlspecialchars(trim($_POST['emergency_contact_relationship']));
-    $emergencyContactPhone = htmlspecialchars(trim($_POST['emergency_contact_phone']));
+    $emergencyContactName = isset($_POST['emergency_contact_name']) ? htmlspecialchars(trim($_POST['emergency_contact_name'])) : '';
+    $emergencyContactRelationship = isset($_POST['emergency_contact_relationship']) ? htmlspecialchars(trim($_POST['emergency_contact_relationship'])) : '';
+    $emergencyContactPhone = isset($_POST['emergency_contact_phone']) ? htmlspecialchars(trim($_POST['emergency_contact_phone'])) : '';
     
     // Workshop preferences
     $workshopPreference = isset($_POST['workshop_preference']) ? $_POST['workshop_preference'] : [];
@@ -97,16 +97,16 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_registration'])
     $needsEquipment = isset($_POST['needs_equipment']) ? 1 : 0;
     
     // Medical information
-    $medicalConditions = htmlspecialchars(trim($_POST['medical_conditions']));
-    $allergies = htmlspecialchars(trim($_POST['allergies']));
+    $medicalConditions = htmlspecialchars(trim($_POST['medical_conditions'] ?? ''));
+    $allergies = htmlspecialchars(trim($_POST['allergies'] ?? ''));
     
     // Permissions
     $photoPermission = isset($_POST['photo_permission']) ? 1 : 0;
     $dataPermission = isset($_POST['data_permission']) ? 1 : 0;
     
     // Additional information
-    $dietaryRestrictions = htmlspecialchars(trim($_POST['dietary_restrictions']));
-    $additionalNotes = htmlspecialchars(trim($_POST['additional_notes']));
+    $dietaryRestrictions = htmlspecialchars(trim($_POST['dietary_restrictions'] ?? ''));
+    $additionalNotes = htmlspecialchars(trim($_POST['additional_notes'] ?? ''));
     
     // Check if user exists in the main users table
     $userIdFromMainTable = null;
@@ -166,26 +166,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_registration'])
     } else {
         // Insert new registration
         $sql = "INSERT INTO holiday_program_attendees (
-                program_id, user_id, first_name, last_name, email, phone, 
-                date_of_birth, gender, school, grade, address, city, province, 
-                postal_code, guardian_name, guardian_relationship, guardian_phone, 
-                guardian_email, emergency_contact_name, emergency_contact_relationship, 
-                emergency_contact_phone, workshop_preference, why_interested, 
-                experience_level, needs_equipment, medical_conditions, allergies, 
-                photo_permission, data_permission, dietary_restrictions, additional_notes
-            ) VALUES (
-                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
-            )";
+            program_id, user_id, first_name, last_name, email, phone, 
+            date_of_birth, gender, school, grade, address, city, province, 
+            postal_code, guardian_name, guardian_relationship, guardian_phone, 
+            guardian_email, emergency_contact_name, emergency_contact_relationship, 
+            emergency_contact_phone, workshop_preference, why_interested, 
+            experience_level, needs_equipment, medical_conditions, allergies, 
+            photo_permission, data_permission, dietary_restrictions, additional_notes) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
             
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("iisssssssissssssssssssissiiss", 
-            $programId, $userIdFromMainTable, $firstName, $lastName, $email, $phone, 
-            $dob, $gender, $school, $grade, $address, $city, $province, 
-            $postalCode, $guardianName, $guardianRelationship, $guardianPhone, 
-            $guardianEmail, $emergencyContactName, $emergencyContactRelationship, 
-            $emergencyContactPhone, $workshopPreferenceJson, $whyInterested, 
-            $experienceLevel, $needsEquipment, $medicalConditions, $allergies,
-            $photoPermission, $dataPermission, $dietaryRestrictions, $additionalNotes);
+
+        $stmt->bind_param("iissssssissssssssssssssississss", 
+        $programId, $userIdFromMainTable, $firstName, $lastName, $email, $phone, 
+        $dob, $gender, $school, $grade, $address, $city, $province, 
+        $postalCode, $guardianName, $guardianRelationship, $guardianPhone, 
+        $guardianEmail, $emergencyContactName, $emergencyContactRelationship, 
+        $emergencyContactPhone, $workshopPreferenceJson, $whyInterested, 
+        $experienceLevel, $needsEquipment, $medicalConditions, $allergies,
+        $photoPermission, $dataPermission, $dietaryRestrictions, $additionalNotes);
             
         if ($stmt->execute()) {
             $registrationSuccess = true;
@@ -627,9 +626,27 @@ if ($result->num_rows > 0) {
                         $('#guardian_email').val(data.guardian_email || data.parent_email);
                         
                         // Emergency contact information
-                        $('#emergency_contact_name').val(data.emergency_contact_name);
-                        $('#emergency_contact_relationship').val(data.emergency_contact_relationship);
-                        $('#emergency_contact_phone').val(data.emergency_contact_phone);
+                        $('#emergency_contact_name').val(data.emergency_contact_name || '');
+                        $('#emergency_contact_relationship').val(data.emergency_contact_relationship || '');
+                        $('#emergency_contact_phone').val(data.emergency_contact_phone || '');
+                        
+                        // Medical information and additional details if available
+                        if (data.medical_conditions) $('#medical_conditions').val(data.medical_conditions);
+                        if (data.allergies) $('#allergies').val(data.allergies);
+                        if (data.dietary_restrictions) $('#dietary_restrictions').val(data.dietary_restrictions);
+                        if (data.additional_notes) $('#additional_notes').val(data.additional_notes);
+                        
+                        // Workshop preferences - this would need to be handled specially for existing registrations
+                        if (data.workshop_preference) {
+                            try {
+                                const workshops = JSON.parse(data.workshop_preference);
+                                workshops.forEach(workshopId => {
+                                    $(`#workshop_${workshopId}`).prop('checked', true);
+                                });
+                            } catch (e) {
+                                console.error('Error parsing workshop preferences:', e);
+                            }
+                        }
                         
                         // Scroll to form
                         $('html, body').animate({
