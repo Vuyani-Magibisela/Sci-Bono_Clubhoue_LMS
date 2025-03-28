@@ -698,6 +698,51 @@ if ($result->num_rows > 0) {
                 alert('Please agree to the required permissions');
                 return false;
             }
+
+             // Age validation (13-18 years old)
+            const dobValue = $('#dob').val();
+            if (dobValue) {
+                const dob = new Date(dobValue);
+                const today = new Date();
+                
+                // Calculate age
+                let age = today.getFullYear() - dob.getFullYear();
+                const monthDiff = today.getMonth() - dob.getMonth();
+                
+                // Adjust age if birthday hasn't occurred yet this year
+                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+                    age--;
+                }
+                
+                // Check if age is within the required range (13-18)
+                if (age < 13 || age > 18) {
+                    e.preventDefault();
+                    
+                    // Custom error message based on age
+                    let errorMessage = 'You must be between 13-18 years old to register for this program.';
+                    if (age < 13) {
+                        errorMessage = 'You must be at least 13 years old to register for this program.';
+                    } else if (age > 18) {
+                        errorMessage = 'You must be 18 years old or younger to register for this program.';
+                    }
+                    
+                    // Show error message
+                    $('<div class="error-message"><p><i class="fas fa-exclamation-circle"></i> ' + errorMessage + '</p></div>')
+                        .insertBefore('#registration-form')
+                        .hide()
+                        .fadeIn(300);
+                    
+                    // Highlight the field and scroll to it
+                    $('#dob').addClass('error-input');
+                    $('html, body').animate({
+                        scrollTop: $('#dob').offset().top - 100
+                    }, 500);
+                    
+                    return false;
+                } else {
+                    $('#dob').removeClass('error-input');
+                }
+            }
             
             return true;
         });
