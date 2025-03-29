@@ -193,7 +193,7 @@ $users = $result->fetch_all(MYSQLI_ASSOC);
                                             <?php if ($_SESSION['user_type'] === 'admin' || 
                                                     ($_SESSION['user_type'] === 'mentor' && $user['user_type'] === 'member')): ?>
                                               
-                                                <a href="settings.php?id=<?php echo $user['id']; ?>" class="edit-btn">Edit</a>
+                                                <a href="./app/Views/settings.php?id=<?php echo $user['id']; ?>" class="edit-btn">Edit</a>
                                                 <?php if ($_SESSION['user_type'] === 'admin'): ?>
                                                     <a href="delete_user.php?id=<?php echo $user['id']; ?>" 
                                                     class="delete-btn" 
