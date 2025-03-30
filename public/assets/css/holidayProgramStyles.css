@@ -308,6 +308,148 @@ label {
     background-color: #d0d0d0;
 }
 
+/* Workshop Selection Styles */
+.workshop-option {
+    transition: all 0.3s ease;
+    position: relative;
+}
+
+.workshop-option.preferred {
+    background-color: rgba(76, 175, 80, 0.1);
+    border-left: 4px solid var(--success);
+}
+
+.workshop-option.backup {
+    background-color: rgba(33, 150, 243, 0.1);
+    border-left: 4px solid var(--info);
+}
+
+.workshop-option.disabled {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+.workshop-option.full-workshop {
+    opacity: 0.7;
+    background-color: rgba(255, 82, 82, 0.05);
+}
+
+.workshop-option.full-workshop:after {
+    content: "WORKSHOP FULL";
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: var(--danger);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 0.7rem;
+    font-weight: bold;
+}
+
+.selection-label {
+    margin-left: 10px;
+    font-weight: 500;
+    font-size: 0.8rem;
+}
+
+.preferred .selection-label {
+    color: var(--success);
+}
+
+.backup .selection-label {
+    color: var(--info);
+}
+
+.selection-info {
+    background-color: #f8f9fa;
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 20px;
+    border-left: 4px solid var(--primary);
+}
+
+.reorder-controls {
+    display: flex;
+    justify-content: flex-start;
+    margin-bottom: 20px;
+}
+
+.capacity-indicator {
+    margin-top: 10px;
+    padding-left: 30px;
+}
+
+.capacity-bar {
+    height: 8px;
+    background-color: #e0e0e0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 5px;
+}
+
+.capacity-fill {
+    height: 100%;
+    background-color: var(--primary);
+    border-radius: 4px;
+}
+
+.capacity-text {
+    font-size: 0.8rem;
+    color: var(--text-light);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.capacity-full {
+    background-color: var(--danger);
+    color: white;
+    padding: 2px 6px;
+    border-radius: 3px;
+    font-size: 0.7rem;
+    font-weight: 500;
+}
+
+/* Mentor workshop preference styling */
+.workshop-capacity-info {
+    display: block;
+    margin-top: 15px;
+    font-size: 0.9rem;
+}
+
+.workshop-capacity-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.workshop-name {
+    flex: 1;
+}
+
+.workshop-capacity-bar {
+    width: 150px;
+    height: 8px;
+    background-color: #e0e0e0;
+    border-radius: 4px;
+    overflow: hidden;
+    margin: 0 10px;
+}
+
+.workshop-capacity-fill {
+    height: 100%;
+    background-color: var(--primary);
+    border-radius: 4px;
+}
+
+.workshop-capacity-text {
+    width: 80px;
+    font-size: 0.8rem;
+    color: var(--text-light);
+    text-align: right;
+}
+
 /* Success Message */
 .success-message {
     background-color: var(--white);

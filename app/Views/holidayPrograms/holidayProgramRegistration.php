@@ -94,11 +94,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_registration'])
     $workshopPreference = $isMentor ? [] : (isset($_POST['workshop_preference']) ? $_POST['workshop_preference'] : []);
     $workshopPreferenceJson = json_encode($workshopPreference);
     
-    // Why interested
-    $whyInterested = htmlspecialchars(trim($_POST['why_interested']));
+    // Why interested - different handling for mentor vs student
+    $whyInterested = $isMentor ? (isset($_POST['mentor_experience']) ? htmlspecialchars(trim($_POST['mentor_experience'])) : '') : 
+                               (isset($_POST['why_interested']) ? htmlspecialchars(trim($_POST['why_interested'])) : '');
     
     // Experience level
-    $experienceLevel = htmlspecialchars(trim($_POST['experience_level']));
+    $experienceLevel = $isMentor ? 'Advanced' : (isset($_POST['experience_level']) ? htmlspecialchars(trim($_POST['experience_level'])) : '');
     
     // Equipment needs
     $needsEquipment = isset($_POST['needs_equipment']) ? 1 : 0;
@@ -142,6 +143,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_registration'])
     $stmt->execute();
     $result = $stmt->get_result();
     
+    // For the UPDATE statement
     if ($result->num_rows > 0) {
         // Update existing registration
         $row = $result->fetch_assoc();
@@ -157,29 +159,55 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_registration'])
                 why_interested = ?, experience_level = ?, needs_equipment = ?,
                 medical_conditions = ?, allergies = ?, photo_permission = ?,
                 data_permission = ?, dietary_restrictions = ?, additional_notes = ?, 
-                mentor_registration = ?, mentor_status = ?,
-                updated_at = CURRENT_TIMESTAMP 
+                mentor_registration = ?, mentor_status = ?, mentor_workshop_preference = ?
                 WHERE id = ?";
         
-        $stmt = $conn->prepare($sql);
+        // Count the placeholders to verify
+        $placeholders_count = substr_count($sql, '?');
         
+        // Define all parameters in an array (in the exact order they appear in the SQL)
+        $params = [
+            $firstName, $lastName, $phone, $dob, $gender, $school, $grade, 
+            $address, $city, $province, $postalCode, $guardianName, 
+            $guardianRelationship, $guardianPhone, $guardianEmail, 
+            $emergencyContactName, $emergencyContactRelationship, 
+            $emergencyContactPhone, $workshopPreferenceJson, $whyInterested, 
+            $experienceLevel, $needsEquipment, $medicalConditions, $allergies,
+            $photoPermission, $dataPermission, $dietaryRestrictions, 
+            $additionalNotes, $mentorRegistration, $mentorStatus, $mentorWorkshopPreference, 
+            $attendeeId
+        ];
+        
+        // Make sure we have the right number of parameters
+        if (count($params) !== $placeholders_count) {
+            die("Parameter count (" . count($params) . ") doesn't match placeholder count (" . $placeholders_count . ")");
+        }
+        
+        // Build type string dynamically based on parameter types
+        $types = '';
+        foreach ($params as $param) {
+            if (is_int($param) || is_bool($param)) {
+                $types .= 'i';
+            } elseif (is_float($param)) {
+                $types .= 'd';
+            } else {
+                $types .= 's'; // Default to string for everything else
+            }
+        }
+        
+        $stmt = $conn->prepare($sql);
         if ($stmt === false) {
             $errorMessage = "Error preparing statement: " . $conn->error;
+            error_log($errorMessage);
         } else {
-            $stmt->bind_param("ssssssissssssssssssssissiissiisi", 
-                $firstName, $lastName, $phone, $dob, $gender, $school, $grade, 
-                $address, $city, $province, $postalCode, $guardianName, 
-                $guardianRelationship, $guardianPhone, $guardianEmail, 
-                $emergencyContactName, $emergencyContactRelationship, 
-                $emergencyContactPhone, $workshopPreferenceJson, $whyInterested, 
-                $experienceLevel, $needsEquipment, $medicalConditions, $allergies,
-                $photoPermission, $dataPermission, $dietaryRestrictions, 
-                $additionalNotes, $mentorRegistration, $mentorStatus, $attendeeId);
-                
+            // Use the spread operator to bind all parameters
+            $stmt->bind_param($types, ...$params);
+            
             if ($stmt->execute()) {
                 $registrationSuccess = true;
             } else {
                 $errorMessage = "Error updating registration: " . $stmt->error;
+                error_log($errorMessage);
             }
         }
     } else {
@@ -192,32 +220,57 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_registration'])
                 emergency_contact_phone, workshop_preference, why_interested, 
                 experience_level, needs_equipment, medical_conditions, allergies, 
                 photo_permission, data_permission, dietary_restrictions, additional_notes,
-                mentor_registration, mentor_status
+                mentor_registration, mentor_status, mentor_workshop_preference
             ) VALUES (
-                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
             )";
         
-        $stmt = $conn->prepare($sql);
+        // Count the placeholders to verify
+        $placeholders_count = substr_count($sql, '?');
         
+        // Define all parameters in an array (in the exact order they appear in the SQL)
+        $params = [
+            $programId, $userIdFromMainTable, $firstName, $lastName, $email, $phone, 
+            $dob, $gender, $school, $grade, $address, $city, $province, 
+            $postalCode, $guardianName, $guardianRelationship, $guardianPhone, 
+            $guardianEmail, $emergencyContactName, $emergencyContactRelationship, 
+            $emergencyContactPhone, $workshopPreferenceJson, $whyInterested, 
+            $experienceLevel, $needsEquipment, $medicalConditions, $allergies,
+            $photoPermission, $dataPermission, $dietaryRestrictions, $additionalNotes,
+            $mentorRegistration, $mentorStatus, $mentorWorkshopPreference
+        ];
+        
+        // Make sure we have the right number of parameters
+        if (count($params) !== $placeholders_count) {
+            die("Parameter count (" . count($params) . ") doesn't match placeholder count (" . $placeholders_count . ")");
+        }
+        
+        // Build type string dynamically based on parameter types
+        $types = '';
+        foreach ($params as $param) {
+            if (is_int($param) || is_bool($param)) {
+                $types .= 'i';
+            } elseif (is_float($param)) {
+                $types .= 'd';
+            } else {
+                $types .= 's'; // Default to string for everything else
+            }
+        }
+        
+        $stmt = $conn->prepare($sql);
         if ($stmt === false) {
             $errorMessage = "Error preparing statement: " . $conn->error;
             error_log($errorMessage);
         } else {
-            $stmt->bind_param("iisssssssissssssssssssissiissi", 
-                $programId, $userIdFromMainTable, $firstName, $lastName, $email, $phone, 
-                $dob, $gender, $school, $grade, $address, $city, $province, 
-                $postalCode, $guardianName, $guardianRelationship, $guardianPhone, 
-                $guardianEmail, $emergencyContactName, $emergencyContactRelationship, 
-                $emergencyContactPhone, $workshopPreferenceJson, $whyInterested, 
-                $experienceLevel, $needsEquipment, $medicalConditions, $allergies,
-                $photoPermission, $dataPermission, $dietaryRestrictions, $additionalNotes,
-                $mentorRegistration, $mentorStatus);
-                
+            // Use the spread operator to bind all parameters
+            $stmt->bind_param($types, ...$params);
+            
             if ($stmt->execute()) {
                 $registrationSuccess = true;
                 $attendeeId = $conn->insert_id;
             } else {
                 $errorMessage = "Error creating registration: " . $stmt->error;
+                error_log($errorMessage);
             }
         }
     }
@@ -289,6 +342,68 @@ if ($result->num_rows > 0) {
     ];
 }
 
+$programId = isset($_GET['program_id']) ? intval($_GET['program_id']) : 1;
+
+
+// Function to get workshop enrollment counts
+function getWorkshopEnrollmentCounts($conn, $programId) {
+    $counts = [];
+    
+    // First get all workshops for this program
+    $sql = "SELECT id, title, max_participants 
+            FROM holiday_program_workshops
+            WHERE program_id = ?";
+    
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $programId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    while ($row = $result->fetch_assoc()) {
+        $counts[$row['id']] = [
+            'title' => $row['title'],
+            'max' => $row['max_participants'],
+            'enrolled' => 0 // Default to 0, will update below
+        ];
+    }
+    
+    // Now get attendance preferences counts from holiday_program_attendees
+    $sqlPrefs = "SELECT workshop_preference
+                 FROM holiday_program_attendees 
+                 WHERE program_id = ? AND mentor_registration = 0";
+    
+    $stmtPrefs = $conn->prepare($sqlPrefs);
+    $stmtPrefs->bind_param("i", $programId);
+    $stmtPrefs->execute();
+    $resultPrefs = $stmtPrefs->get_result();
+    
+    while ($row = $resultPrefs->fetch_assoc()) {
+        if (empty($row['workshop_preference'])) {
+            continue;
+        }
+        
+        $preferences = json_decode($row['workshop_preference'], true);
+        
+        if (!is_array($preferences) || empty($preferences)) {
+            continue;
+        }
+        
+        // Get the first preference (highest priority)
+        $topPreference = is_array($preferences[0]) ? $preferences[0]['id'] : $preferences[0];
+        
+        // Increment the count if this workshop exists in our counts array
+        if (isset($counts[$topPreference])) {
+            $counts[$topPreference]['enrolled']++;
+        }
+    }
+    
+    return $counts;
+}
+
+// Get workshop enrollment counts
+$workshopEnrollmentCounts = getWorkshopEnrollmentCounts($conn, $programId);
+
+
 // Get workshop options for this program
 $workshops = [];
 $sql = "SELECT * FROM holiday_program_workshops WHERE program_id = ? ORDER BY title";
@@ -327,7 +442,7 @@ if ($result->num_rows > 0) {
     <!-- jQuery for form functionality -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 </head>
-<body>
+
     <?php include './holidayPrograms-header.php'; ?>
     
     <main class="registration-container">
@@ -391,7 +506,7 @@ if ($result->num_rows > 0) {
                 </div>
             </div>
 
-            <form method="POST" action="" class="registration-form" id="registration-form">
+            <form method="POST" action="" class="registration-form" id="registration-form" novalidate>
 
             <div class="form-section">
                 <h2><i class="fas fa-chalkboard-teacher"></i> Mentor Registration</h2>
@@ -580,20 +695,59 @@ if ($result->num_rows > 0) {
                     </div>
                 </div>
                 
+                <script>
+                // Workshop capacity data
+                const workshopCapacityData = <?php echo json_encode($workshopEnrollmentCounts); ?>;
+                </script>
+
+                <!-- Replace the existing workshop preferences section with this -->
                 <div id="workshop_preferences_section" class="form-section">
                     <h2><i class="fas fa-laptop-code"></i> Workshop Preferences</h2>
-                    <p class="section-description">Please select your workshop preferences (you can select multiple options)</p>
+                    <p class="section-description">Please select your 1st and 2nd choice workshops (you can only select 2 workshops)</p>
+                    
+                    <div class="selection-info" id="selection-info" style="display: none;">
+                        <p>Selected workshops are prioritized in the order selected. Your first selection will be considered your preferred choice.</p>
+                        <p>Click a selected workshop to deselect it if you want to change your preferences.</p>
+                    </div>
+                    
+                    <div class="reorder-controls" style="display: none;">
+                        <button type="button" id="swap-preferences" class="secondary-button">Swap Preferences</button>
+                    </div>
                     
                     <div class="workshop-options">
-                        <?php foreach ($workshops as $workshop): ?>
-                            <div class="workshop-option">
+                        <?php foreach ($workshops as $workshop): 
+                            $capacity = $workshopEnrollmentCounts[$workshop['id']] ?? null;
+                            $isFull = $capacity && $capacity['enrolled'] >= $capacity['max'];
+                            $capacityPercentage = $capacity ? ($capacity['enrolled'] / $capacity['max']) * 100 : 0;
+                            $workshopClass = $isFull ? 'workshop-option full-workshop' : 'workshop-option';
+                        ?>
+                            <div class="<?php echo $workshopClass; ?>">
                                 <div class="checkbox-group">
-                                    <input type="checkbox" id="workshop_<?php echo $workshop['id']; ?>" name="workshop_preference[]" value="<?php echo $workshop['id']; ?>">
+                                    <input type="checkbox" id="workshop_<?php echo $workshop['id']; ?>" 
+                                        name="workshop_preference[]" value="<?php echo $workshop['id']; ?>"
+                                        <?php echo $isFull ? 'disabled' : ''; ?>>
                                     <label for="workshop_<?php echo $workshop['id']; ?>"><?php echo htmlspecialchars($workshop['title']); ?></label>
+                                    <span class="selection-label"></span>
                                 </div>
                                 <p class="workshop-description"><?php echo htmlspecialchars($workshop['description']); ?></p>
+                                
+                                <?php if ($capacity): ?>
+                                <div class="capacity-indicator">
+                                    <div class="capacity-bar">
+                                        <div class="capacity-fill" style="width: <?php echo min($capacityPercentage, 100); ?>%;"></div>
+                                    </div>
+                                    <div class="capacity-text">
+                                        <?php echo $capacity['enrolled']; ?>/<?php echo $capacity['max']; ?> spots filled
+                                        <?php if ($isFull): ?>
+                                            <span class="capacity-full">FULL</span>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                                <?php endif; ?>
                             </div>
                         <?php endforeach; ?>
+                        
+                        <input type="hidden" id="workshop_preferences_ordered" name="workshop_preferences_ordered">
                     </div>
                     
                     <div id="workshop_note" style="display: none;"></div>
@@ -612,6 +766,56 @@ if ($result->num_rows > 0) {
                             <option value="Intermediate">Intermediate - Familiar with basic concepts and tools</option>
                             <option value="Advanced">Advanced - Experienced with various digital media tools</option>
                         </select>
+                    </div>
+                </div>
+
+                <!-- Enhance mentor fields section -->
+                <div id="mentor_fields" style="display: none;">
+                    <div class="form-group">
+                        <label for="mentor_experience">Please describe your experience relevant to this program: <span class="required">*</span></label>
+                        <textarea id="mentor_experience" name="mentor_experience" class="form-textarea" rows="3"></textarea>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="mentor_availability">Please indicate your availability during the program dates: <span class="required">*</span></label>
+                        <select id="mentor_availability" name="mentor_availability" class="form-select">
+                            <option value="">Select Availability</option>
+                            <option value="full_time">Full time (all program days)</option>
+                            <option value="part_time">Part time (specific days only)</option>
+                            <option value="specific_hours">Specific hours each day</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="mentor_workshop_preference">Which workshop would you prefer to mentor? <span class="required">*</span></label>
+                        <select id="mentor_workshop_preference" name="mentor_workshop_preference" class="form-select">
+                            <option value="">Select Workshop</option>
+                            <?php foreach ($workshops as $workshop): 
+                                $capacity = $workshopEnrollmentCounts[$workshop['id']] ?? null;
+                                $isFull = $capacity && $capacity['enrolled'] >= $capacity['max'];
+                                $fullText = $isFull ? ' (FULL)' : '';
+                                $enrollmentText = $capacity ? " ({$capacity['enrolled']}/{$capacity['max']})" : "";
+                            ?>
+                                <option value="<?php echo $workshop['id']; ?>"><?php echo htmlspecialchars($workshop['title'] . $enrollmentText . $fullText); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+                    
+                    <div class="workshop-capacity-info">
+                        <h4>Current Workshop Enrollments:</h4>
+                        <?php foreach ($workshops as $workshop): 
+                            $capacity = $workshopEnrollmentCounts[$workshop['id']] ?? null;
+                            if ($capacity):
+                                $capacityPercentage = ($capacity['enrolled'] / $capacity['max']) * 100;
+                        ?>
+                        <div class="workshop-capacity-row">
+                            <div class="workshop-name"><?php echo htmlspecialchars($workshop['title']); ?></div>
+                            <div class="workshop-capacity-bar">
+                                <div class="workshop-capacity-fill" style="width: <?php echo min($capacityPercentage, 100); ?>%;"></div>
+                            </div>
+                            <div class="workshop-capacity-text"><?php echo $capacity['enrolled']; ?>/<?php echo $capacity['max']; ?></div>
+                        </div>
+                        <?php endif; endforeach; ?>
                     </div>
                 </div>
                 
@@ -694,9 +898,15 @@ if ($result->num_rows > 0) {
             <span>Account</span>
         </a>
     </nav>
+    
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="../../../public/assets/js/workshopSelection.js"></script>
 
     <script>
     $(document).ready(function() {
+        // Trigger the change event to set proper initial state
+        $('#mentor_registration').trigger('change');
+        
         // Email check functionality
         $('#check-email-btn').click(function(e) {
             e.preventDefault();
@@ -817,7 +1027,7 @@ if ($result->num_rows > 0) {
 
         // Check initial state of mentor checkbox
         if ($('#mentor_registration').is(':checked')) {
-            // Show mentor-specific fields
+            //Show mentor-specific fields
             $('#mentor_fields').show();
             $('#mentor_experience, #mentor_availability, #mentor_workshop_preference').prop('required', true);
             
@@ -836,11 +1046,42 @@ if ($result->num_rows > 0) {
         }
 
         $('#mentor_registration').change(function() {
-            console.log('Mentor checkbox changed, checked:', $(this).is(':checked'));
-            
             if ($(this).is(':checked')) {
-                console.log('Attempting to hide student sections and show mentor fields');
-                // Rest of the code...
+                // Hide student-specific sections
+                $('#school_section').hide();
+                $('#guardian_section').hide();
+                $('#workshop_preferences_section').hide();
+                
+                // Remove required attributes from ALL student-specific fields
+                $('#school, #grade').prop('required', false);
+                $('#guardian_name, #guardian_relationship, #guardian_phone, #guardian_email').prop('required', false);
+                
+                // Also remove required from the workshop section fields
+                $('#why_interested, #experience_level').prop('required', false);
+                $('input[name="workshop_preference[]"]').prop('required', false);
+                
+                // Show mentor-specific fields
+                $('#mentor_fields').show();
+                $('#mentor_experience, #mentor_availability, #mentor_workshop_preference').prop('required', true);
+                
+                // Add note about mentor workshop assignment
+                $('#workshop_note').html('<div class="info-message"><i class="fas fa-info-circle"></i> As a mentor, you will be assigned to a specific workshop based on program needs and your expertise.</div>').show();
+            } else {
+                // Show student-specific sections
+                $('#school_section').show();
+                $('#guardian_section').show();
+                $('#workshop_preferences_section').show();
+                $('#workshop_note').hide();
+                
+                // Hide mentor-specific fields
+                $('#mentor_fields').hide();
+                $('#mentor_experience, #mentor_availability, #mentor_workshop_preference').prop('required', false);
+                
+                // Make student fields required again
+                $('#school, #grade').prop('required', true);
+                $('#guardian_name, #guardian_relationship, #guardian_phone, #guardian_email').prop('required', true);
+                $('#why_interested, #experience_level').prop('required', true);
+                // Note: We don't make workshop checkboxes required here as that's handled separately
             }
         });
                 
