@@ -439,6 +439,24 @@ label {
 
 /* Holiday Program Registration Form Validation Styles */
 
+
+.info-message {
+    background-color: rgba(23, 162, 184, 0.1);
+    border-left: 4px solid var(--info);
+    padding: 15px;
+    border-radius: 5px;
+    margin: 15px 0;
+    color: var(--text-dark);
+    display: flex;
+    align-items: flex-start;
+}
+
+.info-message i {
+    margin-right: 10px;
+    color: var(--info);
+    font-size: 1.1rem;
+}
+
 /* Input note - small hint text */
 .input-note {
     font-size: 0.8rem;

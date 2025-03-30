@@ -79,26 +79,30 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_registration'])
     $phone = htmlspecialchars(trim($_POST['phone']));
     $dob = htmlspecialchars(trim($_POST['dob']));
     $gender = htmlspecialchars(trim($_POST['gender']));
-    $school = htmlspecialchars(trim($_POST['school']));
-    $grade = intval($_POST['grade']);
+
+    // School information - optional for mentors
+    $school = $isMentor ? null : htmlspecialchars(trim($_POST['school']));
+    $grade = $isMentor ? null : intval($_POST['grade']);
+
+    // Address information
     $address = htmlspecialchars(trim($_POST['address']));
     $city = htmlspecialchars(trim($_POST['city']));
     $province = htmlspecialchars(trim($_POST['province']));
     $postalCode = htmlspecialchars(trim($_POST['postal_code']));
     
-    // Guardian information
-    $guardianName = htmlspecialchars(trim($_POST['guardian_name']));
-    $guardianRelationship = htmlspecialchars(trim($_POST['guardian_relationship']));
-    $guardianPhone = htmlspecialchars(trim($_POST['guardian_phone']));
-    $guardianEmail = filter_var(trim($_POST['guardian_email']), FILTER_SANITIZE_EMAIL);
+    // Guardian information - optional for mentors
+    $guardianName = $isMentor ? null : htmlspecialchars(trim($_POST['guardian_name']));
+    $guardianRelationship = $isMentor ? null : htmlspecialchars(trim($_POST['guardian_relationship']));
+    $guardianPhone = $isMentor ? null : htmlspecialchars(trim($_POST['guardian_phone']));
+    $guardianEmail = $isMentor ? null : filter_var(trim($_POST['guardian_email']), FILTER_SANITIZE_EMAIL);
     
     // Emergency contact
-    $emergencyContactName = isset($_POST['emergency_contact_name']) ? htmlspecialchars(trim($_POST['emergency_contact_name'])) : '';
-    $emergencyContactRelationship = isset($_POST['emergency_contact_relationship']) ? htmlspecialchars(trim($_POST['emergency_contact_relationship'])) : '';
-    $emergencyContactPhone = isset($_POST['emergency_contact_phone']) ? htmlspecialchars(trim($_POST['emergency_contact_phone'])) : '';
+    $emergencyContactName = htmlspecialchars(trim($_POST['emergency_contact_name']));
+    $emergencyContactRelationship = htmlspecialchars(trim($_POST['emergency_contact_relationship']));
+    $emergencyContactPhone = htmlspecialchars(trim($_POST['emergency_contact_phone']));
     
-    // Workshop preferences
-    $workshopPreference = isset($_POST['workshop_preference']) ? $_POST['workshop_preference'] : [];
+    // Workshop preferences - only for students
+    $workshopPreference = $isMentor ? [] : (isset($_POST['workshop_preference']) ? $_POST['workshop_preference'] : []);
     $workshopPreferenceJson = json_encode($workshopPreference);
     
     // Why interested
@@ -111,16 +115,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_registration'])
     $needsEquipment = isset($_POST['needs_equipment']) ? 1 : 0;
     
     // Medical information
-    $medicalConditions = htmlspecialchars(trim($_POST['medical_conditions'] ?? ''));
-    $allergies = htmlspecialchars(trim($_POST['allergies'] ?? ''));
+    $medicalConditions = htmlspecialchars(trim($_POST['medical_conditions']));
+    $allergies = htmlspecialchars(trim($_POST['allergies']));
     
     // Permissions
     $photoPermission = isset($_POST['photo_permission']) ? 1 : 0;
     $dataPermission = isset($_POST['data_permission']) ? 1 : 0;
     
     // Additional information
-    $dietaryRestrictions = htmlspecialchars(trim($_POST['dietary_restrictions'] ?? ''));
-    $additionalNotes = htmlspecialchars(trim($_POST['additional_notes'] ?? ''));
+    $dietaryRestrictions = htmlspecialchars(trim($_POST['dietary_restrictions']));
+    $additionalNotes = htmlspecialchars(trim($_POST['additional_notes']));
+    
+    // Mentor specific information
+    $mentorRegistration = $isMentor ? 1 : 0;
+    $mentorStatus = $isMentor ? 'Pending' : NULL;
+    $mentorExperience = $isMentor ? htmlspecialchars(trim($_POST['mentor_experience'])) : NULL;
+    $mentorAvailability = $isMentor ? htmlspecialchars(trim($_POST['mentor_availability'])) : NULL;
+    $mentorWorkshopPreference = $isMentor ? intval($_POST['mentor_workshop_preference']) : NULL;
     
     // Check if user exists in the main users table
     $userIdFromMainTable = null;
@@ -317,25 +328,38 @@ if ($result->num_rows > 0) {
         </div>
         
         <?php if ($formSubmitted && $registrationSuccess): ?>
-        <div class="success-message">
-            <div class="success-content">
-                <i class="fas fa-check-circle"></i>
-                <h2>Registration Successful!</h2>
-                <p>Thank you for registering for the <?php echo htmlspecialchars($programDetails['title']); ?> holiday program. We've sent a confirmation email to <?php echo htmlspecialchars($email); ?> with all the details.</p>
-                <div class="next-steps">
-                    <h3>Next Steps:</h3>
-                    <ul>
-                        <li>Check your email for confirmation and additional information</li>
-                        <li>Mark your calendar for <?php echo htmlspecialchars($programDetails['dates']); ?></li>
-                        <li>Prepare any materials or equipment mentioned in the email</li>
-                    </ul>
-                </div>
-                <div class="action-buttons">
-                    <a href="holiday-dashboard.php" class="primary-button">Go to Dashboard</a>
-                    <a href="holidayProgramIndex.php" class="secondary-button">Back to Programs</a>
+            <div class="success-message">
+                <div class="success-content">
+                    <i class="fas fa-check-circle"></i>
+                    <?php if (isset($mentorRegistration) && $mentorRegistration == 1): ?>
+                        <h2>Mentor Registration Submitted!</h2>
+                        <p>Thank you for registering as a mentor for the <?php echo htmlspecialchars($programDetails['title']); ?> holiday program. We've sent a confirmation email to <?php echo htmlspecialchars($email); ?>. Your application will be reviewed by our program coordinator.</p>
+                        <div class="next-steps">
+                            <h3>Next Steps:</h3>
+                            <ul>
+                                <li>Check your email for confirmation and additional information</li>
+                                <li>You will be notified about the status of your application within 5 business days</li>
+                                <li>If approved, you'll receive details about mentor training and workshop preparation</li>
+                            </ul>
+                        </div>
+                    <?php else: ?>
+                        <h2>Registration Successful!</h2>
+                        <p>Thank you for registering for the <?php echo htmlspecialchars($programDetails['title']); ?> holiday program. We've sent a confirmation email to <?php echo htmlspecialchars($email); ?> with all the details.</p>
+                        <div class="next-steps">
+                            <h3>Next Steps:</h3>
+                            <ul>
+                                <li>Check your email for confirmation and additional information</li>
+                                <li>Mark your calendar for <?php echo htmlspecialchars($programDetails['dates']); ?></li>
+                                <li>Prepare any materials or equipment mentioned in the email</li>
+                            </ul>
+                        </div>
+                    <?php endif; ?>
+                    <div class="action-buttons">
+                        <a href="holiday-dashboard.php" class="primary-button">Go to Dashboard</a>
+                        <a href="holidayProgramIndex.php" class="secondary-button">Back to Programs</a>
+                    </div>
                 </div>
             </div>
-        </div>
         <?php else: ?>
         
         <?php if (!empty($errorMessage)): ?>
@@ -438,7 +462,7 @@ if ($result->num_rows > 0) {
                     </div>
                 </div>
                 
-                <div class="form-section">
+                <div id="school_section" class="form-section">
                     <h2><i class="fas fa-school"></i> School Information</h2>
                     <div class="form-row">
                         <div class="form-group">
@@ -454,8 +478,9 @@ if ($result->num_rows > 0) {
                                 <?php endfor; ?>
                             </select>
                         </div>
-                    </div>  
+                    </div>
                 </div>
+
                 
                 <div class="form-section">
                     <h2><i class="fas fa-map-marker-alt"></i> Contact Information</h2>
@@ -492,7 +517,7 @@ if ($result->num_rows > 0) {
                     </div>
                 </div>
                 
-                <div class="form-section">
+                <div id="guardian_section" class="form-section">
                     <h2><i class="fas fa-user-shield"></i> Parent/Guardian Information</h2>
                     <div class="form-row">
                         <div class="form-group">
@@ -545,7 +570,7 @@ if ($result->num_rows > 0) {
                     </div>
                 </div>
                 
-                <div class="form-section">
+                <div id="workshop_preferences_section" class="form-section">
                     <h2><i class="fas fa-laptop-code"></i> Workshop Preferences</h2>
                     <p class="section-description">Please select your workshop preferences (you can select multiple options)</p>
                     
@@ -561,6 +586,8 @@ if ($result->num_rows > 0) {
                         <?php endforeach; ?>
                     </div>
                     
+                    <div id="workshop_note" style="display: none;"></div>
+                    
                     <div class="form-group">
                         <label for="why_interested">Why are you interested in this holiday program? <span class="required">*</span></label>
                         <textarea id="why_interested" name="why_interested" class="form-textarea" rows="3" required></textarea>
@@ -575,13 +602,6 @@ if ($result->num_rows > 0) {
                             <option value="Intermediate">Intermediate - Familiar with basic concepts and tools</option>
                             <option value="Advanced">Advanced - Experienced with various digital media tools</option>
                         </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="needs_equipment" name="needs_equipment">
-                            <label for="needs_equipment">I need equipment (laptop, etc.) to participate in the program</label>
-                        </div>
                     </div>
                 </div>
                 
