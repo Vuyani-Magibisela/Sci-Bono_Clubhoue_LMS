@@ -55,20 +55,9 @@ if (isset($_POST['check_email'])) {
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_registration'])) {
     $formSubmitted = true;
     
-    // Get mentor registration data
-    $mentorRegistration = isset($_POST['mentor_registration']) ? 1 : 0;
-    $mentorStatus = $mentorRegistration ? 'Pending' : NULL;
-    $mentorExperience = $mentorRegistration ? htmlspecialchars(trim($_POST['mentor_experience'])) : NULL;
-    $mentorAvailability = $mentorRegistration ? htmlspecialchars(trim($_POST['mentor_availability'])) : NULL;
-    $mentorWorkshopPreference = $mentorRegistration ? intval($_POST['mentor_workshop_preference']) : NULL;
-
-    // Additional fields to add to the existing SQL statements
-    // For UPDATE statement:
-    // ... mentor_registration = ?, mentor_status = ?, ...
-    // For INSERT statement:
-    // ... mentor_registration, mentor_status, ...
-    // ... ?, ?, ...
-
+    // Check if registering as mentor
+    $isMentor = isset($_POST['mentor_registration']) && $_POST['mentor_registration'] == 1;
+    
     // Get program ID
     $programId = isset($_GET['program_id']) ? intval($_GET['program_id']) : 1;
     
@@ -79,11 +68,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_registration'])
     $phone = htmlspecialchars(trim($_POST['phone']));
     $dob = htmlspecialchars(trim($_POST['dob']));
     $gender = htmlspecialchars(trim($_POST['gender']));
-
+    
     // School information - optional for mentors
-    $school = $isMentor ? null : htmlspecialchars(trim($_POST['school']));
-    $grade = $isMentor ? null : intval($_POST['grade']);
-
+    $school = $isMentor ? null : (isset($_POST['school']) ? htmlspecialchars(trim($_POST['school'])) : '');
+    $grade = $isMentor ? null : (isset($_POST['grade']) ? intval($_POST['grade']) : 0);
+    
     // Address information
     $address = htmlspecialchars(trim($_POST['address']));
     $city = htmlspecialchars(trim($_POST['city']));
@@ -91,15 +80,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_registration'])
     $postalCode = htmlspecialchars(trim($_POST['postal_code']));
     
     // Guardian information - optional for mentors
-    $guardianName = $isMentor ? null : htmlspecialchars(trim($_POST['guardian_name']));
-    $guardianRelationship = $isMentor ? null : htmlspecialchars(trim($_POST['guardian_relationship']));
-    $guardianPhone = $isMentor ? null : htmlspecialchars(trim($_POST['guardian_phone']));
-    $guardianEmail = $isMentor ? null : filter_var(trim($_POST['guardian_email']), FILTER_SANITIZE_EMAIL);
+    $guardianName = $isMentor ? null : (isset($_POST['guardian_name']) ? htmlspecialchars(trim($_POST['guardian_name'])) : '');
+    $guardianRelationship = $isMentor ? null : (isset($_POST['guardian_relationship']) ? htmlspecialchars(trim($_POST['guardian_relationship'])) : '');
+    $guardianPhone = $isMentor ? null : (isset($_POST['guardian_phone']) ? htmlspecialchars(trim($_POST['guardian_phone'])) : '');
+    $guardianEmail = $isMentor ? null : (isset($_POST['guardian_email']) ? filter_var(trim($_POST['guardian_email']), FILTER_SANITIZE_EMAIL) : '');
     
     // Emergency contact
-    $emergencyContactName = htmlspecialchars(trim($_POST['emergency_contact_name']));
-    $emergencyContactRelationship = htmlspecialchars(trim($_POST['emergency_contact_relationship']));
-    $emergencyContactPhone = htmlspecialchars(trim($_POST['emergency_contact_phone']));
+    $emergencyContactName = isset($_POST['emergency_contact_name']) ? htmlspecialchars(trim($_POST['emergency_contact_name'])) : '';
+    $emergencyContactRelationship = isset($_POST['emergency_contact_relationship']) ? htmlspecialchars(trim($_POST['emergency_contact_relationship'])) : '';
+    $emergencyContactPhone = isset($_POST['emergency_contact_phone']) ? htmlspecialchars(trim($_POST['emergency_contact_phone'])) : '';
     
     // Workshop preferences - only for students
     $workshopPreference = $isMentor ? [] : (isset($_POST['workshop_preference']) ? $_POST['workshop_preference'] : []);
@@ -115,23 +104,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_registration'])
     $needsEquipment = isset($_POST['needs_equipment']) ? 1 : 0;
     
     // Medical information
-    $medicalConditions = htmlspecialchars(trim($_POST['medical_conditions']));
-    $allergies = htmlspecialchars(trim($_POST['allergies']));
+    $medicalConditions = isset($_POST['medical_conditions']) ? htmlspecialchars(trim($_POST['medical_conditions'])) : '';
+    $allergies = isset($_POST['allergies']) ? htmlspecialchars(trim($_POST['allergies'])) : '';
     
     // Permissions
     $photoPermission = isset($_POST['photo_permission']) ? 1 : 0;
     $dataPermission = isset($_POST['data_permission']) ? 1 : 0;
     
     // Additional information
-    $dietaryRestrictions = htmlspecialchars(trim($_POST['dietary_restrictions']));
-    $additionalNotes = htmlspecialchars(trim($_POST['additional_notes']));
+    $dietaryRestrictions = isset($_POST['dietary_restrictions']) ? htmlspecialchars(trim($_POST['dietary_restrictions'])) : '';
+    $additionalNotes = isset($_POST['additional_notes']) ? htmlspecialchars(trim($_POST['additional_notes'])) : '';
     
     // Mentor specific information
     $mentorRegistration = $isMentor ? 1 : 0;
     $mentorStatus = $isMentor ? 'Pending' : NULL;
-    $mentorExperience = $isMentor ? htmlspecialchars(trim($_POST['mentor_experience'])) : NULL;
-    $mentorAvailability = $isMentor ? htmlspecialchars(trim($_POST['mentor_availability'])) : NULL;
-    $mentorWorkshopPreference = $isMentor ? intval($_POST['mentor_workshop_preference']) : NULL;
+    $mentorExperience = $isMentor ? (isset($_POST['mentor_experience']) ? htmlspecialchars(trim($_POST['mentor_experience'])) : '') : NULL;
+    $mentorAvailability = $isMentor ? (isset($_POST['mentor_availability']) ? htmlspecialchars(trim($_POST['mentor_availability'])) : '') : NULL;
+    $mentorWorkshopPreference = $isMentor ? (isset($_POST['mentor_workshop_preference']) ? intval($_POST['mentor_workshop_preference']) : 0) : NULL;
     
     // Check if user exists in the main users table
     $userIdFromMainTable = null;
@@ -147,8 +136,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_registration'])
     }
     
     // Check if the user has already registered for this program
-    $sql = "SELECT id FROM holiday_program_attendees 
-            WHERE email = ? AND program_id = ?";
+    $sql = "SELECT id FROM holiday_program_attendees WHERE email = ? AND program_id = ?";
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("si", $email, $programId);
     $stmt->execute();
@@ -174,61 +162,76 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_registration'])
                 WHERE id = ?";
         
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("ssssssissssssssssssssissiissiisi", 
-            $firstName, $lastName, $phone, $dob, $gender, $school, $grade, 
-            $address, $city, $province, $postalCode, $guardianName, 
-            $guardianRelationship, $guardianPhone, $guardianEmail, 
-            $emergencyContactName, $emergencyContactRelationship, 
-            $emergencyContactPhone, $workshopPreferenceJson, $whyInterested, 
-            $experienceLevel, $needsEquipment, $medicalConditions, $allergies,
-            $photoPermission, $dataPermission, $dietaryRestrictions, 
-            $additionalNotes, $mentorRegistration, $mentorStatus, $attendeeId);
-            
-        if ($stmt->execute()) {
-            $registrationSuccess = true;
+        
+        if ($stmt === false) {
+            $errorMessage = "Error preparing statement: " . $conn->error;
         } else {
-            $errorMessage = "Error updating registration: " . $conn->error;
+            $stmt->bind_param("ssssssissssssssssssssissiissiisi", 
+                $firstName, $lastName, $phone, $dob, $gender, $school, $grade, 
+                $address, $city, $province, $postalCode, $guardianName, 
+                $guardianRelationship, $guardianPhone, $guardianEmail, 
+                $emergencyContactName, $emergencyContactRelationship, 
+                $emergencyContactPhone, $workshopPreferenceJson, $whyInterested, 
+                $experienceLevel, $needsEquipment, $medicalConditions, $allergies,
+                $photoPermission, $dataPermission, $dietaryRestrictions, 
+                $additionalNotes, $mentorRegistration, $mentorStatus, $attendeeId);
+                
+            if ($stmt->execute()) {
+                $registrationSuccess = true;
+            } else {
+                $errorMessage = "Error updating registration: " . $stmt->error;
+            }
         }
     } else {
         // Insert new registration
         $sql = "INSERT INTO holiday_program_attendees (
-            program_id, user_id, first_name, last_name, email, phone, 
-            date_of_birth, gender, school, grade, address, city, province, 
-            postal_code, guardian_name, guardian_relationship, guardian_phone, 
-            guardian_email, emergency_contact_name, emergency_contact_relationship, 
-            emergency_contact_phone, workshop_preference, why_interested, 
-            experience_level, needs_equipment, medical_conditions, allergies, 
-            photo_permission, data_permission, dietary_restrictions, additional_notes, 
-            mentor_registration, mentor_status) 
-            VALUES ( ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
-            
+                program_id, user_id, first_name, last_name, email, phone, 
+                date_of_birth, gender, school, grade, address, city, province, 
+                postal_code, guardian_name, guardian_relationship, guardian_phone, 
+                guardian_email, emergency_contact_name, emergency_contact_relationship, 
+                emergency_contact_phone, workshop_preference, why_interested, 
+                experience_level, needs_equipment, medical_conditions, allergies, 
+                photo_permission, data_permission, dietary_restrictions, additional_notes,
+                mentor_registration, mentor_status
+            ) VALUES (
+                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+            )";
+        
         $stmt = $conn->prepare($sql);
-
-        $stmt->bind_param("iisssssssissssssssssssissiisssi", 
-        $programId, $userIdFromMainTable, $firstName, $lastName, $email, $phone, 
-        $dob, $gender, $school, $grade, $address, $city, $province, 
-        $postalCode, $guardianName, $guardianRelationship, $guardianPhone, 
-        $guardianEmail, $emergencyContactName, $emergencyContactRelationship, 
-        $emergencyContactPhone, $workshopPreferenceJson, $whyInterested, 
-        $experienceLevel, $needsEquipment, $medicalConditions, $allergies,
-        $photoPermission, $dataPermission, $dietaryRestrictions, $additionalNotes,
-        $mentorRegistration, $mentorStatus);
-            
-        if ($stmt->execute()) {
-            $registrationSuccess = true;
+        
+        if ($stmt === false) {
+            $errorMessage = "Error preparing statement: " . $conn->error;
+            error_log($errorMessage);
         } else {
-            $errorMessage = "Error creating registration: " . $conn->error;
+            $stmt->bind_param("iisssssssissssssssssssissiissi", 
+                $programId, $userIdFromMainTable, $firstName, $lastName, $email, $phone, 
+                $dob, $gender, $school, $grade, $address, $city, $province, 
+                $postalCode, $guardianName, $guardianRelationship, $guardianPhone, 
+                $guardianEmail, $emergencyContactName, $emergencyContactRelationship, 
+                $emergencyContactPhone, $workshopPreferenceJson, $whyInterested, 
+                $experienceLevel, $needsEquipment, $medicalConditions, $allergies,
+                $photoPermission, $dataPermission, $dietaryRestrictions, $additionalNotes,
+                $mentorRegistration, $mentorStatus);
+                
+            if ($stmt->execute()) {
+                $registrationSuccess = true;
+                $attendeeId = $conn->insert_id;
+            } else {
+                $errorMessage = "Error creating registration: " . $stmt->error;
+            }
         }
     }
 
-        // After successful insert or update to holiday_program_attendees
-        if ($mentorRegistration) {
-            // Get the attendee ID (either from existing record or newly inserted)
-            $attendeeId = isset($attendeeId) ? $attendeeId : $conn->insert_id;
-            
-            // Check if mentor details already exist
-            $sql = "SELECT id FROM holiday_program_mentor_details WHERE attendee_id = ?";
-            $stmt = $conn->prepare($sql);
+    // After successful insert or update to holiday_program_attendees
+    if ($registrationSuccess && $mentorRegistration) {
+        // Get the attendee ID (either from existing record or newly inserted)
+        $attendeeId = isset($attendeeId) ? $attendeeId : $conn->insert_id;
+        
+        // Check if mentor details already exist
+        $sql = "SELECT id FROM holiday_program_mentor_details WHERE attendee_id = ?";
+        $stmt = $conn->prepare($sql);
+        
+        if ($stmt) {
             $stmt->bind_param("i", $attendeeId);
             $stmt->execute();
             $result = $stmt->get_result();
@@ -242,18 +245,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_registration'])
                         experience = ?, availability = ?, workshop_preference = ? 
                         WHERE id = ?";
                 $stmt = $conn->prepare($sql);
-                $stmt->bind_param("ssii", $mentorExperience, $mentorAvailability, $mentorWorkshopPreference, $mentorDetailsId);
-                $stmt->execute();
+                
+                if ($stmt) {
+                    $stmt->bind_param("ssii", $mentorExperience, $mentorAvailability, $mentorWorkshopPreference, $mentorDetailsId);
+                    $stmt->execute();
+                }
             } else {
                 // Insert new mentor details
                 $sql = "INSERT INTO holiday_program_mentor_details 
                         (attendee_id, experience, availability, workshop_preference) 
                         VALUES (?, ?, ?, ?)";
                 $stmt = $conn->prepare($sql);
-                $stmt->bind_param("issi", $attendeeId, $mentorExperience, $mentorAvailability, $mentorWorkshopPreference);
-                $stmt->execute();
+                
+                if ($stmt) {
+                    $stmt->bind_param("issi", $attendeeId, $mentorExperience, $mentorAvailability, $mentorWorkshopPreference);
+                    $stmt->execute();
+                }
             }
         }
+    }
 }
 
 // Get program details
@@ -331,7 +341,7 @@ if ($result->num_rows > 0) {
             <div class="success-message">
                 <div class="success-content">
                     <i class="fas fa-check-circle"></i>
-                    <?php if (isset($mentorRegistration) && $mentorRegistration == 1): ?>
+                    <?php if (isset($_POST['mentor_registration']) && $_POST['mentor_registration'] == 1): ?>
                         <h2>Mentor Registration Submitted!</h2>
                         <p>Thank you for registering as a mentor for the <?php echo htmlspecialchars($programDetails['title']); ?> holiday program. We've sent a confirmation email to <?php echo htmlspecialchars($email); ?>. Your application will be reviewed by our program coordinator.</p>
                         <div class="next-steps">
@@ -804,11 +814,43 @@ if ($result->num_rows > 0) {
             $('#mentor_experience, #mentor_availability, #mentor_workshop_preference').prop('required', false);
                 }
         });
-        
+
+        // Check initial state of mentor checkbox
+        if ($('#mentor_registration').is(':checked')) {
+            // Show mentor-specific fields
+            $('#mentor_fields').show();
+            $('#mentor_experience, #mentor_availability, #mentor_workshop_preference').prop('required', true);
+            
+            // Hide student-specific sections
+            $('#school_section').hide();
+            $('#guardian_section').hide();
+            $('#workshop_preferences_section').hide();
+            
+            // Remove required attributes from student-specific fields
+            $('#school, #grade').prop('required', false);
+            $('#guardian_name, #guardian_relationship, #guardian_phone, #guardian_email').prop('required', false);
+            $('input[name="workshop_preference[]"]').prop('required', false);
+            
+            // Add a note about mentor workshop assignment
+            $('#workshop_note').html('<div class="info-message"><i class="fas fa-info-circle"></i> As a mentor, you will be assigned to a specific workshop based on program needs and your expertise.</div>').show();
+        }
+
+        $('#mentor_registration').change(function() {
+            console.log('Mentor checkbox changed, checked:', $(this).is(':checked'));
+            
+            if ($(this).is(':checked')) {
+                console.log('Attempting to hide student sections and show mentor fields');
+                // Rest of the code...
+            }
+        });
+                
         // Form validation
         $('#registration-form').submit(function(e) {
-            // Check if at least one workshop is selected
-            if ($('input[name="workshop_preference[]"]:checked').length === 0) {
+            // First check if this is a mentor registration
+            const isMentor = $('#mentor_registration').is(':checked');
+
+            // Only validate workshop selection for non-mentors
+            if (!isMentor && $('input[name="workshop_preference[]"]:checked').length === 0) {
                 e.preventDefault();
                 alert('Please select at least one workshop preference');
                 return false;
@@ -821,7 +863,7 @@ if ($result->num_rows > 0) {
                 return false;
             }
 
-            // Add to your existing JavaScript for toggling fields based on mentor status
+            // Mentor registration toggle functionality
             $('#mentor_registration').change(function() {
                 if ($(this).is(':checked')) {
                     // Show mentor-specific fields
@@ -840,7 +882,6 @@ if ($result->num_rows > 0) {
                     
                     // Add a note about mentor workshop assignment
                     $('#workshop_note').html('<div class="info-message"><i class="fas fa-info-circle"></i> As a mentor, you will be assigned to a specific workshop based on program needs and your expertise.</div>').slideDown();
-                    
                 } else {
                     // Hide mentor-specific fields
                     $('#mentor_fields').slideUp();
@@ -858,86 +899,114 @@ if ($result->num_rows > 0) {
                 }
             });
 
-             // Age validation (13-18 years old)
-            const dobValue = $('#dob').val();
-            if (dobValue) {
-                const dob = new Date(dobValue);
-                const today = new Date();
-                
-                // Calculate age
-                let age = today.getFullYear() - dob.getFullYear();
-                const monthDiff = today.getMonth() - dob.getMonth();
-                
-                // Adjust age if birthday hasn't occurred yet this year
-                if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
-                    age--;
-                }
-                
-                // Check if age is within the required range (13-18)
-                if (age < 13 || age > 18) {
+            // Validate mentor fields if mentor registration
+            if (isMentor) {
+                if (!$('#mentor_experience').val().trim() || 
+                    !$('#mentor_availability').val() || 
+                    !$('#mentor_workshop_preference').val()) {
                     e.preventDefault();
-                    
-                    // Custom error message based on age
-                    let errorMessage = 'You must be between 13-18 years old to register for this program.';
-                    if (age < 13) {
-                        errorMessage = 'You must be at least 13 years old to register for this program.';
-                    } else if (age > 18) {
-                        errorMessage = 'You must be 18 years old or younger to register for this program.';
-                    }
-                    
-                    // Show error message
-                    $('<div class="error-message"><p><i class="fas fa-exclamation-circle"></i> ' + errorMessage + '</p></div>')
-                        .insertBefore('#registration-form')
-                        .hide()
-                        .fadeIn(300);
-                    
-                    // Highlight the field and scroll to it
-                    $('#dob').addClass('error-input');
-                    $('html, body').animate({
-                        scrollTop: $('#dob').offset().top - 100
-                    }, 500);
-                    
+                    alert('Please complete all required mentor fields');
                     return false;
-                } else {
-                    $('#dob').removeClass('error-input');
                 }
             }
 
-             // Add mentor field validation
-                if ($('#mentor_registration').is(':checked')) {
-                    if (!$('#mentor_experience').val().trim() || 
-                        !$('#mentor_availability').val() || 
-                        !$('#mentor_workshop_preference').val()) {
-                        e.preventDefault();
-                        alert('Please complete all required mentor fields');
-                        return false;
-                    }
-                }
-
-             // Age validation - only apply to non-mentors
-                if (!$('#mentor_registration').is(':checked')) {
-                    const dob = new Date($('#dob').val());
+            // Age validation - only apply to non-mentors
+            if (!isMentor) {
+                const dobValue = $('#dob').val();
+                if (dobValue) {
+                    const dob = new Date(dobValue);
                     const today = new Date();
+                    
+                    // Calculate age
                     let age = today.getFullYear() - dob.getFullYear();
                     const monthDiff = today.getMonth() - dob.getMonth();
                     
+                    // Adjust age if birthday hasn't occurred yet this year
                     if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
                         age--;
                     }
                     
-                    // Check program age restrictions (assuming this is defined elsewhere)
-                    const minAge = 9; // Example minimum age
-                    const maxAge = 18; // Example maximum age
+                    // Check program age restrictions
+                    const minAge = 13; // Minimum age
+                    const maxAge = 18; // Maximum age
                     
                     if (age < minAge || age > maxAge) {
-                        // Show warning but don't prevent submission for mentors
-                        const confirmMessage = `The age requirement for participants is ${minAge}-${maxAge} years. You entered an age of ${age}. Do you wish to continue?`;
-                        if (!confirm(confirmMessage)) {
-                            e.preventDefault();
-                            return false;
+                        e.preventDefault();
+                        
+                        // Custom error message based on age
+                        let errorMessage = `You must be between ${minAge}-${maxAge} years old to register for this program.`;
+                        if (age < minAge) {
+                            errorMessage = `You must be at least ${minAge} years old to register for this program.`;
+                        } else if (age > maxAge) {
+                            errorMessage = `You must be ${maxAge} years old or younger to register for this program.`;
                         }
+                        
+                        // Show error message
+                        $('.error-message').remove(); // Remove any existing error messages
+                        $('<div class="error-message"><p><i class="fas fa-exclamation-circle"></i> ' + errorMessage + '</p></div>')
+                            .insertBefore('#registration-form')
+                            .hide()
+                            .fadeIn(300);
+                        
+                        // Highlight the field and scroll to it
+                        $('#dob').addClass('error-input');
+                        $('html, body').animate({
+                            scrollTop: $('#dob').offset().top - 100
+                        }, 500);
+                        
+                        return false;
+                    } else {
+                        $('#dob').removeClass('error-input');
                     }
                 }
+            }
+
+             // Age validation (13-18 years old)
+            // const dobValue = $('#dob').val();
+            // if (dobValue) {
+            //     const dob = new Date(dobValue);
+            //     const today = new Date();
+                
+            //     // Calculate age
+            //     let age = today.getFullYear() - dob.getFullYear();
+            //     const monthDiff = today.getMonth() - dob.getMonth();
+                
+            //     // Adjust age if birthday hasn't occurred yet this year
+            //     if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+            //         age--;
+            //     }
+                
+            //     // Check if age is within the required range (13-18)
+            //     if (age < 13 || age > 18) {
+            //         e.preventDefault();
+                    
+            //         // Custom error message based on age
+            //         let errorMessage = 'You must be between 13-18 years old to register for this program.';
+            //         if (age < 13) {
+            //             errorMessage = 'You must be at least 13 years old to register for this program.';
+            //         } else if (age > 18) {
+            //             errorMessage = 'You must be 18 years old or younger to register for this program.';
+            //         }
+                    
+            //         // Show error message
+            //         $('<div class="error-message"><p><i class="fas fa-exclamation-circle"></i> ' + errorMessage + '</p></div>')
+            //             .insertBefore('#registration-form')
+            //             .hide()
+            //             .fadeIn(300);
+                    
+            //         // Highlight the field and scroll to it
+            //         $('#dob').addClass('error-input');
+            //         $('html, body').animate({
+            //             scrollTop: $('#dob').offset().top - 100
+            //         }, 500);
+                    
+            //         return false;
+            //     } else {
+            //         $('#dob').removeClass('error-input');
+            //     }
+            // }
+
+
             
             return true;
         });
