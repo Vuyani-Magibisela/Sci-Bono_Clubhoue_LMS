@@ -1,13 +1,19 @@
 <?php
 session_start();
 require_once '../../../server.php'; // Database connection
-
+include '../../Models/holiday-program-functions.php';// Include shared functions file
 // Initialize variables
 $formSubmitted = false;
 $registrationSuccess = false;
 $errorMessage = '';
 $userExists = false;
 $userData = [];
+
+// Initialize variables with default values
+$isMemberFull = false;
+$isMentorFull = false;
+$isEditing = isset($_GET['edit']) && $_GET['edit'] == 1;
+$isExistingMentor = false;
 
 // Process email check
 if (isset($_POST['check_email'])) {
@@ -54,12 +60,63 @@ if (isset($_POST['check_email'])) {
 // Process form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_registration'])) {
     $formSubmitted = true;
+
+
+
+    // Check program capacity
+    $programId = isset($_GET['program_id']) ? intval($_GET['program_id']) : 1;
+    $capacityStatus = checkProgramCapacity($conn, $programId);
     
     // Check if registering as mentor
     $isMentor = isset($_POST['mentor_registration']) && $_POST['mentor_registration'] == 1;
     
     // Get program ID
     $programId = isset($_GET['program_id']) ? intval($_GET['program_id']) : 1;
+
+    // Set capacity status
+    $isMemberFull = $capacityStatus['member_full'];
+    $isMentorFull = $capacityStatus['mentor_full'];
+
+    // If editing an existing registration, get the attendee ID
+    if ($isEditing && isset($_SESSION['id'])) {
+        $userId = $_SESSION['id'];
+        $email = $_SESSION['email'] ?? '';
+        
+        $sql = "SELECT id, mentor_registration FROM holiday_program_attendees 
+                WHERE (user_id = ? OR email = ?) AND program_id = ?";
+        
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("isi", $userId, $email, $programId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+            $attendeeId = $row['id'];
+            $existingAttendeeId = $row['id']; // Set both variable names to the same value
+            $isExistingMentor = $row['mentor_registration'] == 1;
+        }
+    }
+    
+    // Check capacity if not editing
+    if (!$isEditing) {
+        $capacityStatus = checkProgramCapacity($conn, $programId);
+        
+        if ($isMentor && $capacityStatus['mentor_full']) {
+            $errorMessage = "We've reached full capacity for mentors. Please register as a member instead.";
+            // Don't process the form
+            $formSubmitted = false;
+        } elseif (!$isMentor && $capacityStatus['member_full']) {
+            $errorMessage = "We've reached full capacity for members. Please try applying as a mentor if you're qualified.";
+            // Don't process the form
+            $formSubmitted = false;
+        }
+    }
+
+
+
+    // Continue with form processing if no capacity issues
+    if ($formSubmitted) {
     
     // Get form data with sanitization
     $firstName = htmlspecialchars(trim($_POST['first_name']));
@@ -318,6 +375,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_registration'])
         }
     }
 }
+}
 
 // Get program details
 $programId = isset($_GET['program_id']) ? intval($_GET['program_id']) : 1;
@@ -337,7 +395,7 @@ if ($result->num_rows > 0) {
         'id' => 1,
         'term' => 'Term 1',
         'title' => 'Multi-Media - Digital Design',
-        'dates' => 'March 29 - April 7, 2025',
+        'dates' => 'March 29 - April 4, 2025',
         'description' => 'Dive into the world of digital media creation, learning graphic design, video editing, and animation techniques.'
     ];
 }
@@ -486,6 +544,32 @@ if ($result->num_rows > 0) {
                 </div>
             </div>
         <?php else: ?>
+
+        <!-- Capacity check messages -->
+        <?php if (($isMemberFull && $isMentorFull) && !$isEditing): ?>
+            <div class="capacity-message">
+                <div class="capacity-icon"><i class="fas fa-exclamation-circle"></i></div>
+                <h2>Registration Closed</h2>
+                <p>We've reached full capacity for both members and mentors for this program. Please check back for future programs or contact us for more information.</p>
+                <a href="holidayProgramIndex.php" class="primary-button">Browse Other Programs</a>
+            </div>
+        <?php elseif ($isMemberFull && !$isMentorFull && !$isEditing): ?>
+            <div class="capacity-message member-full">
+                <div class="capacity-icon"><i class="fas fa-exclamation-circle"></i></div>
+                <h2>Member Registration Closed</h2>
+                <p>We've reached full capacity for members for this program. However, we're still accepting mentor applications if you're interested in volunteering.</p>
+                <div class="capacity-actions">
+                    <button id="show-mentor-form" class="primary-button">Apply as Mentor</button>
+                    <a href="holidayProgramIndex.php" class="secondary-button">Browse Other Programs</a>
+                </div>
+            </div>
+        <?php elseif (!$isMemberFull && $isMentorFull && !$isEditing): ?>
+            <div class="capacity-message mentor-full">
+                <div class="capacity-icon"><i class="fas fa-exclamation-circle"></i></div>
+                <h2>Mentor Registration Closed</h2>
+                <p>We've reached full capacity for mentors for this program. However, you can still register as a participant.</p>
+            </div>
+        <?php endif; ?>
         
         <?php if (!empty($errorMessage)): ?>
         <div class="error-message">
@@ -493,6 +577,12 @@ if ($result->num_rows > 0) {
         </div>
         <?php endif; ?>
         
+        <?php 
+        // Show registration form if:
+        // 1. User is editing their existing registration, OR
+        // 2. There's still capacity for at least one registration type (member or mentor)
+        if ($isEditing || !($isMemberFull && $isMentorFull)): 
+        ?>
         <div class="registration-form-container">
             <div class="email-check-container">
                 <h2>Already registered or a Clubhouse member?</h2>
@@ -512,8 +602,14 @@ if ($result->num_rows > 0) {
                 <h2><i class="fas fa-chalkboard-teacher"></i> Mentor Registration</h2>
                 <div class="form-group">
                     <div class="checkbox-group">
-                        <input type="checkbox" id="mentor_registration" name="mentor_registration" value="1">
-                        <label for="mentor_registration">I would like to register as a mentor for this program</label>
+                        <input type="checkbox" id="mentor_registration" name="mentor_registration" value="1" 
+                            <?php echo ($isMentorFull && !$isExistingMentor) ? 'disabled' : ''; ?>>
+                        <label for="mentor_registration">
+                            I would like to register as a mentor for this program
+                            <?php if ($isMentorFull && !$isExistingMentor): ?>
+                                <span class="capacity-label">(Mentor positions filled)</span>
+                            <?php endif; ?>
+                        </label>
                     </div>
                 </div>
                 
@@ -869,6 +965,7 @@ if ($result->num_rows > 0) {
             </form>
         </div>
         <?php endif; ?>
+    <?php endif; ?>
     </main>
 
     <!-- Mobile Navigation (visible on mobile only) -->
@@ -901,7 +998,28 @@ if ($result->num_rows > 0) {
     
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="../../../public/assets/js/workshopSelection.js"></script>
-
+    <script>
+        // Add this to your script section
+        document.addEventListener('DOMContentLoaded', function() {
+            const showMentorFormButton = document.getElementById('show-mentor-form');
+            const mentorRegistrationCheckbox = document.getElementById('mentor_registration');
+            
+            if (showMentorFormButton && mentorRegistrationCheckbox) {
+                showMentorFormButton.addEventListener('click', function() {
+                    // Check the mentor registration checkbox
+                    mentorRegistrationCheckbox.checked = true;
+                    
+                    // Trigger the change event to show mentor fields
+                    mentorRegistrationCheckbox.dispatchEvent(new Event('change'));
+                    
+                    // Scroll to the form
+                    document.querySelector('.registration-form-container').scrollIntoView({
+                        behavior: 'smooth'
+                    });
+                });
+            }
+        });
+    </script>
     <script>
     $(document).ready(function() {
         // Trigger the change event to set proper initial state
@@ -1202,53 +1320,6 @@ if ($result->num_rows > 0) {
                 }
             }
 
-             // Age validation (13-18 years old)
-            // const dobValue = $('#dob').val();
-            // if (dobValue) {
-            //     const dob = new Date(dobValue);
-            //     const today = new Date();
-                
-            //     // Calculate age
-            //     let age = today.getFullYear() - dob.getFullYear();
-            //     const monthDiff = today.getMonth() - dob.getMonth();
-                
-            //     // Adjust age if birthday hasn't occurred yet this year
-            //     if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
-            //         age--;
-            //     }
-                
-            //     // Check if age is within the required range (13-18)
-            //     if (age < 13 || age > 18) {
-            //         e.preventDefault();
-                    
-            //         // Custom error message based on age
-            //         let errorMessage = 'You must be between 13-18 years old to register for this program.';
-            //         if (age < 13) {
-            //             errorMessage = 'You must be at least 13 years old to register for this program.';
-            //         } else if (age > 18) {
-            //             errorMessage = 'You must be 18 years old or younger to register for this program.';
-            //         }
-                    
-            //         // Show error message
-            //         $('<div class="error-message"><p><i class="fas fa-exclamation-circle"></i> ' + errorMessage + '</p></div>')
-            //             .insertBefore('#registration-form')
-            //             .hide()
-            //             .fadeIn(300);
-                    
-            //         // Highlight the field and scroll to it
-            //         $('#dob').addClass('error-input');
-            //         $('html, body').animate({
-            //             scrollTop: $('#dob').offset().top - 100
-            //         }, 500);
-                    
-            //         return false;
-            //     } else {
-            //         $('#dob').removeClass('error-input');
-            //     }
-            // }
-
-
-            
             return true;
         });
     });

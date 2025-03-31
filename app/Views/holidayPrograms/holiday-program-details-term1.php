@@ -5,6 +5,33 @@ $programId = isset($_GET['id']) ? intval($_GET['id']) : 1;
 // If we have a database connection, we'd query the program details here
 // For now, we'll simulate fetching program details based on ID
 require_once '../../../server.php';
+include '../../Models/holiday-program-functions.php';
+
+// Check program capacity
+$capacityStatus = checkProgramCapacity($conn, $programId);
+$memberCapacity = 30;
+$mentorCapacity = 5;
+
+// Get current enrollment counts
+$memberSql = "SELECT COUNT(*) as count FROM holiday_program_attendees 
+              WHERE program_id = ? AND mentor_registration = 0";
+
+$stmt = $conn->prepare($memberSql);
+$stmt->bind_param("i", $programId);
+$stmt->execute();
+$memberCount = $stmt->get_result()->fetch_assoc()['count'];
+
+$mentorSql = "SELECT COUNT(*) as count FROM holiday_program_attendees 
+              WHERE program_id = ? AND mentor_registration = 1";
+
+$stmt = $conn->prepare($mentorSql);
+$stmt->bind_param("i", $programId);
+$stmt->execute();
+$mentorCount = $stmt->get_result()->fetch_assoc()['count'];
+
+// Calculate percentages
+$memberPercentage = min(($memberCount / $memberCapacity) * 100, 100);
+$mentorPercentage = min(($mentorCount / $mentorCapacity) * 100, 100);
 
 // Initialize program data with default values
 $program = [
@@ -17,7 +44,7 @@ $program = [
     'location' => 'Sci-Bono Clubhouse',
     'age_range' => '13-18 years',
     'max_participants' => 30,
-    'registration_deadline' => 'March 24, 2025',
+    'registration_deadline' => 'March 31, 2025',
     'lunch_included' => true,
     'program_goals' => 'This program introduces participants to various aspects of digital design. Participants will learn essential skills in their chosen workshop track while addressing one or more of the 17 UN Sustainable Development Goals through their projects.',
     'workshops' => [
@@ -568,6 +595,38 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin']) {
                         <?php endif; ?>
                     </div>
                 </div>
+
+                <!-- Registration capcity card -->
+                <div class="sidebar-card capacity-card">
+                <h3>Registration Status</h3>
+                <div class="card-content">
+                    <div class="capacity-info">
+                        <div class="capacity-label">Participant Capacity:</div>
+                        <div class="capacity-bar">
+                            <div class="capacity-fill" style="width: <?php echo $memberPercentage; ?>%;"></div>
+                        </div>
+                        <div class="capacity-text">
+                            <?php echo $memberCount; ?>/<?php echo $memberCapacity; ?> spots filled
+                            <?php if ($capacityStatus['member_full']): ?>
+                                <span class="capacity-full">FULL</span>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    
+                    <div class="capacity-info">
+                        <div class="capacity-label">Mentor Positions:</div>
+                        <div class="capacity-bar">
+                            <div class="capacity-fill" style="width: <?php echo $mentorPercentage; ?>%;"></div>
+                        </div>
+                        <div class="capacity-text">
+                            <?php echo $mentorCount; ?>/<?php echo $mentorCapacity; ?> spots filled
+                            <?php if ($capacityStatus['mentor_full']): ?>
+                                <span class="capacity-full">FULL</span>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                </div>
+            </div>
                 
                 <!-- Workshop Spaces Card -->
                 <div class="sidebar-card workshop-card">
