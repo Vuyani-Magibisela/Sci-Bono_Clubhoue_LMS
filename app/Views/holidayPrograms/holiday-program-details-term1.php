@@ -7,6 +7,22 @@ $programId = isset($_GET['id']) ? intval($_GET['id']) : 1;
 require_once '../../../server.php';
 include '../../Models/holiday-program-functions.php';
 
+
+// Include server connection
+require_once '../../../server.php';
+
+// Include the controller
+require_once '../../Controllers/HolidayProgramController.php';
+
+// Create controller instance and get program data
+$controller = new HolidayProgramController($conn);
+$data = $controller->getProgram($programId);
+
+// Extract data for ease of use in the view
+$program = $data['program'];
+$userIsRegistered = $data['user_is_registered'];
+$capacityStatus = $data['capacity_status'];
+
 // Check program capacity
 $capacityStatus = checkProgramCapacity($conn, $programId);
 $memberCapacity = 30;
@@ -34,184 +50,184 @@ $memberPercentage = min(($memberCount / $memberCapacity) * 100, 100);
 $mentorPercentage = min(($mentorCount / $mentorCapacity) * 100, 100);
 
 // Initialize program data with default values
-$program = [
-    'id' => 1,
-    'term' => 'Term 1',
-    'title' => 'Multi-Media - Digital Design',
-    'description' => 'Dive into the world of digital media creation, learning graphic design, video editing, and animation techniques.',
-    'dates' => 'March 31 - April 4, 2025',
-    'time' => '9:00 AM - 4:00 PM',
-    'location' => 'Sci-Bono Clubhouse',
-    'age_range' => '13-18 years',
-    'max_participants' => 30,
-    'registration_deadline' => 'March 31, 2025',
-    'lunch_included' => true,
-    'program_goals' => 'This program introduces participants to various aspects of digital design. Participants will learn essential skills in their chosen workshop track while addressing one or more of the 17 UN Sustainable Development Goals through their projects.',
-    'workshops' => [
-        [
-            'id' => 1,
-            'title' => '3D Design',
-            'description' => 'Learn the basics of 3D modeling, texturing, and rendering using Blender.',
-            'capacity' => 5,
-            'mentor' => 'Jabu Khumalo',
-            'skills' => ['3D modeling', 'Texturing', 'Lighting', 'Rendering'],
-            'software' => ['Blender'],
-            'icon' => 'fas fa-cube'
-        ],
-        [
-            'id' => 2,
-            'title' => 'Graphic Design',
-            'description' => 'Use Gimp, Krita, Blender and AI image generation tools to express your creativity.',
-            'capacity' => 10,
-            'mentor' => 'Lebo Skhosana',
-            'skills' => ['Design principles', 'Color theory', 'Composition', 'Digital illustration'],
-            'software' => ['GIMP', 'Krita', 'Blender', 'AI Tools'],
-            'icon' => 'fas fa-palette'
-        ],
-        [
-            'id' => 3,
-            'title' => 'Music and Video Production',
-            'description' => 'Utilize Fruity Loops and CapCut to create music and visually represent it.',
-            'capacity' => 10,
-            'mentor' => 'Themba Kgakane',
-            'skills' => ['Audio production', 'Beat creation', 'Video editing', 'Audio-visual synchronization'],
-            'software' => ['Fruity Loops', 'CapCut'],
-            'icon' => 'fas fa-music'
-        ],
-        [
-            'id' => 4,
-            'title' => 'Animation',
-            'description' => 'Learn the foundation in both 2D and 3D animation using Blender and Krita.',
-            'capacity' => 5,
-            'mentor' => 'Vuyani Magibisela',
-            'skills' => ['Animation principles', 'Keyframing', 'Character movement', 'Scene composition'],
-            'software' => ['Blender', 'Krita'],
-            'icon' => 'fas fa-film'
-        ]
-    ],
-    'daily_schedule' => [
-        'Day 1' => [
-            'date' => 'Monday, March 31, 2025',
-            'theme' => 'Introduction & Fundamentals',
-            'morning' => [
-                '9:00 - 9:30' => 'Welcome and program overview for all participants',
-                '9:30 - 10:00' => 'Introduction to UN Sustainable Development Goals',
-                '10:00 - 10:15' => 'Break',
-                '10:15 - 12:00' => 'Workshop-specific introductions and skill assessments'
-            ],
-            'afternoon' => [
-                '1:00 - 2:30' => 'Software introduction and basic skills training',
-                '2:30 - 2:45' => 'Break',
-                '2:45 - 3:45' => 'Brainstorming session for projects addressing SDGs',
-                '3:45 - 4:00' => 'Daily reflection and next day preview'
-            ]
-        ],
-        'Day 2' => [
-            'date' => 'Tuesday, April 1, 2025',
-            'theme' => 'Skill Development',
-            'morning' => [
-                '9:00 - 9:15' => 'Daily briefing and objectives',
-                '9:15 - 10:45' => 'Core skills development session I',
-                '10:45 - 11:00' => 'Break',
-                '11:00 - 12:00' => 'Core skills development session II'
-            ],
-            'afternoon' => [
-                '1:00 - 2:30' => 'Project planning and initial development',
-                '2:30 - 2:45' => 'Break',
-                '2:45 - 3:45' => 'Continued skills development and application',
-                '3:45 - 4:00' => 'Progress check-in and daily reflection'
-            ]
-        ],
-        'Day 3' => [
-            'date' => 'Wednesday, April 2, 2025',
-            'theme' => 'Project Development',
-            'morning' => [
-                '9:00 - 9:15' => 'Daily briefing and objectives',
-                '9:15 - 10:45' => 'Advanced techniques instruction',
-                '10:45 - 11:00' => 'Break',
-                '11:00 - 12:00' => 'Project work with mentor guidance'
-            ],
-            'afternoon' => [
-                '1:00 - 2:30' => 'Continued project development',
-                '2:30 - 2:45' => 'Break',
-                '2:45 - 3:45' => 'Mid-week project review and feedback',
-                '3:45 - 4:00' => 'Progress check-in and daily reflection'
-            ]
-        ],
-        'Day 4' => [
-            'date' => 'Thursday, April 3, 2025',
-            'theme' => 'Project Refinement',
-            'morning' => [
-                '9:00 - 9:15' => 'Daily briefing and objectives',
-                '9:15 - 10:45' => 'Project refinement and advanced techniques',
-                '10:45 - 11:00' => 'Break',
-                '11:00 - 12:00' => 'Problem-solving workshop for project challenges'
-            ],
-            'afternoon' => [
-                '1:00 - 2:30' => 'Final project development',
-                '2:30 - 2:45' => 'Break',
-                '2:45 - 3:45' => 'Project finalization and preparing for showcase',
-                '3:45 - 4:00' => 'Showcase preparation instructions and daily reflection'
-            ]
-        ],
-        'Day 5' => [
-            'date' => 'Friday, April 4, 2025',
-            'theme' => 'Showcase & Celebration',
-            'morning' => [
-                '9:00 - 9:15' => 'Final day briefing',
-                '9:15 - 10:45' => 'Project completion and showcase preparation',
-                '10:45 - 11:00' => 'Break',
-                '11:00 - 12:00' => 'Project final touches and presentation preparation'
-            ],
-            'afternoon' => [
-                '1:00 - 3:00' => 'Showcase event (open to parents and other Clubhouse members)',
-                '3:00 - 3:30' => 'Recognition and certificates',
-                '3:30 - 4:00' => 'Program conclusion and future opportunities at the Clubhouse'
-            ]
-        ]
-    ],
-    'project_requirements' => [
-        'All projects must address at least one UN Sustainable Development Goal',
-        'Projects must be completed by the end of the program',
-        'Each participant/team must prepare a brief presentation for the showcase',
-        'Projects should demonstrate application of skills learned during the program'
-    ],
-    'evaluation_criteria' => [
-        'Technical Execution' => 'Quality of technical skills demonstrated',
-        'Creativity' => 'Original ideas and creative approach',
-        'Message' => 'Clear connection to SDGs and effective communication of message',
-        'Completion' => 'Level of completion and polish',
-        'Presentation' => 'Quality of showcase presentation'
-    ],
-    'what_to_bring' => [
-        'Notebook and pen/pencil',
-        'Snacks (lunch will be provided)',
-        'Water bottle',
-        'Enthusiasm and creativity!'
-    ],
-    'faq' => [
-        [
-            'question' => 'Do I need prior experience to participate?',
-            'answer' => 'No prior experience is necessary. Our workshops are designed for beginners, though those with experience will also benefit and can work on more advanced projects.'
-        ],
-        [
-            'question' => 'Can I switch workshops during the week?',
-            'answer' => 'Due to the progressive nature of the workshops, participants are encouraged to stay with their assigned workshop throughout the week. However, mentors may arrange collaborative activities between workshops.'
-        ],
-        [
-            'question' => 'What are the UN Sustainable Development Goals?',
-            'answer' => 'The UN Sustainable Development Goals are a collection of 17 interlinked global goals designed to be a "blueprint to achieve a better and more sustainable future for all." You\'ll learn more about these goals on the first day of the program.'
-        ],
-        [
-            'question' => 'Will I need my own laptop or equipment?',
-            'answer' => 'No, all necessary equipment will be provided at the Clubhouse. If you have special accessibility needs, please let us know during registration.'
-        ],
-        [
-            'question' => 'What happens if I can\'t attend all five days?',
-            'answer' => 'We encourage full attendance to get the most out of the program. If you must miss a day, please notify us in advance, and your mentor will provide materials to help you catch up.'
-        ]
-    ]
-];
+// $program = [
+//     'id' => 1,
+//     'term' => 'Term 1',
+//     'title' => 'Multi-Media - Digital Design',
+//     'description' => 'Dive into the world of digital media creation, learning graphic design, video editing, and animation techniques.',
+//     'dates' => 'March 31 - April 4, 2025',
+//     'time' => '9:00 AM - 4:00 PM',
+//     'location' => 'Sci-Bono Clubhouse',
+//     'age_range' => '13-18 years',
+//     'max_participants' => 30,
+//     'registration_deadline' => 'March 31, 2025',
+//     'lunch_included' => true,
+//     'program_goals' => 'This program introduces participants to various aspects of digital design. Participants will learn essential skills in their chosen workshop track while addressing one or more of the 17 UN Sustainable Development Goals through their projects.',
+//     'workshops' => [
+//         [
+//             'id' => 1,
+//             'title' => '3D Design',
+//             'description' => 'Learn the basics of 3D modeling, texturing, and rendering using Blender.',
+//             'capacity' => 5,
+//             'mentor' => 'Jabu Khumalo',
+//             'skills' => ['3D modeling', 'Texturing', 'Lighting', 'Rendering'],
+//             'software' => ['Blender'],
+//             'icon' => 'fas fa-cube'
+//         ],
+//         [
+//             'id' => 2,
+//             'title' => 'Graphic Design',
+//             'description' => 'Use Gimp, Krita, Blender and AI image generation tools to express your creativity.',
+//             'capacity' => 10,
+//             'mentor' => 'Lebo Skhosana',
+//             'skills' => ['Design principles', 'Color theory', 'Composition', 'Digital illustration'],
+//             'software' => ['GIMP', 'Krita', 'Blender', 'AI Tools'],
+//             'icon' => 'fas fa-palette'
+//         ],
+//         [
+//             'id' => 3,
+//             'title' => 'Music and Video Production',
+//             'description' => 'Utilize Fruity Loops and CapCut to create music and visually represent it.',
+//             'capacity' => 10,
+//             'mentor' => 'Themba Kgakane',
+//             'skills' => ['Audio production', 'Beat creation', 'Video editing', 'Audio-visual synchronization'],
+//             'software' => ['Fruity Loops', 'CapCut'],
+//             'icon' => 'fas fa-music'
+//         ],
+//         [
+//             'id' => 4,
+//             'title' => 'Animation',
+//             'description' => 'Learn the foundation in both 2D and 3D animation using Blender and Krita.',
+//             'capacity' => 5,
+//             'mentor' => 'Vuyani Magibisela',
+//             'skills' => ['Animation principles', 'Keyframing', 'Character movement', 'Scene composition'],
+//             'software' => ['Blender', 'Krita'],
+//             'icon' => 'fas fa-film'
+//         ]
+//     ],
+    // 'daily_schedule' => [
+    //     'Day 1' => [
+    //         'date' => 'Monday, March 31, 2025',
+    //         'theme' => 'Introduction & Fundamentals',
+    //         'morning' => [
+    //             '9:00 - 9:30' => 'Welcome and program overview for all participants',
+    //             '9:30 - 10:00' => 'Introduction to UN Sustainable Development Goals',
+    //             '10:00 - 10:15' => 'Break',
+    //             '10:15 - 12:00' => 'Workshop-specific introductions and skill assessments'
+    //         ],
+    //         'afternoon' => [
+    //             '1:00 - 2:30' => 'Software introduction and basic skills training',
+    //             '2:30 - 2:45' => 'Break',
+    //             '2:45 - 3:45' => 'Brainstorming session for projects addressing SDGs',
+    //             '3:45 - 4:00' => 'Daily reflection and next day preview'
+    //         ]
+    //     ],
+    //     'Day 2' => [
+    //         'date' => 'Tuesday, April 1, 2025',
+    //         'theme' => 'Skill Development',
+    //         'morning' => [
+    //             '9:00 - 9:15' => 'Daily briefing and objectives',
+    //             '9:15 - 10:45' => 'Core skills development session I',
+    //             '10:45 - 11:00' => 'Break',
+    //             '11:00 - 12:00' => 'Core skills development session II'
+    //         ],
+    //         'afternoon' => [
+    //             '1:00 - 2:30' => 'Project planning and initial development',
+    //             '2:30 - 2:45' => 'Break',
+    //             '2:45 - 3:45' => 'Continued skills development and application',
+    //             '3:45 - 4:00' => 'Progress check-in and daily reflection'
+    //         ]
+    //     ],
+    //     'Day 3' => [
+    //         'date' => 'Wednesday, April 2, 2025',
+    //         'theme' => 'Project Development',
+    //         'morning' => [
+    //             '9:00 - 9:15' => 'Daily briefing and objectives',
+    //             '9:15 - 10:45' => 'Advanced techniques instruction',
+    //             '10:45 - 11:00' => 'Break',
+    //             '11:00 - 12:00' => 'Project work with mentor guidance'
+    //         ],
+    //         'afternoon' => [
+    //             '1:00 - 2:30' => 'Continued project development',
+    //             '2:30 - 2:45' => 'Break',
+    //             '2:45 - 3:45' => 'Mid-week project review and feedback',
+    //             '3:45 - 4:00' => 'Progress check-in and daily reflection'
+    //         ]
+    //     ],
+    //     'Day 4' => [
+    //         'date' => 'Thursday, April 3, 2025',
+    //         'theme' => 'Project Refinement',
+    //         'morning' => [
+    //             '9:00 - 9:15' => 'Daily briefing and objectives',
+    //             '9:15 - 10:45' => 'Project refinement and advanced techniques',
+    //             '10:45 - 11:00' => 'Break',
+    //             '11:00 - 12:00' => 'Problem-solving workshop for project challenges'
+    //         ],
+    //         'afternoon' => [
+    //             '1:00 - 2:30' => 'Final project development',
+    //             '2:30 - 2:45' => 'Break',
+    //             '2:45 - 3:45' => 'Project finalization and preparing for showcase',
+    //             '3:45 - 4:00' => 'Showcase preparation instructions and daily reflection'
+    //         ]
+    //     ],
+    //     'Day 5' => [
+    //         'date' => 'Friday, April 4, 2025',
+    //         'theme' => 'Showcase & Celebration',
+    //         'morning' => [
+    //             '9:00 - 9:15' => 'Final day briefing',
+    //             '9:15 - 10:45' => 'Project completion and showcase preparation',
+    //             '10:45 - 11:00' => 'Break',
+    //             '11:00 - 12:00' => 'Project final touches and presentation preparation'
+    //         ],
+    //         'afternoon' => [
+    //             '1:00 - 3:00' => 'Showcase event (open to parents and other Clubhouse members)',
+    //             '3:00 - 3:30' => 'Recognition and certificates',
+    //             '3:30 - 4:00' => 'Program conclusion and future opportunities at the Clubhouse'
+    //         ]
+    //     ]
+    // ],
+    // 'project_requirements' => [
+    //     'All projects must address at least one UN Sustainable Development Goal',
+    //     'Projects must be completed by the end of the program',
+    //     'Each participant/team must prepare a brief presentation for the showcase',
+    //     'Projects should demonstrate application of skills learned during the program'
+    // ],
+    // 'evaluation_criteria' => [
+    //     'Technical Execution' => 'Quality of technical skills demonstrated',
+    //     'Creativity' => 'Original ideas and creative approach',
+    //     'Message' => 'Clear connection to SDGs and effective communication of message',
+    //     'Completion' => 'Level of completion and polish',
+    //     'Presentation' => 'Quality of showcase presentation'
+    // ],
+//     'what_to_bring' => [
+//         'Notebook and pen/pencil',
+//         'Snacks (lunch will be provided)',
+//         'Water bottle',
+//         'Enthusiasm and creativity!'
+//     ],
+//     'faq' => [
+//         [
+//             'question' => 'Do I need prior experience to participate?',
+//             'answer' => 'No prior experience is necessary. Our workshops are designed for beginners, though those with experience will also benefit and can work on more advanced projects.'
+//         ],
+//         [
+//             'question' => 'Can I switch workshops during the week?',
+//             'answer' => 'Due to the progressive nature of the workshops, participants are encouraged to stay with their assigned workshop throughout the week. However, mentors may arrange collaborative activities between workshops.'
+//         ],
+//         [
+//             'question' => 'What are the UN Sustainable Development Goals?',
+//             'answer' => 'The UN Sustainable Development Goals are a collection of 17 interlinked global goals designed to be a "blueprint to achieve a better and more sustainable future for all." You\'ll learn more about these goals on the first day of the program.'
+//         ],
+//         [
+//             'question' => 'Will I need my own laptop or equipment?',
+//             'answer' => 'No, all necessary equipment will be provided at the Clubhouse. If you have special accessibility needs, please let us know during registration.'
+//         ],
+//         [
+//             'question' => 'What happens if I can\'t attend all five days?',
+//             'answer' => 'We encourage full attendance to get the most out of the program. If you must miss a day, please notify us in advance, and your mentor will provide materials to help you catch up.'
+//         ]
+//     ]
+// ];
 
 // In a real implementation, you would query the database based on the program ID
 // $sql = "SELECT * FROM holiday_programs WHERE id = ?";
@@ -718,7 +734,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin']) {
         document.addEventListener('DOMContentLoaded', function() {
             // Tab functionality for schedule
             const tabButtons = document.querySelectorAll('.tab-button');
-            
+
             tabButtons.forEach(button => {
                 button.addEventListener('click', function() {
                     // Get the tab to show
