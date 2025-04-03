@@ -19,15 +19,15 @@ function sanitize_input($data) {
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
     // Retrieve basic report data
-    $reportMonth = sanitize_input($_POST['reportMonth']);
-    $reportYear = sanitize_input($_POST['reportYear']);
+    $reportMonth = sanitize_input($_POST['reportMonth'] ?? '');
+    $reportYear = sanitize_input($_POST['reportYear'] ?? '');
     $reportDate = $reportYear . '-' . $reportMonth . '-01'; // First day of the month
     
-    $totalAttendees = intval($_POST['totalAttendees']);
-    $maleAttendees = intval($_POST['maleAttendees']);
-    $femaleAttendees = intval($_POST['femaleAttendees']);
-    $monthNarrative = sanitize_input($_POST['monthNarrative']);
-    $challenges = sanitize_input($_POST['challenges']);
+    $totalAttendees = intval($_POST['totalAttendees'] ?? 0);
+    $maleAttendees = intval($_POST['maleAttendees'] ?? 0);
+    $femaleAttendees = intval($_POST['femaleAttendees'] ?? 0);
+    $monthNarrative = sanitize_input($_POST['monthNarrative'] ?? '');
+    $challenges = sanitize_input($_POST['challenges'] ?? '');
     
     // Age groups - convert to JSON for storage
     $ageGroups = isset($_POST['ageGroups']) ? json_encode($_POST['ageGroups']) : '{}';

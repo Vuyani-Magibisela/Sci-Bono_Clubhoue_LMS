@@ -95,7 +95,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                             <span>Logout</span>
                         </a>
                     <?php else: ?>
-                        <a href="../../login.php" class="login-btn">
+                        <a href="./holidayProgramLogin.php" class="login-btn">
                             <i class="fas fa-sign-in-alt"></i>
                             <span>Login</span>
                         </a>
