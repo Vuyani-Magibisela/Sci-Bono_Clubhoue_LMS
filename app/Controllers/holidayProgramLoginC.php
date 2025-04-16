@@ -20,7 +20,7 @@ class HolidayProgramLoginController {
         $registeredEmail = $_SESSION['email'] ?? '';
 
         if (!$isLoggedIn && !empty($registeredEmail)) {
-            $needsPassword = $this->userModel->userNeedsPassword($registeredEmail);
+            // $needsPassword = $this->userModel->userNeedsPassword($registeredEmail);
         }
 
         // Process password creation
