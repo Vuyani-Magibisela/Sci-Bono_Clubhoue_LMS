@@ -261,6 +261,11 @@ while ($report = $reportResult->fetch_assoc()) {
                 <h3>Add Program</h3>
             </div>
         </a>
+        <a href="./holidayPrograms/holidayProgramIndex.php">
+            <div class="addProgram">
+                <h3>Holiday Programs</h3>
+            </div>
+        </a>
     </nav>
 
     <h1>Attendance Statistics Dashboard</h1>
