@@ -266,6 +266,11 @@ while ($report = $reportResult->fetch_assoc()) {
                 <h3>Holiday Programs</h3>
             </div>
         </a>
+        <a href="./dailyAttendanceRegister.php">
+            <div class="addProgram">
+                <h3>Clubhouse Registers</h3>
+            </div>
+        </a>
     </nav>
 
     <h1>Attendance Statistics Dashboard</h1>
@@ -614,5 +619,6 @@ while ($report = $reportResult->fetch_assoc()) {
         }
     }
     </script>
+    <script src="../../public/assets/js/homedashboard.js"></script>
 </body>
 </html>

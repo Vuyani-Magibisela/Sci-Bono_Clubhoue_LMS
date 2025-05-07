@@ -140,6 +140,7 @@ document.addEventListener('DOMContentLoaded', function() {
         
         // If form is valid, submit data
         if (isValid) {
+            console.log("Form is valid, submitting data...");
             // Show loading state
             const registerBtn = document.getElementById('register-btn');
             registerBtn.classList.add('loading');
@@ -149,7 +150,7 @@ document.addEventListener('DOMContentLoaded', function() {
             const formData = new FormData(registrationForm);
             
             // Submit form data via AJAX
-            fetch('visitors-handler.php', {
+            fetch('../../handlers/visitors-handler.php', {
                 method: 'POST',
                 body: formData
             })
@@ -203,7 +204,7 @@ document.addEventListener('DOMContentLoaded', function() {
             formData.append('action', 'signin');
             
             // Submit form data via AJAX
-            fetch('visitors-handler.php', {
+            fetch('../../handlers/visitors-handler.php', {
                 method: 'POST',
                 body: formData
             })
@@ -257,7 +258,7 @@ document.addEventListener('DOMContentLoaded', function() {
             formData.append('action', 'signout');
             
             // Submit form data via AJAX
-            fetch('visitors-handler.php', {
+            fetch('../../handlers/visitors-handler.php', {
                 method: 'POST',
                 body: formData
             })
