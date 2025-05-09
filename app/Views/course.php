@@ -41,13 +41,26 @@ if (isset($_GET['enroll']) && $_GET['enroll'] == 1) {
     exit;
 }
 
-// Get course details and sections
-$course = $courseController->getCourseDetails($courseId);
-$sections = $courseController->getCourseSections($courseId);
-$isEnrolled = $courseController->isUserEnrolled($userId, $courseId);
-$progress = $isEnrolled ? $courseController->getUserProgress($userId, $courseId) : 0;
+// Get all course page data using the new method
+$coursePageData = $courseController->getCourseDataForView($courseId, $userId);
 
-// Rest of the HTML and display logic remains the same...
+if (!$coursePageData || !$coursePageData['course']) {
+    // Redirect to learn page if course data is invalid or course not found
+    header("Location: learn.php?error=course_not_found");
+    exit;
+}
+
+$course = $coursePageData['course'];
+$sections = $coursePageData['sections']; // This will now have lessons populated
+$isEnrolled = $coursePageData['isEnrolled'];
+// $userProgressData is an array like ['percent' => X, 'completed_lessons' => Y, 'total_lessons_in_progress' => Z]
+// For the progress bar, we need the percentage.
+$progressPercent = $coursePageData['progress']['percent'] ?? 0; 
+$totalDuration = $coursePageData['totalDuration'];
+$totalLessons = $coursePageData['totalLessons'];
+$completedLessons = $coursePageData['completedLessons']; // This is calculated in getCourseDataForView
+
+
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -187,16 +200,36 @@ $progress = $isEnrolled ? $courseController->getUserProgress($userId, $courseId)
                     <div class="progress-container">
                         <div class="progress-label">
                             <span>Your Progress</span>
-                            <span><?php echo $progress; ?>%</span>
+                            <span><?php echo htmlspecialchars($progressPercent); ?>%</span>
                         </div>
                         <div class="progress-bar-container">
-                            <div class="progress-bar" style="width: <?php echo $progress; ?>%"></div>
+                            <div class="progress-bar" style="width: <?php echo htmlspecialchars($progressPercent); ?>%"></div>
                         </div>
                         <div class="progress-stats" style="margin-top:0.75rem; font-size:0.85rem; color:#777;">
-                            <span><?php echo $completedLessons; ?> of <?php echo $totalLessons; ?> lessons completed</span>
+                            <span><?php echo htmlspecialchars($completedLessons); ?> of <?php echo htmlspecialchars($totalLessons); ?> lessons completed</span>
                         </div>
                     </div>
-                    <a href="lesson.php?id=<?php echo $sections[0]['lessons'][0]['id']; ?>" class="action-button">Continue Learning</a>
+                    <?php 
+                    // Find the first uncompleted lesson or the first lesson if all are completed or none started
+                    $continueLessonId = null;
+                    if (!empty($sections) && !empty($sections[0]['lessons'])) {
+                        $continueLessonId = $sections[0]['lessons'][0]['id']; // Default to first lesson of first section
+                        $foundNext = false;
+                        foreach ($sections as $s) {
+                            if (isset($s['lessons']) && is_array($s['lessons'])) {
+                                foreach ($s['lessons'] as $l) {
+                                    if (isset($l['id']) && !$l['completed']) {
+                                        $continueLessonId = $l['id'];
+                                        $foundNext = true;
+                                        break;
+                                    }
+                                }
+                            }
+                            if ($foundNext) break;
+                        }
+                    }
+                    ?>
+                    <a href="lesson.php?id=<?php echo $continueLessonId; ?>" class="action-button">Continue Learning</a>
                     <?php else: ?>
                     <a href="course.php?id=<?php echo $course['id']; ?>&enroll=1" class="action-button">Enroll Now</a>
                     <?php endif; ?>

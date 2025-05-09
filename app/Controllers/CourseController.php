@@ -1,16 +1,19 @@
 <?php
 require_once __DIR__ . '/../Models/CourseModel.php';
 require_once __DIR__ . '/../Models/EnrollmentModel.php';
+require_once __DIR__ . '/LessonController.php'; // Added LessonController
 
 class CourseController {
     private $conn;
     private $courseModel;
     private $enrollmentModel;
+    private $lessonController; // Added lessonController property
     
     public function __construct($conn) {
         $this->conn = $conn;
         $this->courseModel = new CourseModel($conn);
         $this->enrollmentModel = new EnrollmentModel($conn);
+        $this->lessonController = new LessonController($conn); // Instantiate LessonController
     }
     
     public function getAllCourses() {
@@ -187,6 +190,60 @@ class CourseController {
             'Advanced' => 'badge-danger'
         ];
         return $classes[$level] ?? 'badge-primary';
+    }
+
+    public function getCourseDataForView($courseId, $userId) {
+        $courseDetails = $this->courseModel->getCourseDetails($courseId);
+        if (!$courseDetails) {
+            // Consider logging this error or handling it more gracefully
+            return null; 
+        }
+
+        $sectionsFromDB = $this->courseModel->getCourseSections($courseId);
+        $populatedSections = [];
+        $totalDuration = 0;
+        $totalLessons = 0;
+        $completedLessons = 0;
+
+        if (is_array($sectionsFromDB)) {
+            foreach ($sectionsFromDB as $section) {
+                $sectionLessons = $this->lessonController->getSectionLessons($section['id']);
+                $populatedSectionLessons = [];
+                if (is_array($sectionLessons)) {
+                    foreach ($sectionLessons as $lesson) {
+                        // Ensure lesson ID exists before checking completion
+                        $lessonId = isset($lesson['id']) ? $lesson['id'] : null;
+                        if ($lessonId) {
+                            $lesson['completed'] = $this->isLessonCompleted($userId, $lessonId);
+                            if ($lesson['completed']) {
+                                $completedLessons++;
+                            }
+                        } else {
+                            $lesson['completed'] = false; // Default if no ID
+                        }
+                        $totalDuration += isset($lesson['duration_minutes']) ? intval($lesson['duration_minutes']) : 0;
+                        $totalLessons++;
+                        $populatedSectionLessons[] = $lesson;
+                    }
+                }
+                $section['lessons'] = $populatedSectionLessons; 
+                $populatedSections[] = $section;
+            }
+        }
+
+        $isEnrolled = $this->isUserEnrolled($userId, $courseId);
+        // getUserProgress returns an array e.g. ['percent' => X, 'completed' => Y, ...]
+        $userProgressData = $this->getUserProgress($userId, $courseId); 
+
+        return [
+            'course' => $courseDetails,
+            'sections' => $populatedSections,
+            'isEnrolled' => $isEnrolled,
+            'progress' => $userProgressData, // Pass the whole array
+            'totalDuration' => $totalDuration,
+            'totalLessons' => $totalLessons,
+            'completedLessons' => $completedLessons,
+        ];
     }
 }
 ?>
