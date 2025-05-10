@@ -259,9 +259,9 @@ $currentPage = basename($_SERVER['PHP_SELF']);
         <div class="header-left">
             <div class="logo-container">
                 <a href="<?php echo $destination; ?>">
-                    <img src="../../public/assets/images/Sci-Bono logo White.png" alt="Sci-Bono Logo">
+                    <img src="../../../public/assets/images/Sci-Bono logo White.png" alt="Sci-Bono Logo">
                 </a>
-                <img src="../../public/assets/images/TheClubhouse_Logo_White_Large.png" alt="Clubhouse Logo" style="height: 32px;">
+                <img src="../../../public/assets/images/TheClubhouse_Logo_White_Large.png" alt="Clubhouse Logo" style="height: 32px;">
             </div>
             
             <a href="<?php echo $learnHome; ?>" class="site-title">
@@ -270,7 +270,7 @@ $currentPage = basename($_SERVER['PHP_SELF']);
             </a>
             
             <nav class="header-nav">
-                <a href="<?php echo $learnHome; ?>" class="nav-link <?php echo ($currentPage == 'learn.php') ? 'active' : ''; ?>">
+                <a href="<?php echo $learnHome; ?>" class="nav-link <?php echo ($currentPage == 'manage-courses.php') ? 'active' : ''; ?>">
                     <i class="fas fa-home"></i> Home
                 </a>
                 <a href="./explore.php" class="nav-link <?php echo ($currentPage == 'explore.php') ? 'active' : ''; ?>">

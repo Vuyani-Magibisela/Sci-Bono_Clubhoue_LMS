@@ -6,128 +6,21 @@ class AdminCourseModel {
         $this->conn = $conn;
     }
     
-    public function createCourse($title, $description, $type, $difficulty, $duration, $imagePath, $createdBy) {
-        $sql = "INSERT INTO courses (title, description, type, difficulty_level, duration, image_path, created_by) 
-                VALUES (?, ?, ?, ?, ?, ?, ?)";
-        
-        $stmt = $this->conn->prepare($sql);
-        $stmt->bind_param("ssssssi", $title, $description, $type, $difficulty, $duration, $imagePath, $createdBy);
-        
-        return $stmt->execute();
-    }
-    
-    public function addSection($courseId, $title, $description, $orderNumber) {
-        $sql = "INSERT INTO course_sections (course_id, title, description, order_number) 
-                VALUES (?, ?, ?, ?)";
-        
-        $stmt = $this->conn->prepare($sql);
-        $stmt->bind_param("issi", $courseId, $title, $description, $orderNumber);
-        
-        return $stmt->execute();
-    }
-    
-    public function addLesson($sectionId, $title, $content, $lessonType, $videoUrl, $durationMinutes, $orderNumber, $isPublished) {
-        $sql = "INSERT INTO course_lessons (section_id, title, content, lesson_type, video_url, duration_minutes, order_number, is_published) 
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-        
-        $stmt = $this->conn->prepare($sql);
-        $stmt->bind_param("issssiii", $sectionId, $title, $content, $lessonType, $videoUrl, $durationMinutes, $orderNumber, $isPublished);
-        
-        return $stmt->execute();
-    }
-    
     /**
-     * Get all lessons for a specific course section
+     * Get all courses with related metadata
      * 
-     * @param int $sectionId Section ID
-     * @return array Array of lesson data
+     * @return array Array of courses with metadata
      */
-    public function getSectionLessons($sectionId) {
-        $lessons = [];
-        
-        if (!$sectionId) {
-            return $lessons;
-        }
-        
-        $sql = "SELECT l.*, 
-                (SELECT COUNT(*) FROM lesson_progress WHERE lesson_id = l.id AND completed = 1) as completion_count 
-                FROM course_lessons l 
-                WHERE l.section_id = ? 
-                ORDER BY l.order_number ASC";
-                
-        $stmt = $this->conn->prepare($sql);
-        
-        if (!$stmt) {
-            // Handle database error
-            return $lessons;
-        }
-        
-        $stmt->bind_param("i", $sectionId);
-        $executed = $stmt->execute();
-        
-        if (!$executed) {
-            return $lessons;
-        }
-        
-        $result = $stmt->get_result();
-        
-        if ($result && $result->num_rows > 0) {
-            while ($row = $result->fetch_assoc()) {
-                $lessons[] = $row;
-            }
-        }
-        
-        return $lessons;
-    }
-    
-    /**
-     * Get lessons count for a section
-     * 
-     * @param int $sectionId Section ID
-     * @return int Number of lessons in the section
-     */
-    public function getSectionLessonCount($sectionId) {
-        if (!$sectionId) {
-            return 0;
-        }
-        
-        $sql = "SELECT COUNT(*) as lesson_count FROM course_lessons WHERE section_id = ?";
-        $stmt = $this->conn->prepare($sql);
-        
-        if (!$stmt) {
-            return 0;
-        }
-        
-        $stmt->bind_param("i", $sectionId);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        
-        if ($result && $result->num_rows > 0) {
-            $row = $result->fetch_assoc();
-            return (int)$row['lesson_count'];
-        }
-        
-        return 0;
-    }
-    
-    /**
-     * Get all courses with additional metadata
-     * 
-     * @return array Array of courses with section counts, lesson counts, etc.
-     */
-    public function getAllCoursesWithMetadata() {
+    public function getAllCourses() {
         $courses = [];
-        
-        $sql = "SELECT c.*, 
-                u.name as creator_name, u.surname as creator_surname,
+        $sql = "SELECT c.*, u.name as creator_name, u.surname as creator_surname, 
                 (SELECT COUNT(*) FROM course_sections WHERE course_id = c.id) as section_count,
-                (SELECT COUNT(*) FROM course_sections cs 
-                 JOIN course_lessons cl ON cs.id = cl.section_id 
-                 WHERE cs.course_id = c.id) as lesson_count
+                (SELECT COUNT(*) FROM course_lessons l JOIN course_sections s ON l.section_id = s.id WHERE s.course_id = c.id) as lesson_count,
+                (SELECT COUNT(*) FROM user_enrollments WHERE course_id = c.id) as enrollment_count
                 FROM courses c
                 LEFT JOIN users u ON c.created_by = u.id
                 ORDER BY c.created_at DESC";
-                
+        
         $result = $this->conn->query($sql);
         
         if ($result && $result->num_rows > 0) {
@@ -140,28 +33,18 @@ class AdminCourseModel {
     }
     
     /**
-     * Get course details with creator information
+     * Get course details by ID
      * 
      * @param int $courseId Course ID
      * @return array|null Course details or null if not found
      */
     public function getCourseDetails($courseId) {
-        if (!$courseId) {
-            return null;
-        }
-        
-        $sql = "SELECT c.*, 
-                u.name as creator_name, u.surname as creator_surname
+        $sql = "SELECT c.*, u.name as creator_name, u.surname as creator_surname 
                 FROM courses c
                 LEFT JOIN users u ON c.created_by = u.id
                 WHERE c.id = ?";
-                
+        
         $stmt = $this->conn->prepare($sql);
-        
-        if (!$stmt) {
-            return null;
-        }
-        
         $stmt->bind_param("i", $courseId);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -174,127 +57,70 @@ class AdminCourseModel {
     }
     
     /**
-     * Get all sections for a course
+     * Create a new course
      * 
-     * @param int $courseId Course ID
-     * @return array Array of course sections
+     * @param array $courseData Course data
+     * @return int|bool New course ID or false on failure
      */
-    public function getCourseSections($courseId) {
-        $sections = [];
+    public function createCourse($courseData) {
+        $sql = "INSERT INTO courses (title, description, type, difficulty_level, duration, image_path, is_featured, is_published, status, created_by)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         
-        if (!$courseId) {
-            return $sections;
-        }
-        
-        $sql = "SELECT cs.*, 
-                (SELECT COUNT(*) FROM course_lessons WHERE section_id = cs.id) as lesson_count
-                FROM course_sections cs
-                WHERE cs.course_id = ?
-                ORDER BY cs.order_number ASC";
-                
         $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("ssssssiiis", 
+            $courseData['title'],
+            $courseData['description'],
+            $courseData['type'],
+            $courseData['difficulty_level'],
+            $courseData['duration'],
+            $courseData['image_path'],
+            $courseData['is_featured'],
+            $courseData['is_published'],
+            $courseData['status'],
+            $courseData['created_by']
+        );
         
-        if (!$stmt) {
-            return $sections;
+        if ($stmt->execute()) {
+            return $this->conn->insert_id;
         }
         
-        $stmt->bind_param("i", $courseId);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        
-        if ($result && $result->num_rows > 0) {
-            while ($row = $result->fetch_assoc()) {
-                $sections[] = $row;
-            }
-        }
-        
-        return $sections;
+        return false;
     }
     
     /**
-     * Update a course
+     * Update an existing course
      * 
      * @param int $courseId Course ID
-     * @param array $data Updated course data
+     * @param array $courseData Updated course data
      * @return bool Success status
      */
-    public function updateCourse($courseId, $data) {
-        if (!$courseId || empty($data)) {
-            return false;
-        }
-        
-        $updateFields = [];
-        $params = [];
-        $types = '';
-        
-        // Build update statement based on provided data
-        if (isset($data['title'])) {
-            $updateFields[] = "title = ?";
-            $params[] = $data['title'];
-            $types .= 's';
-        }
-        
-        if (isset($data['description'])) {
-            $updateFields[] = "description = ?";
-            $params[] = $data['description'];
-            $types .= 's';
-        }
-        
-        if (isset($data['type'])) {
-            $updateFields[] = "type = ?";
-            $params[] = $data['type'];
-            $types .= 's';
-        }
-        
-        if (isset($data['difficulty_level'])) {
-            $updateFields[] = "difficulty_level = ?";
-            $params[] = $data['difficulty_level'];
-            $types .= 's';
-        }
-        
-        if (isset($data['duration'])) {
-            $updateFields[] = "duration = ?";
-            $params[] = $data['duration'];
-            $types .= 's';
-        }
-        
-        if (isset($data['image_path']) && !empty($data['image_path'])) {
-            $updateFields[] = "image_path = ?";
-            $params[] = $data['image_path'];
-            $types .= 's';
-        }
-        
-        if (isset($data['is_published'])) {
-            $updateFields[] = "is_published = ?";
-            $params[] = $data['is_published'] ? 1 : 0;
-            $types .= 'i';
-        }
-        
-        if (isset($data['is_featured'])) {
-            $updateFields[] = "is_featured = ?";
-            $params[] = $data['is_featured'] ? 1 : 0;
-            $types .= 'i';
-        }
-        
-        // Add updated_at timestamp
-        $updateFields[] = "updated_at = NOW()";
-        
-        if (empty($updateFields)) {
-            return false; // Nothing to update
-        }
-        
-        $sql = "UPDATE courses SET " . implode(", ", $updateFields) . " WHERE id = ?";
-        
-        $params[] = $courseId;
-        $types .= 'i';
+    public function updateCourse($courseId, $courseData) {
+        $sql = "UPDATE courses SET 
+                title = ?, 
+                description = ?, 
+                type = ?, 
+                difficulty_level = ?, 
+                duration = ?, 
+                image_path = ?, 
+                is_featured = ?, 
+                is_published = ?, 
+                status = ?
+                WHERE id = ?";
         
         $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("ssssssiisi", 
+            $courseData['title'],
+            $courseData['description'],
+            $courseData['type'],
+            $courseData['difficulty_level'],
+            $courseData['duration'],
+            $courseData['image_path'],
+            $courseData['is_featured'],
+            $courseData['is_published'],
+            $courseData['status'],
+            $courseId
+        );
         
-        if (!$stmt) {
-            return false;
-        }
-        
-        $stmt->bind_param($types, ...$params);
         return $stmt->execute();
     }
     
@@ -305,67 +131,251 @@ class AdminCourseModel {
      * @return bool Success status
      */
     public function deleteCourse($courseId) {
-        if (!$courseId) {
-            return false;
+        // First, get all sections to delete associated lessons
+        $sectionIds = [];
+        $sectionsQuery = "SELECT id FROM course_sections WHERE course_id = ?";
+        $sectionsStmt = $this->conn->prepare($sectionsQuery);
+        $sectionsStmt->bind_param("i", $courseId);
+        $sectionsStmt->execute();
+        $sectionsResult = $sectionsStmt->get_result();
+        
+        if ($sectionsResult && $sectionsResult->num_rows > 0) {
+            while ($row = $sectionsResult->fetch_assoc()) {
+                $sectionIds[] = $row['id'];
+            }
         }
         
         // Start transaction to ensure all related data is deleted
         $this->conn->begin_transaction();
         
         try {
-            // Delete lesson progress
-            $sql1 = "DELETE lp FROM lesson_progress lp 
-                     JOIN course_lessons cl ON lp.lesson_id = cl.id 
-                     JOIN course_sections cs ON cl.section_id = cs.id 
-                     WHERE cs.course_id = ?";
-            $stmt1 = $this->conn->prepare($sql1);
-            $stmt1->bind_param("i", $courseId);
-            $stmt1->execute();
-            
-            // Delete quiz attempts and related data
-            // (If you have quiz functionality)
-            
-            // Delete lessons
-            $sql2 = "DELETE cl FROM course_lessons cl 
-                     JOIN course_sections cs ON cl.section_id = cs.id 
-                     WHERE cs.course_id = ?";
-            $stmt2 = $this->conn->prepare($sql2);
-            $stmt2->bind_param("i", $courseId);
-            $stmt2->execute();
+            // Delete lessons for each section
+            if (!empty($sectionIds)) {
+                foreach ($sectionIds as $sectionId) {
+                    $deleteLessonsQuery = "DELETE FROM course_lessons WHERE section_id = ?";
+                    $deleteLessonsStmt = $this->conn->prepare($deleteLessonsQuery);
+                    $deleteLessonsStmt->bind_param("i", $sectionId);
+                    $deleteLessonsStmt->execute();
+                }
+            }
             
             // Delete sections
-            $sql3 = "DELETE FROM course_sections WHERE course_id = ?";
-            $stmt3 = $this->conn->prepare($sql3);
-            $stmt3->bind_param("i", $courseId);
-            $stmt3->execute();
+            $deleteSectionsQuery = "DELETE FROM course_sections WHERE course_id = ?";
+            $deleteSectionsStmt = $this->conn->prepare($deleteSectionsQuery);
+            $deleteSectionsStmt->bind_param("i", $courseId);
+            $deleteSectionsStmt->execute();
             
             // Delete enrollments
-            $sql4 = "DELETE FROM user_enrollments WHERE course_id = ?";
-            $stmt4 = $this->conn->prepare($sql4);
-            $stmt4->bind_param("i", $courseId);
-            $stmt4->execute();
-            
-            // Delete ratings
-            $sql5 = "DELETE FROM course_ratings WHERE course_id = ?";
-            $stmt5 = $this->conn->prepare($sql5);
-            $stmt5->bind_param("i", $courseId);
-            $stmt5->execute();
+            $deleteEnrollmentsQuery = "DELETE FROM user_enrollments WHERE course_id = ?";
+            $deleteEnrollmentsStmt = $this->conn->prepare($deleteEnrollmentsQuery);
+            $deleteEnrollmentsStmt->bind_param("i", $courseId);
+            $deleteEnrollmentsStmt->execute();
             
             // Delete course
-            $sql6 = "DELETE FROM courses WHERE id = ?";
-            $stmt6 = $this->conn->prepare($sql6);
-            $stmt6->bind_param("i", $courseId);
-            $stmt6->execute();
+            $deleteCourseQuery = "DELETE FROM courses WHERE id = ?";
+            $deleteCourseStmt = $this->conn->prepare($deleteCourseQuery);
+            $deleteCourseStmt->bind_param("i", $courseId);
+            $result = $deleteCourseStmt->execute();
             
             // Commit transaction
             $this->conn->commit();
-            return true;
             
+            return $result;
         } catch (Exception $e) {
-            // Rollback on error
+            // Rollback transaction on error
+            $this->conn->rollback();
+            return false;
+        }
+    }
+    
+    /**
+     * Update course status
+     * 
+     * @param int $courseId Course ID
+     * @param string $status New status
+     * @return bool Success status
+     */
+    public function updateCourseStatus($courseId, $status) {
+        // If status is 'active', also update is_published
+        $isPublished = ($status == 'active') ? 1 : 0;
+        
+        $sql = "UPDATE courses SET status = ?, is_published = ? WHERE id = ?";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("sii", $status, $isPublished, $courseId);
+        
+        return $stmt->execute();
+    }
+    
+    /**
+     * Toggle featured status for a course
+     * 
+     * @param int $courseId Course ID
+     * @param bool $featured Featured status
+     * @return bool Success status
+     */
+    public function toggleFeatured($courseId, $featured) {
+        $sql = "UPDATE courses SET is_featured = ? WHERE id = ?";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("ii", $featured, $courseId);
+        
+        return $stmt->execute();
+    }
+    
+    /**
+     * Get course sections with lessons
+     * 
+     * @param int $courseId Course ID
+     * @return array Course sections with lessons
+     */
+    public function getCourseSections($courseId) {
+        $sections = [];
+        $sql = "SELECT * FROM course_sections WHERE course_id = ? ORDER BY order_number ASC";
+        
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("i", $courseId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result && $result->num_rows > 0) {
+            while ($section = $result->fetch_assoc()) {
+                // Get lessons for each section
+                $section['lessons'] = $this->getSectionLessons($section['id']);
+                $sections[] = $section;
+            }
+        }
+        
+        return $sections;
+    }
+    
+    /**
+     * Get lessons for a section
+     * 
+     * @param int $sectionId Section ID
+     * @return array Lessons in the section
+     */
+    private function getSectionLessons($sectionId) {
+        $lessons = [];
+        $sql = "SELECT * FROM course_lessons WHERE section_id = ? ORDER BY order_number ASC";
+        
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("i", $sectionId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result && $result->num_rows > 0) {
+            while ($lesson = $result->fetch_assoc()) {
+                $lessons[] = $lesson;
+            }
+        }
+        
+        return $lessons;
+    }
+    
+    /**
+     * Create a new section for a course
+     * 
+     * @param int $courseId Course ID
+     * @param array $sectionData Section data
+     * @return int|bool New section ID or false on failure
+     */
+    public function createSection($courseId, $sectionData) {
+        // Get the highest order number for the course
+        $orderQuery = "SELECT MAX(order_number) as max_order FROM course_sections WHERE course_id = ?";
+        $orderStmt = $this->conn->prepare($orderQuery);
+        $orderStmt->bind_param("i", $courseId);
+        $orderStmt->execute();
+        $orderResult = $orderStmt->get_result();
+        $orderRow = $orderResult->fetch_assoc();
+        $orderNumber = ($orderRow['max_order'] ?? 0) + 1;
+        
+        // Insert the new section
+        $sql = "INSERT INTO course_sections (course_id, title, description, order_number) VALUES (?, ?, ?, ?)";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("issi", $courseId, $sectionData['title'], $sectionData['description'], $orderNumber);
+        
+        if ($stmt->execute()) {
+            return $this->conn->insert_id;
+        }
+        
+        return false;
+    }
+    
+    /**
+     * Update a section
+     * 
+     * @param int $sectionId Section ID
+     * @param array $sectionData Updated section data
+     * @return bool Success status
+     */
+    public function updateSection($sectionId, $sectionData) {
+        $sql = "UPDATE course_sections SET title = ?, description = ? WHERE id = ?";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("ssi", $sectionData['title'], $sectionData['description'], $sectionId);
+        
+        return $stmt->execute();
+    }
+    
+    /**
+     * Delete a section
+     * 
+     * @param int $sectionId Section ID
+     * @return bool Success status
+     */
+    public function deleteSection($sectionId) {
+        // Start transaction
+        $this->conn->begin_transaction();
+        
+        try {
+            // Delete lessons in the section
+            $deleteLessonsQuery = "DELETE FROM course_lessons WHERE section_id = ?";
+            $deleteLessonsStmt = $this->conn->prepare($deleteLessonsQuery);
+            $deleteLessonsStmt->bind_param("i", $sectionId);
+            $deleteLessonsStmt->execute();
+            
+            // Delete section
+            $deleteSectionQuery = "DELETE FROM course_sections WHERE id = ?";
+            $deleteSectionStmt = $this->conn->prepare($deleteSectionQuery);
+            $deleteSectionStmt->bind_param("i", $sectionId);
+            $result = $deleteSectionStmt->execute();
+            
+            // Commit transaction
+            $this->conn->commit();
+            
+            return $result;
+        } catch (Exception $e) {
+            // Rollback transaction on error
+            $this->conn->rollback();
+            return false;
+        }
+    }
+    
+    /**
+     * Update section order
+     * 
+     * @param array $sectionOrders Array of section IDs and their order
+     * @return bool Success status
+     */
+    public function updateSectionOrder($sectionOrders) {
+        // Start transaction
+        $this->conn->begin_transaction();
+        
+        try {
+            $sql = "UPDATE course_sections SET order_number = ? WHERE id = ?";
+            $stmt = $this->conn->prepare($sql);
+            
+            foreach ($sectionOrders as $sectionId => $order) {
+                $stmt->bind_param("ii", $order, $sectionId);
+                $stmt->execute();
+            }
+            
+            // Commit transaction
+            $this->conn->commit();
+            
+            return true;
+        } catch (Exception $e) {
+            // Rollback transaction on error
             $this->conn->rollback();
             return false;
         }
     }
 }
-?>
