@@ -8,8 +8,8 @@ if (session_status() == PHP_SESSION_NONE) {
 // Database connection details
 require __DIR__ . '/../../server.php';
 
-// Set the inactivity timeout in seconds (e.g., 15 minutes)
-$inactivityTimeout = 600; // 10 minutes
+// Set the inactivity timeout in seconds 
+$inactivityTimeout = 900; // 15 minutes
 
 // Check if the last activity time is set in the session
 if (isset($_SESSION['last_activity'])) {
@@ -24,8 +24,11 @@ if (isset($_SESSION['last_activity'])) {
         // Destroy the session
         session_destroy();
 
-        // Redirect the user to the login page with a message
-        header('Location: login.php?timeout=1');
+        // Dynamically determine the path to login.php
+        $loginPath = '/Sci-Bono_Clubhoue_LMS/login.php'; // Adjust this to match your root path
+
+        // Redirect the user to the login page with a timeout message
+        header('Location: ' . $loginPath . '?timeout=1');
         exit;
     }
 }

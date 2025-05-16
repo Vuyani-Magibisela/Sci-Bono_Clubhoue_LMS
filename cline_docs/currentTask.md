@@ -1,44 +1,29 @@
-# Current Task: Debug `app/Views/course.php`
+# Current Task: Refactor User Management (`user_list.php`)
 
 ## Objectives
-- Identify the cause of "Undefined variable" warnings for `$totalDuration` and `$totalLessons`.
-- Identify the cause of "Undefined array key 'lessons'" warning and the subsequent `count()` TypeError.
-- Implement fixes to resolve these errors.
-- Ensure the course page displays correctly with accurate duration, lesson counts, and section details.
+- [x] Separate database logic, presentation logic, and request handling for user management into Model, View, and Controller components.
+- [x] Create `app/Models/UserModel.php` for database operations (fetch all, fetch members, fetch by ID, update, delete).
+- [x] Create `app/Controllers/UserController.php` to handle routing logic, permissions, and interaction between Model and Views.
+- [x] Create `app/Views/user_list_view.php` to display the user table.
+- [x] Create `app/Views/user_edit_form_view.php` for the user editing form.
+- [x] Create `users.php` in the root directory as the main entry point/router for user management actions (`list`, `edit`, `update`, `delete`).
+- [x] Apply styling from `public/assets/css/settingsStyle.css` to the new views.
+- [x] Ensure correct permissions are enforced (Admin vs. Mentor capabilities).
+- [x] Create and integrate a reusable navigation component (`_navigation.php`).
+- [x] Remove the old `user_list.php` and `delete_user.php` files.
 
 ## Context
-The user has provided `app/Views/course.php` and a list of errors occurring in it:
-- `Warning: Undefined variable $totalDuration` (line 88)
-- `Warning: Undefined variable $totalLessons` (line 96)
-- `Warning: Undefined array key "lessons"` (line 130)
-- `Fatal error: Uncaught TypeError: count(): Argument #1 ($value) must be of type Countable|array, null given` (line 130)
+The previous `user_list.php` file contained mixed PHP logic for database access, permission checks, and HTML rendering for both listing and initiating edits/deletes of users. This needed refactoring for better maintainability, separation of concerns, and adherence to MVC principles.
 
-The file includes `CourseController.php` and `LessonController.php`. The variables `$course` and `$sections` are fetched using `CourseController`.
-
-## Next Steps
-1.  **DONE:** Create `cline_docs/techStack.md`.
-2.  **DONE:** Create `cline_docs/codebaseSummary.md`.
-3.  **DONE:** Read `app/Controllers/CourseController.php` to understand how `$totalDuration`, `$totalLessons`, and section lessons are (or should be) calculated and passed to the view.
-4.  **DONE:** Read `app/Controllers/LessonController.php` to identify `getSectionLessons()`.
-5.  **DONE:** Read `app/Models/CourseModel.php` to understand how sections are fetched.
-6.  **DONE:** Analyzed `app/Views/course.php` in conjunction with the controller/model logic to pinpoint where the variables should be initialized and data fetched.
-7.  **DONE:** Proposed and implemented changes:
-    *   Modified `app/Controllers/CourseController.php`:
-        *   Added `LessonController` dependency.
-        *   Created `getCourseDataForView($courseId, $userId)` method to consolidate data fetching:
-            *   Fetches course details.
-            *   Fetches sections.
-            *   For each section, fetches its lessons via `LessonController`.
-            *   For each lesson, determines completion status.
-            *   Calculates `totalDuration`, `totalLessons`, `completedLessons`.
-            *   Gets enrollment status and user progress.
-            *   Returns all data in a structured array.
-    *   Modified `app/Views/course.php`:
-        *   Calls `getCourseDataForView()` to get all page data.
-        *   Extracts variables (`$course`, `$sections`, `$isEnrolled`, `$progressPercent`, `$totalDuration`, `$totalLessons`, `$completedLessons`) from the returned data.
-        *   Updated display logic for progress and lesson counts.
-        *   Added logic for "Continue Learning" button to link to the next appropriate lesson.
-
-## Final Steps
-1. Update `cline_docs/projectRoadmap.md`.
-2. Attempt completion.
+## Next Steps (Completed for this task)
+1.  **DONE:** Created `app/Models/UserModel.php`.
+2.  **DONE:** Created `app/Controllers/UserController.php`.
+3.  **DONE:** Created `app/Views/user_list_view.php`.
+4.  **DONE:** Created `app/Views/user_edit_form_view.php`.
+5.  **DONE:** Created `users.php` router.
+6.  **DONE:** Created `_navigation.php` and included it in views.
+7.  **DONE:** Updated documentation (`projectRoadmap.md`, `currentTask.md`).
+8.  **PENDING:** Update `codebaseSummary.md`.
+9.  **PENDING:** Remove `user_list.php`.
+10. **PENDING:** Check for and remove `delete_user.php`.
+11. **PENDING:** Attempt completion.

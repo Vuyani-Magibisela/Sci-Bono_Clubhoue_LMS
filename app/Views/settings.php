@@ -152,7 +152,7 @@ if (!$can_edit) {
                 <div class="settings-nav">
                     <a href="./settings.php" class="settings-nav-link active">Profile</a>
                     <?php if ($current_user_type === 'admin'): ?>
-                    <a href="../../user_list.php" class="settings-nav-link">Manage Members</a>
+                    <a href="./user_list.php" class="settings-nav-link">Manage Members</a>
                     <a href="#" class="settings-nav-link">Approve Members</a>
                     <?php endif; ?>
                 </div>

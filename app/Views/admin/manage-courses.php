@@ -17,6 +17,9 @@ require_once '../../../server.php';
 require_once '../../Controllers/Admin/AdminCourseController.php';
 require_once '../../Models/LMSUtilities.php';
 
+// Include the config file
+// require __DIR__ . '/../../../config/config.php'; 
+
 // Get user ID from session
 $userId = $_SESSION['id'] ?? 0;
 
@@ -176,10 +179,10 @@ $courseTypeCounts = [
                 <?php foreach ($allCourses as $course): ?>
                 <div class="course-card">
                     <div class="course-card-image">
-                        <?php if (isset($course['image_path']) && file_exists('../../public/assets/uploads/images/courses/' . $course['image_path'])): ?>
-                            <img src="../../public/assets/uploads/images/courses/<?php echo htmlspecialchars($course['image_path']); ?>" alt="<?php echo htmlspecialchars($course['title']); ?>">
+                        <?php if (isset($course['image_path']) && file_exists(BASE_URL . 'public/assets/uploads/images/courses/' . $course['image_path'])): ?>
+                            <img src="<?php echo BASE_URL; ?>public/assets/uploads/images/courses/<?php echo htmlspecialchars($course['image_path']); ?>" alt="<?php echo htmlspecialchars($course['title']); ?>">
                         <?php else: ?>
-                            <img src="https://source.unsplash.com/random/600x400?<?php echo urlencode(strtolower($course['title'])); ?>" alt="<?php echo htmlspecialchars($course['title']); ?>">
+                            <img src="https://picsum.photos/seed/123/600/400<?php echo urlencode(strtolower($course['title'])); ?>" alt="<?php echo htmlspecialchars($course['title']); ?>">
                         <?php endif; ?>
                     </div>
                     <div class="course-card-content">

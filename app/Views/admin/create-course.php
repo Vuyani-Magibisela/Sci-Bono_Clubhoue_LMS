@@ -3,7 +3,7 @@ session_start();
 // Check if user is logged in and is an admin or mentor
 if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true || 
     ($_SESSION['user_type'] != 'admin' && $_SESSION['user_type'] != 'mentor')) {
-    header("Location: ../../login.php");
+    header("Location: ../../../login.php");
     exit;
 }
 

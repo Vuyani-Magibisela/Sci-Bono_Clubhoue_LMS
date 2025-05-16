@@ -102,7 +102,7 @@ require_once 'app/Models/dashboard-data-loader.php';
                     <div class="menu-icon">
                         <i class="fas fa-bookmark"></i>
                     </div>
-                    <div class="menu-text"><a href="./app/Views/learn.php">learn</a></div>
+                    <div class="menu-text"><a href="./app/Views/admin/manage-courses.php">learn</a></div>
                 </div>
                 <div class="menu-item">
                     <div class="menu-icon">

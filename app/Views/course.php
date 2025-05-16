@@ -76,7 +76,7 @@ $completedLessons = $coursePageData['completedLessons']; // This is calculated i
     
     </head>
 <body>
-    <?php include './learn-header.php'; ?>
+    <?php include './admin/learn-header.php'; ?>
     
     <div class="course-container">
         <div class="course-header">
@@ -87,7 +87,7 @@ $completedLessons = $coursePageData['completedLessons']; // This is calculated i
                     <img src="https://source.unsplash.com/random/1200x400?<?php echo urlencode(strtolower($course['title'])); ?>" alt="<?php echo htmlspecialchars($course['title']); ?>">
                 <?php endif; ?>
                 <div class="course-banner-overlay">
-                    <a href="learn.php" class="back-link">
+                    <a href="./admin/manage-courses.php" class="back-link">
                         <i class="fas fa-arrow-left"></i>
                     </a>
                     <div class="course-badges">
