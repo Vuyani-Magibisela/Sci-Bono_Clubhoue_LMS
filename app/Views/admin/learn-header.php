@@ -5,10 +5,10 @@ if(session_status() === PHP_SESSION_NONE) {
 }
 
 if(isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
-    $destination = "../../home.php";
+    $destination = "../../../home.php";
     $learnHome = "./learn.php";
 } else {
-    $destination = "../../login.php";
+    $destination = "../../../login.php";
     $learnHome = "./login.php";
 }
 

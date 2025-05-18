@@ -11,6 +11,7 @@ include '../Controllers/sessionTimer.php';
 
 // Include database connection
 require_once '../../server.php';
+require __DIR__ . '/../../config/config.php'; // Include the config file
 
 // Fetch all users from database
 $sql = "SELECT * FROM users ORDER BY id DESC";
@@ -401,7 +402,7 @@ if (isset($_SESSION['message'])) {
                                                 <i class="fas fa-edit"></i> Edit
                                             </a>
                                             <?php if ($_SESSION['user_type'] === 'admin'): ?>
-                                            <a href="../../app/Models/Admin/delete_user.php echo $user['id']; ?>" class="user-action-btn delete-btn" onclick="return confirm('Are you sure you want to delete this user? This action cannot be undone.');">
+                                            <a href="<?php echo BASE_URL ?> app/Models/Admin/delete_user.php echo $user['id']; ?>" class="user-action-btn delete-btn" onclick="return confirm('Are you sure you want to delete this user? This action cannot be undone.');">
                                                 <i class="fas fa-trash"></i> Delete
                                             </a>
                                             <?php endif; ?>

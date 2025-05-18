@@ -1,0 +1,192 @@
+Sci-Bono_Clubhoue_LMS/
+├── Database/
+├── accounts.sql
+├── attendance.csv
+├── clubhouse_programs.sql
+├── clubhouse_reports.sql
+├── users.csv
+├── users.sql
+└── vuyanjcb_users.sql
+├── app/
+│   ├── Controllers/
+│   │   ├── Admin/
+│   │   ├── AdminCourseController.php
+│   │   ├── AdminCourseController00.php
+│   │   └── AdminLessonController.php
+│   ├── AttendanceRegisterController.php
+│   ├── AuthController.php
+│   ├── CourseController.php # Added LessonController
+│   ├── HolidayProgramController.php
+│   ├── HomeController.php
+│   ├── LessonController.php
+│   ├── UserController.php
+│   ├── VisitorController.php
+│   ├── addPrograms.php # Database connection details
+│   ├── holidayProgramLoginC.php # Fix paths using __DIR__
+│   ├── sessionTimer.php # Check if the session is not already started
+│   ├── submit_monthly_report.php # Check if user is logged in
+│   ├── submit_report_data.php # Database connection details
+│   ├── user_delete.php # Check if user is logged in
+│   ├── user_edit.php # Check if user is logged in
+│   ├── user_list.php # Check if user is logged in
+│   └── user_update.php # Check if user is logged in
+│   ├── Models/
+│   │   ├── Admin/
+│   │   ├── AdminCourseModel.php
+│   │   ├── AdminCourseModel00.php
+│   │   ├── AdminLessonModel.php
+│   │   └── delete_user.php # Check if user is logged in and is an admin
+│   ├── AttendanceRegisterModel.php
+│   ├── CourseModel.php
+│   ├── EnrollmentModel.php
+│   ├── HolidayProgramModel.php
+│   ├── LMSUtilities.php
+│   ├── LessonModel.php
+│   ├── ProgressModel.php
+│   ├── User.php
+│   ├── UserModel.php
+│   ├── VisitorModel.php
+│   ├── dashboard-data-loader.php
+│   ├── dashboard-functions.php
+│   ├── dashboardStats.php # Check if user is logged in
+│   ├── dashboardStatsS.php # Check if user is logged in
+│   ├── filter.php # Your database connection file
+│   ├── holiday-program-functions.php
+│   └── holidayProgramLoginM.php
+│   └── Views/
+│       ├── admin/
+│       ├── admin_footer.php
+│       ├── admin_header.php # Check if session is not already started
+│       ├── course.php # Check if user is logged in
+│       ├── create-course.php # Check if user is logged in and is an admin or mentor
+│       ├── learn-header.php # Check if a session is not already active
+│       ├── manage-courses.php # Check if user is logged in and is an admin or mentor
+│       ├── manage-courses00.php
+│       ├── manage-lessons.php # Check if user is logged in and is an admin or mentor
+│       ├── manage-sections.php # Check if user is logged in and is an admin or mentor
+│       └── user_edit.php # This view is included by UserController.php (showEditForm action).
+│       ├── holidayPrograms/
+│       ├── holiday-dashboard.php # Start session if not already started
+│       ├── holiday-program-details-term1.php # Get the program ID from URL parameter
+│       ├── holidayProgramIndex.php
+│       ├── holidayProgramLogin.php
+│       ├── holidayProgramRegistration.php # Database connection
+│       ├── holidayPrograms-header.php # Start session if not already started
+│       └── sql schema.txt
+│   ├── addClubhouseProgram.php
+│   ├── course.php # Check if user is logged in
+│   ├── dailyAttendanceRegister.php # Check if user is logged in
+│   ├── dynamic-dashboard-content.php
+│   ├── learn.php # Check if user is logged in
+│   ├── lesson.php # Check if user is logged in
+│   ├── monthlyReportForm.php # Check if user is logged in
+│   ├── monthlyReportView.php # Check if user is logged in
+│   ├── reportForm.php # Check if user is logged in
+│   ├── settings.php # Start the session first
+│   ├── statsDashboard.php # Force PHP to show all errors
+│   ├── user_list.php # Check if user is logged in and is an admin
+│   └── visitorsPage.php
+├── cline_docs/
+├── codebaseSummary.md # Codebase Summary
+├── currentTask.md # Current Task: Refactor User Management (`user_list.php`)
+├── projectRoadmap.md # Project Roadmap
+└── techStack.md # Technology Stack
+├── config/
+├── config.php # Dynamically determine the base URL
+└── database.php
+├── handlers/
+└── visitors-handler.php
+├── public/
+│   └── assets/
+│       ├── css/
+│       ├── attendanceRegister.css # Daily Attendance Register Styles
+│       ├── course.css # Course Page Specific Styles
+│       ├── cssRest.css # * Comprehensive CSS Reset* Version: 1.0 - March 2025* For use in all CSS projects
+│       ├── header.css # index header styling
+│       ├── holidayDahsboard.css # Holiday Dashboard Styles
+│       ├── holidayProgramContentStyles.css # Holiday Program Styles CSS
+│       ├── holidayProgramHeader.css # Holiday Program Header Styles
+│       ├── holidayProgramIndex.css # Holiday Program CSS Styles
+│       ├── holidayProgramStyles.css # Holiday Program Styles
+│       ├── homeStyle.css # 6C63FF;
+│       ├── learn.css # Learn Page Specific Styles
+│       ├── lesson.css # Lesson Page Specific Styles
+│       ├── manage-courses.css # Admin Course Management Styles
+│       ├── monthly_report_styles.css # Monthly Report Form Styles
+│       ├── screenSizes.css # Base styles (Mobile First approach)
+│       ├── settingsStyle.css # Modern Settings Page Styles
+│       ├── signUpStyles.css # Mobile First
+│       ├── statsDashboardStyle.css # 333;
+│       └── visitors.css # Import Roboto font
+│       ├── images/
+│       │   ├── courses/
+│       │   └── RCourseHeader.png
+│       ├── Login_img.png
+│       ├── MobileLoginImg.svg
+│       ├── Sci-Bono logo White.png
+│       ├── SignIn_Img.png
+│       ├── SignUp_img.svg
+│       ├── TheClubhouse_Logo_White_Large.png
+│       ├── bell.svg
+│       ├── clubhouse-students.jpg
+│       ├── header01.png
+│       ├── hero-background.jpg
+│       ├── memberImage.png
+│       ├── mobileSigninImg.svg
+│       └── ui-user-profile-negative.svg
+│       ├── js/
+│       ├── attendanceRegister.js # *
+ * Daily Attendance Register
+ * JavaScript for handling interactions and animations
+│       ├── homedashboard.js # Show loading spinner
+│       ├── searchUserInputHandler.js # search').val();
+│       ├── settings.js # Modern Settings Page JavaScript
+│       ├── visitors-script.js # Tab switching functionality
+│       └── workshopSelection.js # Enhanced Workshop Selection
+│       └── uploads/
+│           └── images/
+│               ├── 2024-09/
+│               ├── 66e459fca872b_FWAC0DJIDYKNTLY.jpg
+│               └── 66e889ae59f47_pikaso_texttoimage_Futuristic-robot-cyberspace-digital-world-revoluti.jpeg
+│               ├── 2024-12/
+│               └── 6757a499935ff_20241204_093249.jpg
+│               ├── 2025-03/
+│               ├── 67c6f6d2a2270_Screenshot 2024-08-22 104155.png
+│               └── 67c6f6d2a2aae_Screenshot (1).png
+│               ├── 2025-04/
+│               ├── 67ebd09be8bd1_int.jpg
+│               ├── 67ebd09be9a2f_inter.jpg
+│               ├── 67ebde1b70bd5_IMG_4036.JPG
+│               └── 67ebde1b71c06_IMG_4037.JPG
+│               ├── courses/
+│               └── defaultImage.small_600_400_nofilter.jpg
+│           ├── 2024-0966e448b212080_FWAC0DJIDYKNTLY.jpg
+│           └── courses682339a9c846d_1747138985.jpg
+├── tests/
+├── Ai_Login.php
+├── README.md
+├── _navigation.php
+├── composer.json
+├── display_members.php
+├── display_users.php
+├── edit_user.php
+├── header.php
+├── home.php
+├── index.php
+├── login.php
+├── login_process.php
+├── logout_process.php
+├── members.php
+├── profile_updater.php
+├── script.js
+├── server.php
+├── signin.php
+├── signup.php
+├── signup_process.php
+├── style.css
+├── testUsers.txt
+├── testhtml.php
+├── update_user.php
+├── user_list.php
+├── users.php
+└── validate_password.php

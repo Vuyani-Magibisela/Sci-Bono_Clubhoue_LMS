@@ -92,17 +92,17 @@ require_once 'app/Models/dashboard-data-loader.php';
                     </div>
                     <div class="menu-text"><a href="./members.php">Members</a></div>
                 </div>
-                <div class="menu-item">
+                <!-- <div class="menu-item">
                     <div class="menu-icon">
                         <i class="fas fa-newspaper"></i>
                     </div>
                     <div class="menu-text">Feed</div>
-                </div>
+                </div> -->
                 <div class="menu-item">
                     <div class="menu-icon">
-                        <i class="fas fa-bookmark"></i>
+                        <i class="fa-solid fa-chalkboard"></i>
                     </div>
-                    <div class="menu-text"><a href="./app/Views/admin/manage-courses.php">learn</a></div>
+                    <div class="menu-text"><a href="./app/Views/learn.php">learn</a></div>
                 </div>
                 <div class="menu-item">
                     <div class="menu-icon">
@@ -129,11 +129,25 @@ require_once 'app/Models/dashboard-data-loader.php';
                 </div>
                 <?php endforeach; ?>
             </div>
+            <?php if (isset($_SESSION['user_type']) && $_SESSION['user_type'] == "member"): ?>
+            <div class="menu-item">
+                    <div class="menu-icon">
+                        <i class="fas fa-cog"></i>
+                    </div>
+                    <div class="menu-text"><a href="./app/Views/settings.php">Settings</a></div>
+            </div>
+            <?php endif; ?>
             
             <!-- Admin links shown only to admin users -->
             <?php if (isset($_SESSION['user_type']) && $_SESSION['user_type'] === "admin"): ?>
             <div class="menu-group">
                 <div class="menu-title">Admin</div>
+                <div class="menu-item">
+                    <div class="menu-icon">
+                        <i class="fa-solid fa-chalkboard"></i>
+                    </div>
+                    <div class="menu-text"><a href="./app/Views/admin/manage-courses.php">Manage Courses</a></div>
+                </div>
                 <div class="menu-item">
                     <div class="menu-icon">
                         <i class="fas fa-chart-bar"></i>
@@ -476,30 +490,54 @@ require_once 'app/Models/dashboard-data-loader.php';
             </div>
             <span>Home</span>
         </a>
-        <a href="members.php" class="mobile-menu-item">
+        <a href="app/Views/admin/manage-courses.php" class="mobile-menu-item">
+            <div class="mobile-menu-icon">
+                <i class="fa fa-leanpub" aria-hidden="true"></i>
+            </div>
+            <span>Learn</span>
+        </a>
+       <!-- <a href="members.php" class="mobile-menu-item">
             <div class="mobile-menu-icon">
                 <i class="fas fa-users"></i>
             </div>
             <span>Members</span>
-        </a>
-        <a href="app/Views/messages.php" class="mobile-menu-item">
+        </a> 
+         <a href="app/Views/messages.php" class="mobile-menu-item">
             <div class="mobile-menu-icon">
                 <i class="fas fa-comment-dots"></i>
             </div>
             <span>Messages</span>
-        </a>
-        <a href="app/Views/projects.php" class="mobile-menu-item">
-            <div class="mobile-menu-icon">
-                <i class="fas fa-project-diagram"></i>
-            </div>
-            <span>Projects</span>
-        </a>
+        </a> -->
+        <?php if (isset($_SESSION['user_type']) && $_SESSION['user_type'] === "member"): ?>
         <a href="app/Views/settings.php" class="mobile-menu-item">
             <div class="mobile-menu-icon">
                 <i class="fas fa-cog"></i>
             </div>
             <span>Settings</span>
         </a>
+        <?php endif; ?>
+        <!-- Admin & Mentor Users -->
+        <?php if (isset($_SESSION['user_type']) && $_SESSION['user_type'] === "admin"): ?>
+        <a href="app/Views/statsDashboard.php" class="mobile-menu-item">
+            <div class="mobile-menu-icon">
+                <i class="fas fa-chart-bar"></i>
+            </div>
+            <span>Reports</span>
+        </a> 
+        <a href="app/Views/settings.php" class="mobile-menu-item">
+            <div class="mobile-menu-icon">
+                <i class="fas fa-cog"></i>
+            </div>
+            <span>Settings</span>
+        </a>
+        <?php endif; ?>
+            <!-- Log Out Button -->
+        <a href="logout_process.php" class="mobile-menu-item">
+            <div class="mobile-menu-icon">
+                <i class="fas fa-sign-out-alt"></i>
+            </div>
+        <span>Log Out</span>
+    </a>
     </nav>
     <script src="./public/assets/js/homedashboard.js"></script>
 </body>

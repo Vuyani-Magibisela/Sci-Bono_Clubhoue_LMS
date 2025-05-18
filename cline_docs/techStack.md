@@ -1,21 +1,21 @@
 # Technology Stack
 
 ## Backend
-- **Language:** PHP
-- **Web Server:** XAMPP (Apache)
-- **Database:** MySQL (assumed, as `server.php` is included and is typical for XAMPP setups)
-- **Session Management:** PHP Sessions (`session_start()`)
+- **Programming Language:** PHP
+- **Framework:** Custom MVC Framework
+- **Database:** MySQL
+- **Authentication:** Custom implementation
+- **File Management:** Custom file handling
 
 ## Frontend
-- **HTML:** Standard HTML5
-- **CSS:** Custom CSS (`public/assets/css/course.css`)
-- **JavaScript:** Vanilla JavaScript (for `toggleSection` and progress bar animation)
-- **Libraries:**
-    - Font Awesome (for icons)
-    - Google Fonts (Poppins)
+- **HTML:** Semantic HTML5
+- **CSS:** Custom CSS
+- **JavaScript:** Vanilla JS & jQuery
+- **UI Components:** Custom components
+- **Form Validation:** Custom validation
 
-## Key Architectural Decisions
-- **MVC-like Structure:** The use of `Controllers` (e.g., `CourseController`, `LessonController`) and `Views` (e.g., `course.php`) suggests an attempt at a Model-View-Controller pattern, though Models are also present (`LMSUtilities.php` might be a utility class or part of a model layer).
-- **Direct Database Connection:** `require_once '../../server.php';` likely establishes a direct database connection.
-- **URL-based Routing:** Course ID is retrieved via `$_GET['id']`.
-- **User Authentication:** Basic session-based login check.
+## Tools
+- **Version Control:** Git
+- **IDE:** Visual Studio Code
+- **Testing:** Unit testing framework
+- **Build Tools:** Webpack (for JS bundling)
