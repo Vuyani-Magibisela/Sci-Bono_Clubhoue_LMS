@@ -37,22 +37,6 @@ The Sci-Bono Clubhouse LMS is a Learning Management System designed to facilitat
 
 ## Directory Structure Explanation
 
-```mermaid
-graph TD
-  A[Root] -->|app/| B
-  A -->|public/| C
-  A -->|Database/| D
-  A -->|config/| E
-  B[app/] -->|Controllers/| B1
-  B -->|Models/| B2
-  B -->|Views/| B3
-  B1[Controllers] --> "holidayProgramLoginC.php, CourseController.php, etc."
-  B2[Models] --> "HolidayProgramModel.php, CourseModel.php, etc."
-  B3[Views] --> "course.php, lesson.php, manage-courses.php, etc."
-  C[public/] --> "CSS/JS assets and uploads directory"
-  D[Database/] --> "SQL schemas and CSV data files"
-  E[config/] --> "Database connection settings"
-```
 
 ## Usage Guide
 
