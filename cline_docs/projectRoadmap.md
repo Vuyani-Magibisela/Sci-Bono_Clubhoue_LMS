@@ -5,6 +5,9 @@
 - [x] Implement Visitors Management System
 - [x] Create Holiday Programs Registration System
 - [x] Develop Home Dashboard with Interactive Features
+- [ ] Develop Learning System with learning content
+- [ ] Develop Competitions System with Interactive Features
+- [ ] Create user profile viewer
 
 ## Key Features
 ### Visitors Management System

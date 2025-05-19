@@ -1,5 +1,5 @@
 <?php
-require_once __DIR__ . '../Models/UserModel.php';
+require_once __DIR__ . '/../Models/UserModel.php';
 
 
 class UserController {
@@ -72,6 +72,14 @@ class UserController {
      * @return bool Success status
      */
     public function deleteUser($userId) {
+        // Check if user exists before attempting deletion
+        $user = $this->userModel->getUserById($userId);
+        
+        if (!$user) {
+            return false; // User does not exist
+        }
+        
+        // Perform the deletion
         return $this->userModel->deleteUser($userId);
     }
     

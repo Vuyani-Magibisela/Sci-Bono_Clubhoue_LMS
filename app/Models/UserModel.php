@@ -280,18 +280,69 @@ class UserModel {
         
         return $result;
     }
-    
+        
     /**
-     * Delete a user
+     * Delete a user and all related data
      * 
-     * @param int $userId The user's ID
-     * @return bool Success status
+     * @param int $userId User ID to delete
+     * @return bool Success or failure
      */
     public function deleteUser($userId) {
-        $sql = "DELETE FROM users WHERE id = ?";
-        $stmt = $this->conn->prepare($sql);
-        $stmt->bind_param("i", $userId);
-        return $stmt->execute();
+        // Get user details for logging
+        $checkSql = "SELECT username, name, surname, user_type FROM users WHERE id = ?";
+        $checkStmt = $this->conn->prepare($checkSql);
+        $checkStmt->bind_param("i", $userId);
+        $checkStmt->execute();
+        $checkResult = $checkStmt->get_result();
+        
+        if ($checkResult->num_rows == 0) {
+            return false; // User not found
+        }
+        
+        // Begin transaction for data integrity
+        $this->conn->begin_transaction();
+        
+        try {
+            // Delete associated records first to maintain database integrity
+            
+            // 1. Delete attendance records
+            $deleteAttendanceSql = "DELETE FROM attendance WHERE user_id = ?";
+            $deleteAttendanceStmt = $this->conn->prepare($deleteAttendanceSql);
+            $deleteAttendanceStmt->bind_param("i", $userId);
+            $deleteAttendanceStmt->execute();
+            
+            // 2. Delete course enrollments and progress
+            $deleteEnrollmentsSql = "DELETE FROM user_enrollments WHERE user_id = ?";
+            $deleteEnrollmentsStmt = $this->conn->prepare($deleteEnrollmentsSql);
+            $deleteEnrollmentsStmt->bind_param("i", $userId);
+            $deleteEnrollmentsStmt->execute();
+            
+            $deleteLessonProgressSql = "DELETE FROM lesson_progress WHERE user_id = ?";
+            $deleteLessonProgressStmt = $this->conn->prepare($deleteLessonProgressSql);
+            $deleteLessonProgressStmt->bind_param("i", $userId);
+            $deleteLessonProgressStmt->execute();
+            
+            // 4. Delete the user record
+            $deleteUserSql = "DELETE FROM users WHERE id = ?";
+            $deleteUserStmt = $this->conn->prepare($deleteUserSql);
+            $deleteUserStmt->bind_param("i", $userId);
+            $deleteUserStmt->execute();
+            
+            // Commit transaction if all operations succeeded
+            $this->conn->commit();
+            
+            return true;
+            
+        } catch (Exception $e) {
+            // Rollback transaction if any operation failed
+            $this->conn->rollback();
+            
+            // Log the error if you have a logging system
+            // logError("Error deleting user: " . $e->getMessage());
+            
+            return false;
+        }
     }
+    
 }
 ?>

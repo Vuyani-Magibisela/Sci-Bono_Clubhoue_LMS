@@ -402,9 +402,9 @@ if (isset($_SESSION['message'])) {
                                                 <i class="fas fa-edit"></i> Edit
                                             </a>
                                             <?php if ($_SESSION['user_type'] === 'admin'): ?>
-                                            <a href="<?php echo BASE_URL ?> app/Models/Admin/delete_user.php echo $user['id']; ?>" class="user-action-btn delete-btn" onclick="return confirm('Are you sure you want to delete this user? This action cannot be undone.');">
-                                                <i class="fas fa-trash"></i> Delete
-                                            </a>
+                                                <a href="<?php echo BASE_URL; ?>user-delete.php?id=<?php echo $user['id']; ?>" class="user-action-btn delete-btn" onclick="return confirm('Are you sure you want to delete this user? This action cannot be undone.');">
+                                                    <i class="fas fa-trash"></i> Delete
+                                                </a>
                                             <?php endif; ?>
                                         </td>
                                     </tr>
