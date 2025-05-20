@@ -270,7 +270,10 @@ if (!$can_edit) {
                                             <option value="Sepedi" <?php echo (isset($user['home_language']) && $user['home_language'] == 'Sepedi') ? 'selected' : ''; ?>>Sepedi</option>
                                             <option value="Sesotho" <?php echo (isset($user['home_language']) && $user['home_language'] == 'Sesotho') ? 'selected' : ''; ?>>Sesotho</option>
                                             <option value="Setswana" <?php echo (isset($user['home_language']) && $user['home_language'] == 'Setswana') ? 'selected' : ''; ?>>Setswana</option>
-                                            <option value="Other" <?php echo (isset($user['home_language']) && !in_array($user['home_language'], ['Afrikaans', 'English', 'isiNdebele', 'isiXhosa', 'isiZulu', 'Sepedi', 'Sesotho', 'Setswana']) && !empty($user['home_language'])) ? 'selected' : ''; ?>>Other</option>
+                                            <option value="siSwati" <?php echo (isset($user['home_language']) && $user['home_language'] == 'siSwati') ? 'selected' : ''; ?>>siSwati</option>
+                                            <option value="Tshivenda" <?php echo (isset($user['home_language']) && $user['home_language'] == 'Tshivenda') ? 'selected' : ''; ?>>Tshivenda</option>
+                                            <option value="Xitsonga" <?php echo (isset($user['home_language']) && $user['home_language'] == 'Xitsonga') ? 'selected' : ''; ?>>Xitsonga</option>
+                                            <option value="Other" <?php echo (isset($user['home_language']) && !in_array($user['home_language'], ['Afrikaans', 'English', 'isiNdebele', 'isiXhosa', 'isiZulu', 'Sepedi', 'Sesotho', 'Setswana', 'siSwati', 'Tshivenda','Xitsonga']) && !empty($user['home_language'])) ? 'selected' : ''; ?>>Other</option>
                                         </select>
                                         <div class="error-message"></div>
                                     </div>
@@ -278,9 +281,9 @@ if (!$can_edit) {
                                 
                                 <div class="form-row">
                                     <div class="form-group">
-                                        <div id="other_language_div" style="display: <?php echo (isset($user['home_language']) && !in_array($user['home_language'], ['Afrikaans', 'English', 'isiNdebele', 'isiXhosa', 'isiZulu', 'Sepedi', 'Sesotho', 'Setswana']) && !empty($user['home_language'])) ? 'block' : 'none'; ?>;">
+                                        <div id="other_language_div" style="display: <?php echo (isset($user['home_language']) && !in_array($user['home_language'], ['Afrikaans', 'English', 'isiNdebele', 'isiXhosa', 'isiZulu', 'Sepedi', 'Sesotho', 'Setswana', 'siSwati', 'Tshivenda','Xitsonga']) && !empty($user['home_language'])) ? 'block' : 'none'; ?>;">
                                             <label for="other_language" class="form-label">Specify Language</label>
-                                            <input type="text" id="other_language" name="other_language" class="form-control input-control" value="<?php echo (isset($user['home_language']) && !in_array($user['home_language'], ['Afrikaans', 'English', 'isiNdebele', 'isiXhosa', 'isiZulu', 'Sepedi', 'Sesotho', 'Setswana']) && !empty($user['home_language'])) ? $user['home_language'] : ''; ?>" placeholder="Specify language">
+                                            <input type="text" id="other_language" name="other_language" class="form-control input-control" value="<?php echo (isset($user['home_language']) && !in_array($user['home_language'], ['Afrikaans', 'English', 'isiNdebele', 'isiXhosa', 'isiZulu', 'Sepedi', 'Sesotho', 'Setswana', 'siSwati', 'Tshivenda','Xitsonga']) && !empty($user['home_language'])) ? $user['home_language'] : ''; ?>" placeholder="Specify language">
                                         </div>
                                     </div>
                                 </div>

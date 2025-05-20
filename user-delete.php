@@ -10,6 +10,7 @@
 // ====================================================================
 
 // Start session for authentication
+ob_start(); // Start output buffering
 session_start();
 
 // Include core dependencies
@@ -38,7 +39,7 @@ if ($userId <= 0) {
 }
 
 // Business rule: Prevent deletion of own account
-if ($userId == $_SESSION['id']) {
+if ($userId == ($_SESSION['id'] ?? 0)) {
     $_SESSION['message'] = "You cannot delete your own account.";
     $_SESSION['message_type'] = "danger";
     header("Location: app/Views/user_list.php");  // Redirect to view
