@@ -3,6 +3,7 @@ session_start(); // Start the session first
 
 // Include database connection
 require_once '../../server.php'; // Updated path to server.php from app/views/
+require __DIR__ . '/../../config/config.php'; // Updated path to config.php
 
 // Check if user is logged in
 if (!isset($_SESSION['loggedin'])) {
@@ -176,7 +177,7 @@ if (!$can_edit) {
                     </div>
                     
                     <!-- Edit Profile Form -->
-                    <form id="settings-form" action="../../update_user.php" method="post">
+                    <form id="settings-form" action="<?php echo BASE_URL; ?>app/Models/Admin/update_user.php" method="post">
                         <input type="hidden" name="id" value="<?php echo $user['id']; ?>">
                         
                         <!-- Personal Details Section -->
@@ -291,7 +292,7 @@ if (!$can_edit) {
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label for="email" class="form-label">Email</label>
-                                        <input type="email" id="email" name="email" class="form-control input-control" value="<?php echo $user['email']; ?>" required>
+                                        <input type="email" id="email" name="email" class="form-control input-control" value="<?php echo $user['email']; ?>">
                                         <div class="error-message"></div>
                                     </div>
                                     <div class="form-group">
@@ -408,13 +409,13 @@ if (!$can_edit) {
                                     </div>
                                 </div>
                                 
-                                <div class="form-row">
+                                <!-- <div class="form-row">
                                     <div class="form-group">
                                         <label for="learner-number" class="form-label">Learner Number</label>
                                         <input type="text" id="learner-number" name="learner_number" class="form-control input-control" value="<?php echo $user['leaner_number']; ?>">
                                         <div class="error-message"></div>
                                     </div>
-                                </div>
+                                </div> -->
                             </div>
                         </div>
                         
@@ -440,7 +441,7 @@ if (!$can_edit) {
                                 <div class="form-row">
                                     <div class="form-group">
                                         <label for="parent-email" class="form-label">Parent Email</label>
-                                        <input type="email" id="parent-email" name="parent_email" class="form-control input-control" value="<?php echo $user['parent_email']; ?>" required>
+                                        <input type="email" id="parent-email" name="parent_email" class="form-control input-control" value="<?php echo $user['parent_email']; ?>" >
                                         <div class="error-message"></div>
                                     </div>
                                     <div class="form-group">

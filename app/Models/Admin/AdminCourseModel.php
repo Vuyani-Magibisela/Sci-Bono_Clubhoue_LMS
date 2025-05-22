@@ -63,6 +63,10 @@ class AdminCourseModel {
      * @return int|bool New course ID or false on failure
      */
     public function createCourse($courseData) {
+        // Generate a unique course code if not provided
+        if (empty($courseData['course_code'])) {
+            $courseData['course_code'] = $this->generateUniqueCourseCode($courseData['title']);
+        }
         $sql = "INSERT INTO courses (title, description, type, difficulty_level, duration, image_path, is_featured, is_published, status, created_by)
                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         
@@ -86,7 +90,26 @@ class AdminCourseModel {
         
         return false;
     }
-    
+
+    /**
+     * Generate a unique course code based on title and timestamp
+     */
+    private function generateUniqueCourseCode($title) {
+        // Create a code based on first letters of title words + timestamp
+        $words = explode(' ', $title);
+        $code = '';
+        foreach ($words as $word) {
+            if (!empty($word)) {
+                $code .= strtoupper(substr($word, 0, 1));
+            }
+        }
+        
+        // Add a timestamp to ensure uniqueness
+        $code .= '-' . substr(time(), -6);
+        
+        return $code;
+    }
+        
     /**
      * Update an existing course
      * 
