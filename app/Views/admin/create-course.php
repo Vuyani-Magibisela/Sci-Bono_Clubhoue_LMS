@@ -1,14 +1,25 @@
 <?php
-session_start();
+// Start session if not already started
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
 // Check if user is logged in and is an admin or mentor
-if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true || 
-    ($_SESSION['user_type'] != 'admin' && $_SESSION['user_type'] != 'mentor')) {
+if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
     header("Location: ../../../login.php");
     exit;
 }
 
+if (!isset($_SESSION['user_type']) || ($_SESSION['user_type'] !== 'admin' && $_SESSION['user_type'] !== 'mentor')) {
+    header("Location: ../../../home.php");
+    exit;
+}
+
 // Include the auto-logout script to track inactivity
-include '../../Controllers/sessionTimer.php';
+$sessionTimerPath = '../../Controllers/sessionTimer.php';
+if (file_exists($sessionTimerPath)) {
+    include $sessionTimerPath;
+}
 
 // Include database connection
 require_once '../../../server.php';
@@ -17,8 +28,46 @@ require_once '../../../server.php';
 require_once '../../Controllers/Admin/AdminCourseController.php';
 require_once '../../Models/LMSUtilities.php';
 
-// Get user ID from session
-$userId = $_SESSION['id'] ?? 0;
+// Get user ID from session with validation - handle both 'id' and 'user_id' keys
+$userId = 0;
+if (isset($_SESSION['id']) && !empty($_SESSION['id'])) {
+    $userId = intval($_SESSION['id']);
+} elseif (isset($_SESSION['user_id']) && !empty($_SESSION['user_id'])) {
+    $userId = intval($_SESSION['user_id']);
+    // Standardize the session by setting 'id' if it's missing
+    $_SESSION['id'] = $userId;
+}
+
+// Clear any error messages from previous operations
+unset($_SESSION['message']);
+unset($_SESSION['message_type']);
+
+// Validate that user ID exists and is valid
+if ($userId <= 0) {
+    error_log("Invalid user ID in session: " . print_r($_SESSION, true));
+    // Try to get user info from database to fix session
+    if (isset($_SESSION['username']) && !empty($_SESSION['username'])) {
+        $userQuery = "SELECT id, name, surname FROM users WHERE username = ?";
+        $userStmt = $conn->prepare($userQuery);
+        $userStmt->bind_param("s", $_SESSION['username']);
+        $userStmt->execute();
+        $userResult = $userStmt->get_result();
+        
+        if ($userResult && $userResult->num_rows > 0) {
+            $userData = $userResult->fetch_assoc();
+            $userId = intval($userData['id']);
+            $_SESSION['id'] = $userId;
+            $_SESSION['user_id'] = $userId;
+        }
+    }
+    
+    // If still no valid user ID, redirect to login
+    if ($userId <= 0) {
+        session_destroy();
+        header("Location: ../../../login.php");
+        exit;
+    }
+}
 
 // Initialize controller
 $courseController = new AdminCourseController($conn);
@@ -47,49 +96,66 @@ $formData = [
     'is_featured' => 0,
     'is_published' => 0,
     'status' => 'draft',
-    'created_by' => $userId
+    'created_by' => $userId,
+    'course_code' => '' // Will be auto-generated
 ];
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Get form data
     $formData = [
-        'title' => $_POST['title'] ?? '',
-        'description' => $_POST['description'] ?? '',
+        'title' => trim($_POST['title'] ?? ''),
+        'description' => trim($_POST['description'] ?? ''),
         'type' => $_POST['type'] ?? $contentType,
         'difficulty_level' => $_POST['difficulty_level'] ?? 'Beginner',
-        'duration' => $_POST['duration'] ?? '',
+        'duration' => trim($_POST['duration'] ?? ''),
         'image_path' => '', // Will be updated if image is uploaded
         'is_featured' => isset($_POST['is_featured']) ? 1 : 0,
         'is_published' => isset($_POST['is_published']) ? 1 : 0,
         'status' => $_POST['status'] ?? 'draft',
-        'created_by' => $userId
+        'created_by' => $userId,
+        'course_code' => '' // Will be auto-generated in the model
     ];
     
     // Validate required fields
     if (empty($formData['title'])) {
         $message = "Title is required.";
         $messageType = "danger";
+    } elseif (strlen($formData['title']) < 3) {
+        $message = "Title must be at least 3 characters long.";
+        $messageType = "danger";
     } else {
         // Process image upload if provided
         if (isset($_FILES['image']) && $_FILES['image']['error'] == 0) {
-            $targetDir = "../../../public/assets/uploads/images/courses";
+            $targetDir = "../../../public/assets/uploads/images/courses/";
            
             // Create directory if it doesn't exist
             if (!file_exists($targetDir)) {
                 mkdir($targetDir, 0777, true);
             }
             
-            // Generate a unique filename
-            $extension = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
-            $filename = uniqid() . '_' . time() . '.' . $extension;
-            $targetFile = $targetDir . $filename;
+            // Validate file type
+            $allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+            $fileType = $_FILES['image']['type'];
             
-            // Move uploaded file
-            if (move_uploaded_file($_FILES['image']['tmp_name'], $targetFile)) {
-                $formData['image_path'] = $filename;
-            } else {
-                $message = "Failed to upload image.";
+            if (!in_array($fileType, $allowedTypes)) {
+                $message = "Invalid image format. Please use JPEG, PNG, GIF, or WebP.";
                 $messageType = "danger";
+            } elseif ($_FILES['image']['size'] > 2097152) { // 2MB limit
+                $message = "Image file is too large. Maximum size is 2MB.";
+                $messageType = "danger";
+            } else {
+                // Generate a unique filename
+                $extension = pathinfo($_FILES['image']['name'], PATHINFO_EXTENSION);
+                $filename = uniqid() . '_' . time() . '.' . $extension;
+                $targetFile = $targetDir . $filename;
+                
+                // Move uploaded file
+                if (move_uploaded_file($_FILES['image']['tmp_name'], $targetFile)) {
+                    $formData['image_path'] = $filename;
+                } else {
+                    $message = "Failed to upload image. Please try again.";
+                    $messageType = "danger";
+                }
             }
         }
         
@@ -100,19 +166,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         // Create course if validation passes
         if (empty($message)) {
-            $courseId = $courseController->createCourse($formData);
-            
-            if ($courseId) {
-                // Redirect to course editing or section management
-                $redirectUrl = ($contentType == 'lesson' || $contentType == 'skill_activity') 
-                    ? "edit-course.php?id=" . $courseId
-                    : "manage-sections.php?course_id=" . $courseId;
+            try {
+                $courseId = $courseController->createCourse($formData);
+                
+                if ($courseId) {
+                    // Set success message
+                    $_SESSION['message'] = $contentLabel . " created successfully!";
+                    $_SESSION['message_type'] = "success";
                     
-                header("Location: " . $redirectUrl);
-                exit;
-            } else {
-                $message = "Failed to create " . strtolower($contentLabel) . ". Please try again.";
+                    // Redirect to course editing or section management
+                    $redirectUrl = ($contentType == 'lesson' || $contentType == 'skill_activity') 
+                        ? "edit-course.php?id=" . $courseId
+                        : "manage-sections.php?course_id=" . $courseId;
+                        
+                    header("Location: " . $redirectUrl);
+                    exit;
+                } else {
+                    $message = "Failed to create " . strtolower($contentLabel) . ". Please check that you have permission and try again.";
+                    $messageType = "danger";
+                }
+            } catch (Exception $e) {
+                $message = "An error occurred while creating the " . strtolower($contentLabel) . ". Please try again.";
                 $messageType = "danger";
+                error_log("Course creation error: " . $e->getMessage());
             }
         }
     }
@@ -145,7 +221,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         <?php if (!empty($message)): ?>
         <div class="alert alert-<?php echo $messageType; ?>">
-            <?php echo $message; ?>
+            <?php echo htmlspecialchars($message); ?>
         </div>
         <?php endif; ?>
         
@@ -157,11 +233,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="form-row">
                         <div class="form-group">
                             <label for="title" class="form-label">Title *</label>
-                            <input type="text" id="title" name="title" class="form-control" required value="<?php echo htmlspecialchars($formData['title']); ?>">
+                            <input type="text" id="title" name="title" class="form-control" required 
+                                   value="<?php echo htmlspecialchars($formData['title']); ?>"
+                                   placeholder="Enter a descriptive title for your <?php echo strtolower($contentLabel); ?>">
+                            <div class="form-text">The course code will be automatically generated from this title.</div>
                         </div>
-                        
+                                                
                         <div class="form-group">
-                            <label for="type" class="form-label">Content Type *</label>
+                            <label for="type" class="form-label">Content Type</label>
                             <select id="type" name="type" class="form-control" required>
                                 <option value="full_course" <?php echo $contentType == 'full_course' ? 'selected' : ''; ?>>Full Course</option>
                                 <option value="short_course" <?php echo $contentType == 'short_course' ? 'selected' : ''; ?>>Short Course</option>
@@ -183,7 +262,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         
                         <div class="form-group">
                             <label for="duration" class="form-label">Estimated Duration</label>
-                            <input type="text" id="duration" name="duration" class="form-control" placeholder="e.g., 2 weeks, 5 hours" value="<?php echo htmlspecialchars($formData['duration']); ?>">
+                            <input type="text" id="duration" name="duration" class="form-control" 
+                                   placeholder="e.g., 2 weeks, 5 hours, 30 minutes" 
+                                   value="<?php echo htmlspecialchars($formData['duration']); ?>">
                             <div class="form-text">Estimated time to complete this content</div>
                         </div>
                     </div>
@@ -191,7 +272,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="form-row">
                         <div class="form-group">
                             <label for="description" class="form-label">Description</label>
-                            <textarea id="description" name="description" class="form-control" rows="5"><?php echo htmlspecialchars($formData['description']); ?></textarea>
+                            <textarea id="description" name="description" class="form-control" rows="5" 
+                                      placeholder="Provide a detailed description of what learners will gain from this <?php echo strtolower($contentLabel); ?>..."><?php echo htmlspecialchars($formData['description']); ?></textarea>
                         </div>
                     </div>
                 </div>
@@ -203,7 +285,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         <div class="form-group">
                             <label for="image" class="form-label">Upload Cover Image</label>
                             <input type="file" id="image" name="image" class="form-control" accept="image/*">
-                            <div class="form-text">Recommended size: 1200x600 pixels. Max file size: 2MB.</div>
+                            <div class="form-text">Recommended size: 1200x600 pixels. Max file size: 2MB. Supported formats: JPEG, PNG, GIF, WebP.</div>
                         </div>
                     </div>
                 </div>
@@ -304,6 +386,29 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         pageTitle.textContent = 'Create New Skill Activity';
                         submitButton.innerHTML = '<i class="fas fa-save"></i> Create Skill Activity';
                         break;
+                }
+            });
+            
+            // Form validation
+            const form = document.querySelector('form');
+            const titleInput = document.getElementById('title');
+            
+            form.addEventListener('submit', function(e) {
+                if (titleInput.value.trim().length < 3) {
+                    e.preventDefault();
+                    alert('Title must be at least 3 characters long.');
+                    titleInput.focus();
+                    return false;
+                }
+            });
+            
+            // Real-time title validation
+            titleInput.addEventListener('input', function() {
+                const value = this.value.trim();
+                if (value.length > 0 && value.length < 3) {
+                    this.style.borderColor = '#ff6b6b';
+                } else {
+                    this.style.borderColor = '';
                 }
             });
         });

@@ -63,15 +63,34 @@ class AdminCourseModel {
      * @return int|bool New course ID or false on failure
      */
     public function createCourse($courseData) {
-        // Generate a unique course code if not provided
-        if (empty($courseData['course_code'])) {
-            $courseData['course_code'] = $this->generateUniqueCourseCode($courseData['title']);
+        // Validate that the user exists
+        if (!$this->validateUserExists($courseData['created_by'])) {
+            error_log("User with ID {$courseData['created_by']} does not exist");
+            return false;
         }
-        $sql = "INSERT INTO courses (title, description, type, difficulty_level, duration, image_path, is_featured, is_published, status, created_by)
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        
+        // Generate a unique course code if not provided or empty
+        if (empty($courseData['course_code'])) {
+            $courseData['course_code'] = $this->generateUniqueCourseCode($courseData['title'], $courseData['type']);
+        } else {
+            // Check if the provided course code is unique
+            if (!$this->isCourseCodeUnique($courseData['course_code'])) {
+                // If not unique, generate a new one
+                $courseData['course_code'] = $this->generateUniqueCourseCode($courseData['title'], $courseData['type']);
+            }
+        }
+        
+        $sql = "INSERT INTO courses (course_code, title, description, type, difficulty_level, duration, image_path, is_featured, is_published, status, created_by)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)";
         
         $stmt = $this->conn->prepare($sql);
-        $stmt->bind_param("ssssssiiis", 
+        if (!$stmt) {
+            error_log("Failed to prepare statement: " . $this->conn->error);
+            return false;
+        }
+        
+        $stmt->bind_param("sssssssiiss",
+            $courseData['course_code'],
             $courseData['title'],
             $courseData['description'],
             $courseData['type'],
@@ -86,30 +105,128 @@ class AdminCourseModel {
         
         if ($stmt->execute()) {
             return $this->conn->insert_id;
+        } else {
+            error_log("Failed to execute statement: " . $stmt->error);
+            return false;
         }
-        
-        return false;
     }
-
+    
     /**
-     * Generate a unique course code based on title and timestamp
+     * Validate that a user exists in the database
+     * 
+     * @param int $userId User ID to validate
+     * @return bool True if user exists, false otherwise
      */
-    private function generateUniqueCourseCode($title) {
-        // Create a code based on first letters of title words + timestamp
-        $words = explode(' ', $title);
-        $code = '';
-        foreach ($words as $word) {
-            if (!empty($word)) {
-                $code .= strtoupper(substr($word, 0, 1));
-            }
+    private function validateUserExists($userId) {
+        if (empty($userId) || !is_numeric($userId)) {
+            return false;
         }
         
-        // Add a timestamp to ensure uniqueness
-        $code .= '-' . substr(time(), -6);
+        $sql = "SELECT id FROM users WHERE id = ?";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        return $result && $result->num_rows > 0;
+    }
+    
+    /**
+     * Check if a course code is unique
+     * 
+     * @param string $courseCode Course code to check
+     * @return bool True if unique, false otherwise
+     */
+    private function isCourseCodeUnique($courseCode) {
+        $sql = "SELECT id FROM courses WHERE course_code = ?";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("s", $courseCode);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        return $result && $result->num_rows === 0;
+    }
+    
+    /**
+     * Generate a unique course code based on title, type, and timestamp
+     * 
+     * @param string $title Course title
+     * @param string $type Course type
+     * @return string Unique course code
+     */
+    private function generateUniqueCourseCode($title, $type = '') {
+        // Create a base code from title and type
+        $baseCode = $this->createBaseCode($title, $type);
+        
+        // Check if the base code is unique
+        if ($this->isCourseCodeUnique($baseCode)) {
+            return $baseCode;
+        }
+        
+        // If not unique, add a timestamp suffix
+        $counter = 1;
+        do {
+            $code = $baseCode . '-' . $counter;
+            $counter++;
+        } while (!$this->isCourseCodeUnique($code) && $counter < 1000); // Prevent infinite loop
         
         return $code;
     }
+    
+    /**
+     * Create a base course code from title and type
+     * 
+     * @param string $title Course title
+     * @param string $type Course type
+     * @return string Base course code
+     */
+    private function createBaseCode($title, $type = '') {
+        // Clean and process the title
+        $titleWords = explode(' ', strtoupper(trim($title)));
+        $titleCode = '';
         
+        // Get first letter of each word (up to 4 letters)
+        $wordCount = 0;
+        foreach ($titleWords as $word) {
+            if (!empty($word) && $wordCount < 4) {
+                $titleCode .= substr($word, 0, 1);
+                $wordCount++;
+            }
+        }
+        
+        // Add type prefix if provided
+        $typePrefix = '';
+        if (!empty($type)) {
+            switch ($type) {
+                case 'full_course':
+                    $typePrefix = 'FC-';
+                    break;
+                case 'short_course':
+                    $typePrefix = 'SC-';
+                    break;
+                case 'lesson':
+                    $typePrefix = 'LN-';
+                    break;
+                case 'skill_activity':
+                    $typePrefix = 'SA-';
+                    break;
+                default:
+                    $typePrefix = 'GN-'; // Generic
+                    break;
+            }
+        }
+        
+        // Combine type prefix and title code
+        $baseCode = $typePrefix . $titleCode;
+        
+        // Ensure minimum length and add timestamp if too short
+        if (strlen($baseCode) < 4) {
+            $baseCode .= substr(time(), -3);
+        }
+        
+        return $baseCode;
+    }
+
     /**
      * Update an existing course
      * 
@@ -402,3 +519,4 @@ class AdminCourseModel {
         }
     }
 }
+?>

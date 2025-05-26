@@ -3,20 +3,20 @@ require_once __DIR__ . '/../../Models/Admin/AdminCourseModel.php';
 
 class AdminCourseController {
     private $conn;
-    private $adminCourseModel;
+    private $courseModel;
     
     public function __construct($conn) {
         $this->conn = $conn;
-        $this->adminCourseModel = new AdminCourseModel($conn);
+        $this->courseModel = new AdminCourseModel($conn);
     }
     
     /**
-     * Get all courses with additional metadata
+     * Get all courses
      * 
-     * @return array Array of courses with metadata
+     * @return array List of all courses
      */
     public function getAllCourses() {
-        return $this->adminCourseModel->getAllCourses();
+        return $this->courseModel->getAllCourses();
     }
     
     /**
@@ -26,28 +26,32 @@ class AdminCourseController {
      * @return array|null Course details or null if not found
      */
     public function getCourseDetails($courseId) {
-        return $this->adminCourseModel->getCourseDetails($courseId);
+        return $this->courseModel->getCourseDetails($courseId);
     }
     
     /**
-     * Create a new course
+     * Create a new course with validation
      * 
      * @param array $courseData Course data
      * @return int|bool New course ID or false on failure
      */
     public function createCourse($courseData) {
         // Validate required fields
-        if (empty($courseData['title']) || empty($courseData['type'])) {
+        if (empty($courseData['title'])) {
+            error_log("Course creation failed: Missing title");
             return false;
         }
         
-        // Set defaults for optional fields
-        $courseData['difficulty_level'] = $courseData['difficulty_level'] ?? 'Beginner';
-        $courseData['status'] = $courseData['status'] ?? 'draft';
-        $courseData['is_published'] = $courseData['is_published'] ?? 0;
-        $courseData['is_featured'] = $courseData['is_featured'] ?? 0;
+        if (empty($courseData['created_by']) || !is_numeric($courseData['created_by'])) {
+            error_log("Course creation failed: Invalid created_by user ID");
+            return false;
+        }
         
-        return $this->adminCourseModel->createCourse($courseData);
+        // Sanitize data
+        $courseData = $this->sanitizeCourseData($courseData);
+        
+        // Create the course
+        return $this->courseModel->createCourse($courseData);
     }
     
     /**
@@ -63,12 +67,10 @@ class AdminCourseController {
             return false;
         }
         
-        // Validate required fields
-        if (empty($courseData['title']) || empty($courseData['type'])) {
-            return false;
-        }
+        // Sanitize data
+        $courseData = $this->sanitizeCourseData($courseData);
         
-        return $this->adminCourseModel->updateCourse($courseId, $courseData);
+        return $this->courseModel->updateCourse($courseId, $courseData);
     }
     
     /**
@@ -78,33 +80,28 @@ class AdminCourseController {
      * @return bool Success status
      */
     public function deleteCourse($courseId) {
-        // Validate course ID
         if ($courseId <= 0) {
             return false;
         }
         
-        return $this->adminCourseModel->deleteCourse($courseId);
+        return $this->courseModel->deleteCourse($courseId);
     }
     
     /**
-     * Update course status (active, draft, archived)
+     * Update course status
      * 
      * @param int $courseId Course ID
      * @param string $status New status
      * @return bool Success status
      */
     public function updateCourseStatus($courseId, $status) {
-        // Validate course ID
-        if ($courseId <= 0) {
+        $validStatuses = ['draft', 'active', 'archived'];
+        
+        if ($courseId <= 0 || !in_array($status, $validStatuses)) {
             return false;
         }
         
-        // Validate status
-        if (!in_array($status, ['active', 'draft', 'archived'])) {
-            return false;
-        }
-        
-        return $this->adminCourseModel->updateCourseStatus($courseId, $status);
+        return $this->courseModel->updateCourseStatus($courseId, $status);
     }
     
     /**
@@ -115,27 +112,25 @@ class AdminCourseController {
      * @return bool Success status
      */
     public function toggleFeatured($courseId, $featured) {
-        // Validate course ID
         if ($courseId <= 0) {
             return false;
         }
         
-        return $this->adminCourseModel->toggleFeatured($courseId, $featured);
+        return $this->courseModel->toggleFeatured($courseId, $featured);
     }
     
     /**
-     * Get course sections
+     * Get course sections with lessons
      * 
      * @param int $courseId Course ID
-     * @return array Course sections
+     * @return array Course sections with lessons
      */
     public function getCourseSections($courseId) {
-        // Validate course ID
         if ($courseId <= 0) {
             return [];
         }
         
-        return $this->adminCourseModel->getCourseSections($courseId);
+        return $this->courseModel->getCourseSections($courseId);
     }
     
     /**
@@ -146,17 +141,15 @@ class AdminCourseController {
      * @return int|bool New section ID or false on failure
      */
     public function createSection($courseId, $sectionData) {
-        // Validate course ID
-        if ($courseId <= 0) {
+        if ($courseId <= 0 || empty($sectionData['title'])) {
             return false;
         }
         
-        // Validate required fields
-        if (empty($sectionData['title'])) {
-            return false;
-        }
+        // Sanitize section data
+        $sectionData['title'] = trim($sectionData['title']);
+        $sectionData['description'] = trim($sectionData['description'] ?? '');
         
-        return $this->adminCourseModel->createSection($courseId, $sectionData);
+        return $this->courseModel->createSection($courseId, $sectionData);
     }
     
     /**
@@ -167,17 +160,15 @@ class AdminCourseController {
      * @return bool Success status
      */
     public function updateSection($sectionId, $sectionData) {
-        // Validate section ID
-        if ($sectionId <= 0) {
+        if ($sectionId <= 0 || empty($sectionData['title'])) {
             return false;
         }
         
-        // Validate required fields
-        if (empty($sectionData['title'])) {
-            return false;
-        }
+        // Sanitize section data
+        $sectionData['title'] = trim($sectionData['title']);
+        $sectionData['description'] = trim($sectionData['description'] ?? '');
         
-        return $this->adminCourseModel->updateSection($sectionId, $sectionData);
+        return $this->courseModel->updateSection($sectionId, $sectionData);
     }
     
     /**
@@ -187,12 +178,11 @@ class AdminCourseController {
      * @return bool Success status
      */
     public function deleteSection($sectionId) {
-        // Validate section ID
         if ($sectionId <= 0) {
             return false;
         }
         
-        return $this->adminCourseModel->deleteSection($sectionId);
+        return $this->courseModel->deleteSection($sectionId);
     }
     
     /**
@@ -206,7 +196,52 @@ class AdminCourseController {
             return false;
         }
         
-        return $this->adminCourseModel->updateSectionOrder($sectionOrders);
+        return $this->courseModel->updateSectionOrder($sectionOrders);
+    }
+    
+    /**
+     * Sanitize course data for security
+     * 
+     * @param array $courseData Raw course data
+     * @return array Sanitized course data
+     */
+    private function sanitizeCourseData($courseData) {
+        $sanitized = [];
+        
+        // Required fields
+        $sanitized['title'] = trim($courseData['title'] ?? '');
+        $sanitized['description'] = trim($courseData['description'] ?? '');
+        $sanitized['type'] = trim($courseData['type'] ?? 'full_course');
+        $sanitized['difficulty_level'] = trim($courseData['difficulty_level'] ?? 'Beginner');
+        $sanitized['created_by'] = intval($courseData['created_by'] ?? 0);
+        
+        // Optional fields
+        $sanitized['duration'] = trim($courseData['duration'] ?? '');
+        $sanitized['image_path'] = trim($courseData['image_path'] ?? '');
+        $sanitized['course_code'] = trim($courseData['course_code'] ?? '');
+        $sanitized['status'] = trim($courseData['status'] ?? 'draft');
+        
+        // Boolean fields
+        $sanitized['is_featured'] = isset($courseData['is_featured']) ? intval($courseData['is_featured']) : 0;
+        $sanitized['is_published'] = isset($courseData['is_published']) ? intval($courseData['is_published']) : 0;
+        
+        // Validate enum values
+        $validTypes = ['full_course', 'short_course', 'lesson', 'skill_activity'];
+        if (!in_array($sanitized['type'], $validTypes)) {
+            $sanitized['type'] = 'full_course';
+        }
+        
+        $validDifficulties = ['Beginner', 'Intermediate', 'Advanced'];
+        if (!in_array($sanitized['difficulty_level'], $validDifficulties)) {
+            $sanitized['difficulty_level'] = 'Beginner';
+        }
+        
+        $validStatuses = ['draft', 'active', 'archived'];
+        if (!in_array($sanitized['status'], $validStatuses)) {
+            $sanitized['status'] = 'draft';
+        }
+        
+        return $sanitized;
     }
     
     /**
@@ -223,11 +258,11 @@ class AdminCourseController {
             'skill_activity' => 'Skill Activity'
         ];
         
-        return $types[$type] ?? ucwords(str_replace('_', ' ', $type));
+        return $types[$type] ?? ucfirst(str_replace('_', ' ', $type));
     }
     
     /**
-     * Get CSS class for difficulty level
+     * Get difficulty class for styling
      * 
      * @param string $level Difficulty level
      * @return string CSS class
@@ -242,3 +277,4 @@ class AdminCourseController {
         return $classes[$level] ?? 'badge-primary';
     }
 }
+?>

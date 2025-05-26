@@ -11,18 +11,17 @@ Sci-Bono_Clubhoue_LMS/
 │   ├── Controllers/
 │   │   ├── Admin/
 │   │   ├── AdminCourseController.php
-│   │   ├── AdminCourseController00.php
 │   │   └── AdminLessonController.php
 │   ├── AttendanceRegisterController.php
-│   ├── AuthController.php
 │   ├── CourseController.php # Added LessonController
 │   ├── HolidayProgramController.php
-│   ├── HomeController.php
 │   ├── LessonController.php
 │   ├── UserController.php
 │   ├── VisitorController.php
 │   ├── addPrograms.php # Database connection details
+│   ├── authController.php
 │   ├── holidayProgramLoginC.php # Fix paths using __DIR__
+│   ├── homeController.php
 │   ├── sessionTimer.php # Check if the session is not already started
 │   ├── submit_monthly_report.php # Check if user is logged in
 │   ├── submit_report_data.php # Database connection details
@@ -33,9 +32,8 @@ Sci-Bono_Clubhoue_LMS/
 │   ├── Models/
 │   │   ├── Admin/
 │   │   ├── AdminCourseModel.php
-│   │   ├── AdminCourseModel00.php
 │   │   ├── AdminLessonModel.php
-│   │   └── delete_user.php # Check if user is logged in and is an admin
+│   │   └── update_user.php
 │   ├── AttendanceRegisterModel.php
 │   ├── CourseModel.php
 │   ├── EnrollmentModel.php
@@ -58,10 +56,9 @@ Sci-Bono_Clubhoue_LMS/
 │       ├── admin_footer.php
 │       ├── admin_header.php # Check if session is not already started
 │       ├── course.php # Check if user is logged in
-│       ├── create-course.php # Check if user is logged in and is an admin or mentor
+│       ├── create-course.php # Start session if not already started
 │       ├── learn-header.php # Check if a session is not already active
 │       ├── manage-courses.php # Check if user is logged in and is an admin or mentor
-│       ├── manage-courses00.php
 │       ├── manage-lessons.php # Check if user is logged in and is an admin or mentor
 │       ├── manage-sections.php # Check if user is logged in and is an admin or mentor
 │       └── user_edit.php # This view is included by UserController.php (showEditForm action).
@@ -87,9 +84,10 @@ Sci-Bono_Clubhoue_LMS/
 │   ├── user_list.php # Check if user is logged in and is an admin
 │   └── visitorsPage.php
 ├── cline_docs/
+├── ClubhouseLMSProStructure.txt
 ├── codebaseSummary.md # Codebase Summary
 ├── currentTask.md # Current Task: Refactor User Management (`user_list.php`)
-├── projectRoadmap.md # Project Roadmap
+├── projectRoadmap.md # Project Roadmap for Sci-Bono Clubhouse LMS
 └── techStack.md # Technology Stack
 ├── config/
 ├── config.php # Dynamically determine the base URL
@@ -101,7 +99,9 @@ Sci-Bono_Clubhoue_LMS/
 │       ├── css/
 │       ├── attendanceRegister.css # Daily Attendance Register Styles
 │       ├── course.css # Course Page Specific Styles
-│       ├── cssRest.css # * Comprehensive CSS Reset* Version: 1.0 - March 2025* For use in all CSS projects
+│       ├── cssRest.css # * Comprehensive CSS Reset
+ * Version: 1.0 - March 2025
+ * For use in all CSS projects
 │       ├── header.css # index header styling
 │       ├── holidayDahsboard.css # Holiday Dashboard Styles
 │       ├── holidayProgramContentStyles.css # Holiday Program Styles CSS
@@ -159,10 +159,20 @@ Sci-Bono_Clubhoue_LMS/
 │               ├── 67ebde1b70bd5_IMG_4036.JPG
 │               └── 67ebde1b71c06_IMG_4037.JPG
 │               ├── courses/
+│               ├── 682f015feceb6_1747911007.jpeg
+│               ├── 682f02af53c86_1747911343.jpg
+│               ├── 682f02fc8ae36_1747911420.png
+│               ├── 682f0354b82a6_1747911508.webp
 │               └── defaultImage.small_600_400_nofilter.jpg
 │           ├── 2024-0966e448b212080_FWAC0DJIDYKNTLY.jpg
-│           └── courses682339a9c846d_1747138985.jpg
-├── tests/
+│           ├── courses682339a9c846d_1747138985.jpg
+│           ├── courses682b40ee1ce66_1747665134.png
+│           ├── courses682da5a05f4bd_1747821984.jpeg
+│           ├── courses682de2d8d3237_1747837656.jpeg
+│           ├── courses682de2f737c4f_1747837687.jpeg
+│           ├── courses682de3b44bba5_1747837876.jpeg
+│           ├── courses682ef156ade2d_1747906902.jpeg
+│           └── courses682ef51e2524a_1747907870.jpeg
 ├── Ai_Login.php
 ├── README.md
 ├── _navigation.php
@@ -186,7 +196,5 @@ Sci-Bono_Clubhoue_LMS/
 ├── style.css
 ├── testUsers.txt
 ├── testhtml.php
-├── update_user.php
-├── user_list.php
-├── users.php
+├── user-delete.php
 └── validate_password.php
