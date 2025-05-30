@@ -17,7 +17,7 @@ require_once '../Controllers/CourseController.php';
 require_once '../Controllers/LessonController.php';
 // Include utilities
 require_once '../Models/LMSUtilities.php';
-
+require_once '../../config/config.php';
 // // Add these helper functions
 // function formatCourseType($type) {
 //     return ucwords(str_replace('_', ' ', $type));
@@ -81,7 +81,8 @@ $userEnrollments = $courseController->getUserEnrollments($userId);
 </head>
 
 <body>
-    <?php include './learn-header.php'; ?>
+    <?php include  './admin/learn-header.php';
+    ?>
     
     <div class="learn-container">
         <h1 class="page-title">Explore Learning</h1>
@@ -142,11 +143,13 @@ $userEnrollments = $courseController->getUserEnrollments($userId);
             <div class="featured-grid">
                 <?php foreach ($featuredCourses as $course): ?>
                 <div class="featured-card">
-                    <?php if (isset($course['image_path']) && file_exists('../../public/assets/uploads/images/courses/' . $course['image_path'])): ?>
-                        <img class="featured-image" src="../../public/assets/uploads/images/courses/<?php echo htmlspecialchars($course['image_path']); ?>" alt="<?php echo htmlspecialchars($course['title']); ?>">
-                    <?php else: ?>
-                        <img class="featured-image" src="https://source.unsplash.com/random/600x400?<?php echo urlencode(strtolower($course['title'])); ?>" alt="<?php echo htmlspecialchars($course['title']); ?>">
-                    <?php endif; ?>
+                        <?php if (isset($course['image_path']) && !empty($course['image_path'])): ?>
+                            <img src="../../../public/assets/uploads/images/courses/<?php echo htmlspecialchars($course['image_path']); ?>" 
+                                 alt="<?php echo htmlspecialchars($course['title']); ?>">
+                        <?php else: ?>
+                            <img src="https://picsum.photos/seed/<?php echo $course['id']; ?>/600/400" 
+                                 alt="<?php echo htmlspecialchars($course['title']); ?>">
+                        <?php endif; ?>
                     <div class="featured-overlay">
                         <div class="featured-badges">
                             <span class="featured-badge"><?php echo formatCourseType($course['type']); ?></span>
@@ -169,10 +172,12 @@ $userEnrollments = $courseController->getUserEnrollments($userId);
             <?php foreach ($recommendedCourses as $course): ?>
             <div class="course-card" data-type="<?php echo $course['type']; ?>">
                 <div class="card-image">
-                    <?php if (isset($course['image_path']) && file_exists('../../public/assets/uploads/images/courses/' . $course['image_path'])): ?>
-                        <img src="../../public/assets/uploads/images/courses/<?php echo htmlspecialchars($course['image_path']); ?>" alt="<?php echo htmlspecialchars($course['title']); ?>">
+                    <?php if (isset($course['image_path']) && !empty($course['image_path'])): ?>
+                        <img src="../../../public/assets/uploads/images/courses/<?php echo htmlspecialchars($course['image_path']); ?>" 
+                                alt="<?php echo htmlspecialchars($course['title']); ?>">
                     <?php else: ?>
-                        <img src="https://source.unsplash.com/random/600x400?<?php echo urlencode(strtolower($course['title'])); ?>" alt="<?php echo htmlspecialchars($course['title']); ?>">
+                        <img src="https://picsum.photos/seed/<?php echo $course['id']; ?>/600/400" 
+                                alt="<?php echo htmlspecialchars($course['title']); ?>">
                     <?php endif; ?>
                 </div>
                 <div class="card-content">

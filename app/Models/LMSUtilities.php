@@ -1,220 +1,357 @@
 <?php
 /**
- * Utility functions for the Clubhouse LMS Learning System
- * 
- * Contains helper functions used across the learning system components
- * 
- * @package ClubhouseLMS
+ * Enhanced LMS Utilities for Sci-Bono Clubhouse LMS
+ * Provides utility functions for the enhanced course management system
  */
 
 /**
- * Format course type for display
+ * Get appropriate icon for lesson type
  * 
- * Converts course type codes to user-friendly display format
- * 
- * @param string $type Course type code
- * @return string Formatted course type text
- */
-function formatCourseType($type) {
-    $types = [
-        'robotics' => 'Robotics',
-        'coding' => 'Coding & Programming',
-        'design' => 'Digital Design',
-        'video' => 'Video Production',
-        'art' => 'Digital Art',
-        'web' => 'Web Development',
-        'game' => 'Game Development',
-        'ai' => 'Artificial Intelligence',
-        'electronics' => 'Electronics',
-        'soft_skills' => 'Soft Skills',
-        'life_skills' => 'Life Skills',
-        'computer_basics' => 'Computer Basics',
-        'ftc' => 'FTC Robotics',
-        'fll' => 'FLL Robotics'
-    ];
-    
-    return $types[$type] ?? ucfirst(str_replace('_', ' ', $type));
-}
-
-/**
- * Get appropriate Font Awesome icon for lesson type
- * 
- * Returns the appropriate Font Awesome icon class based on the lesson type
- * 
- * @param string $lessonType Type of lesson
+ * @param string $lessonType The type of lesson
  * @return string Font Awesome icon class
  */
 function getLessonIcon($lessonType) {
     $icons = [
-        'video' => 'fa-video',
         'text' => 'fa-file-alt',
+        'video' => 'fa-video',
         'quiz' => 'fa-question-circle',
         'assignment' => 'fa-tasks',
-        'exercise' => 'fa-laptop-code',
-        'discussion' => 'fa-comments',
-        'presentation' => 'fa-desktop',
-        'project' => 'fa-project-diagram',
-        'resource' => 'fa-download',
-        'external' => 'fa-external-link-alt'
+        'interactive' => 'fa-laptop-code'
     ];
     
     return $icons[$lessonType] ?? 'fa-file';
 }
 
 /**
- * Format duration in minutes to human-readable text
+ * Get appropriate icon for activity type
  * 
- * Converts raw minutes to hours and minutes format
+ * @param string $activityType The type of activity
+ * @return string Font Awesome icon class
+ */
+function getActivityIcon($activityType) {
+    $icons = [
+        'practical' => 'fa-tools',
+        'assignment' => 'fa-tasks',
+        'project' => 'fa-project-diagram',
+        'quiz' => 'fa-question-circle',
+        'assessment' => 'fa-clipboard-check',
+        'skill_exercise' => 'fa-dumbbell'
+    ];
+    
+    return $icons[$activityType] ?? 'fa-tasks';
+}
+
+/**
+ * Get appropriate icon for module type
  * 
- * @param int $minutes Total duration in minutes
- * @return string Formatted duration text
+ * @param string $moduleType The type of module
+ * @return string Font Awesome icon class
+ */
+function getModuleIcon($moduleType = 'default') {
+    $icons = [
+        'introduction' => 'fa-flag-checkered',
+        'core' => 'fa-cog',
+        'advanced' => 'fa-rocket',
+        'assessment' => 'fa-clipboard-check',
+        'project' => 'fa-project-diagram',
+        'default' => 'fa-folder'
+    ];
+    
+    return $icons[$moduleType] ?? 'fa-folder';
+}
+
+/**
+ * Format course type for display
+ * 
+ * @param string $type Course type
+ * @return string Formatted course type
+ */
+function formatCourseType($type) {
+    $types = [
+        'full_course' => 'Full Course',
+        'short_course' => 'Short Course',
+        'lesson' => 'Lesson',
+        'skill_activity' => 'Skill Activity'
+    ];
+    
+    return $types[$type] ?? ucfirst(str_replace('_', ' ', $type));
+}
+
+/**
+ * Get difficulty class for styling
+ * 
+ * @param string $level Difficulty level
+ * @return string CSS class
+ */
+function getDifficultyClass($level) {
+    $classes = [
+        'Beginner' => 'badge-success',
+        'Intermediate' => 'badge-warning',
+        'Advanced' => 'badge-danger'
+    ];
+    
+    return $classes[$level] ?? 'badge-primary';
+}
+
+/**
+ * Get status class for styling
+ * 
+ * @param string $status Status
+ * @return string CSS class
+ */
+function getStatusClass($status) {
+    $classes = [
+        'active' => 'badge-success',
+        'draft' => 'badge-warning',
+        'archived' => 'badge-secondary',
+        'inactive' => 'badge-danger'
+    ];
+    
+    return $classes[$status] ?? 'badge-primary';
+}
+
+/**
+ * Format duration from minutes to human readable format
+ * 
+ * @param int $minutes Duration in minutes
+ * @return string Formatted duration
  */
 function formatDuration($minutes) {
-    if ($minutes < 1) {
-        return 'Less than 1 minute';
-    }
-    
     if ($minutes < 60) {
-        return $minutes . ' minute' . ($minutes != 1 ? 's' : '');
+        return $minutes . ' min';
+    } elseif ($minutes < 1440) { // Less than 24 hours
+        $hours = floor($minutes / 60);
+        $remainingMinutes = $minutes % 60;
+        return $hours . 'h' . ($remainingMinutes > 0 ? ' ' . $remainingMinutes . 'm' : '');
+    } else {
+        $days = floor($minutes / 1440);
+        $remainingHours = floor(($minutes % 1440) / 60);
+        return $days . 'd' . ($remainingHours > 0 ? ' ' . $remainingHours . 'h' : '');
     }
-    
-    $hours = floor($minutes / 60);
-    $mins = $minutes % 60;
-    
-    $result = $hours . ' hour' . ($hours != 1 ? 's' : '');
-    
-    if ($mins > 0) {
-        $result .= ' ' . $mins . ' minute' . ($mins != 1 ? 's' : '');
-    }
-    
-    return $result;
 }
 
 /**
- * Calculate total course duration
+ * Calculate completion percentage
  * 
- * Sums up the duration of all lessons in a course
- * 
- * @param array $sections Course sections containing lessons
- * @return int Total duration in minutes
+ * @param int $completed Number of completed items
+ * @param int $total Total number of items
+ * @return float Completion percentage
  */
-function calculateTotalDuration($sections) {
-    $totalMinutes = 0;
-    
-    foreach ($sections as $section) {
-        if (isset($section['lessons']) && is_array($section['lessons'])) {
-            foreach ($section['lessons'] as $lesson) {
-                $totalMinutes += isset($lesson['duration_minutes']) ? intval($lesson['duration_minutes']) : 0;
-            }
-        }
+function calculateCompletionPercentage($completed, $total) {
+    if ($total == 0) {
+        return 0;
     }
     
-    return $totalMinutes;
+    return round(($completed / $total) * 100, 1);
 }
 
 /**
- * Count total lessons and completed lessons
+ * Generate course code
  * 
- * @param array $sections Course sections
- * @return array Associative array with 'total' and 'completed' counts
+ * @param string $title Course title
+ * @param string $type Course type
+ * @return string Generated course code
  */
-function countLessons($sections) {
-    $total = 0;
-    $completed = 0;
-    
-    foreach ($sections as $section) {
-        if (isset($section['lessons']) && is_array($section['lessons'])) {
-            foreach ($section['lessons'] as $lesson) {
-                $total++;
-                if (isset($lesson['completed']) && $lesson['completed']) {
-                    $completed++;
-                }
-            }
-        }
-    }
-    
-    return [
-        'total' => $total,
-        'completed' => $completed
+function generateCourseCode($title, $type) {
+    $typePrefix = [
+        'full_course' => 'FC',
+        'short_course' => 'SC',
+        'lesson' => 'LN',
+        'skill_activity' => 'SA'
     ];
+    
+    $prefix = $typePrefix[$type] ?? 'GN';
+    $titleCode = strtoupper(substr(preg_replace('/[^A-Za-z]/', '', $title), 0, 4));
+    $timestamp = substr(time(), -4);
+    
+    return $prefix . '-' . $titleCode . $timestamp;
 }
 
 /**
- * Get lesson progress status for a user
+ * Validate course data
  * 
- * Retrieves the progress status of a lesson for a specific user
+ * @param array $data Course data to validate
+ * @return array Validation result with 'valid' boolean and 'errors' array
+ */
+function validateCourseData($data) {
+    $errors = [];
+    
+    if (empty($data['title'])) {
+        $errors['title'] = 'Course title is required';
+    }
+    
+    if (empty($data['type']) || !in_array($data['type'], ['full_course', 'short_course', 'lesson', 'skill_activity'])) {
+        $errors['type'] = 'Valid course type is required';
+    }
+    
+    if (empty($data['difficulty_level']) || !in_array($data['difficulty_level'], ['Beginner', 'Intermediate', 'Advanced'])) {
+        $errors['difficulty_level'] = 'Valid difficulty level is required';
+    }
+    
+    return ['valid' => empty($errors), 'errors' => $errors];
+}
+
+/**
+ * Sanitize HTML content for lesson/activity content
+ * 
+ * @param string $content HTML content to sanitize
+ * @return string Sanitized HTML content
+ */
+function sanitizeContent($content) {
+    // Allow specific HTML tags for rich content
+    $allowedTags = '<p><br><strong><em><u><ol><ul><li><h1><h2><h3><h4><h5><h6><a><img><blockquote><code><pre>';
+    
+    return strip_tags($content, $allowedTags);
+}
+
+/**
+ * Generate breadcrumb navigation for course hierarchy
+ * 
+ * @param array $hierarchy Array containing course, module, lesson info
+ * @return string HTML breadcrumb
+ */
+function generateBreadcrumb($hierarchy) {
+    $breadcrumb = '<nav class="breadcrumb">';
+    
+    if (!empty($hierarchy['course'])) {
+        $breadcrumb .= '<a href="course.php?id=' . $hierarchy['course']['id'] . '">' . 
+                      htmlspecialchars($hierarchy['course']['title']) . '</a>';
+    }
+    
+    if (!empty($hierarchy['module'])) {
+        $breadcrumb .= ' <i class="fas fa-chevron-right"></i> ' . 
+                      '<span>' . htmlspecialchars($hierarchy['module']['title']) . '</span>';
+    }
+    
+    if (!empty($hierarchy['lesson'])) {
+        $breadcrumb .= ' <i class="fas fa-chevron-right"></i> ' . 
+                      '<span>' . htmlspecialchars($hierarchy['lesson']['title']) . '</span>';
+    }
+    
+    $breadcrumb .= '</nav>';
+    
+    return $breadcrumb;
+}
+
+/**
+ * Check if user has permission to access course content
  * 
  * @param int $userId User ID
- * @param int $lessonId Lesson ID
- * @return array Progress data including completion status, last access time, etc.
+ * @param int $courseId Course ID
+ * @param string $action Action being performed
+ * @return bool Whether user has permission
  */
-function getLessonProgress($userId, $lessonId) {
+function hasPermission($userId, $courseId, $action = 'view') {
     global $conn;
     
-    $result = [
-        'completed' => false,
-        'started' => false,
-        'completion_date' => null,
-        'last_accessed' => null,
-        'time_spent' => 0,
-        'progress_percent' => 0
-    ];
+    // Get user type
+    $userQuery = "SELECT user_type FROM users WHERE id = ?";
+    $userStmt = $conn->prepare($userQuery);
+    $userStmt->bind_param("i", $userId);
+    $userStmt->execute();
+    $userResult = $userStmt->get_result();
+    $user = $userResult->fetch_assoc();
     
-    // Ensure we have valid IDs
-    if (!$userId || !$lessonId) {
-        return $result;
+    if (!$user) {
+        return false;
     }
     
-    // Query the lesson_progress table
-    $sql = "SELECT * FROM lesson_progress 
-            WHERE user_id = ? AND lesson_id = ? 
-            LIMIT 1";
-            
-    $stmt = $conn->prepare($sql);
-    
-    if (!$stmt) {
-        // Handle database error
-        return $result;
+    // Admin and mentor always have permission
+    if (in_array($user['user_type'], ['admin', 'mentor'])) {
+        return true;
     }
     
-    $stmt->bind_param("ii", $userId, $lessonId);
-    $stmt->execute();
-    
-    $queryResult = $stmt->get_result();
-    if (!$queryResult) {
-        return $result;
+    // For members, check enrollment for view/participate actions
+    if ($action === 'view' || $action === 'participate') {
+        $enrollmentQuery = "SELECT id FROM user_enrollments WHERE user_id = ? AND course_id = ?";
+        $enrollmentStmt = $conn->prepare($enrollmentQuery);
+        $enrollmentStmt->bind_param("ii", $userId, $courseId);
+        $enrollmentStmt->execute();
+        $enrollmentResult = $enrollmentStmt->get_result();
+        
+        return $enrollmentResult->num_rows > 0;
     }
     
-    $progressData = $queryResult->fetch_assoc();
-    
-    if ($progressData) {
-        $result = [
-            'completed' => (bool)$progressData['completed'],
-            'started' => true,
-            'completion_date' => $progressData['completion_date'],
-            'last_accessed' => $progressData['last_accessed'],
-            'time_spent' => (int)($progressData['time_spent'] ?? 0),
-            'progress_percent' => (int)($progressData['progress'] ?? 0) // Note: Changed to match your table column name
-        ];
-    }
-    
-    return $result;
+    // For management actions, only admin/mentor allowed
+    return false;
 }
 
 /**
- * Get CSS class for course difficulty level
+ * Get learning path suggestions based on completed courses
  * 
- * Returns an appropriate CSS class based on course difficulty level
- * 
- * @param string $difficultyLevel Course difficulty level ('Beginner', 'Intermediate', 'Advanced')
- * @return string CSS class for styling
+ * @param int $userId User ID
+ * @return array Suggested courses/paths
  */
-function getDifficultyClass($difficultyLevel) {
-    $classes = [
-        'Beginner' => 'difficulty-beginner',
-        'Intermediate' => 'difficulty-intermediate',
-        'Advanced' => 'difficulty-advanced'
-    ];
+function getLearningPathSuggestions($userId) {
+    global $conn;
     
-    return $classes[$difficultyLevel] ?? 'difficulty-beginner';
+    // Get completed courses
+    $completedQuery = "SELECT c.* FROM courses c
+                      JOIN user_enrollments ue ON c.id = ue.course_id
+                      WHERE ue.user_id = ? AND ue.completed = 1";
+    $completedStmt = $conn->prepare($completedQuery);
+    $completedStmt->bind_param("i", $userId);
+    $completedStmt->execute();
+    $completedResult = $completedStmt->get_result();
+    
+    $completedCourses = [];
+    while ($course = $completedResult->fetch_assoc()) {
+        $completedCourses[] = $course;
+    }
+    
+    // Simple suggestion logic - recommend courses of next difficulty level
+    // In a real implementation, this would be more sophisticated
+    $suggestions = [];
+    
+    // Count completed courses by difficulty
+    $beginnerCount = count(array_filter($completedCourses, fn($c) => $c['difficulty_level'] === 'Beginner'));
+    $intermediateCount = count(array_filter($completedCourses, fn($c) => $c['difficulty_level'] === 'Intermediate'));
+    
+    // Suggest next level courses
+    if ($beginnerCount >= 2 && $intermediateCount === 0) {
+        // Suggest intermediate courses
+        $suggestionQuery = "SELECT * FROM courses 
+                           WHERE difficulty_level = 'Intermediate' 
+                           AND is_published = 1 
+                           AND id NOT IN (SELECT course_id FROM user_enrollments WHERE user_id = ?)
+                           LIMIT 3";
+        $suggestionStmt = $conn->prepare($suggestionQuery);
+        $suggestionStmt->bind_param("i", $userId);
+        $suggestionStmt->execute();
+        $suggestionResult = $suggestionStmt->get_result();
+        
+        while ($course = $suggestionResult->fetch_assoc()) {
+            $suggestions[] = $course;
+        }
+    }
+    
+    return $suggestions;
 }
+
+/**
+ * Log user activity for analytics
+ * 
+ * @param int $userId User ID
+ * @param string $action Action performed
+ * @param string $entityType Type of entity (course, lesson, activity)
+ * @param int $entityId ID of the entity
+ * @param array $metadata Additional metadata
+ * @return bool Success status
+ */
+function logUserActivity($userId, $action, $entityType, $entityId, $metadata = []) {
+    global $conn;
+    
+    $metadataJson = json_encode($metadata);
+    
+    $sql = "INSERT INTO user_activity_log (user_id, action, entity_type, entity_id, metadata, created_at) 
+            VALUES (?, ?, ?, ?, ?, NOW())";
+    
+    $stmt = $conn->prepare($sql);
+    if ($stmt) {
+        $stmt->bind_param("issis", $userId, $action, $entityType, $entityId, $metadataJson);
+        return $stmt->execute();
+    }
+    
+    return false;
+}
+?>

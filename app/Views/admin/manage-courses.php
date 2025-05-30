@@ -218,7 +218,7 @@ $courseTypeCounts = [
                             <a href="../course.php?id=<?php echo $course['id']; ?>" class="icon-btn view" title="View Course">
                                 <i class="fas fa-eye"></i>
                             </a>
-                            <a href="manage-sections.php?id=<?php echo $course['id']; ?>" class="icon-btn edit" title="Edit Course">
+                            <a href="manage-sections.php?course_id=<?php echo $course['id']; ?>" class="icon-btn edit" title="Edit Course">
                                 <i class="fas fa-edit"></i>
                             </a>
                             

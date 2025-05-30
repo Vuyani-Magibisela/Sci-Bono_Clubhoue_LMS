@@ -129,7 +129,7 @@ require_once 'app/Models/dashboard-data-loader.php';
                 </div>
                 <?php endforeach; ?>
             </div>
-            <?php if (isset($_SESSION['user_type']) && $_SESSION['user_type'] == "member"): ?>
+            <?php if (isset($_SESSION['user_type']) && $_SESSION['user_type'] == "member" || $_SESSION['user_type'] == "mentor"): ?>
             <div class="menu-item">
                     <div class="menu-icon">
                         <i class="fas fa-cog"></i>
