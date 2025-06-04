@@ -1,11 +1,12 @@
-// Updated JavaScript for MVC Architecture
-// Configuration - Place this at the top of the file
+// Fixed JavaScript for MVC Architecture
+// Configuration with CORRECT endpoints for localhost
 const CONFIG = {
     endpoints: {
-        signin: '../../../app/Controllers/attendance_routes.php?action=signin',
-        signout: '../../../app/Controllers/attendance_routes.php?action=signout',
-        search: '../../../app/Controllers/attendance_routes.php?action=search',
-        stats: '../../../app/Controllers/attendance_routes.php?action=stats'
+        // Fixed paths for your localhost setup
+        signin: 'Sci-Bono_Clubhoue_LMS/app/Controllers/attendance_routes.php?action=signin',
+        signout: 'Sci-Bono_Clubhoue_LMS/app/Controllers/attendance_routes.php?action=signout',
+        search: 'Sci-Bono_Clubhoue_LMS/app/Controllers/attendance_routes.php?action=search',
+        stats: 'Sci-Bono_Clubhoue_LMS/app/Controllers/attendance_routes.php?action=stats'
     },
     autoRefreshInterval: 5 * 60 * 1000, // 5 minutes
     maxFailedAttempts: 5,
@@ -61,9 +62,9 @@ function performSearch() {
         }
         
         const searchTerms = card.getAttribute('data-search-terms') || '';
-        const username = card.querySelector('.userName h3')?.textContent || '';
-        const fullname = card.querySelector('.userName h6')?.textContent || '';
-        const role = card.querySelector('.userRole p')?.textContent || '';
+        const username = card.querySelector('.userName h3, .user-name')?.textContent || '';
+        const fullname = card.querySelector('.userName h6, .user-fullname')?.textContent || '';
+        const role = card.querySelector('.userRole p, .user-role')?.textContent || '';
         
         const searchableText = (searchTerms + ' ' + username + ' ' + fullname + ' ' + role).toLowerCase();
         const isVisible = searchableText.includes(searchTerm) || searchTerm === '';
@@ -155,6 +156,8 @@ function resetSubmitButton() {
 }
 
 function showError(message) {
+    console.error('Signin Error:', message);
+    
     if (errorText) {
         errorText.textContent = message;
     }
@@ -208,7 +211,7 @@ function signInPrompt(userId) {
     showSigninModal(userId);
 }
 
-// Send sign-in request using modern fetch API
+// Send sign-in request using modern fetch API with better error handling
 function sendSignInRequest(userId, password) {
     if (!submitBtn) return;
     
@@ -218,6 +221,9 @@ function sendSignInRequest(userId, password) {
     if (loadingSpinner) loadingSpinner.style.display = 'inline-block';
     if (errorMessage) errorMessage.style.display = 'none';
 
+    console.log('Attempting signin for user:', userId);
+    console.log('Using endpoint:', CONFIG.endpoints.signin);
+
     const formData = new FormData();
     formData.append('user_id', userId);
     formData.append('password', password);
@@ -226,8 +232,28 @@ function sendSignInRequest(userId, password) {
         method: 'POST',
         body: formData
     })
-    .then(response => response.json())
+    .then(response => {
+        console.log('Response status:', response.status);
+        console.log('Response headers:', response.headers);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        // Check if response is actually JSON
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            return response.text().then(text => {
+                console.error('Non-JSON response:', text);
+                throw new Error('Server returned non-JSON response');
+            });
+        }
+        
+        return response.json();
+    })
     .then(data => {
+        console.log('Signin response:', data);
+        
         if (data.success) {
             closeSigninModal();
             showSuccessToast('Successfully signed in!');
@@ -245,8 +271,8 @@ function sendSignInRequest(userId, password) {
         }
     })
     .catch(error => {
-        console.error('Error:', error);
-        showError('An error occurred. Please try again.');
+        console.error('Fetch error:', error);
+        showError('Connection error. Please check your internet connection and try again.');
         resetSubmitButton();
     });
 }
@@ -271,6 +297,8 @@ function signOut(userId) {
         return;
     }
 
+    console.log('Attempting signout for user:', userId);
+
     const formData = new FormData();
     formData.append('user_id', userId);
 
@@ -278,7 +306,21 @@ function signOut(userId) {
         method: 'POST',
         body: formData
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+            return response.text().then(text => {
+                console.error('Non-JSON response:', text);
+                throw new Error('Server returned non-JSON response');
+            });
+        }
+        
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
             showSuccessToast('Successfully signed out!');
@@ -302,7 +344,7 @@ function signOut(userId) {
         }
     })
     .catch(error => {
-        console.error('Error:', error);
+        console.error('Signout error:', error);
         alert('An error occurred. Please try again.');
     });
 }
@@ -349,7 +391,10 @@ function setupEventListeners() {
         signinForm.addEventListener('submit', function(e) {
             e.preventDefault();
             
-            if (!currentUserId) return;
+            if (!currentUserId) {
+                showError('No user selected');
+                return;
+            }
             
             const password = document.getElementById('password')?.value;
             if (!password) {
@@ -383,6 +428,9 @@ function setupEventListeners() {
 
 // Initialize everything when DOM is loaded
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('Initializing attendance system...');
+    console.log('Endpoints configured:', CONFIG.endpoints);
+    
     initializeDOMElements();
     setupEventListeners();
     updateMemberCount();
@@ -392,11 +440,12 @@ document.addEventListener('DOMContentLoaded', function() {
         searchInput.focus();
     }
     
-    console.log('Attendance system initialized with MVC endpoints');
+    console.log('Attendance system initialized successfully');
 });
 
 // Auto-refresh page every 5 minutes to keep data current
 setInterval(() => {
+    console.log('Auto-refreshing page...');
     window.location.reload();
 }, CONFIG.autoRefreshInterval);
 
@@ -412,3 +461,19 @@ window.signIn = signIn;
 window.signOut = signOut;
 window.signInPrompt = signInPrompt;
 window.handleSignInResponse = handleSignInResponse;
+
+// Debug function to test endpoints
+window.testEndpoint = function() {
+    console.log('Testing signin endpoint...');
+    fetch(CONFIG.endpoints.signin)
+        .then(response => {
+            console.log('Endpoint test - Status:', response.status);
+            return response.text();
+        })
+        .then(text => {
+            console.log('Endpoint test - Response:', text);
+        })
+        .catch(error => {
+            console.error('Endpoint test - Error:', error);
+        });
+};
