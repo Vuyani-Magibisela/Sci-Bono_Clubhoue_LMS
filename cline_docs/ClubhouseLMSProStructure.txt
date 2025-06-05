@@ -11,7 +11,9 @@ Sci-Bono_Clubhoue_LMS/
 │   ├── Controllers/
 │   │   ├── Admin/
 │   │   ├── AdminCourseController.php
-│   │   └── AdminLessonController.php
+│   │   ├── AdminLessonController.php
+│   │   └── CourseController.php # Enhanced Course Controller for Sci-Bono Clubhouse LMS * Handles all course management operations including hierarchy management
+│   ├── AttendanceController.php # * Debug Version of AttendanceController - Add debugging for password issues
 │   ├── AttendanceRegisterController.php
 │   ├── CourseController.php # Added LessonController
 │   ├── HolidayProgramController.php
@@ -33,12 +35,15 @@ Sci-Bono_Clubhoue_LMS/
 │   │   ├── Admin/
 │   │   ├── AdminCourseModel.php
 │   │   ├── AdminLessonModel.php
+│   │   ├── CourseModel.php # Enhanced Course Model for Sci-Bono Clubhouse LMS Supports the full learning hierarchy: Courses > Modules > Lessons > Activities
 │   │   └── update_user.php
+│   ├── ActivityLogModel.php
+│   ├── AttendanceModel.php
 │   ├── AttendanceRegisterModel.php
 │   ├── CourseModel.php
 │   ├── EnrollmentModel.php
 │   ├── HolidayProgramModel.php
-│   ├── LMSUtilities.php
+│   ├── LMSUtilities.php #  Enhanced LMS Utilities for Sci-Bono Clubhouse LMS Provides utility functions for the enhanced course management system
 │   ├── LessonModel.php
 │   ├── ProgressModel.php
 │   ├── User.php
@@ -57,11 +62,17 @@ Sci-Bono_Clubhoue_LMS/
 │       ├── admin_header.php # Check if session is not already started
 │       ├── course.php # Check if user is logged in
 │       ├── create-course.php # Start session if not already started
+│       ├── enhanced-manage-courses.php # Check if user is logged in and is an admin or mentor
 │       ├── learn-header.php # Check if a session is not already active
+│       ├── manage-activities.php # Check if user is logged in and is an admin or mentor
+│       ├── manage-course-content.php # Check if user is logged in and is an admin or mentor
 │       ├── manage-courses.php # Check if user is logged in and is an admin or mentor
 │       ├── manage-lessons.php # Check if user is logged in and is an admin or mentor
+│       ├── manage-modules.php # Check if user is logged in and is an admin or mentor
 │       ├── manage-sections.php # Check if user is logged in and is an admin or mentor
 │       └── user_edit.php # This view is included by UserController.php (showEditForm action).
+│       ├── attendance/
+│       └── signin.php # Include the config file
 │       ├── holidayPrograms/
 │       ├── holiday-dashboard.php # Start session if not already started
 │       ├── holiday-program-details-term1.php # Get the program ID from URL parameter
@@ -92,6 +103,8 @@ Sci-Bono_Clubhoue_LMS/
 ├── config/
 ├── config.php # Dynamically determine the base URL
 └── database.php
+├── core/
+└── Router.php
 ├── handlers/
 └── visitors-handler.php
 ├── public/
@@ -99,9 +112,7 @@ Sci-Bono_Clubhoue_LMS/
 │       ├── css/
 │       ├── attendanceRegister.css # Daily Attendance Register Styles
 │       ├── course.css # Course Page Specific Styles
-│       ├── cssRest.css # * Comprehensive CSS Reset
- * Version: 1.0 - March 2025
- * For use in all CSS projects
+│       ├── cssRest.css # * Comprehensive CSS Reset * Version: 1.0 - March 2025 * For use in all CSS projects
 │       ├── header.css # index header styling
 │       ├── holidayDahsboard.css # Holiday Dashboard Styles
 │       ├── holidayProgramContentStyles.css # Holiday Program Styles CSS
@@ -112,6 +123,7 @@ Sci-Bono_Clubhoue_LMS/
 │       ├── learn.css # Learn Page Specific Styles
 │       ├── lesson.css # Lesson Page Specific Styles
 │       ├── manage-courses.css # Admin Course Management Styles
+│       ├── modern-signin.css # Modern Sign-in Page Styles
 │       ├── monthly_report_styles.css # Monthly Report Form Styles
 │       ├── screenSizes.css # Base styles (Mobile First approach)
 │       ├── settingsStyle.css # Modern Settings Page Styles
@@ -135,10 +147,9 @@ Sci-Bono_Clubhoue_LMS/
 │       ├── mobileSigninImg.svg
 │       └── ui-user-profile-negative.svg
 │       ├── js/
-│       ├── attendanceRegister.js # *
- * Daily Attendance Register
- * JavaScript for handling interactions and animations
+│       ├── attendanceRegister.js # ** Daily Attendance Register JavaScript for handling interactions and animations
 │       ├── homedashboard.js # Show loading spinner
+│       ├── script.js # Fixed JavaScript for MVC Architecture
 │       ├── searchUserInputHandler.js # search').val();
 │       ├── settings.js # Modern Settings Page JavaScript
 │       ├── visitors-script.js # Tab switching functionality
@@ -188,13 +199,12 @@ Sci-Bono_Clubhoue_LMS/
 ├── logout_process.php
 ├── members.php
 ├── profile_updater.php
-├── script.js
 ├── server.php
-├── signin.php
 ├── signup.php
 ├── signup_process.php
 ├── style.css
 ├── testUsers.txt
+├── test_connection.php
 ├── testhtml.php
 ├── user-delete.php
 └── validate_password.php

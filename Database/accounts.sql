@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Mar 31, 2025 at 06:03 PM
+-- Generation Time: Jun 05, 2025 at 02:56 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -20,6 +20,53 @@ SET time_zone = "+00:00";
 --
 -- Database: `accounts`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `activity_submissions`
+--
+
+CREATE TABLE `activity_submissions` (
+  `id` int(11) NOT NULL,
+  `activity_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `submission_content` longtext DEFAULT NULL,
+  `file_path` varchar(255) DEFAULT NULL,
+  `submission_url` varchar(255) DEFAULT NULL,
+  `points_earned` int(11) DEFAULT NULL,
+  `max_points` int(11) NOT NULL,
+  `feedback` text DEFAULT NULL,
+  `status` enum('draft','submitted','graded','returned') NOT NULL DEFAULT 'draft',
+  `submitted_at` timestamp NULL DEFAULT NULL,
+  `graded_at` timestamp NULL DEFAULT NULL,
+  `graded_by` int(11) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `assessment_attempts`
+--
+
+CREATE TABLE `assessment_attempts` (
+  `id` int(11) NOT NULL,
+  `assessment_id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `attempt_number` int(11) NOT NULL DEFAULT 1,
+  `points_earned` int(11) DEFAULT NULL,
+  `total_points` int(11) NOT NULL,
+  `percentage` decimal(5,2) DEFAULT NULL,
+  `passed` tinyint(1) DEFAULT 0,
+  `time_spent_minutes` int(11) DEFAULT NULL,
+  `started_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `completed_at` timestamp NULL DEFAULT NULL,
+  `status` enum('in_progress','completed','abandoned','expired') NOT NULL DEFAULT 'in_progress',
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -81,7 +128,9 @@ INSERT INTO `attendance` (`id`, `user_id`, `checked_in`, `checked_out`, `sign_in
 (46, 8, '2024-06-03 21:56:47', '2024-06-03 21:56:50', 'signedOut'),
 (47, 9, '2024-06-03 21:57:05', '2024-06-03 21:57:07', 'signedOut'),
 (48, 1, '2024-06-03 21:57:22', '2024-06-03 21:57:25', 'signedOut'),
-(49, 1, '2025-02-17 11:02:06', '2025-02-17 11:04:55', 'signedOut');
+(49, 1, '2025-02-17 11:02:06', '2025-02-17 11:04:55', 'signedOut'),
+(50, 1, '2025-05-06 16:14:37', '2025-05-06 21:03:37', 'signedOut'),
+(51, 10, '2025-05-06 16:15:03', '2025-05-06 21:03:38', 'signedOut');
 
 -- --------------------------------------------------------
 
@@ -150,21 +199,99 @@ CREATE TABLE `courses` (
   `course_code` varchar(50) NOT NULL,
   `title` varchar(255) NOT NULL,
   `description` text DEFAULT NULL,
+  `learning_objectives` text DEFAULT NULL,
+  `course_requirements` text DEFAULT NULL,
   `prerequisites` text DEFAULT NULL,
   `completion_criteria` text DEFAULT NULL,
+  `certification_criteria` text DEFAULT NULL,
+  `pass_percentage` decimal(5,2) DEFAULT 70.00,
   `type` enum('full_course','short_course','lesson','skill_activity') NOT NULL,
   `category` varchar(100) NOT NULL DEFAULT 'General',
   `difficulty_level` enum('Beginner','Intermediate','Advanced') NOT NULL DEFAULT 'Beginner',
   `duration` varchar(50) DEFAULT NULL,
+  `estimated_duration_hours` int(11) DEFAULT NULL,
   `image_path` varchar(255) DEFAULT NULL,
   `thumbnail_path` varchar(255) DEFAULT NULL,
   `enrollment_count` int(11) NOT NULL DEFAULT 0,
+  `max_enrollments` int(11) DEFAULT NULL,
   `display_order` int(11) NOT NULL DEFAULT 0,
   `is_featured` tinyint(1) NOT NULL DEFAULT 0,
   `is_published` tinyint(1) NOT NULL DEFAULT 0,
   `status` enum('active','inactive','draft','archived') NOT NULL DEFAULT 'draft',
   `created_by` int(11) NOT NULL,
   `last_updated_by` int(11) DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `courses`
+--
+
+INSERT INTO `courses` (`id`, `course_code`, `title`, `description`, `learning_objectives`, `course_requirements`, `prerequisites`, `completion_criteria`, `certification_criteria`, `pass_percentage`, `type`, `category`, `difficulty_level`, `duration`, `estimated_duration_hours`, `image_path`, `thumbnail_path`, `enrollment_count`, `max_enrollments`, `display_order`, `is_featured`, `is_published`, `status`, `created_by`, `last_updated_by`, `created_at`, `updated_at`) VALUES
+(1, '', 'Introduction to Robotics', 'Learn the basics of robotics programming and design. This course covers fundamental concepts of robotics, including sensors, motors, and programming for autonomous behavior.', NULL, NULL, NULL, NULL, NULL, 70.00, 'full_course', 'General', 'Beginner', '8 weeks', NULL, NULL, NULL, 0, NULL, 0, 1, 1, 'active', 1, NULL, '2025-05-08 10:59:04', '2025-05-22 12:06:51'),
+(10, 'FC-TC', 'Test Course', 'Best Course Ever', NULL, NULL, NULL, NULL, NULL, 70.00, 'full_course', 'General', 'Beginner', '2 weeks', NULL, '682f015feceb6_1747911007.jpeg', NULL, 1, NULL, 0, 0, 0, 'draft', 1, NULL, '2025-05-22 10:50:07', '2025-05-22 11:00:53'),
+(11, 'SC-TSC', 'Test Short Course', 'Best Short Course ever!!', NULL, NULL, NULL, NULL, NULL, 70.00, 'short_course', 'General', 'Beginner', '1 week', NULL, '682f02af53c86_1747911343.jpg', NULL, 1, NULL, 0, 0, 0, 'draft', 1, NULL, '2025-05-22 10:55:43', '2025-05-22 11:00:48'),
+(12, 'LN-TL', 'Test Lesson', 'Best lesson ever!!', NULL, NULL, NULL, NULL, NULL, 70.00, 'lesson', 'General', 'Beginner', '1 hour', NULL, '682f02fc8ae36_1747911420.png', NULL, 1, NULL, 0, 0, 0, 'draft', 1, NULL, '2025-05-22 10:57:00', '2025-05-22 11:00:40'),
+(13, 'SA-TSA', 'Test Skills Activity', 'Best Practical activity ever', NULL, NULL, NULL, NULL, NULL, 70.00, 'skill_activity', 'General', 'Beginner', '1 day', NULL, '682f0354b82a6_1747911508.webp', NULL, 1, NULL, 0, 0, 0, 'draft', 1, NULL, '2025-05-22 10:58:28', '2025-05-22 11:00:30');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `course_activities`
+--
+
+CREATE TABLE `course_activities` (
+  `id` int(11) NOT NULL,
+  `course_id` int(11) DEFAULT NULL,
+  `module_id` int(11) DEFAULT NULL,
+  `lesson_id` int(11) DEFAULT NULL,
+  `lesson_section_id` int(11) DEFAULT NULL,
+  `title` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `activity_type` enum('practical','assignment','project','quiz','assessment','skill_exercise') NOT NULL,
+  `instructions` longtext DEFAULT NULL,
+  `resources_needed` text DEFAULT NULL,
+  `estimated_duration_minutes` int(11) DEFAULT NULL,
+  `max_points` int(11) DEFAULT 100,
+  `pass_points` int(11) DEFAULT 70,
+  `submission_type` enum('text','file','link','code','none') DEFAULT 'text',
+  `auto_grade` tinyint(1) DEFAULT 0,
+  `order_number` int(11) NOT NULL DEFAULT 0,
+  `is_published` tinyint(1) NOT NULL DEFAULT 0,
+  `due_date` datetime DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `course_activities`
+--
+
+INSERT INTO `course_activities` (`id`, `course_id`, `module_id`, `lesson_id`, `lesson_section_id`, `title`, `description`, `activity_type`, `instructions`, `resources_needed`, `estimated_duration_minutes`, `max_points`, `pass_points`, `submission_type`, `auto_grade`, `order_number`, `is_published`, `due_date`, `created_at`, `updated_at`) VALUES
+(1, 10, 1, NULL, NULL, 'First Activity', 'This a the first Activit of the firt module of the first lesso', 'practical', 'Do things', 'you will need things', 60, 100, 80, 'text', 0, 1, 0, '2025-06-06 12:02:00', '2025-05-26 13:49:24', '2025-05-26 13:49:24');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `course_assessments`
+--
+
+CREATE TABLE `course_assessments` (
+  `id` int(11) NOT NULL,
+  `course_id` int(11) DEFAULT NULL,
+  `module_id` int(11) DEFAULT NULL,
+  `title` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `assessment_type` enum('module_quiz','module_exam','course_final','course_project') NOT NULL,
+  `total_points` int(11) NOT NULL DEFAULT 100,
+  `pass_points` int(11) NOT NULL DEFAULT 70,
+  `time_limit_minutes` int(11) DEFAULT NULL,
+  `attempts_allowed` int(11) DEFAULT 1,
+  `instructions` longtext DEFAULT NULL,
+  `is_published` tinyint(1) NOT NULL DEFAULT 0,
+  `start_date` datetime DEFAULT NULL,
+  `end_date` datetime DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -201,22 +328,94 @@ CREATE TABLE `course_category_relationships` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `course_certificates`
+--
+
+CREATE TABLE `course_certificates` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `course_id` int(11) NOT NULL,
+  `certificate_number` varchar(50) NOT NULL,
+  `completion_date` date NOT NULL,
+  `final_score` decimal(5,2) NOT NULL,
+  `grade` enum('A+','A','B+','B','C+','C','D','F') DEFAULT NULL,
+  `certificate_template` varchar(255) DEFAULT NULL,
+  `verification_code` varchar(100) NOT NULL,
+  `issued_by` int(11) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `course_lessons`
 --
 
 CREATE TABLE `course_lessons` (
   `id` int(11) NOT NULL,
   `section_id` int(11) NOT NULL,
+  `course_id` int(11) DEFAULT NULL,
+  `module_id` int(11) DEFAULT NULL,
   `title` varchar(255) NOT NULL,
   `content` longtext DEFAULT NULL,
+  `lesson_objectives` text DEFAULT NULL,
   `lesson_type` enum('text','video','quiz','assignment','interactive') NOT NULL DEFAULT 'text',
+  `difficulty_level` enum('Beginner','Intermediate','Advanced') DEFAULT 'Beginner',
+  `pass_percentage` decimal(5,2) DEFAULT 70.00,
+  `prerequisites` text DEFAULT NULL,
   `video_url` varchar(255) DEFAULT NULL,
   `duration_minutes` int(11) DEFAULT NULL,
+  `estimated_duration_minutes` int(11) DEFAULT NULL,
   `order_number` int(11) NOT NULL DEFAULT 0,
   `is_published` tinyint(1) NOT NULL DEFAULT 0,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `course_lessons`
+--
+
+INSERT INTO `course_lessons` (`id`, `section_id`, `course_id`, `module_id`, `title`, `content`, `lesson_objectives`, `lesson_type`, `difficulty_level`, `pass_percentage`, `prerequisites`, `video_url`, `duration_minutes`, `estimated_duration_minutes`, `order_number`, `is_published`, `created_at`, `updated_at`) VALUES
+(1, 1, NULL, NULL, 'What is Robotics?', '<p>This lesson introduces the field of robotics and its applications in the modern world.</p><p>Robotics is an interdisciplinary field that combines mechanical engineering, electrical engineering, and computer science. Robots are designed to assist humans or to perform tasks autonomously.</p><h3>Key Concepts</h3><ul><li>Definition of robots and robotics</li><li>History of robotics development</li><li>Types of robots: industrial, service, educational</li><li>Basic components: sensors, actuators, controllers</li></ul><p>By the end of this course, you will be able to design, build, and program a simple robot that can navigate its environment and perform basic tasks.</p>', NULL, 'text', 'Beginner', 70.00, NULL, NULL, 20, NULL, 1, 1, '2025-05-08 11:11:17', '2025-05-08 11:11:17'),
+(2, 1, NULL, NULL, 'Robot Components Overview', '<p>This lesson covers the essential components that make up a robot.</p><h3>Main Components of a Robot</h3><ol><li><strong>Structure/Frame</strong>: The physical body that supports all other components</li><li><strong>Actuators</strong>: Motors and other devices that create movement</li><li><strong>Sensors</strong>: Devices that collect information about the environment</li><li><strong>Controller</strong>: The \"brain\" (usually a microcontroller) that processes information and controls behavior</li><li><strong>Power Source</strong>: Batteries or other energy sources</li></ol><p>In the next lessons, we will explore each of these components in more detail.</p>', NULL, 'text', 'Beginner', 70.00, NULL, NULL, 25, NULL, 2, 1, '2025-05-08 11:11:17', '2025-05-08 11:11:17'),
+(3, 1, NULL, NULL, 'Introduction to Robot Controllers', '<p>Learn about the various controllers used in robotics, from simple microcontrollers to advanced computing systems.</p><h3>Common Robot Controllers</h3><ul><li>Arduino boards</li><li>Raspberry Pi</li><li>LEGO Mindstorms EV3</li><li>Specialized robotics platforms</li></ul><p>In this course, we will primarily use Arduino for our robotics projects.</p>', NULL, 'text', 'Beginner', 70.00, NULL, NULL, 30, NULL, 3, 1, '2025-05-08 11:11:17', '2025-05-08 11:11:17'),
+(4, 2, NULL, NULL, 'Types of Sensors', '<p>This lesson explores different types of sensors used in robotics.</p><h3>Common Sensor Types</h3><ul><li>Distance sensors (ultrasonic, infrared)</li><li>Light sensors (photoresistors, photodiodes)</li><li>Touch sensors (buttons, switches)</li><li>Color sensors</li><li>Gyroscopes and accelerometers</li></ul><p>Each sensor type provides different kinds of information about the environment.</p>', NULL, 'text', 'Beginner', 70.00, NULL, NULL, 25, NULL, 1, 1, '2025-05-08 11:11:17', '2025-05-08 11:11:17'),
+(5, 2, NULL, NULL, 'Working with Ultrasonic Sensors', '<p>Learn how to use ultrasonic sensors to detect obstacles and measure distances.</p><h3>How Ultrasonic Sensors Work</h3><p>Ultrasonic sensors emit high-frequency sound waves and time how long it takes for the echo to return. This time can be converted to distance.</p><h3>Connecting and Programming</h3><p>We will connect an HC-SR04 ultrasonic sensor to our Arduino and write code to read distance values.</p>', NULL, 'video', 'Beginner', 70.00, NULL, 'https://www.youtube.com/embed/dQw4w9WgXcQ', 40, NULL, 2, 1, '2025-05-08 11:11:17', '2025-05-08 11:11:17'),
+(6, 2, NULL, NULL, 'Sensor Quiz', '<p>Test your knowledge about different types of sensors and their applications in robotics.</p>', NULL, 'quiz', 'Beginner', 70.00, NULL, NULL, 15, NULL, 3, 1, '2025-05-08 11:11:17', '2025-05-08 11:11:17'),
+(7, 3, NULL, NULL, 'DC Motors and Servo Motors', '<p>This lesson covers the differences between DC motors and servo motors, and when to use each.</p><h3>DC Motors</h3><p>Continuous rotation, good for wheels and general movement.</p><h3>Servo Motors</h3><p>Precise position control, good for robotic arms and controlled movements.</p>', NULL, 'text', 'Beginner', 70.00, NULL, NULL, 30, NULL, 1, 1, '2025-05-08 11:11:17', '2025-05-08 11:11:17'),
+(8, 3, NULL, NULL, 'Motor Drivers and Control Circuits', '<p>Learn why motors need special control circuits and how to use motor drivers with your controller.</p><h3>Why Motor Drivers?</h3><p>Most microcontrollers cannot provide enough current to drive motors directly. Motor drivers act as intermediaries that can handle the higher current requirements.</p>', NULL, 'text', 'Beginner', 70.00, NULL, NULL, 35, NULL, 2, 1, '2025-05-08 11:11:17', '2025-05-08 11:11:17'),
+(9, 4, NULL, NULL, 'Introduction to Autonomous Behavior', '<p>This lesson introduces the concept of autonomous behavior in robots.</p><h3>What is Autonomous Behavior?</h3><p>Autonomous behavior refers to a robot\'s ability to perform tasks and make decisions without human intervention, based on sensor input and programmed logic.</p>', NULL, 'text', 'Beginner', 70.00, NULL, NULL, 25, NULL, 1, 1, '2025-05-08 11:11:17', '2025-05-08 11:11:17'),
+(10, 4, NULL, NULL, 'Simple Line Following Robot', '<p>In this lesson, we\'ll create a robot that can follow a line on the ground.</p><h3>Components Needed</h3><ul><li>Chassis with two motors</li><li>Line sensors</li><li>Arduino controller</li><li>Motor driver</li></ul><h3>Line Following Algorithm</h3><p>We\'ll implement a simple algorithm that adjusts the robot\'s direction based on sensor readings.</p>', NULL, 'assignment', 'Beginner', 70.00, NULL, NULL, 60, NULL, 2, 1, '2025-05-08 11:11:17', '2025-05-08 11:11:17'),
+(11, 4, NULL, NULL, 'Final Project: Obstacle Avoiding Robot', '<p>For the final project, you will create a robot that can navigate autonomously while avoiding obstacles.</p><h3>Project Requirements</h3><ul><li>Robot must detect obstacles using sensors</li><li>Robot must make decisions about path changes</li><li>Robot should be able to navigate a simple maze</li></ul><p>You will document your design process and demonstrate your robot\'s capabilities.</p>', NULL, 'assignment', 'Beginner', 70.00, NULL, NULL, 120, NULL, 3, 1, '2025-05-08 11:11:17', '2025-05-08 11:11:17');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `course_modules`
+--
+
+CREATE TABLE `course_modules` (
+  `id` int(11) NOT NULL,
+  `course_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `learning_objectives` text DEFAULT NULL,
+  `estimated_duration_hours` int(11) DEFAULT NULL,
+  `order_number` int(11) NOT NULL DEFAULT 0,
+  `is_published` tinyint(1) NOT NULL DEFAULT 0,
+  `pass_percentage` decimal(5,2) DEFAULT 70.00,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `course_modules`
+--
+
+INSERT INTO `course_modules` (`id`, `course_id`, `title`, `description`, `learning_objectives`, `estimated_duration_hours`, `order_number`, `is_published`, `pass_percentage`, `created_at`, `updated_at`) VALUES
+(1, 10, 'First Module', 'This is the first module of this Course', 'You will learn\r\nYou will also learn', 2, 1, 0, 70.00, '2025-05-26 13:45:45', '2025-05-26 13:45:45'),
+(2, 10, 'Second Module', 'This is the Second Module', 'Lean a lot in the second module', 4, 2, 0, 70.00, '2025-05-26 14:23:19', '2025-05-26 14:23:19');
 
 -- --------------------------------------------------------
 
@@ -280,6 +479,16 @@ CREATE TABLE `course_sections` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `course_sections`
+--
+
+INSERT INTO `course_sections` (`id`, `course_id`, `title`, `description`, `order_number`, `created_at`, `updated_at`) VALUES
+(1, 1, 'Robotics Fundamentals', 'Introduction to basic robotics concepts and components', 1, '2025-05-08 11:01:34', '2025-05-08 11:01:34'),
+(2, 1, 'Sensors and Input', 'Working with different types of sensors to gather environmental data', 2, '2025-05-08 11:01:34', '2025-05-08 11:01:34'),
+(3, 1, 'Motors and Movement', 'Understanding how to control motors for precise movement', 3, '2025-05-08 11:01:34', '2025-05-08 11:01:34'),
+(4, 1, 'Programming Autonomous Behavior', 'Creating programs that allow robots to function independently', 4, '2025-05-08 11:01:34', '2025-05-08 11:01:34');
 
 -- --------------------------------------------------------
 
@@ -397,19 +606,22 @@ CREATE TABLE `holiday_program_attendees` (
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
   `mentor_registration` tinyint(1) DEFAULT 0,
   `mentor_status` enum('Pending','Approved','Declined') DEFAULT NULL,
-  `mentor_workshop_preference` int(11) DEFAULT NULL
+  `mentor_workshop_preference` int(11) DEFAULT NULL,
+  `password` varchar(255) DEFAULT NULL,
+  `last_login` datetime DEFAULT NULL,
+  `is_clubhouse_member` tinyint(1) DEFAULT 0
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `holiday_program_attendees`
 --
 
-INSERT INTO `holiday_program_attendees` (`id`, `program_id`, `user_id`, `first_name`, `last_name`, `email`, `phone`, `date_of_birth`, `gender`, `school`, `grade`, `address`, `city`, `province`, `postal_code`, `guardian_name`, `guardian_relationship`, `guardian_phone`, `guardian_email`, `emergency_contact_name`, `emergency_contact_relationship`, `emergency_contact_phone`, `workshop_preference`, `why_interested`, `experience_level`, `needs_equipment`, `medical_conditions`, `allergies`, `photo_permission`, `data_permission`, `dietary_restrictions`, `additional_notes`, `registration_status`, `created_at`, `updated_at`, `mentor_registration`, `mentor_status`, `mentor_workshop_preference`) VALUES
-(1, 1, 1, 'Vuyani', 'Magibisela', 'vuyani.magibisela@sci-bono.co.za', '638393157', '2010-08-23', 'Male', '0', 12, '123 Gull Street', 'Johannesburg', 'Gauteng', '2021', 'Mandisa', 'Mother', '0721166543', 'mandi@gmail.com', '', '', '', '[\"3\",\"4\"]', 'Learn', '0', 1, 'No', '0', 1, 1, 'No', 'Learn', 'pending', '2025-03-28 16:40:40', '2025-03-28 16:40:40', 0, NULL, NULL),
-(2, 1, 7, 'Sam', 'Kabanga', 'sam@example.com', '688965565', '2025-02-21', 'Male', NULL, NULL, '123 Good Street', 'Johannesburg', '', '1920', NULL, NULL, NULL, NULL, 'Thabo', 'Uncle', '0832342342', '[]', 'sdf', 'Advanced', 0, 'dssdf', 'sd', 1, 1, 'dssd', 'sd', 'pending', '2025-03-30 14:48:38', '2025-03-30 15:28:37', 1, 'Pending', 4),
-(3, 1, 2, 'Itumeleng', 'Kgakane', 'itum@gmail.com', '0', '2012-01-12', 'Male', 'Fernadale High School', 12, '123 Good Street', 'Johannesburg', 'Gauteng', '1920', 'Mandi', 'Mother', '736933940', 'mandi@gmail.com', '', '', '', '[\"3\",\"4\"]', 'df', 'Beginner', 0, 'fsd', 'sdf', 1, 1, 'sd', 'sdf', 'pending', '2025-03-30 15:31:51', '2025-03-30 15:31:51', 0, NULL, NULL),
-(4, 1, 8, 'Jabu', 'Khumalo', 'jabut@example.com', '0', '2012-02-21', 'Male', 'Fernadale High School', 12, '123 Main St', 'Johannesburg', 'Gauteng', '2021', 'Mandisa', 'Mother', '0721166543', 'mandi@gmail.com', '', '', '', '[\"1\",\"2\"]', 'ds', 'Basic', 0, 'sd', 'fds', 1, 1, 'ds', 'sda', 'pending', '2025-03-30 16:35:22', '2025-03-30 16:35:22', 0, NULL, NULL),
-(5, 1, NULL, 'Noma', 'Mabasa', 'noma@gmail.com', '0012000', '2012-02-16', 'Male', 'Fernadale High School', 10, '123 Main St', 'Johannesburg', 'Gauteng', '2021', 'Vuyani', 'Father', '0638393157', 'vuyani@gmail.com', '', '', '', '[\"4\",\"1\"]', 'Love 3D animations', 'Intermediate', 0, 'No', 'No', 1, 1, 'No', 'Want to have fun and learn.', 'pending', '2025-03-30 17:09:01', '2025-03-30 17:09:01', 0, NULL, NULL);
+INSERT INTO `holiday_program_attendees` (`id`, `program_id`, `user_id`, `first_name`, `last_name`, `email`, `phone`, `date_of_birth`, `gender`, `school`, `grade`, `address`, `city`, `province`, `postal_code`, `guardian_name`, `guardian_relationship`, `guardian_phone`, `guardian_email`, `emergency_contact_name`, `emergency_contact_relationship`, `emergency_contact_phone`, `workshop_preference`, `why_interested`, `experience_level`, `needs_equipment`, `medical_conditions`, `allergies`, `photo_permission`, `data_permission`, `dietary_restrictions`, `additional_notes`, `registration_status`, `created_at`, `updated_at`, `mentor_registration`, `mentor_status`, `mentor_workshop_preference`, `password`, `last_login`, `is_clubhouse_member`) VALUES
+(1, 1, 1, 'Vuyani', 'Magibisela', 'vuyani.magibisela@sci-bono.co.za', '638393157', '2010-08-23', 'Male', '0', 12, '123 Gull Street', 'Johannesburg', 'Gauteng', '2021', 'Mandisa', 'Mother', '0721166543', 'mandi@gmail.com', '', '', '', '[\"3\",\"4\"]', 'Learn', '0', 1, 'No', '0', 1, 1, 'No', 'Learn', 'pending', '2025-03-28 16:40:40', '2025-03-28 16:40:40', 0, NULL, NULL, NULL, NULL, 0),
+(2, 1, 7, 'Sam', 'Kabanga', 'sam@example.com', '688965565', '2025-02-21', 'Male', NULL, NULL, '123 Good Street', 'Johannesburg', '', '1920', NULL, NULL, NULL, NULL, 'Thabo', 'Uncle', '0832342342', '[]', 'sdf', 'Advanced', 0, 'dssdf', 'sd', 1, 1, 'dssd', 'sd', 'pending', '2025-03-30 14:48:38', '2025-03-30 15:28:37', 1, 'Pending', 4, NULL, NULL, 0),
+(3, 1, 2, 'Itumeleng', 'Kgakane', 'itum@gmail.com', '0', '2012-01-12', 'Male', 'Fernadale High School', 12, '123 Good Street', 'Johannesburg', 'Gauteng', '1920', 'Mandi', 'Mother', '736933940', 'mandi@gmail.com', '', '', '', '[\"3\",\"4\"]', 'df', 'Beginner', 0, 'fsd', 'sdf', 1, 1, 'sd', 'sdf', 'pending', '2025-03-30 15:31:51', '2025-03-30 15:31:51', 0, NULL, NULL, NULL, NULL, 0),
+(4, 1, 8, 'Jabu', 'Khumalo', 'jabut@example.com', '0', '2012-02-21', 'Male', 'Fernadale High School', 12, '123 Main St', 'Johannesburg', 'Gauteng', '2021', 'Mandisa', 'Mother', '0721166543', 'mandi@gmail.com', '', '', '', '[\"1\",\"2\"]', 'ds', 'Basic', 0, 'sd', 'fds', 1, 1, 'ds', 'sda', 'pending', '2025-03-30 16:35:22', '2025-03-30 16:35:22', 0, NULL, NULL, NULL, NULL, 0),
+(5, 1, NULL, 'Noma', 'Mabasa', 'noma@gmail.com', '0012000', '2012-02-16', 'Male', 'Fernadale High School', 10, '123 Main St', 'Johannesburg', 'Gauteng', '2021', 'Vuyani', 'Father', '0638393157', 'vuyani@gmail.com', '', '', '', '[\"4\",\"1\"]', 'Love 3D animations', 'Intermediate', 0, 'No', 'No', 1, 1, 'No', 'Want to have fun and learn.', 'pending', '2025-03-30 17:09:01', '2025-03-30 17:09:01', 0, NULL, NULL, NULL, NULL, 0);
 
 -- --------------------------------------------------------
 
@@ -678,10 +890,10 @@ CREATE TABLE `holiday_program_workshops` (
 --
 
 INSERT INTO `holiday_program_workshops` (`id`, `program_id`, `title`, `description`, `instructor`, `max_participants`, `start_time`, `end_time`, `location`, `created_at`, `updated_at`) VALUES
-(1, 1, 'Graphic Design Basics', 'Learn the fundamentals of graphic design using industry tools.', 'Simphiwe Phiri', 15, NULL, NULL, NULL, '2025-03-26 19:24:54', '2025-03-28 15:35:43'),
-(2, 1, 'Music and Video Production', 'Create and edit Music and videos using professional techniques.', 'Lebo Skhosana', 15, NULL, NULL, NULL, '2025-03-26 19:24:54', '2025-03-26 21:14:19'),
-(3, 1, '3D Design Fundamentals', 'Explore the principles of 3D Design and create your 3D visualizations.', 'Themba Kgakane', 15, NULL, NULL, NULL, '2025-03-26 19:24:54', '2025-03-26 21:13:13'),
-(4, 1, 'Animation Fundamentals', 'Explore the principles of animation and create your animated shorts.', 'Andrew Klaas', 15, NULL, NULL, NULL, '2025-03-26 19:24:54', '2025-03-28 15:36:51');
+(1, 1, 'Graphic Design Basics', 'Learn the fundamentals of graphic design using industry tools.', 'Carols Kanye', 10, NULL, NULL, NULL, '2025-03-26 19:24:54', '2025-03-31 19:31:53'),
+(2, 1, 'Music and Video Production', 'Create and edit Music and videos using professional techniques.', 'Andrew Klaas and Philani Mbatha', 10, NULL, NULL, NULL, '2025-03-26 19:24:54', '2025-03-31 19:33:04'),
+(3, 1, '3D Design Fundamentals', 'Explore the principles of 3D Design and create your 3D visualizations.', 'Samuel Kazadi ', 5, NULL, NULL, NULL, '2025-03-26 19:24:54', '2025-03-31 19:32:24'),
+(4, 1, 'Animation Fundamentals', 'Explore the principles of animation and create your animated shorts.', 'Vuyani Magibisela', 5, NULL, NULL, NULL, '2025-03-26 19:24:54', '2025-03-31 19:33:24');
 
 -- --------------------------------------------------------
 
@@ -735,6 +947,26 @@ CREATE TABLE `lesson_progress` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `lesson_sections`
+--
+
+CREATE TABLE `lesson_sections` (
+  `id` int(11) NOT NULL,
+  `lesson_id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `content` longtext DEFAULT NULL,
+  `section_type` enum('text','video','interactive','quiz','assignment') NOT NULL DEFAULT 'text',
+  `video_url` varchar(255) DEFAULT NULL,
+  `estimated_duration_minutes` int(11) DEFAULT NULL,
+  `order_number` int(11) NOT NULL DEFAULT 0,
+  `is_published` tinyint(1) NOT NULL DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `monthly_reports`
 --
 
@@ -756,7 +988,9 @@ CREATE TABLE `monthly_reports` (
 --
 
 INSERT INTO `monthly_reports` (`id`, `report_date`, `total_attendees`, `male_attendees`, `female_attendees`, `age_groups`, `narrative`, `challenges`, `created_at`, `updated_at`) VALUES
-(1, '2025-01-01', 0, 0, 0, '{\"9-12\":\"0\",\"12-14\":\"0\",\"14-16\":\"0\",\"16-18\":\"0\"}', 'The month was great....', 'Lack of Computers.', '2025-03-04 12:49:22', '2025-03-04 12:49:22');
+(1, '2025-01-01', 0, 0, 0, '{\"9-12\":\"0\",\"12-14\":\"0\",\"14-16\":\"0\",\"16-18\":\"0\"}', 'The month was great....', 'Lack of Computers.', '2025-03-04 12:49:22', '2025-03-04 12:49:22'),
+(2, '2025-03-01', 0, 0, 0, '{\"9-12\":\"0\",\"12-14\":\"0\",\"14-16\":\"0\",\"16-18\":\"0\"}', 'Test', 'The challenges', '2025-04-01 11:40:11', '2025-04-01 11:40:11'),
+(3, '2025-02-01', 1, 1, 0, '{\"9-12\":\"0\",\"12-14\":\"0\",\"14-16\":\"0\",\"16-18\":\"0\"}', 'Fab Narative', 'Challenges', '2025-04-01 12:37:47', '2025-04-01 12:37:47');
 
 -- --------------------------------------------------------
 
@@ -782,7 +1016,9 @@ CREATE TABLE `monthly_report_activities` (
 
 INSERT INTO `monthly_report_activities` (`id`, `report_id`, `program_id`, `participants`, `completed_projects`, `in_progress_projects`, `not_started_projects`, `narrative`, `created_at`) VALUES
 (1, 1, 1, 23, 5, 2, 0, 'Kids leant a lot', '2025-03-04 12:49:22'),
-(2, 1, 3, 23, 12, 5, 0, 'Narroto of the year', '2025-03-04 12:49:22');
+(2, 1, 3, 23, 12, 5, 0, 'Narroto of the year', '2025-03-04 12:49:22'),
+(3, 2, 1, 10, 0, 0, 0, 'Currently Recruiting', '2025-04-01 11:40:11'),
+(4, 3, 3, 1, 1, 1, 1, 'Drawing', '2025-04-01 12:37:47');
 
 -- --------------------------------------------------------
 
@@ -803,7 +1039,11 @@ CREATE TABLE `monthly_report_images` (
 
 INSERT INTO `monthly_report_images` (`id`, `activity_id`, `image_path`, `created_at`) VALUES
 (1, 1, '2025-03/67c6f6d2a2270_Screenshot 2024-08-22 104155.png', '2025-03-04 12:49:22'),
-(2, 2, '2025-03/67c6f6d2a2aae_Screenshot (1).png', '2025-03-04 12:49:22');
+(2, 2, '2025-03/67c6f6d2a2aae_Screenshot (1).png', '2025-03-04 12:49:22'),
+(3, 3, '2025-04/67ebd09be8bd1_int.jpg', '2025-04-01 11:40:11'),
+(4, 3, '2025-04/67ebd09be9a2f_inter.jpg', '2025-04-01 11:40:11'),
+(5, 4, '2025-04/67ebde1b70bd5_IMG_4036.JPG', '2025-04-01 12:37:47'),
+(6, 4, '2025-04/67ebde1b71c06_IMG_4037.JPG', '2025-04-01 12:37:47');
 
 -- --------------------------------------------------------
 
@@ -854,6 +1094,80 @@ CREATE TABLE `quiz_questions` (
   `question_type` enum('multiple_choice','true_false','short_answer','matching') NOT NULL DEFAULT 'multiple_choice',
   `points` int(11) NOT NULL DEFAULT 1,
   `order_number` int(11) NOT NULL DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `skill_activities`
+--
+
+CREATE TABLE `skill_activities` (
+  `id` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `description` text DEFAULT NULL,
+  `skill_category` varchar(100) DEFAULT NULL,
+  `technique_taught` varchar(255) DEFAULT NULL,
+  `tools_required` text DEFAULT NULL,
+  `materials_needed` text DEFAULT NULL,
+  `difficulty_level` enum('Beginner','Intermediate','Advanced') NOT NULL DEFAULT 'Beginner',
+  `estimated_duration_minutes` int(11) DEFAULT NULL,
+  `final_outcome_description` text DEFAULT NULL,
+  `instructions` longtext DEFAULT NULL,
+  `image_path` varchar(255) DEFAULT NULL,
+  `video_url` varchar(255) DEFAULT NULL,
+  `resources_links` text DEFAULT NULL,
+  `created_by` int(11) NOT NULL,
+  `is_published` tinyint(1) NOT NULL DEFAULT 0,
+  `is_featured` tinyint(1) NOT NULL DEFAULT 0,
+  `view_count` int(11) DEFAULT 0,
+  `completion_count` int(11) DEFAULT 0,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `skill_activity_completions`
+--
+
+CREATE TABLE `skill_activity_completions` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `skill_activity_id` int(11) NOT NULL,
+  `completion_percentage` decimal(5,2) DEFAULT 0.00,
+  `current_step` int(11) DEFAULT 1,
+  `final_submission_path` varchar(255) DEFAULT NULL,
+  `notes` text DEFAULT NULL,
+  `rating` int(1) DEFAULT NULL CHECK (`rating` >= 1 and `rating` <= 5),
+  `feedback` text DEFAULT NULL,
+  `status` enum('started','in_progress','completed','abandoned') NOT NULL DEFAULT 'started',
+  `started_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `completed_at` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `skill_activity_steps`
+--
+
+CREATE TABLE `skill_activity_steps` (
+  `id` int(11) NOT NULL,
+  `skill_activity_id` int(11) NOT NULL,
+  `step_number` int(11) NOT NULL,
+  `title` varchar(255) NOT NULL,
+  `instructions` longtext NOT NULL,
+  `image_path` varchar(255) DEFAULT NULL,
+  `video_url` varchar(255) DEFAULT NULL,
+  `estimated_duration_minutes` int(11) DEFAULT NULL,
+  `tips` text DEFAULT NULL,
+  `common_mistakes` text DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -912,18 +1226,17 @@ CREATE TABLE `users` (
 
 INSERT INTO `users` (`id`, `username`, `email`, `password`, `name`, `surname`, `user_type`, `date_of_birth`, `Gender`, `grade`, `school`, `parent`, `parent_email`, `leaner_number`, `parent_number`, `Relationship`, `Center`, `nationality`, `id_number`, `home_language`, `address_street`, `address_suburb`, `address_city`, `address_province`, `address_postal_code`, `medical_aid_name`, `medical_aid_holder`, `medical_aid_number`, `emergency_contact_name`, `emergency_contact_relationship`, `emergency_contact_phone`, `emergency_contact_email`, `emergency_contact_address`, `interests`, `role_models`, `goals`, `has_computer`, `computer_skills`, `computer_skills_source`) VALUES
 (1, 'vuyani_magibisela', 'vuyani.magibisela@sci-bono.co.za', '$2y$10$OEkQUqNT9pp8F.oBn/nAquaBuxyo7.8a0QCiWLXw37ECwvzXWNZDy', 'Vuyani', 'Magibisela', 'admin', '1990-08-23', 'Male', NULL, NULL, NULL, NULL, 638393157, NULL, NULL, 'Sci-Bono Clubhouse', 'South African', '9008235531088', 'isiXhosa', '123 Gull Street', 'Soweto', 'Johannesburg', 'Gauteng', '2021', 'Discovery', 'Vuyani Magibisela', '12345685', 'Mandisa', 'Mother', '0726611543', 'mandisa.magibisela@gmail.com', '123 Bob Street \r\nQueens Town\r\nEastern Cape', NULL, NULL, NULL, NULL, NULL, NULL),
-(2, 'itumeleng_kgakane', 'itum@gmail.com', '$2y$10$djcIfQ1gSBbtbe7dKgbphO6myGetqJ0t6F.SGlpbDvp.sOn53iSBK', 'Itumeleng', 'Kgakane', 'member', '2000-01-12', 'Male', 12, '0', 'Mandi', 'mandi@gmail.com', 0, 736933940, 'Mother', 'Sci-Bono Clubhouse', 'South African', '0001125531088', 'Setswana', '123 Good Street', 'Soweto', 'Johannesburg', 'Gauteng', '1920', 'Discovery', 'Vuyani', '1783740808', 'Mandi', 'Mother', '0832342342', 'mandi@gmail.com', '123 Good street, Soweto, Johannesburg, Gauteng, South Africa', '', '', '', 1, '', ''),
-(4, 'themba_magibisela', '', '13378', 'Themba', 'Magibisela', 'mentor', '0000-00-00', 'Male', 0, '0', '0', '0', 0, 0, '', 'Sci-Bono Clubhouse', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(5, 'themba_kgakane', '', '$2y$10$MF.CYKDPS86B4KofOayZWuSDP7ETZtLpiVXnyDO2aU3bnn4K8BHzW', 'Themba', 'Kgakane', 'mentor', '0000-00-00', 'Male', 0, '0', '0', '0', 0, 0, '', 'Sci-Bono Clubhouse', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(6, 'Kgotso_Maponya', '', '$2y$10$8BzYI1MeWyctdaCnC6oJzufCqMd2CFSzhseZYBPz.0pQtofyv1mya', 'Kgotso', 'Maponya', 'member', '0000-00-00', 'Male', 0, '0', '0', '0', 0, 0, '', 'Sci-Bono Clubhouse', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(2, 'itumeleng_kgakane', 'itum@gmail.com', '$2y$10$cH5JP8jdlORJuJya9qBHGOCrqHzP4gnefjxdQQk3yEqV2SKdsOdgi', 'Itumeleng', 'Kgakane', 'member', '2000-01-12', 'Male', 12, 'Fernadale High School', 'Mandi', 'mandi@gmail.com', 0, 736933940, 'Mother', '', 'South African', '0001125531088', 'Setswana', '123 Good Street', 'Soweto', 'Johannesburg', 'Gauteng', '1920', NULL, NULL, NULL, 'Mandi', 'Mother', '0832342342', 'mandi@gmail.com', '123 Good street, Soweto, Johannesburg, Gauteng, South Africa', 'Sports', 'Khaya', 'Be the best', 1, 'Digital Drawing', 'At home'),
+(4, 'themba_magibisela', 'themba@example.co.za', '13378', 'Themba', 'Magibisela', 'mentor', '2018-01-01', 'Male', NULL, NULL, NULL, NULL, 835562525, NULL, NULL, 'Sci-Bono Clubhouse', 'South African', '1801025522088', 'English', '123 Good Street', 'Soweto', 'Johannesburg', '', '2300', NULL, NULL, NULL, 'Mandi', 'Mother', '0721166543', 'mandi@gmail.com', '123 Good Street \r\nSoweto\r\n23000', NULL, NULL, NULL, NULL, NULL, NULL),
 (7, 'Sam_King', 'sam@example.com', '$2y$10$aSK4SUKKNstMnefJ0VKfs.NyBF32SHBC5wv.ALf2w1HvBrK1hLqgK', 'Sam', 'Kabanga', 'mentor', '2025-02-21', 'Male', 9, '0', 'Bonga Kabanga', 'bonga.kabanga@example.com', 688965565, 868963125, 'Father', 'Sci-Bono Clubhouse', 'South African', '', 'isiNdebele', '123 Good Street', 'Soweto', 'Johannesburg', '', '1920', NULL, NULL, NULL, 'Thabo', 'Uncle', '0832342342', 'thabo@gmail.com', '123 Good street', '', '', '', 1, '', ''),
 (8, 'jabu_khumalo ', 'jabut@example.com', '$2y$10$n8Pb/bmu/7rO7KJSlXkaFeaTjabFz7anFGZmxtvWmkvADhZVbIh0S', 'Jabu', 'Khumalo', 'mentor', '2025-02-21', 'Male', 0, '0', '0', '0', 0, 0, '', 'Sci-Bono Clubhouse', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (9, 'lebo_skhosana', '', '$2y$10$4.fc0AJKIOfj.YPKp0sePOtDllx98DA8yIMl14wv5hptlsDMEY84O', 'Lebo', 'Skhosana', 'admin', '0000-00-00', 'Male', 0, '0', '0', '0', 0, 0, '', 'Sci-Bono Clubhouse', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (10, 'Tim_M', '', '$2y$10$5G/8yYmZdhejlA16qu30Q.Bc/k7E8V7KLvUcnNTcT.xKcbSilpNYW', 'Tim', 'Shabango', 'member', '0000-00-00', 'Male', 0, '0', '0', '0', 0, 0, '', 'Sci-Bono Clubhouse', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(11, 'linda_skhosana', 'default@example.com', '$2y$10$OuPeaMzVXhi2gNKmiHKcPOZma8MAaDulkn8Q7mINUh4D.LAhsNYle', 'Linda', 'Skhosana', 'member', NULL, 'Female', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Mapetla Solar Lab', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(11, 'linda_skhosana', 'default@example.com', '$2y$10$OuPeaMzVXhi2gNKmiHKcPOZma8MAaDulkn8Q7mINUh4D.LAhsNYle', 'Linda', 'Skhosana', 'member', '2004-09-12', 'Female', 10, 'Malvern High School', 'Mandi', 'mandi@gmail.com', 719948640, 766703421, 'Mother', 'Mapetla Solar Lab', 'South African', '0409120000000', 'Afrikaans', '123 Good Street', 'Soweto', 'Johannesburg', '', '2000', NULL, NULL, NULL, 'Thabo', 'Father', '0716640054', 'thabo@gmail.com', 'address', 'yes', 'yes', 'yes', 1, 'yes', 'yes'),
 (12, 'Pammy', 'default@example.com', '$2y$10$XVbGAfHni2g96herJzNxS.vK69a/1GQVLYnskgkPzw0GKskVV5Ql2', 'Pamela Sithandweyinkosi ', 'Ngwenya', 'mentor', NULL, 'Female', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Sci-Bono Clubhouse', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (13, 'NkuliTheGreat', 'default@example.com', '$2y$10$IjHh78npTETLCK2kgZ5UR.Anib0Pgjx91eOq//BiKb8I5iZyt6Y9m', 'Nonkululeko ', 'Shongwe ', 'admin', NULL, 'Female', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Sci-Bono Clubhouse', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(14, 'Pammy', 'default@example.com', '$2y$10$4naNeRn30g44Fl7KZ0KAzu/bfmsxus8nY/RHowmHgiRgkX7SArqHa', 'Pamela Sithandweyinkosi ', 'Ngwenya', 'mentor', NULL, 'Female', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Sci-Bono Clubhouse', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+(14, 'Pammy', 'default@example.com', '$2y$10$4naNeRn30g44Fl7KZ0KAzu/bfmsxus8nY/RHowmHgiRgkX7SArqHa', 'Pamela Sithandweyinkosi ', 'Ngwenya', 'mentor', NULL, 'Female', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Sci-Bono Clubhouse', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
+(16, 'Kgotso_Maponya', 'default@example.com', '$2y$10$e000Bj1pepX8f1LIFrZEy.OxJrQJEIVpXgr94efE7qL2ZiGGZFQuW', 'Kgotso', 'Maponya', 'member', NULL, 'Male', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Sci-Bono Clubhouse', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 
 -- --------------------------------------------------------
 
@@ -940,6 +1253,42 @@ CREATE TABLE `user_enrollments` (
   `completed` tinyint(1) NOT NULL DEFAULT 0,
   `completion_date` timestamp NULL DEFAULT NULL,
   `last_accessed` timestamp NOT NULL DEFAULT current_timestamp(),
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `user_enrollments`
+--
+
+INSERT INTO `user_enrollments` (`id`, `user_id`, `course_id`, `enrollment_date`, `progress`, `completed`, `completion_date`, `last_accessed`, `created_at`, `updated_at`) VALUES
+(1, 1, 1, '2025-05-08 11:12:01', 0, 0, NULL, '2025-05-08 11:12:01', '2025-05-08 11:12:01', '2025-05-08 11:12:01'),
+(2, 1, 13, '2025-05-22 11:00:30', 0, 0, NULL, '2025-05-22 11:00:30', '2025-05-22 11:00:30', '2025-05-22 11:00:30'),
+(3, 1, 12, '2025-05-22 11:00:40', 0, 0, NULL, '2025-05-22 11:00:40', '2025-05-22 11:00:40', '2025-05-22 11:00:40'),
+(4, 1, 11, '2025-05-22 11:00:48', 0, 0, NULL, '2025-05-22 11:00:48', '2025-05-22 11:00:48', '2025-05-22 11:00:48'),
+(5, 1, 10, '2025-05-22 11:00:53', 0, 0, NULL, '2025-05-22 11:00:53', '2025-05-22 11:00:53', '2025-05-22 11:00:53');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `user_progress`
+--
+
+CREATE TABLE `user_progress` (
+  `id` int(11) NOT NULL,
+  `user_id` int(11) NOT NULL,
+  `course_id` int(11) DEFAULT NULL,
+  `module_id` int(11) DEFAULT NULL,
+  `lesson_id` int(11) DEFAULT NULL,
+  `lesson_section_id` int(11) DEFAULT NULL,
+  `activity_id` int(11) DEFAULT NULL,
+  `progress_type` enum('course','module','lesson','lesson_section','activity') NOT NULL,
+  `completion_percentage` decimal(5,2) DEFAULT 0.00,
+  `total_points_earned` int(11) DEFAULT 0,
+  `total_points_possible` int(11) DEFAULT 0,
+  `status` enum('not_started','in_progress','completed','passed','failed') NOT NULL DEFAULT 'not_started',
+  `last_accessed` timestamp NOT NULL DEFAULT current_timestamp(),
+  `completed_at` timestamp NULL DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -962,9 +1311,60 @@ CREATE TABLE `user_question_answers` (
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `visitors`
+--
+
+CREATE TABLE `visitors` (
+  `id` int(11) NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `surname` varchar(100) NOT NULL,
+  `age` int(11) NOT NULL,
+  `grade_school` varchar(100) NOT NULL,
+  `student_number` varchar(50) DEFAULT NULL,
+  `parent_name` varchar(100) NOT NULL,
+  `parent_surname` varchar(100) NOT NULL,
+  `email` varchar(100) NOT NULL,
+  `phone_number` varchar(20) NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `visits`
+--
+
+CREATE TABLE `visits` (
+  `id` int(11) NOT NULL,
+  `visitor_id` int(11) NOT NULL,
+  `sign_in_time` timestamp NOT NULL DEFAULT current_timestamp(),
+  `sign_out_time` timestamp NULL DEFAULT NULL,
+  `comment` text DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
 --
 -- Indexes for dumped tables
 --
+
+--
+-- Indexes for table `activity_submissions`
+--
+ALTER TABLE `activity_submissions`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `activity_id` (`activity_id`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `graded_by` (`graded_by`);
+
+--
+-- Indexes for table `assessment_attempts`
+--
+ALTER TABLE `assessment_attempts`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `assessment_id` (`assessment_id`),
+  ADD KEY `user_id` (`user_id`);
 
 --
 -- Indexes for table `attendance`
@@ -998,6 +1398,24 @@ ALTER TABLE `courses`
   ADD KEY `idx_display_order` (`display_order`);
 
 --
+-- Indexes for table `course_activities`
+--
+ALTER TABLE `course_activities`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `course_id` (`course_id`),
+  ADD KEY `module_id` (`module_id`),
+  ADD KEY `lesson_id` (`lesson_id`),
+  ADD KEY `lesson_section_id` (`lesson_section_id`);
+
+--
+-- Indexes for table `course_assessments`
+--
+ALTER TABLE `course_assessments`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `course_id` (`course_id`),
+  ADD KEY `module_id` (`module_id`);
+
+--
 -- Indexes for table `course_categories`
 --
 ALTER TABLE `course_categories`
@@ -1013,11 +1431,31 @@ ALTER TABLE `course_category_relationships`
   ADD KEY `category_id` (`category_id`);
 
 --
+-- Indexes for table `course_certificates`
+--
+ALTER TABLE `course_certificates`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `certificate_number` (`certificate_number`),
+  ADD UNIQUE KEY `verification_code` (`verification_code`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `course_id` (`course_id`),
+  ADD KEY `issued_by` (`issued_by`);
+
+--
 -- Indexes for table `course_lessons`
 --
 ALTER TABLE `course_lessons`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `section_id` (`section_id`);
+  ADD KEY `section_id` (`section_id`),
+  ADD KEY `course_lessons_module_fk` (`module_id`),
+  ADD KEY `course_lessons_course_fk` (`course_id`);
+
+--
+-- Indexes for table `course_modules`
+--
+ALTER TABLE `course_modules`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `course_id` (`course_id`);
 
 --
 -- Indexes for table `course_prerequisites`
@@ -1178,6 +1616,13 @@ ALTER TABLE `lesson_progress`
   ADD KEY `lesson_id` (`lesson_id`);
 
 --
+-- Indexes for table `lesson_sections`
+--
+ALTER TABLE `lesson_sections`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `lesson_id` (`lesson_id`);
+
+--
 -- Indexes for table `monthly_reports`
 --
 ALTER TABLE `monthly_reports`
@@ -1222,6 +1667,32 @@ ALTER TABLE `quiz_questions`
   ADD KEY `quiz_id` (`quiz_id`);
 
 --
+-- Indexes for table `skill_activities`
+--
+ALTER TABLE `skill_activities`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `created_by` (`created_by`),
+  ADD KEY `skill_category` (`skill_category`),
+  ADD KEY `difficulty_level` (`difficulty_level`);
+
+--
+-- Indexes for table `skill_activity_completions`
+--
+ALTER TABLE `skill_activity_completions`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `user_skill_activity_unique` (`user_id`,`skill_activity_id`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `skill_activity_id` (`skill_activity_id`);
+
+--
+-- Indexes for table `skill_activity_steps`
+--
+ALTER TABLE `skill_activity_steps`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `skill_activity_id` (`skill_activity_id`),
+  ADD KEY `step_number` (`step_number`);
+
+--
 -- Indexes for table `users`
 --
 ALTER TABLE `users`
@@ -1236,6 +1707,19 @@ ALTER TABLE `user_enrollments`
   ADD KEY `course_id` (`course_id`);
 
 --
+-- Indexes for table `user_progress`
+--
+ALTER TABLE `user_progress`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `user_progress_unique` (`user_id`,`course_id`,`module_id`,`lesson_id`,`lesson_section_id`,`activity_id`,`progress_type`),
+  ADD KEY `user_id` (`user_id`),
+  ADD KEY `course_id` (`course_id`),
+  ADD KEY `module_id` (`module_id`),
+  ADD KEY `lesson_id` (`lesson_id`),
+  ADD KEY `lesson_section_id` (`lesson_section_id`),
+  ADD KEY `activity_id` (`activity_id`);
+
+--
 -- Indexes for table `user_question_answers`
 --
 ALTER TABLE `user_question_answers`
@@ -1245,14 +1729,42 @@ ALTER TABLE `user_question_answers`
   ADD KEY `answer_id` (`answer_id`);
 
 --
+-- Indexes for table `visitors`
+--
+ALTER TABLE `visitors`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `email` (`email`),
+  ADD KEY `idx_visitor_email` (`email`);
+
+--
+-- Indexes for table `visits`
+--
+ALTER TABLE `visits`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_visits_visitor_id` (`visitor_id`),
+  ADD KEY `idx_visits_sign_in_time` (`sign_in_time`);
+
+--
 -- AUTO_INCREMENT for dumped tables
 --
+
+--
+-- AUTO_INCREMENT for table `activity_submissions`
+--
+ALTER TABLE `activity_submissions`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `assessment_attempts`
+--
+ALTER TABLE `assessment_attempts`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `attendance`
 --
 ALTER TABLE `attendance`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=50;
+  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=52;
 
 --
 -- AUTO_INCREMENT for table `clubhouse_programs`
@@ -1270,6 +1782,18 @@ ALTER TABLE `clubhouse_reports`
 -- AUTO_INCREMENT for table `courses`
 --
 ALTER TABLE `courses`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+
+--
+-- AUTO_INCREMENT for table `course_activities`
+--
+ALTER TABLE `course_activities`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `course_assessments`
+--
+ALTER TABLE `course_assessments`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
@@ -1285,10 +1809,22 @@ ALTER TABLE `course_category_relationships`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `course_certificates`
+--
+ALTER TABLE `course_certificates`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `course_lessons`
 --
 ALTER TABLE `course_lessons`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+
+--
+-- AUTO_INCREMENT for table `course_modules`
+--
+ALTER TABLE `course_modules`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `course_prerequisites`
@@ -1312,7 +1848,7 @@ ALTER TABLE `course_ratings`
 -- AUTO_INCREMENT for table `course_sections`
 --
 ALTER TABLE `course_sections`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `dell_surveys`
@@ -1417,22 +1953,28 @@ ALTER TABLE `lesson_progress`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `lesson_sections`
+--
+ALTER TABLE `lesson_sections`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `monthly_reports`
 --
 ALTER TABLE `monthly_reports`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `monthly_report_activities`
 --
 ALTER TABLE `monthly_report_activities`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `monthly_report_images`
 --
 ALTER TABLE `monthly_report_images`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `quiz_answers`
@@ -1453,15 +1995,39 @@ ALTER TABLE `quiz_questions`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `skill_activities`
+--
+ALTER TABLE `skill_activities`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `skill_activity_completions`
+--
+ALTER TABLE `skill_activity_completions`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `skill_activity_steps`
+--
+ALTER TABLE `skill_activity_steps`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(100) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=15;
+  MODIFY `id` int(100) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `user_enrollments`
 --
 ALTER TABLE `user_enrollments`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+
+--
+-- AUTO_INCREMENT for table `user_progress`
+--
+ALTER TABLE `user_progress`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
@@ -1471,8 +2037,35 @@ ALTER TABLE `user_question_answers`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `visitors`
+--
+ALTER TABLE `visitors`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `visits`
+--
+ALTER TABLE `visits`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- Constraints for dumped tables
 --
+
+--
+-- Constraints for table `activity_submissions`
+--
+ALTER TABLE `activity_submissions`
+  ADD CONSTRAINT `activity_submissions_activity_fk` FOREIGN KEY (`activity_id`) REFERENCES `course_activities` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `activity_submissions_grader_fk` FOREIGN KEY (`graded_by`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `activity_submissions_user_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `assessment_attempts`
+--
+ALTER TABLE `assessment_attempts`
+  ADD CONSTRAINT `assessment_attempts_assessment_fk` FOREIGN KEY (`assessment_id`) REFERENCES `course_assessments` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `assessment_attempts_user_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `attendance`
@@ -1485,6 +2078,22 @@ ALTER TABLE `attendance`
 --
 ALTER TABLE `courses`
   ADD CONSTRAINT `courses_ibfk_1` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `course_activities`
+--
+ALTER TABLE `course_activities`
+  ADD CONSTRAINT `course_activities_course_fk` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `course_activities_lesson_fk` FOREIGN KEY (`lesson_id`) REFERENCES `course_lessons` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `course_activities_module_fk` FOREIGN KEY (`module_id`) REFERENCES `course_modules` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `course_activities_section_fk` FOREIGN KEY (`lesson_section_id`) REFERENCES `lesson_sections` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `course_assessments`
+--
+ALTER TABLE `course_assessments`
+  ADD CONSTRAINT `course_assessments_course_fk` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `course_assessments_module_fk` FOREIGN KEY (`module_id`) REFERENCES `course_modules` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `course_categories`
@@ -1500,10 +2109,26 @@ ALTER TABLE `course_category_relationships`
   ADD CONSTRAINT `course_category_relationships_ibfk_2` FOREIGN KEY (`category_id`) REFERENCES `course_categories` (`id`) ON DELETE CASCADE;
 
 --
+-- Constraints for table `course_certificates`
+--
+ALTER TABLE `course_certificates`
+  ADD CONSTRAINT `course_certificates_course_fk` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `course_certificates_issuer_fk` FOREIGN KEY (`issued_by`) REFERENCES `users` (`id`),
+  ADD CONSTRAINT `course_certificates_user_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
 -- Constraints for table `course_lessons`
 --
 ALTER TABLE `course_lessons`
-  ADD CONSTRAINT `course_lessons_ibfk_1` FOREIGN KEY (`section_id`) REFERENCES `course_sections` (`id`) ON DELETE CASCADE;
+  ADD CONSTRAINT `course_lessons_course_fk` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `course_lessons_ibfk_1` FOREIGN KEY (`section_id`) REFERENCES `course_sections` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `course_lessons_module_fk` FOREIGN KEY (`module_id`) REFERENCES `course_modules` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `course_modules`
+--
+ALTER TABLE `course_modules`
+  ADD CONSTRAINT `course_modules_ibfk_1` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `course_prerequisites`
@@ -1637,6 +2262,12 @@ ALTER TABLE `lesson_progress`
   ADD CONSTRAINT `lesson_progress_ibfk_2` FOREIGN KEY (`lesson_id`) REFERENCES `course_lessons` (`id`) ON DELETE CASCADE;
 
 --
+-- Constraints for table `lesson_sections`
+--
+ALTER TABLE `lesson_sections`
+  ADD CONSTRAINT `lesson_sections_ibfk_1` FOREIGN KEY (`lesson_id`) REFERENCES `course_lessons` (`id`) ON DELETE CASCADE;
+
+--
 -- Constraints for table `monthly_report_activities`
 --
 ALTER TABLE `monthly_report_activities`
@@ -1669,11 +2300,41 @@ ALTER TABLE `quiz_questions`
   ADD CONSTRAINT `quiz_questions_ibfk_1` FOREIGN KEY (`quiz_id`) REFERENCES `course_quizzes` (`id`) ON DELETE CASCADE;
 
 --
+-- Constraints for table `skill_activities`
+--
+ALTER TABLE `skill_activities`
+  ADD CONSTRAINT `skill_activities_creator_fk` FOREIGN KEY (`created_by`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `skill_activity_completions`
+--
+ALTER TABLE `skill_activity_completions`
+  ADD CONSTRAINT `skill_completions_activity_fk` FOREIGN KEY (`skill_activity_id`) REFERENCES `skill_activities` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `skill_completions_user_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `skill_activity_steps`
+--
+ALTER TABLE `skill_activity_steps`
+  ADD CONSTRAINT `skill_activity_steps_fk` FOREIGN KEY (`skill_activity_id`) REFERENCES `skill_activities` (`id`) ON DELETE CASCADE;
+
+--
 -- Constraints for table `user_enrollments`
 --
 ALTER TABLE `user_enrollments`
   ADD CONSTRAINT `user_enrollments_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `user_enrollments_ibfk_2` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `user_progress`
+--
+ALTER TABLE `user_progress`
+  ADD CONSTRAINT `user_progress_activity_fk` FOREIGN KEY (`activity_id`) REFERENCES `course_activities` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `user_progress_course_fk` FOREIGN KEY (`course_id`) REFERENCES `courses` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `user_progress_lesson_fk` FOREIGN KEY (`lesson_id`) REFERENCES `course_lessons` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `user_progress_module_fk` FOREIGN KEY (`module_id`) REFERENCES `course_modules` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `user_progress_section_fk` FOREIGN KEY (`lesson_section_id`) REFERENCES `lesson_sections` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `user_progress_user_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `user_question_answers`
@@ -1682,6 +2343,12 @@ ALTER TABLE `user_question_answers`
   ADD CONSTRAINT `user_question_answers_ibfk_1` FOREIGN KEY (`attempt_id`) REFERENCES `quiz_attempts` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `user_question_answers_ibfk_2` FOREIGN KEY (`question_id`) REFERENCES `quiz_questions` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `user_question_answers_ibfk_3` FOREIGN KEY (`answer_id`) REFERENCES `quiz_answers` (`id`) ON DELETE SET NULL;
+
+--
+-- Constraints for table `visits`
+--
+ALTER TABLE `visits`
+  ADD CONSTRAINT `visits_ibfk_1` FOREIGN KEY (`visitor_id`) REFERENCES `visitors` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
