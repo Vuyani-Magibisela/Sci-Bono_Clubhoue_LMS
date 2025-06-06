@@ -86,7 +86,7 @@
                         "description" => "Dive into the world of digital media creation, learning graphic design, video editing, and animation techniques.",
                         "icon" => "fas fa-photo-video",
                         "color" => "program-multimedia",
-                        "registration_open" => true
+                        "registration_open" => false
                     ],
                     [
                         "id" => 2,
@@ -96,7 +96,7 @@
                         "description" => "Explore artificial intelligence through interactive workshops, coding exercises, and creative AI applications.",
                         "icon" => "fas fa-robot",
                         "color" => "program-ai",
-                        "registration_open" => false
+                        "registration_open" => true
                     ],
                     [
                         "id" => 3,
@@ -139,7 +139,7 @@
                             <p>{$program['description']}</p>
                             <div class='program-action'>
                                 {$registrationStatus}
-                                <a href='./holiday-program-details-term1.php?id={$program['id']}' class='details-link'>View Details</a>
+                                <a href='./holiday-program-details-term.php?id={$program['id']}' class='details-link'>View Details</a>
                             </div>
                         </div>
                     </div>";

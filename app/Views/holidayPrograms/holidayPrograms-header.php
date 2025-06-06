@@ -61,7 +61,8 @@ $current_page = basename($_SERVER['PHP_SELF']);
                                 <i class="fas fa-project-diagram"></i>
                                 <span>Projects</span>
                             </a>
-                        </li>
+                        </li>     
+
                         <?php if (isset($_SESSION['loggedin']) && $_SESSION['loggedin']): ?>
                             <li class="<?php echo ($current_page == 'holiday-dashboard.php') ? 'active' : ''; ?>">
                                 <a href="holiday-dashboard.php">
@@ -69,6 +70,13 @@ $current_page = basename($_SERVER['PHP_SELF']);
                                     <span>Dashboard</span>
                                 </a>
                             </li>
+                            <!-- New Admin Dashboard -->
+                            <li class="<?php echo ($current_page == 'holiday-dashboard.php') ? 'active' : ''; ?>">
+                                <a href="holidayProgramAdminDashboard.php">
+                                    <i class="fas fa-tachometer-alt"></i>
+                                    <span>Admin Dashboard</span>
+                                </a>
+                            </li>                            
                             <?php if (isset($_SESSION['user_type']) && ($_SESSION['user_type'] == 'admin' || $_SESSION['user_type'] == 'mentor')): ?>
                                 <li class="<?php echo ($current_page == 'holiday-reports.php') ? 'active' : ''; ?>">
                                     <a href="holiday-reports.php">
