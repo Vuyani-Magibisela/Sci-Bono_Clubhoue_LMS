@@ -109,6 +109,78 @@ a:hover {
     margin-bottom: 30px;
     border-left: 4px solid var(--primary);
 }
+/* Login Form Styling */
+.registration-path-info {
+    margin-bottom: 30px;
+    padding: 20px;
+    background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+    border-radius: 12px;
+    border-left: 4px solid var(--primary);
+}
+
+.path-indicator {
+    text-align: center;
+}
+
+.path-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    border-radius: 25px;
+    font-weight: 600;
+    margin-bottom: 15px;
+}
+
+.path-badge.mentor-path {
+    background: linear-gradient(135deg, #6c63ff, #8e8af7);
+    color: white;
+}
+
+.path-badge.member-path {
+    background: linear-gradient(135deg, #28a745, #5cb85c);
+    color: white;
+}
+
+.path-badge.new-user-path {
+    background: linear-gradient(135deg, #17a2b8, #5bc0de);
+    color: white;
+}
+
+.info-message {
+    background-color: rgba(23, 162, 184, 0.1);
+    border: 1px solid rgba(23, 162, 184, 0.3);
+    padding: 15px;
+    border-radius: 8px;
+    margin-bottom: 15px;
+}
+
+.info-message i {
+    color: #17a2b8;
+    margin-right: 8px;
+}
+
+.help-text {
+    margin-top: 5px;
+}
+
+.help-text small {
+    color: #6c757d;
+    font-style: italic;
+}
+
+.password-creation-section {
+    margin-top: 30px;
+    padding: 30px;
+    background: #f8f9fa;
+    border-radius: 12px;
+    border: 2px solid #e9ecef;
+}
+
+.password-form {
+    max-width: 600px;
+    margin: 0 auto;
+}
 
 .email-check-container h2 {
     color: var(--purple-dark);

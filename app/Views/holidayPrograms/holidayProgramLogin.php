@@ -1,3 +1,105 @@
+<?php
+session_start();
+require_once '../../../server.php';
+
+// Initialize variables
+$error = '';
+$email = '';
+
+// Check if already logged in
+if (isset($_SESSION['holiday_logged_in']) && $_SESSION['holiday_logged_in'] === true) {
+    header('Location: holiday-dashboard.php');
+    exit();
+}
+
+// Process login form submission
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
+    $email = trim($_POST['email']);
+    $password = $_POST['password'];
+    
+    if (empty($email) || empty($password)) {
+        $error = "Please enter both email and password.";
+    } else {
+        // Check in holiday_program_attendees table first (for holiday program participants)
+        $sql = "SELECT id, first_name, last_name, email, password, mentor_registration, mentor_status, program_id 
+                FROM holiday_program_attendees 
+                WHERE email = ? AND password IS NOT NULL";
+        
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("s", $email);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result->num_rows > 0) {
+            $user = $result->fetch_assoc();
+            
+            // Verify password
+            if (password_verify($password, $user['password'])) {
+                // Set session variables
+                $_SESSION['holiday_logged_in'] = true;
+                $_SESSION['holiday_user_id'] = $user['id'];
+                $_SESSION['holiday_email'] = $user['email'];
+                $_SESSION['holiday_name'] = $user['first_name'];
+                $_SESSION['holiday_surname'] = $user['last_name'];
+                $_SESSION['holiday_is_mentor'] = $user['mentor_registration'];
+                $_SESSION['holiday_mentor_status'] = $user['mentor_status'];
+                $_SESSION['holiday_program_id'] = $user['program_id'];
+                $_SESSION['holiday_user_type'] = $user['mentor_registration'] ? 'mentor' : 'member';
+                
+                // Update last login
+                $update_sql = "UPDATE holiday_program_attendees SET last_login = NOW() WHERE id = ?";
+                $update_stmt = $conn->prepare($update_sql);
+                $update_stmt->bind_param("i", $user['id']);
+                $update_stmt->execute();
+                
+                // Redirect to dashboard
+                header('Location: holiday-dashboard.php');
+                exit();
+            } else {
+                $error = "Invalid email or password.";
+            }
+        } else {
+            // Check in main users table (for admin/staff access)
+            $sql = "SELECT id, username, email, password, name, surname, user_type 
+                    FROM users 
+                    WHERE email = ? AND user_type IN ('admin', 'mentor')";
+            
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("s", $email);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            
+            if ($result->num_rows > 0) {
+                $user = $result->fetch_assoc();
+                
+                // Verify password
+                if (password_verify($password, $user['password'])) {
+                    // Set session variables for admin/staff
+                    $_SESSION['holiday_logged_in'] = true;
+                    $_SESSION['holiday_user_id'] = $user['id'];
+                    $_SESSION['holiday_email'] = $user['email'];
+                    $_SESSION['holiday_name'] = $user['name'];
+                    $_SESSION['holiday_surname'] = $user['surname'];
+                    $_SESSION['holiday_is_mentor'] = false;
+                    $_SESSION['holiday_mentor_status'] = null;
+                    $_SESSION['holiday_program_id'] = null;
+                    $_SESSION['holiday_user_type'] = $user['user_type'];
+                    $_SESSION['holiday_is_admin'] = ($user['user_type'] === 'admin');
+                    
+                    // Redirect to dashboard
+                    header('Location: holiday-dashboard.php');
+                    exit();
+                } else {
+                    $error = "Invalid email or password.";
+                }
+            } else {
+                $error = "No account found with this email address. Please register first.";
+            }
+        }
+    }
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -133,54 +235,56 @@
         }
         
         .user-options {
-            margin-top: 20px;
-            background-color: #f5f5f5;
-            padding: 15px;
-            border-radius: 6px;
+            margin-top: 30px;
+            background-color: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
         }
         
         .option-label {
-            font-weight: 500;
+            font-weight: 600;
             margin-bottom: 10px;
             color: var(--text-dark);
+            text-align: center;
         }
         
         .option-description {
             font-size: 0.9rem;
             color: var(--text-light);
-            margin-bottom: 15px;
+            margin-bottom: 20px;
+            text-align: center;
         }
         
         .option-buttons {
             display: flex;
             gap: 15px;
+            flex-wrap: wrap;
         }
         
         .option-button {
             flex: 1;
+            min-width: 150px;
             text-align: center;
-            padding: 10px;
+            padding: 15px 10px;
             background-color: var(--white);
-            border: 1px solid #ddd;
-            border-radius: 6px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
             cursor: pointer;
             transition: all 0.3s ease;
+            text-decoration: none;
+            color: var(--text-dark);
         }
         
         .option-button:hover {
             background-color: rgba(108, 99, 255, 0.05);
             border-color: var(--primary);
-        }
-        
-        .option-button.active {
-            background-color: rgba(108, 99, 255, 0.1);
-            border-color: var(--primary);
+            transform: translateY(-2px);
         }
         
         .option-icon {
             display: block;
-            font-size: 1.5rem;
-            margin-bottom: 5px;
+            font-size: 2rem;
+            margin-bottom: 8px;
             color: var(--primary);
         }
         
@@ -189,6 +293,16 @@
             font-weight: 500;
             color: var(--text-dark);
         }
+        
+        :root {
+            --primary: #6c63ff;
+            --purple-dark: #5a52d5;
+            --dark: #333;
+            --text-light: #666;
+            --text-dark: #333;
+            --white: #fff;
+            --danger: #f44336;
+        }
     </style>
 </head>
 <body>
@@ -196,7 +310,7 @@
     
     <div class="login-container">
         <div class="login-header">
-            <img src="../../../public/assets/images/Sci-Bono logo White.png" alt="Sci-Bono Clubhouse">
+            <img src="../../../public/assets/images/Sci-Bono logo White.png" alt="Sci-Bono Clubhouse" style="filter: invert(1);">
             <h1>Welcome Back</h1>
             <p>Sign in to access your holiday programs</p>
         </div>
@@ -204,14 +318,15 @@
         <?php if (!empty($error)): ?>
         <div class="error-message">
             <i class="fas fa-exclamation-circle"></i>
-            <span><?php echo $error; ?></span>
+            <span><?php echo htmlspecialchars($error); ?></span>
         </div>
         <?php endif; ?>
         
         <form method="POST" action="">
             <div class="form-group">
                 <label for="email">Email Address</label>
-                <input type="email" id="email" name="email" class="form-input" value="<?php echo htmlspecialchars($email); ?>" required>
+                <input type="email" id="email" name="email" class="form-input" 
+                       value="<?php echo htmlspecialchars($email); ?>" required>
             </div>
             
             <div class="form-group">
@@ -236,8 +351,8 @@
         </form>
         
         <div class="user-options">
-            <div class="option-label">Choose Your Path:</div>
-            <div class="option-description">Select the option that best describes you:</div>
+            <div class="option-label">New User? Choose Your Path:</div>
+            <div class="option-description">Select the option that best describes you to get started:</div>
             
             <div class="option-buttons">
                 <a href="holidayProgramRegistration.php?program_id=1" class="option-button">
@@ -257,5 +372,76 @@
             </div>
         </div>
     </div>
+
+    <!-- Mobile Navigation (visible on mobile only) -->
+    <nav class="mobile-nav">
+        <a href="../../home.php" class="mobile-menu-item">
+            <div class="mobile-menu-icon">
+                <i class="fas fa-home"></i>
+            </div>
+            <span>Home</span>
+        </a>
+        <a href="holidayProgramIndex.php" class="mobile-menu-item">
+            <div class="mobile-menu-icon">
+                <i class="fas fa-calendar-alt"></i>
+            </div>
+            <span>Programs</span>
+        </a>
+        <a href="../../app/Views/learn.php" class="mobile-menu-item">
+            <div class="mobile-menu-icon">
+                <i class="fas fa-book"></i>
+            </div>
+            <span>Learn</span>
+        </a>
+        <a href="holiday-dashboard.php" class="mobile-menu-item">
+            <div class="mobile-menu-icon">
+                <i class="fas fa-user"></i>
+            </div>
+            <span>Account</span>
+        </a>
+    </nav>
+
+    <script>
+        // Add smooth transitions and form validation
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.querySelector('form');
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            
+            // Add real-time validation
+            emailInput.addEventListener('blur', function() {
+                if (this.value && !isValidEmail(this.value)) {
+                    this.style.borderColor = '#f44336';
+                } else {
+                    this.style.borderColor = '#ddd';
+                }
+            });
+            
+            function isValidEmail(email) {
+                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return emailRegex.test(email);
+            }
+            
+            // Form submission validation
+            form.addEventListener('submit', function(e) {
+                let isValid = true;
+                
+                if (!emailInput.value.trim()) {
+                    emailInput.style.borderColor = '#f44336';
+                    isValid = false;
+                }
+                
+                if (!passwordInput.value.trim()) {
+                    passwordInput.style.borderColor = '#f44336';
+                    isValid = false;
+                }
+                
+                if (!isValid) {
+                    e.preventDefault();
+                    alert('Please fill in all required fields correctly.');
+                }
+            });
+        });
+    </script>
 </body>
 </html>

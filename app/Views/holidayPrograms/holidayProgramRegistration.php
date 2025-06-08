@@ -1,5 +1,13 @@
 <?php
 session_start();
+// Handle different user paths from URL parameters
+$isNewUser = !isset($_GET['member']) && !isset($_GET['mentor']);
+$isExistingMember = isset($_GET['member']) && $_GET['member'] == 1;
+$isMentorApplication = isset($_GET['mentor']) && $_GET['mentor'] == 1;
+
+// Set default mentor registration based on URL parameter
+$defaultMentorRegistration = $isMentorApplication ? 1 : 0;
+
 require_once '../../../server.php'; // Database connection
 include '../../Models/holiday-program-functions.php';// Include shared functions file
 // Initialize variables
@@ -509,12 +517,39 @@ if ($result->num_rows > 0) {
             <p class="program-dates"><i class="fas fa-calendar-alt"></i> <?php echo htmlspecialchars($programDetails['dates']); ?></p>
             <p class="program-description"><?php echo htmlspecialchars($programDetails['description']); ?></p>
         </div>
+
+        <!-- password creation section for successful registrations -->
+        <?php if ($registrationSuccess && !$formSubmitted): ?>
+        <div class="password-creation-section">
+            <h2><i class="fas fa-key"></i> Create Your Account Password</h2>
+            <p>To access your dashboard and manage your registration, please create a password for your account.</p>
+            
+            <form method="POST" action="holiday-create-password.php" class="password-form">
+                <input type="hidden" name="email" value="<?php echo htmlspecialchars($email); ?>">
+                <input type="hidden" name="attendee_id" value="<?php echo $attendeeId; ?>">
+                
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="password">Password <span class="required">*</span></label>
+                        <input type="password" id="password" name="password" class="form-input" required>
+                        <div class="help-text">Minimum 8 characters</div>
+                    </div>
+                    <div class="form-group">
+                        <label for="confirm_password">Confirm Password <span class="required">*</span></label>
+                        <input type="password" id="confirm_password" name="confirm_password" class="form-input" required>
+                    </div>
+                </div>
+                
+                <button type="submit" class="primary-button">Create Password & Access Dashboard</button>
+            </form>
+        </div>
+        <?php endif; ?>
         
         <?php if ($formSubmitted && $registrationSuccess): ?>
             <div class="success-message">
                 <div class="success-content">
                     <i class="fas fa-check-circle"></i>
-                    <?php if (isset($_POST['mentor_registration']) && $_POST['mentor_registration'] == 1): ?>
+                    <?php if ($mentorRegistration): ?>
                         <h2>Mentor Registration Submitted!</h2>
                         <p>Thank you for registering as a mentor for the <?php echo htmlspecialchars($programDetails['title']); ?> holiday program. We've sent a confirmation email to <?php echo htmlspecialchars($email); ?>. Your application will be reviewed by our program coordinator.</p>
                         <div class="next-steps">
@@ -532,6 +567,7 @@ if ($result->num_rows > 0) {
                             <h3>Next Steps:</h3>
                             <ul>
                                 <li>Check your email for confirmation and additional information</li>
+                                <li>Create a password to access your participant dashboard: <a href="holidayProgramLogin.php">Login Here</a></li>
                                 <li>Mark your calendar for <?php echo htmlspecialchars($programDetails['dates']); ?></li>
                                 <li>Prepare any materials or equipment mentioned in the email</li>
                             </ul>
@@ -596,27 +632,70 @@ if ($result->num_rows > 0) {
                 </div>
             </div>
 
+            <div class="registration-path-info">
+                <div class="path-indicator">
+                    <?php if ($isMentorApplication): ?>
+                        <div class="path-badge mentor-path">
+                            <i class="fas fa-chalkboard-teacher"></i>
+                            <span>Mentor Application</span>
+                        </div>
+                        <p>You're applying to become a mentor for this holiday program. Mentors guide participants through workshops and help facilitate learning.</p>
+                    <?php elseif ($isExistingMember): ?>
+                        <div class="path-badge member-path">
+                            <i class="fas fa-users"></i>
+                            <span>Clubhouse Member Registration</span>
+                        </div>
+                        <p>As an existing Clubhouse member, some of your information may be pre-filled. Please review and update as needed.</p>
+                    <?php else: ?>
+                        <div class="path-badge new-user-path">
+                            <i class="fas fa-user-plus"></i>
+                            <span>New Participant Registration</span>
+                        </div>
+                        <p>Welcome to Sci-Bono Clubhouse! Please complete the registration form below to join this holiday program.</p>
+                    <?php endif; ?>
+                </div>
+            </div>
+
             <form method="POST" action="" class="registration-form" id="registration-form" novalidate>
 
+            <!-- Update the mentor registration checkbox section -->
             <div class="form-section">
-                <h2><i class="fas fa-chalkboard-teacher"></i> Mentor Registration</h2>
-                <div class="form-group">
-                    <div class="checkbox-group">
-                        <input type="checkbox" id="mentor_registration" name="mentor_registration" value="1" 
-                            <?php echo ($isMentorFull && !$isExistingMentor) ? 'disabled' : ''; ?>>
-                        <label for="mentor_registration">
-                            I would like to register as a mentor for this program
-                            <?php if ($isMentorFull && !$isExistingMentor): ?>
-                                <span class="capacity-label">(Mentor positions filled)</span>
-                            <?php endif; ?>
-                        </label>
-                    </div>
-                </div>
+                <h2><i class="fas fa-chalkboard-teacher"></i> Registration Type</h2>
                 
-                <div id="mentor_fields" style="display: none;">
+                <?php if ($isMentorApplication): ?>
+                    <div class="form-group">
+                        <div class="info-message">
+                            <i class="fas fa-info-circle"></i>
+                            <p>You are applying as a <strong>mentor</strong> for this program. Mentors must be 18+ years old and have relevant experience in the program area.</p>
+                        </div>
+                        <input type="hidden" name="mentor_registration" value="1">
+                    </div>
+                <?php else: ?>
+                    <div class="form-group">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="mentor_registration" name="mentor_registration" value="1" 
+                                <?php echo ($defaultMentorRegistration) ? 'checked' : ''; ?>
+                                <?php echo ($isMemberFull && !$isExistingMentor) ? 'disabled' : ''; ?>>
+                            <label for="mentor_registration">
+                                I would like to register as a mentor for this program
+                                <?php if ($isMemberFull && !$isExistingMentor): ?>
+                                    <span class="capacity-label">(Mentor positions filled)</span>
+                                <?php endif; ?>
+                            </label>
+                        </div>
+                        <div class="help-text">
+                            <small>Mentors must be 18+ years old and have relevant experience. Mentor applications are subject to approval.</small>
+                        </div>
+                    </div>
+                <?php endif; ?>
+                
+                <!-- Mentor fields section -->
+                <div id="mentor_fields" style="<?php echo ($defaultMentorRegistration) ? 'display: block;' : 'display: none;'; ?>">
+                    <!-- Existing mentor fields content -->
                     <div class="form-group">
                         <label for="mentor_experience">Please describe your experience relevant to this program: <span class="required">*</span></label>
-                        <textarea id="mentor_experience" name="mentor_experience" class="form-textarea" rows="3"></textarea>
+                        <textarea id="mentor_experience" name="mentor_experience" class="form-textarea" rows="4" 
+                            placeholder="Describe your background, skills, and experience that qualify you to mentor in this program..."></textarea>
                     </div>
                     
                     <div class="form-group">
@@ -639,7 +718,7 @@ if ($result->num_rows > 0) {
                         </select>
                     </div>
                 </div>
-            </div>            
+            </div>           
 
                 <div class="form-section">
                     <h2><i class="fas fa-user"></i> Personal Information</h2>
@@ -796,7 +875,7 @@ if ($result->num_rows > 0) {
                 const workshopCapacityData = <?php echo json_encode($workshopEnrollmentCounts); ?>;
                 </script>
 
-                <!-- Replace the existing workshop preferences section with this -->
+                <!--workshop preferences section  -->
                 <div id="workshop_preferences_section" class="form-section">
                     <h2><i class="fas fa-laptop-code"></i> Workshop Preferences</h2>
                     <p class="section-description">Please select your 1st and 2nd choice workshops (you can only select 2 workshops)</p>
@@ -998,6 +1077,7 @@ if ($result->num_rows > 0) {
     
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     <script src="../../../public/assets/js/workshopSelection.js"></script>
+    <script src="../../../public/assets/js/holidayProgramRegistrationScript.js"></script>
     <script>
         // Add this to your script section
         document.addEventListener('DOMContentLoaded', function() {
@@ -1021,7 +1101,12 @@ if ($result->num_rows > 0) {
         });
     </script>
     <script>
-    $(document).ready(function() {
+    
+    $(document).ready(function() { 
+        // Set initial state based on URL parameters
+        <?php if ($isMentorApplication): ?>
+            $('#mentor_registration').prop('checked', true).trigger('change');
+        <?php endif; ?>
         // Trigger the change event to set proper initial state
         $('#mentor_registration').trigger('change');
         
@@ -1321,6 +1406,18 @@ if ($result->num_rows > 0) {
             }
 
             return true;
+        });
+        
+        // Password confirmation validation
+        $('#confirm_password').on('input', function() {
+            const password = $('#password').val();
+            const confirmPassword = $(this).val();
+            
+            if (confirmPassword && password !== confirmPassword) {
+                $(this).css('border-color', '#dc3545');
+            } else {
+                $(this).css('border-color', '#ced4da');
+            }
         });
     });
     </script>
