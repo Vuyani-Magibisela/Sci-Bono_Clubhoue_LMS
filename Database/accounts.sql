@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 05, 2025 at 02:56 PM
+-- Generation Time: Jun 08, 2025 at 04:05 PM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -532,6 +532,7 @@ CREATE TABLE `holiday_programs` (
   `registration_deadline` varchar(100) DEFAULT NULL,
   `max_participants` int(11) DEFAULT 30,
   `registration_open` tinyint(1) DEFAULT 1,
+  `status` enum('draft','open','closing_soon','closed','completed','cancelled') DEFAULT 'draft',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
   `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -540,8 +541,40 @@ CREATE TABLE `holiday_programs` (
 -- Dumping data for table `holiday_programs`
 --
 
-INSERT INTO `holiday_programs` (`id`, `term`, `title`, `description`, `dates`, `time`, `start_date`, `end_date`, `location`, `age_range`, `lunch_included`, `program_goals`, `registration_deadline`, `max_participants`, `registration_open`, `created_at`, `updated_at`) VALUES
-(1, 'Term 1', 'Multi-Media - Digital Design', 'Dive into the world of digital media creation, learning graphic design, video editing, and animation techniques.', 'March 31 - April 4, 2025', '9:00 AM - 4:00 PM', '2025-03-29', '2025-04-07', 'Sci-Bono Clubhouse', '13-18 years', 1, NULL, NULL, 35, 1, '2025-03-26 19:24:06', '2025-03-31 02:41:36');
+INSERT INTO `holiday_programs` (`id`, `term`, `title`, `description`, `dates`, `time`, `start_date`, `end_date`, `location`, `age_range`, `lunch_included`, `program_goals`, `registration_deadline`, `max_participants`, `registration_open`, `status`, `created_at`, `updated_at`) VALUES
+(1, 'Term 1', 'Multi-Media - Digital Design', 'Dive into the world of digital media creation, learning graphic design, video editing, and animation techniques.', 'March 31 - April 4, 2025', '9:00 AM - 4:00 PM', '2025-03-29', '2025-04-07', 'Sci-Bono Clubhouse', '13-18 years', 1, NULL, NULL, 35, 0, 'completed', '2025-03-26 19:24:06', '2025-06-06 11:07:39');
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `holiday_programs_with_status`
+-- (See below for the actual view)
+--
+CREATE TABLE `holiday_programs_with_status` (
+`id` int(11)
+,`term` varchar(50)
+,`title` varchar(255)
+,`description` text
+,`dates` varchar(100)
+,`time` varchar(50)
+,`start_date` date
+,`end_date` date
+,`location` varchar(255)
+,`age_range` varchar(50)
+,`lunch_included` tinyint(1)
+,`program_goals` text
+,`registration_deadline` varchar(100)
+,`max_participants` int(11)
+,`registration_open` tinyint(1)
+,`status` enum('draft','open','closing_soon','closed','completed','cancelled')
+,`created_at` timestamp
+,`updated_at` timestamp
+,`display_status` varchar(19)
+,`total_registrations` bigint(21)
+,`member_registrations` bigint(21)
+,`mentor_registrations` bigint(21)
+,`workshop_count` bigint(21)
+);
 
 -- --------------------------------------------------------
 
@@ -617,11 +650,11 @@ CREATE TABLE `holiday_program_attendees` (
 --
 
 INSERT INTO `holiday_program_attendees` (`id`, `program_id`, `user_id`, `first_name`, `last_name`, `email`, `phone`, `date_of_birth`, `gender`, `school`, `grade`, `address`, `city`, `province`, `postal_code`, `guardian_name`, `guardian_relationship`, `guardian_phone`, `guardian_email`, `emergency_contact_name`, `emergency_contact_relationship`, `emergency_contact_phone`, `workshop_preference`, `why_interested`, `experience_level`, `needs_equipment`, `medical_conditions`, `allergies`, `photo_permission`, `data_permission`, `dietary_restrictions`, `additional_notes`, `registration_status`, `created_at`, `updated_at`, `mentor_registration`, `mentor_status`, `mentor_workshop_preference`, `password`, `last_login`, `is_clubhouse_member`) VALUES
-(1, 1, 1, 'Vuyani', 'Magibisela', 'vuyani.magibisela@sci-bono.co.za', '638393157', '2010-08-23', 'Male', '0', 12, '123 Gull Street', 'Johannesburg', 'Gauteng', '2021', 'Mandisa', 'Mother', '0721166543', 'mandi@gmail.com', '', '', '', '[\"3\",\"4\"]', 'Learn', '0', 1, 'No', '0', 1, 1, 'No', 'Learn', 'pending', '2025-03-28 16:40:40', '2025-03-28 16:40:40', 0, NULL, NULL, NULL, NULL, 0),
-(2, 1, 7, 'Sam', 'Kabanga', 'sam@example.com', '688965565', '2025-02-21', 'Male', NULL, NULL, '123 Good Street', 'Johannesburg', '', '1920', NULL, NULL, NULL, NULL, 'Thabo', 'Uncle', '0832342342', '[]', 'sdf', 'Advanced', 0, 'dssdf', 'sd', 1, 1, 'dssd', 'sd', 'pending', '2025-03-30 14:48:38', '2025-03-30 15:28:37', 1, 'Pending', 4, NULL, NULL, 0),
+(1, 1, 1, 'Vuyani', 'Magibisela', 'vuyani.magibisela@sci-bono.co.za', '638393157', '2010-08-23', 'Male', '0', 12, '123 Gull Street', 'Johannesburg', 'Gauteng', '2021', 'Mandisa', 'Mother', '0721166543', 'mandi@gmail.com', '', '', '', '[\"3\",\"4\"]', 'Learn', '0', 1, 'No', '0', 1, 1, 'No', 'Learn', 'confirmed', '2025-03-28 16:40:40', '2025-06-06 14:45:48', 0, NULL, NULL, NULL, NULL, 0),
+(2, 1, 7, 'Sam', 'Kabanga', 'sam@example.com', '688965565', '2025-02-21', 'Male', NULL, NULL, '123 Good Street', 'Johannesburg', '', '1920', NULL, NULL, NULL, NULL, 'Thabo', 'Uncle', '0832342342', '[]', 'sdf', 'Advanced', 0, 'dssdf', 'sd', 1, 1, 'dssd', 'sd', 'confirmed', '2025-03-30 14:48:38', '2025-06-06 14:46:01', 1, 'Approved', 4, NULL, NULL, 0),
 (3, 1, 2, 'Itumeleng', 'Kgakane', 'itum@gmail.com', '0', '2012-01-12', 'Male', 'Fernadale High School', 12, '123 Good Street', 'Johannesburg', 'Gauteng', '1920', 'Mandi', 'Mother', '736933940', 'mandi@gmail.com', '', '', '', '[\"3\",\"4\"]', 'df', 'Beginner', 0, 'fsd', 'sdf', 1, 1, 'sd', 'sdf', 'pending', '2025-03-30 15:31:51', '2025-03-30 15:31:51', 0, NULL, NULL, NULL, NULL, 0),
-(4, 1, 8, 'Jabu', 'Khumalo', 'jabut@example.com', '0', '2012-02-21', 'Male', 'Fernadale High School', 12, '123 Main St', 'Johannesburg', 'Gauteng', '2021', 'Mandisa', 'Mother', '0721166543', 'mandi@gmail.com', '', '', '', '[\"1\",\"2\"]', 'ds', 'Basic', 0, 'sd', 'fds', 1, 1, 'ds', 'sda', 'pending', '2025-03-30 16:35:22', '2025-03-30 16:35:22', 0, NULL, NULL, NULL, NULL, 0),
-(5, 1, NULL, 'Noma', 'Mabasa', 'noma@gmail.com', '0012000', '2012-02-16', 'Male', 'Fernadale High School', 10, '123 Main St', 'Johannesburg', 'Gauteng', '2021', 'Vuyani', 'Father', '0638393157', 'vuyani@gmail.com', '', '', '', '[\"4\",\"1\"]', 'Love 3D animations', 'Intermediate', 0, 'No', 'No', 1, 1, 'No', 'Want to have fun and learn.', 'pending', '2025-03-30 17:09:01', '2025-03-30 17:09:01', 0, NULL, NULL, NULL, NULL, 0);
+(4, 1, 8, 'Jabu', 'Khumalo', 'jabut@example.com', '0', '2012-02-21', 'Male', 'Fernadale High School', 12, '123 Main St', 'Johannesburg', 'Gauteng', '2021', 'Mandisa', 'Mother', '0721166543', 'mandi@gmail.com', '', '', '', '[\"1\",\"2\"]', 'ds', 'Basic', 0, 'sd', 'fds', 1, 1, 'ds', 'sda', 'confirmed', '2025-03-30 16:35:22', '2025-06-06 14:46:44', 0, NULL, NULL, NULL, NULL, 0),
+(5, 1, NULL, 'Noma', 'Mabasa', 'noma@gmail.com', '0012000', '2012-02-16', 'Male', 'Fernadale High School', 10, '123 Main St', 'Johannesburg', 'Gauteng', '2021', 'Vuyani', 'Father', '0638393157', 'vuyani@gmail.com', '', '', '', '[\"4\",\"1\"]', 'Love 3D animations', 'Intermediate', 0, 'No', 'No', 1, 1, 'No', 'Want to have fun and learn.', 'confirmed', '2025-03-30 17:09:01', '2025-06-06 10:28:31', 0, NULL, NULL, NULL, NULL, 0);
 
 -- --------------------------------------------------------
 
@@ -864,6 +897,29 @@ INSERT INTO `holiday_program_schedule_items` (`id`, `schedule_id`, `time_slot`, 
 (20, 5, '1:00 - 3:00', 'Showcase event (open to parents and other Clubhouse members)', 'afternoon', '2025-03-31 15:57:58'),
 (21, 5, '3:00 - 3:30', 'Recognition and certificates', 'afternoon', '2025-03-31 15:57:58'),
 (22, 5, '3:30 - 4:00', 'Program conclusion and future opportunities at the Clubhouse', 'afternoon', '2025-03-31 15:57:58');
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `holiday_program_stats`
+-- (See below for the actual view)
+--
+CREATE TABLE `holiday_program_stats` (
+`id` int(11)
+,`term` varchar(50)
+,`title` varchar(255)
+,`dates` varchar(100)
+,`registration_open` tinyint(1)
+,`status` enum('draft','open','closing_soon','closed','completed','cancelled')
+,`max_participants` int(11)
+,`total_registrations` bigint(21)
+,`member_count` bigint(21)
+,`mentor_count` bigint(21)
+,`confirmed_count` bigint(21)
+,`pending_count` bigint(21)
+,`workshop_count` bigint(21)
+,`capacity_percentage` decimal(25,1)
+);
 
 -- --------------------------------------------------------
 
@@ -1331,6 +1387,13 @@ CREATE TABLE `visitors` (
   `created_at` timestamp NOT NULL DEFAULT current_timestamp()
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `visitors`
+--
+
+INSERT INTO `visitors` (`id`, `name`, `surname`, `age`, `grade_school`, `student_number`, `parent_name`, `parent_surname`, `email`, `phone_number`, `created_at`) VALUES
+(1, 'Vuyani', 'Magibisela', 29, 'Ferndale', '', 'Mandisa', 'Magibisela', 'vuyani.magibisela@sci-bono.co.za', '0638393757', '2025-06-05 14:32:10');
+
 -- --------------------------------------------------------
 
 --
@@ -1344,6 +1407,31 @@ CREATE TABLE `visits` (
   `sign_out_time` timestamp NULL DEFAULT NULL,
   `comment` text DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `visits`
+--
+
+INSERT INTO `visits` (`id`, `visitor_id`, `sign_in_time`, `sign_out_time`, `comment`) VALUES
+(1, 1, '2025-06-05 14:32:22', NULL, NULL);
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `holiday_programs_with_status`
+--
+DROP TABLE IF EXISTS `holiday_programs_with_status`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `holiday_programs_with_status`  AS SELECT `p`.`id` AS `id`, `p`.`term` AS `term`, `p`.`title` AS `title`, `p`.`description` AS `description`, `p`.`dates` AS `dates`, `p`.`time` AS `time`, `p`.`start_date` AS `start_date`, `p`.`end_date` AS `end_date`, `p`.`location` AS `location`, `p`.`age_range` AS `age_range`, `p`.`lunch_included` AS `lunch_included`, `p`.`program_goals` AS `program_goals`, `p`.`registration_deadline` AS `registration_deadline`, `p`.`max_participants` AS `max_participants`, `p`.`registration_open` AS `registration_open`, `p`.`status` AS `status`, `p`.`created_at` AS `created_at`, `p`.`updated_at` AS `updated_at`, CASE WHEN `p`.`status` = 'completed' OR `p`.`end_date` < curdate() THEN 'Completed' WHEN `p`.`status` = 'cancelled' THEN 'Cancelled' WHEN `p`.`status` = 'draft' THEN 'Draft' WHEN `p`.`registration_open` = 1 AND `p`.`status` in ('open','closing_soon') THEN 'Registration Open' WHEN `p`.`registration_open` = 0 OR `p`.`status` = 'closed' THEN 'Registration Closed' WHEN `p`.`start_date` > curdate() THEN 'Upcoming' WHEN curdate() between `p`.`start_date` and `p`.`end_date` THEN 'In Progress' ELSE 'Unknown' END AS `display_status`, (select count(0) from `holiday_program_attendees` where `holiday_program_attendees`.`program_id` = `p`.`id`) AS `total_registrations`, (select count(0) from `holiday_program_attendees` where `holiday_program_attendees`.`program_id` = `p`.`id` and `holiday_program_attendees`.`mentor_registration` = 0) AS `member_registrations`, (select count(0) from `holiday_program_attendees` where `holiday_program_attendees`.`program_id` = `p`.`id` and `holiday_program_attendees`.`mentor_registration` = 1) AS `mentor_registrations`, (select count(0) from `holiday_program_workshops` where `holiday_program_workshops`.`program_id` = `p`.`id`) AS `workshop_count` FROM `holiday_programs` AS `p` ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `holiday_program_stats`
+--
+DROP TABLE IF EXISTS `holiday_program_stats`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `holiday_program_stats`  AS SELECT `p`.`id` AS `id`, `p`.`term` AS `term`, `p`.`title` AS `title`, `p`.`dates` AS `dates`, `p`.`registration_open` AS `registration_open`, `p`.`status` AS `status`, `p`.`max_participants` AS `max_participants`, count(distinct `a`.`id`) AS `total_registrations`, count(distinct case when `a`.`mentor_registration` = 0 then `a`.`id` end) AS `member_count`, count(distinct case when `a`.`mentor_registration` = 1 then `a`.`id` end) AS `mentor_count`, count(distinct case when `a`.`registration_status` = 'confirmed' then `a`.`id` end) AS `confirmed_count`, count(distinct case when `a`.`registration_status` = 'pending' then `a`.`id` end) AS `pending_count`, count(distinct `w`.`id`) AS `workshop_count`, round(count(distinct `a`.`id`) / `p`.`max_participants` * 100,1) AS `capacity_percentage` FROM ((`holiday_programs` `p` left join `holiday_program_attendees` `a` on(`p`.`id` = `a`.`program_id`)) left join `holiday_program_workshops` `w` on(`p`.`id` = `w`.`program_id`)) ;
 
 --
 -- Indexes for dumped tables
@@ -1498,7 +1586,11 @@ ALTER TABLE `dell_surveys`
 -- Indexes for table `holiday_programs`
 --
 ALTER TABLE `holiday_programs`
-  ADD PRIMARY KEY (`id`);
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_status` (`status`),
+  ADD KEY `idx_registration_open` (`registration_open`),
+  ADD KEY `idx_dates` (`start_date`,`end_date`),
+  ADD KEY `idx_term` (`term`);
 
 --
 -- Indexes for table `holiday_program_attendance`
@@ -1516,7 +1608,12 @@ ALTER TABLE `holiday_program_attendees`
   ADD KEY `program_id` (`program_id`),
   ADD KEY `user_id` (`user_id`),
   ADD KEY `email` (`email`),
-  ADD KEY `fk_mentor_workshop` (`mentor_workshop_preference`);
+  ADD KEY `fk_mentor_workshop` (`mentor_workshop_preference`),
+  ADD KEY `idx_registration_status` (`registration_status`),
+  ADD KEY `idx_mentor_registration` (`mentor_registration`),
+  ADD KEY `idx_mentor_status` (`mentor_status`),
+  ADD KEY `idx_email` (`email`),
+  ADD KEY `idx_created_at` (`created_at`);
 
 --
 -- Indexes for table `holiday_program_criteria`
@@ -1590,7 +1687,9 @@ ALTER TABLE `holiday_program_schedule_items`
 --
 ALTER TABLE `holiday_program_workshops`
   ADD PRIMARY KEY (`id`),
-  ADD KEY `program_id` (`program_id`);
+  ADD KEY `program_id` (`program_id`),
+  ADD KEY `idx_program_id` (`program_id`),
+  ADD KEY `idx_instructor` (`instructor`);
 
 --
 -- Indexes for table `holiday_report_images`
@@ -2040,13 +2139,13 @@ ALTER TABLE `user_question_answers`
 -- AUTO_INCREMENT for table `visitors`
 --
 ALTER TABLE `visitors`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `visits`
 --
 ALTER TABLE `visits`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- Constraints for dumped tables
