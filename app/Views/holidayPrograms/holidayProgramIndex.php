@@ -1,3 +1,111 @@
+
+<?php
+// Start session if not already started
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
+
+// Include database connection and required files
+require_once '../../../server.php';
+
+// Try to include the models - with error handling
+$holidayProgramModel = null;
+$activePrograms = [];
+$allPrograms = [];
+
+// First try HolidayProgramCreationModel
+if (file_exists('../../Models/HolidayProgramCreationModel.php')) {
+    require_once '../../Models/HolidayProgramCreationModel.php';
+    
+    if (class_exists('HolidayProgramCreationModel')) {
+        $holidayProgramModel = new HolidayProgramCreationModel($conn);
+        
+        // Check if getAllPrograms method exists
+        if (method_exists($holidayProgramModel, 'getAllPrograms')) {
+            try {
+                $allPrograms = $holidayProgramModel->getAllPrograms();
+                $activePrograms = $holidayProgramModel->getProgramsByStatus('active');
+            } catch (Exception $e) {
+                error_log("Error getting programs: " . $e->getMessage());
+            }
+        } else {
+            // Method doesn't exist, get programs manually
+            $allPrograms = getHolidayProgramsManually($conn);
+            $activePrograms = getActiveHolidayProgramsManually($conn);
+        }
+    }
+} else {
+    // Model file doesn't exist, get programs manually
+    $allPrograms = getHolidayProgramsManually($conn);
+    $activePrograms = getActiveHolidayProgramsManually($conn);
+}
+
+// Fallback functions to get programs directly from database
+function getHolidayProgramsManually($conn) {
+    $programs = [];
+    
+    $sql = "SELECT 
+                id, 
+                term, 
+                title, 
+                description, 
+                dates, 
+                start_date, 
+                end_date, 
+                registration_open,
+                max_participants,
+                created_at,
+                updated_at,
+                (SELECT COUNT(*) FROM holiday_program_attendees WHERE program_id = holiday_programs.id) as registration_count
+            FROM holiday_programs 
+            ORDER BY start_date DESC, created_at DESC";
+    
+    $result = $conn->query($sql);
+    
+    if ($result && $result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $programs[] = $row;
+        }
+    }
+    
+    return $programs;
+}
+
+function getActiveHolidayProgramsManually($conn) {
+    $programs = [];
+    
+    $sql = "SELECT 
+                id, 
+                term, 
+                title, 
+                description, 
+                dates, 
+                start_date, 
+                end_date, 
+                registration_open,
+                max_participants,
+                created_at,
+                updated_at,
+                (SELECT COUNT(*) FROM holiday_program_attendees WHERE program_id = holiday_programs.id) as registration_count
+            FROM holiday_programs 
+            WHERE registration_open = 1
+            ORDER BY start_date DESC, created_at DESC";
+    
+    $result = $conn->query($sql);
+    
+    if ($result && $result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $programs[] = $row;
+        }
+    }
+    
+    return $programs;
+}
+
+// Determine current page for navigation
+$current_page = basename($_SERVER['PHP_SELF']);
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -46,19 +154,22 @@
             </div>
             <div class="about-content">
                 <div class="about-text">
-                    <p>The Sci-Bono Clubhouse Holiday Programs offer immersive learning experiences for young minds during school breaks. Each term features different themes, from multimedia and digital design to robotics and AI.</p>
-                    <p>Our goal is to provide a supportive environment where participants can:</p>
-                    <ul>
-                        <li><i class="fas fa-check-circle"></i> Develop technical skills through hands-on projects</li>
-                        <li><i class="fas fa-check-circle"></i> Collaborate with peers and experienced mentors</li>
-                        <li><i class="fas fa-check-circle"></i> Explore emerging technologies and creative tools</li>
-                        <li><i class="fas fa-check-circle"></i> Build confidence in their abilities</li>
-                        <li><i class="fas fa-check-circle"></i> Prepare for future opportunities in tech and digital arts</li>
-                    </ul>
-                    <p>All programs are guided by skilled mentors who provide personalized support throughout the journey.</p>
+                    <p>The Sci-Bono Clubhouse Holiday Programs offer immersive learning experiences for young minds during school breaks. Our programs combine creativity, technology, and collaboration to provide hands-on learning opportunities that inspire innovation and develop essential 21st-century skills.</p>
+                    <p>Whether you're interested in digital design, programming, electronics, or multimedia creation, our expert mentors will guide you through exciting projects that make learning both fun and meaningful.</p>
                 </div>
-                <div class="about-image">
-                    <img src="../../../public/assets/images/clubhouse-students.jpg" alt="Students at Sci-Bono Clubhouse" onerror="this.src=''">
+                <div class="about-features">
+                    <div class="feature-item">
+                        <i class="fas fa-users"></i>
+                        <span>Expert Mentorship</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-project-diagram"></i>
+                        <span>Real Projects</span>
+                    </div>
+                    <div class="feature-item">
+                        <i class="fas fa-certificate"></i>
+                        <span>Certificates</span>
+                    </div>
                 </div>
             </div>
         </div>
@@ -68,83 +179,180 @@
     <section class="programs" id="programs">
         <div class="container">
             <div class="section-header">
-                <h2>2025 Holiday Programs</h2>
+                <h2>Current Holiday Programs</h2>
                 <div class="underline"></div>
+                <p>Choose from our exciting range of holiday programs designed to spark creativity and build technical skills</p>
             </div>
-            <div class="program-cards">
-                <?php
-                // Get current year
-                $currentYear = date("Y");
-                
-                // Define the holiday programs
-                $holidayPrograms = [
-                    [
-                        "id" => 1,
-                        "term" => "Term 1",
-                        "dates" => "March 31 - April 11, 2025",
-                        "theme" => "Multi-Media - Digital Design",
-                        "description" => "Dive into the world of digital media creation, learning graphic design, video editing, and animation techniques.",
-                        "icon" => "fas fa-photo-video",
-                        "color" => "program-multimedia",
-                        "registration_open" => false
-                    ],
-                    [
-                        "id" => 2,
-                        "term" => "Term 2",
-                        "dates" => "June 21 - July 14, 2025",
-                        "theme" => "AI Festival",
-                        "description" => "Explore artificial intelligence through interactive workshops, coding exercises, and creative AI applications.",
-                        "icon" => "fas fa-robot",
-                        "color" => "program-ai",
-                        "registration_open" => true
-                    ],
-                    [
-                        "id" => 3,
-                        "term" => "Term 3",
-                        "dates" => "October 4 - October 12, 2025",
-                        "theme" => "Robotics Bootcamp",
-                        "description" => "Build and program robots while learning mechanical design, electronics, and problem-solving skills.",
-                        "icon" => "fas fa-microchip",
-                        "color" => "program-robotics",
-                        "registration_open" => false
-                    ],
-                    [
-                        "id" => 4,
-                        "term" => "Term 4",
-                        "dates" => "December 11 - December 17, 2025",
-                        "theme" => "Mixed Reality (VR & AR)",
-                        "description" => "Create immersive experiences using virtual and augmented reality technologies.",
-                        "icon" => "fas fa-vr-cardboard",
-                        "color" => "program-vr",
-                        "registration_open" => false
-                    ]
-                ];
-                
-                // Display each program
-                foreach ($holidayPrograms as $program) {
-                    $registrationStatus = $program["registration_open"] ? 
-                        "<a href='holidayProgramRegistration.php?program_id={$program['id']}' class='register-btn'>Register Now</a>" : 
-                        "<span class='coming-soon'>Registration Opens Soon</span>";
+            
+            <div class="programs-grid">
+                <?php if (!empty($allPrograms)): ?>
+                    <?php foreach ($allPrograms as $program): ?>
+                        <?php
+                        // Determine program icon and color based on title or term
+                        $programIcon = "fas fa-laptop-code";
+                        $programColor = "program-tech";
+                        
+                        $title = $program['title'] ?? '';
+                        if (stripos($title, 'digital') !== false || stripos($title, 'design') !== false) {
+                            $programIcon = "fas fa-paint-brush";
+                            $programColor = "program-design";
+                        } elseif (stripos($title, 'robotics') !== false || stripos($title, 'electronics') !== false) {
+                            $programIcon = "fas fa-robot";
+                            $programColor = "program-robotics";
+                        } elseif (stripos($title, 'game') !== false || stripos($title, 'vr') !== false) {
+                            $programIcon = "fas fa-gamepad";
+                            $programColor = "program-gaming";
+                        } elseif (stripos($title, 'web') !== false || stripos($title, 'app') !== false) {
+                            $programIcon = "fas fa-code";
+                            $programColor = "program-web";
+                        }
+                        
+                        // Determine if registration is available and program status
+                        $registrationButton = '';
+                        $detailsButton = '';
+                        $programStatus = '';
+                        
+                        $isRegistrationOpen = ($program['registration_open'] ?? 0) == 1;
+                        
+                        if ($isRegistrationOpen) {
+                            // Registration is open
+                            $registrationButton = "<a href='holidayProgramRegistration.php?program_id={$program['id']}' class='register-btn active'>Register Now</a>";
+                            $programStatus = "<span class='status-badge open'>Registration Open</span>";
+                        } else {
+                            // Registration is closed
+                            $registrationButton = "<span class='register-btn disabled'>Registration Closed</span>";
+                            $programStatus = "<span class='status-badge closed'>Registration Closed</span>";
+                        }
+                        
+                        // Always show details button if program information is available
+                        if (!empty($program['title']) && !empty($program['term'])) {
+                            $detailsButton = "<a href='./holiday-program-details-term.php?id={$program['id']}' class='details-link'>View Details</a>";
+                        }
+                        
+                        // Calculate capacity if data is available
+                        $capacityHtml = '';
+                        if (isset($program['registration_count']) && isset($program['max_participants']) && $program['max_participants'] > 0) {
+                            $registrationCount = (int)$program['registration_count'];
+                            $maxCapacity = (int)$program['max_participants'];
+                            $capacityPercentage = min(($registrationCount / $maxCapacity) * 100, 100);
+                            
+                            if ($isRegistrationOpen) {
+                                $capacityHtml = "
+                                <div class='capacity-indicator'>
+                                    <div class='capacity-bar'>
+                                        <div class='capacity-fill' style='width: {$capacityPercentage}%'></div>
+                                    </div>
+                                    <span class='capacity-text'>{$registrationCount}/{$maxCapacity} participants</span>
+                                </div>";
+                            }
+                        }
+                        ?>
+                        
+                        <div class="program-card <?php echo $programColor; ?>" data-program-id="<?php echo $program['id']; ?>">
+                            <div class="program-status-indicator">
+                                <?php echo $programStatus; ?>
+                            </div>
+                            <div class="program-icon">
+                                <i class="<?php echo $programIcon; ?>"></i>
+                            </div>
+                            <div class="program-info">
+                                <h3><?php echo htmlspecialchars($program['term'] ?? 'Holiday Program'); ?>: <?php echo htmlspecialchars($program['title'] ?? 'Program Title'); ?></h3>
+                                <div class="program-dates">
+                                    <i class="fas fa-calendar-alt"></i> 
+                                    <?php echo htmlspecialchars($program['dates'] ?? 'Dates TBA'); ?>
+                                </div>
+                                <p><?php echo htmlspecialchars($program['description'] ?? 'Program description coming soon...'); ?></p>
+                                
+                                <!-- Program capacity indicator -->
+                                <?php echo $capacityHtml; ?>
+                                
+                                <div class="program-action">
+                                    <?php echo $registrationButton; ?>
+                                    <?php if ($detailsButton): ?>
+                                        <?php echo $detailsButton; ?>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <!-- Default/fallback programs if none in database -->
+                    <div class="program-card program-design">
+                        <div class="program-status-indicator">
+                            <span class="status-badge coming-soon">Coming Soon</span>
+                        </div>
+                        <div class="program-icon">
+                            <i class="fas fa-paint-brush"></i>
+                        </div>
+                        <div class="program-info">
+                            <h3>Term 1: Multi-Media - Digital Design</h3>
+                            <div class="program-dates">
+                                <i class="fas fa-calendar-alt"></i> March 31 - April 4, 2025
+                            </div>
+                            <p>Dive into the world of digital media creation, learning graphic design, video editing, and animation techniques.</p>
+                            <div class="program-action">
+                                <span class="register-btn disabled">Registration Opens Soon</span>
+                            </div>
+                        </div>
+                    </div>
                     
-                    echo "
-                    <div class='program-card {$program['color']}'>
-                        <div class='program-icon'>
-                            <i class='{$program['icon']}'></i>
+                    <div class="program-card program-tech">
+                        <div class="program-status-indicator">
+                            <span class="status-badge coming-soon">Coming Soon</span>
                         </div>
-                        <div class='program-info'>
-                            <h3>{$program['term']}: {$program['theme']}</h3>
-                            <div class='program-dates'>
-                                <i class='fas fa-calendar-alt'></i> {$program['dates']}
+                        <div class="program-icon">
+                            <i class="fas fa-laptop-code"></i>
+                        </div>
+                        <div class="program-info">
+                            <h3>Term 2: Programming & Web Development</h3>
+                            <div class="program-dates">
+                                <i class="fas fa-calendar-alt"></i> June 16 - June 20, 2025
                             </div>
-                            <p>{$program['description']}</p>
-                            <div class='program-action'>
-                                {$registrationStatus}
-                                <a href='./holiday-program-details-term.php?id={$program['id']}' class='details-link'>View Details</a>
+                            <p>Learn programming fundamentals and create your own websites and web applications using modern technologies.</p>
+                            <div class="program-action">
+                                <span class="register-btn disabled">Registration Opens Soon</span>
                             </div>
                         </div>
-                    </div>";
-                }
-                ?>
+                    </div>
+                    
+                    <div class="program-card program-robotics">
+                        <div class="program-status-indicator">
+                            <span class="status-badge coming-soon">Coming Soon</span>
+                        </div>
+                        <div class="program-icon">
+                            <i class="fas fa-robot"></i>
+                        </div>
+                        <div class="program-info">
+                            <h3>Term 3: Robotics & Electronics</h3>
+                            <div class="program-dates">
+                                <i class="fas fa-calendar-alt"></i> September 22 - September 26, 2025
+                            </div>
+                            <p>Build and program robots while learning about electronics, sensors, and automation technologies.</p>
+                            <div class="program-action">
+                                <span class="register-btn disabled">Registration Opens Soon</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="program-card program-gaming">
+                        <div class="program-status-indicator">
+                            <span class="status-badge coming-soon">Coming Soon</span>
+                        </div>
+                        <div class="program-icon">
+                            <i class="fas fa-gamepad"></i>
+                        </div>
+                        <div class="program-info">
+                            <h3>Term 4: Game Development & VR</h3>
+                            <div class="program-dates">
+                                <i class="fas fa-calendar-alt"></i> December 15 - December 19, 2025
+                            </div>
+                            <p>Create interactive games and explore virtual reality experiences using cutting-edge development tools.</p>
+                            <div class="program-action">
+                                <span class="register-btn disabled">Registration Opens Soon</span>
+                            </div>
+                        </div>
+                    </div>
+                <?php endif; ?>
             </div>
         </div>
     </section>
@@ -173,293 +381,82 @@
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">
-                        <i class="fas fa-rocket"></i>
+                        <i class="fas fa-users-cog"></i>
                     </div>
-                    <h3>Innovation Focus</h3>
-                    <p>Work on cutting-edge technologies and creative approaches that push the boundaries of what's possible.</p>
+                    <h3>Collaborative Environment</h3>
+                    <p>Work alongside peers in a supportive clubhouse environment that encourages collaboration and creativity.</p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">
                         <i class="fas fa-certificate"></i>
                     </div>
-                    <h3>Recognition</h3>
-                    <p>Receive certificates of completion and opportunities to showcase your work to the broader community.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-    
-    <!-- Testimonials -->
-    <!-- <section class="testimonials">
-        <div class="container">
-            <div class="section-header">
-                <h2>What Previous Participants Say</h2>
-                <div class="underline"></div>
-            </div>
-            <div class="testimonial-slider">
-                <div class="testimonial-card">
-                    <div class="testimonial-text">
-                        <p>"The Robotics Bootcamp was amazing! I learned how to build and program my own robot, and now I'm joining the FTC competition team."</p>
-                    </div>
-                    <div class="testimonial-author">
-                        <div class="author-avatar">TM</div>
-                        <div class="author-info">
-                            <h4>Thabo Mokoena</h4>
-                            <p>Participant, 2024 Robotics Bootcamp</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="testimonial-card">
-                    <div class="testimonial-text">
-                        <p>"I discovered my passion for digital art during the Multimedia program. The mentors were so helpful and I created my first animation!"</p>
-                    </div>
-                    <div class="testimonial-author">
-                        <div class="author-avatar">LS</div>
-                        <div class="author-info">
-                            <h4>Lerato Sibiya</h4>
-                            <p>Participant, 2024 Multimedia Program</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="testimonial-card">
-                    <div class="testimonial-text">
-                        <p>"The AI Festival opened my eyes to how artificial intelligence works. I built a simple AI model that can recognize images. It was incredible!"</p>
-                    </div>
-                    <div class="testimonial-author">
-                        <div class="author-avatar">KN</div>
-                        <div class="author-info">
-                            <h4>Kagiso Ndlovu</h4>
-                            <p>Participant, 2024 AI Festival</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <div class="testimonial-controls">
-                <button id="prev-testimonial"><i class="fas fa-chevron-left"></i></button>
-                <button id="next-testimonial"><i class="fas fa-chevron-right"></i></button>
-            </div>
-        </div>
-    </section> -->
-    
-    <!-- FAQ Section -->
-    <section class="faq">
-        <div class="container">
-            <div class="section-header">
-                <h2>Frequently Asked Questions</h2>
-                <div class="underline"></div>
-            </div>
-            <div class="faq-container">
-                <div class="faq-item">
-                    <div class="faq-question">
-                        <h3>Who can participate in the holiday programs?</h3>
-                        <i class="fas fa-plus"></i>
-                    </div>
-                    <div class="faq-answer">
-                        <p>Our holiday programs are designed for students aged 9-18 years. Some programs may have specific age requirements based on the content and tools used.</p>
-                    </div>
-                </div>
-                <div class="faq-item">
-                    <div class="faq-question">
-                        <h3>Do I need any prior experience to join?</h3>
-                        <i class="fas fa-plus"></i>
-                    </div>
-                    <div class="faq-answer">
-                        <p>Most of our programs are designed for beginners with no prior experience. We also offer intermediate and advanced options for those with existing skills. Each program description specifies the recommended experience level.</p>
-                    </div>
-                </div>
-                <div class="faq-item">
-                    <div class="faq-question">
-                        <h3>What do I need to bring with me?</h3>
-                        <i class="fas fa-plus"></i>
-                    </div>
-                    <div class="faq-answer">
-                        <p>All essential equipment and materials will be provided. Participants should bring their own lunch, a water bottle, and a notebook. If specific items are needed for a program, this will be communicated after registration.</p>
-                    </div>
-                </div>
-                <div class="faq-item">
-                    <div class="faq-question">
-                        <h3>What are the program hours?</h3>
-                        <i class="fas fa-plus"></i>
-                    </div>
-                    <div class="faq-answer">
-                        <p>Most programs run from 9:00 AM to 3:00 PM, Monday through Friday. Specific hours for each program are provided in the detailed program information after registration.</p>
-                    </div>
-                </div>
-                <div class="faq-item">
-                    <div class="faq-question">
-                        <h3>Is there a cost to participate?</h3>
-                        <i class="fas fa-plus"></i>
-                    </div>
-                    <div class="faq-answer">
-                        <p>The Sci-Bono Clubhouse Holiday Programs are offered free of charge to ensure accessibility for all interested students. Space is limited, so early registration is encouraged.</p>
-                    </div>
+                    <h3>Certificate of Completion</h3>
+                    <p>Receive recognition for your achievements and document your learning journey with official certificates.</p>
                 </div>
             </div>
         </div>
     </section>
     
     <!-- CTA Section -->
-    <section class="cta">
+    <section class="cta-section">
         <div class="container">
             <div class="cta-content">
-                <h2>Ready to embark on a creative technology journey?</h2>
-                <p>Register now for our upcoming holiday programs and start building the skills for tomorrow.</p>
-                <a href="#programs" class="cta-button">Explore Programs</a>
+                <h2>Ready to Start Your Learning Journey?</h2>
+                <p>Join thousands of young innovators who have discovered their passion for technology through our holiday programs.</p>
+                <div class="cta-buttons">
+                    <a href="#programs" class="cta-button primary">View Programs</a>
+                    <a href="holidayProgramLogin.php" class="cta-button secondary">Login to Dashboard</a>
+                </div>
             </div>
         </div>
     </section>
-    
+
     <!-- Footer -->
-    <footer class="footer">
+    <footer class="holiday-footer">
         <div class="container">
             <div class="footer-content">
-                <div class="footer-logo">
-                    <img src="../../public/assets/images/Sci-Bono logo White.png" alt="Sci-Bono Clubhouse">
-                    <img src="../../public/assets/images/TheClubhouse_Logo_White_Large.png" alt="The Clubhouse Network">
-                </div>
-                <div class="footer-links">
-                    <div class="footer-links-column">
-                        <h3>Programs</h3>
-                        <ul>
-                            <li><a href="#">Holiday Programs</a></li>
-                            <li><a href="#">After-School Activities</a></li>
-                            <li><a href="#">Workshops</a></li>
-                            <li><a href="#">Competitions</a></li>
-                        </ul>
-                    </div>
-                    <div class="footer-links-column">
-                        <h3>Resources</h3>
-                        <ul>
-                            <li><a href="#">Learning Materials</a></li>
-                            <li><a href="#">Project Gallery</a></li>
-                            <li><a href="#">Tech Tools</a></li>
-                            <li><a href="#">Downloads</a></li>
-                        </ul>
-                    </div>
-                    <div class="footer-links-column">
-                        <h3>About</h3>
-                        <ul>
-                            <li><a href="#">Our Mission</a></li>
-                            <li><a href="#">The Team</a></li>
-                            <li><a href="#">Partners</a></li>
-                            <li><a href="#">Contact Us</a></li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="footer-contact">
-                    <h3>Contact Us</h3>
-                    <p><i class="fas fa-map-marker-alt"></i> Sci-Bono Discovery Centre, Corner of Miriam Makeba & Helen Joseph Streets, Newtown, Johannesburg</p>
-                    <p><i class="fas fa-phone"></i> +27 11 639 8463</p>
-                    <p><i class="fas fa-envelope"></i> vuyani.magibisela@sci-bono.co.za</p>
+                <div class="footer-section">
+                    <h3>Follow Us</h3>
                     <div class="social-links">
-                        <a href="#" aria-label="Facebook"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#" aria-label="Twitter"><i class="fab fa-twitter"></i></a>
-                        <a href="#" aria-label="Instagram"><i class="fab fa-instagram"></i></a>
-                        <a href="#" aria-label="YouTube"><i class="fab fa-youtube"></i></a>
+                        <a href="#"><i class="fab fa-facebook"></i></a>
+                        <a href="#"><i class="fab fa-twitter"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-youtube"></i></a>
                     </div>
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; <?php echo date("Y"); ?> Sci-Bono Clubhouse. All Rights Reserved.</p>
+                <p>&copy; 2025 Sci-Bono Discovery Centre. All rights reserved.</p>
             </div>
         </div>
     </footer>
 
-    <!-- Mobile Navigation (visible on mobile only) -->
-    <nav class="mobile-nav">
-        <a href="../../home.php" class="mobile-menu-item">
-            <div class="mobile-menu-icon">
-                <i class="fas fa-home"></i>
-            </div>
-            <span>Home</span>
-        </a>
-        <a href="#programs" class="mobile-menu-item">
-            <div class="mobile-menu-icon">
-                <i class="fas fa-calendar-alt"></i>
-            </div>
-            <span>Programs</span>
-        </a>
-        <a href="../../app/Views/learn.php" class="mobile-menu-item">
-            <div class="mobile-menu-icon">
-                <i class="fas fa-book"></i>
-            </div>
-            <span>Learn</span>
-        </a>
-        <a href="holiday-dashboard.php" class="mobile-menu-item">
-            <div class="mobile-menu-icon">
-                <i class="fas fa-user"></i>
-            </div>
-            <span>Account</span>
-        </a>
-    </nav>
-
     <!-- JavaScript -->
+    <script src="../../../public/assets/js/holidayProgramIndex.js"></script>
     <script>
-        // FAQ Toggle
-        document.querySelectorAll('.faq-question').forEach(question => {
-            question.addEventListener('click', () => {
-                const item = question.parentElement;
-                const isActive = item.classList.contains('active');
-                
-                // Close all FAQ items
-                document.querySelectorAll('.faq-item').forEach(faqItem => {
-                    faqItem.classList.remove('active');
-                    const faqAnswer = faqItem.querySelector('.faq-answer');
-                    faqAnswer.style.maxHeight = null;
-                    faqItem.querySelector('.fa-plus').classList.remove('fa-minus');
-                    faqItem.querySelector('.fa-plus').classList.add('fa-plus');
+        // Auto-refresh program status every 30 seconds
+        setInterval(function() {
+            // Only refresh if page is visible
+            if (!document.hidden) {
+                // Check for status updates without full page reload
+                checkForProgramUpdates();
+            }
+        }, 30000);
+        
+        function checkForProgramUpdates() {
+            // Simple AJAX call to check for updates
+            fetch('./api/get-all-program-status.php')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success && data.has_updates) {
+                        // Reload page if there are updates
+                        window.location.reload();
+                    }
+                })
+                .catch(error => {
+                    console.log('Update check failed:', error);
                 });
-                
-                // If clicked item wasn't already active, open it
-                if (!isActive) {
-                    item.classList.add('active');
-                    const answer = item.querySelector('.faq-answer');
-                    answer.style.maxHeight = answer.scrollHeight + "px";
-                    question.querySelector('.fa-plus').classList.remove('fa-plus');
-                    question.querySelector('i').classList.add('fa-minus');
-                }
-            });
-        });
-
-        // Testimonial Slider
-        const testimonialCards = document.querySelectorAll('.testimonial-card');
-        let currentTestimonial = 0;
-
-        function showTestimonial(index) {
-            testimonialCards.forEach((card, i) => {
-                card.style.display = i === index ? 'block' : 'none';
-            });
         }
-
-        document.getElementById('next-testimonial').addEventListener('click', () => {
-            currentTestimonial = (currentTestimonial + 1) % testimonialCards.length;
-            showTestimonial(currentTestimonial);
-        });
-
-        document.getElementById('prev-testimonial').addEventListener('click', () => {
-            currentTestimonial = (currentTestimonial - 1 + testimonialCards.length) % testimonialCards.length;
-            showTestimonial(currentTestimonial);
-        });
-
-        // Initialize the testimonial slider
-        showTestimonial(currentTestimonial);
-
-        // Smooth scroll for anchor links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function(e) {
-                e.preventDefault();
-                const targetId = this.getAttribute('href');
-                if (targetId === '#') return;
-                
-                const targetElement = document.querySelector(targetId);
-                if (targetElement) {
-                    window.scrollTo({
-                        top: targetElement.offsetTop - 80,
-                        behavior: 'smooth'
-                    });
-                }
-            });
-        });
     </script>
 </body>
 </html>

@@ -87,18 +87,6 @@ class HolidayProgramCreationModel {
         return $stmt->execute();
     }
     
-    /**
-     * Get program by ID
-     */
-    public function getProgramById($programId) {
-        $sql = "SELECT * FROM holiday_programs WHERE id = ?";
-        $stmt = $this->conn->prepare($sql);
-        $stmt->bind_param("i", $programId);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        
-        return $result->fetch_assoc();
-    }
     
     /**
      * Delete a program
@@ -231,64 +219,6 @@ class HolidayProgramCreationModel {
     }
     
     /**
-     * Search programs
-     */
-    public function searchPrograms($searchTerm) {
-        $sql = "SELECT id, term, title, dates, start_date, end_date, registration_open,
-                       (SELECT COUNT(*) FROM holiday_program_attendees WHERE program_id = holiday_programs.id) as registration_count
-                FROM holiday_programs 
-                WHERE title LIKE ? OR term LIKE ? OR description LIKE ?
-                ORDER BY start_date DESC";
-        
-        $searchWildcard = '%' . $searchTerm . '%';
-        $stmt = $this->conn->prepare($sql);
-        $stmt->bind_param("sss", $searchWildcard, $searchWildcard, $searchWildcard);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        
-        $programs = [];
-        while ($row = $result->fetch_assoc()) {
-            $programs[] = $row;
-        }
-        
-        return $programs;
-    }
-    
-    /**
-     * Get programs by status
-     */
-    public function getProgramsByStatus($status) {
-        $sql = "SELECT id, term, title, dates, start_date, end_date, registration_open,
-                       (SELECT COUNT(*) FROM holiday_program_attendees WHERE program_id = holiday_programs.id) as registration_count
-                FROM holiday_programs";
-        
-        if ($status === 'active') {
-            $sql .= " WHERE registration_open = 1";
-        } elseif ($status === 'closed') {
-            $sql .= " WHERE registration_open = 0";
-        } elseif ($status === 'upcoming') {
-            $sql .= " WHERE start_date > CURDATE()";
-        } elseif ($status === 'past') {
-            $sql .= " WHERE end_date < CURDATE()";
-        } elseif ($status === 'current') {
-            $sql .= " WHERE CURDATE() BETWEEN start_date AND end_date";
-        }
-        
-        $sql .= " ORDER BY start_date DESC";
-        
-        $result = $this->conn->query($sql);
-        
-        $programs = [];
-        if ($result) {
-            while ($row = $result->fetch_assoc()) {
-                $programs[] = $row;
-            }
-        }
-        
-        return $programs;
-    }
-    
-    /**
      * Update program status only
      */
     public function updateProgramStatus($programId, $registrationOpen) {
@@ -323,5 +253,321 @@ class HolidayProgramCreationModel {
         }
         
         return $program;
+    }
+
+    /**
+     * Get all holiday programs
+    */
+    public function getAllPrograms() {
+        $sql = "SELECT 
+                    id, 
+                    term, 
+                    title, 
+                    description, 
+                    dates, 
+                    start_date, 
+                    end_date, 
+                    registration_open,
+                    max_participants,
+                    auto_close_on_capacity,
+                    auto_close_on_date,
+                    registration_deadline,
+                    created_at,
+                    updated_at,
+                    (SELECT COUNT(*) FROM holiday_program_attendees WHERE program_id = holiday_programs.id) as registration_count
+                FROM holiday_programs 
+                ORDER BY start_date DESC, created_at DESC";
+        
+        $result = $this->conn->query($sql);
+        
+        $programs = [];
+        if ($result && $result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                $programs[] = $row;
+            }
+        }
+        
+        return $programs;
+    }
+
+    /**
+     * Get programs by status - method already exists but here's the improved version
+     */
+    public function getProgramsByStatus($status) {
+        $sql = "SELECT 
+                    id, 
+                    term, 
+                    title, 
+                    description, 
+                    dates, 
+                    start_date, 
+                    end_date, 
+                    registration_open,
+                    max_participants,
+                    auto_close_on_capacity,
+                    auto_close_on_date,
+                    registration_deadline,
+                    created_at,
+                    updated_at,
+                    (SELECT COUNT(*) FROM holiday_program_attendees WHERE program_id = holiday_programs.id) as registration_count
+                FROM holiday_programs";
+        
+        $conditions = [];
+        
+        switch($status) {
+            case 'active':
+                $conditions[] = "registration_open = 1";
+                break;
+            case 'closed':
+                $conditions[] = "registration_open = 0";
+                break;
+            case 'upcoming':
+                $conditions[] = "start_date > CURDATE()";
+                break;
+            case 'past':
+                $conditions[] = "end_date < CURDATE()";
+                break;
+            case 'current':
+                $conditions[] = "CURDATE() BETWEEN start_date AND end_date";
+                break;
+            case 'open_registration':
+                $conditions[] = "registration_open = 1 AND (registration_deadline IS NULL OR registration_deadline > NOW())";
+                break;
+        }
+        
+        if (!empty($conditions)) {
+            $sql .= " WHERE " . implode(" AND ", $conditions);
+        }
+        
+        $sql .= " ORDER BY start_date DESC, created_at DESC";
+        
+        $result = $this->conn->query($sql);
+        
+        $programs = [];
+        if ($result && $result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                $programs[] = $row;
+            }
+        }
+        
+        return $programs;
+    }
+
+    /**
+     * Get a single program by ID
+     */
+    public function getProgramById($programId) {
+        $sql = "SELECT 
+                    id, 
+                    term, 
+                    title, 
+                    description, 
+                    dates, 
+                    start_date, 
+                    end_date, 
+                    registration_open,
+                    max_participants,
+                    auto_close_on_capacity,
+                    auto_close_on_date,
+                    registration_deadline,
+                    created_at,
+                    updated_at,
+                    (SELECT COUNT(*) FROM holiday_program_attendees WHERE program_id = holiday_programs.id) as registration_count,
+                    (SELECT COUNT(*) FROM holiday_program_attendees WHERE program_id = holiday_programs.id AND status = 'confirmed') as confirmed_count
+                FROM holiday_programs 
+                WHERE id = ?";
+        
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("i", $programId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result && $result->num_rows > 0) {
+            return $result->fetch_assoc();
+        }
+        
+        return null;
+    }
+
+    /**
+     * Check if program exists
+     */
+    public function programExists($programId) {
+        $sql = "SELECT id FROM holiday_programs WHERE id = ?";
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("i", $programId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        return $result && $result->num_rows > 0;
+    }
+
+    /**
+     * Get program capacity information
+     */
+    public function getProgramCapacity($programId) {
+        $sql = "SELECT 
+                    p.max_participants,
+                    COUNT(a.id) as total_registrations,
+                    COUNT(CASE WHEN a.status = 'confirmed' THEN 1 END) as confirmed_count,
+                    COUNT(CASE WHEN a.status = 'pending' THEN 1 END) as pending_count,
+                    COUNT(CASE WHEN a.mentor_registration = 1 THEN 1 END) as mentor_count,
+                    COUNT(CASE WHEN a.mentor_registration = 0 THEN 1 END) as member_count
+                FROM holiday_programs p
+                LEFT JOIN holiday_program_attendees a ON p.id = a.program_id
+                WHERE p.id = ?
+                GROUP BY p.id, p.max_participants";
+        
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("i", $programId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result && $result->num_rows > 0) {
+            $data = $result->fetch_assoc();
+            
+            // Calculate capacity percentage
+            $data['capacity_percentage'] = $data['max_participants'] > 0 
+                ? round(($data['confirmed_count'] / $data['max_participants']) * 100, 1) 
+                : 0;
+                
+            // Determine capacity status
+            if ($data['confirmed_count'] >= $data['max_participants']) {
+                $data['capacity_status'] = 'full';
+            } elseif ($data['capacity_percentage'] >= 90) {
+                $data['capacity_status'] = 'nearly_full';
+            } elseif ($data['capacity_percentage'] >= 75) {
+                $data['capacity_status'] = 'filling_up';
+            } else {
+                $data['capacity_status'] = 'available';
+            }
+            
+            return $data;
+        }
+        
+        return [
+            'max_participants' => 0,
+            'total_registrations' => 0,
+            'confirmed_count' => 0,
+            'pending_count' => 0,
+            'mentor_count' => 0,
+            'member_count' => 0,
+            'capacity_percentage' => 0,
+            'capacity_status' => 'available'
+        ];
+    }
+
+    /**
+     * Update program registration status
+     */
+    public function updateRegistrationStatus($programId, $status) {
+        $sql = "UPDATE holiday_programs 
+                SET registration_open = ?, updated_at = NOW() 
+                WHERE id = ?";
+        
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("ii", $status, $programId);
+        
+        if ($stmt->execute()) {
+            // Log the status change if status log table exists
+            $this->logStatusChange($programId, $status);
+            return true;
+        }
+        
+        return false;
+    }
+
+    /**
+     * Log status changes (if status log table exists)
+     */
+    private function logStatusChange($programId, $newStatus) {
+        // Check if status log table exists
+        $checkTable = "SHOW TABLES LIKE 'holiday_program_status_log'";
+        $result = $this->conn->query($checkTable);
+        
+        if ($result && $result->num_rows > 0) {
+            $sql = "INSERT INTO holiday_program_status_log 
+                    (program_id, old_status, new_status, change_reason, ip_address, created_at)
+                    VALUES (?, ?, ?, ?, ?, NOW())";
+            
+            $stmt = $this->conn->prepare($sql);
+            $oldStatus = $newStatus == 1 ? 0 : 1; // opposite of new status
+            $reason = $newStatus == 1 ? 'Registration opened' : 'Registration closed';
+            $ipAddress = $_SERVER['REMOTE_ADDR'] ?? 'unknown';
+            
+            $stmt->bind_param("iiiss", $programId, $oldStatus, $newStatus, $reason, $ipAddress);
+            $stmt->execute();
+        }
+    }
+
+    /**
+     * Get active programs (registration open)
+     */
+    public function getActivePrograms() {
+        return $this->getProgramsByStatus('active');
+    }
+
+    /**
+     * Get upcoming programs
+     */
+    public function getUpcomingPrograms() {
+        return $this->getProgramsByStatus('upcoming');
+    }
+
+    /**
+     * Search programs
+     */
+    public function searchPrograms($searchTerm) {
+        $sql = "SELECT 
+                    id, 
+                    term, 
+                    title, 
+                    description, 
+                    dates, 
+                    start_date, 
+                    end_date, 
+                    registration_open,
+                    max_participants,
+                    created_at,
+                    updated_at,
+                    (SELECT COUNT(*) FROM holiday_program_attendees WHERE program_id = holiday_programs.id) as registration_count
+                FROM holiday_programs 
+                WHERE title LIKE ? OR term LIKE ? OR description LIKE ?
+                ORDER BY start_date DESC, created_at DESC";
+        
+        $searchWildcard = '%' . $searchTerm . '%';
+        $stmt = $this->conn->prepare($sql);
+        $stmt->bind_param("sss", $searchWildcard, $searchWildcard, $searchWildcard);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        $programs = [];
+        if ($result && $result->num_rows > 0) {
+            while ($row = $result->fetch_assoc()) {
+                $programs[] = $row;
+            }
+        }
+        
+        return $programs;
+    }
+
+    /**
+     * Get program statistics
+     */
+    public function getProgramStatistics($programId) {
+        $capacity = $this->getProgramCapacity($programId);
+        $program = $this->getProgramById($programId);
+        
+        return [
+            'total_registrations' => $capacity['total_registrations'],
+            'confirmed_registrations' => $capacity['confirmed_count'],
+            'pending_registrations' => $capacity['pending_count'],
+            'mentor_applications' => $capacity['mentor_count'],
+            'member_registrations' => $capacity['member_count'],
+            'capacity_percentage' => $capacity['capacity_percentage'],
+            'capacity_status' => $capacity['capacity_status'],
+            'spots_remaining' => max(0, ($program['max_participants'] ?? 0) - $capacity['confirmed_count']),
+            'registration_open' => $program['registration_open'] ?? 0
+        ];
     }
 }

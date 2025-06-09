@@ -712,6 +712,417 @@ section:nth-child(even) {
     color: var(--primary);
 }
 
+
+/* Program Status Indicators */
+.program-status-indicator {
+    position: absolute;
+    top: 15px;
+    right: 15px;
+    z-index: 2;
+}
+
+.status-badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    white-space: nowrap;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.status-badge.open {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    animation: pulse 2s infinite;
+}
+
+.status-badge.closed {
+    background: linear-gradient(135deg, #dc3545, #e74c3c);
+    color: white;
+}
+
+.status-badge.coming-soon {
+    background: linear-gradient(135deg, #ffc107, #fd7e14);
+    color: #212529;
+}
+
+.status-badge.closing-soon {
+    background: linear-gradient(135deg, #fd7e14, #dc3545);
+    color: white;
+    animation: blink 1s infinite;
+}
+
+/* Pulse animation for open registration */
+@keyframes pulse {
+    0% {
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), 0 0 0 0 rgba(40, 167, 69, 0.7);
+    }
+    70% {
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), 0 0 0 10px rgba(40, 167, 69, 0);
+    }
+    100% {
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1), 0 0 0 0 rgba(40, 167, 69, 0);
+    }
+}
+
+/* Blink animation for closing soon */
+@keyframes blink {
+    0%, 50% {
+        opacity: 1;
+    }
+    51%, 100% {
+        opacity: 0.7;
+    }
+}
+
+/* Enhanced Program Cards */
+.program-card {
+    position: relative;
+    border-radius: 15px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+}
+
+.program-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.15);
+}
+
+/* Program Card States */
+.program-card.registration-open {
+    border: 2px solid #28a745;
+}
+
+.program-card.registration-closed {
+    opacity: 0.8;
+    filter: grayscale(20%);
+}
+
+.program-card.coming-soon {
+    background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+}
+
+/* Capacity Indicator */
+.capacity-indicator {
+    margin: 15px 0;
+    font-size: 12px;
+}
+
+.capacity-bar {
+    width: 100%;
+    height: 6px;
+    background-color: #e9ecef;
+    border-radius: 3px;
+    overflow: hidden;
+    margin-bottom: 5px;
+}
+
+.capacity-fill {
+    height: 100%;
+    background: linear-gradient(90deg, #28a745, #20c997);
+    border-radius: 3px;
+    transition: width 0.3s ease;
+}
+
+.capacity-fill[style*="100%"] {
+    background: linear-gradient(90deg, #dc3545, #e74c3c);
+}
+
+.capacity-text {
+    color: #6c757d;
+    font-weight: 500;
+}
+
+/* Enhanced Action Buttons */
+.program-action {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+.register-btn {
+    padding: 12px 24px;
+    border-radius: 25px;
+    text-decoration: none;
+    font-weight: 600;
+    text-align: center;
+    transition: all 0.3s ease;
+    border: none;
+    cursor: pointer;
+    font-size: 14px;
+    min-width: 120px;
+    display: inline-block;
+}
+
+.register-btn.active {
+    background: linear-gradient(135deg, #007bff, #0056b3);
+    color: white;
+    box-shadow: 0 4px 15px rgba(0, 123, 255, 0.3);
+}
+
+.register-btn.active:hover {
+    background: linear-gradient(135deg, #0056b3, #004085);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 123, 255, 0.4);
+}
+
+.register-btn.disabled {
+    background: #6c757d;
+    color: white;
+    cursor: not-allowed;
+    opacity: 0.7;
+}
+
+.details-link {
+    padding: 10px 20px;
+    border: 2px solid #6c757d;
+    border-radius: 25px;
+    color: #6c757d;
+    text-decoration: none;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    font-size: 14px;
+    background: transparent;
+}
+
+.details-link:hover {
+    background: #6c757d;
+    color: white;
+    transform: translateY(-1px);
+}
+
+/* Program not available state */
+.program-card.no-details .details-link {
+    display: none;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .program-action {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .register-btn,
+    .details-link {
+        width: 100%;
+        text-align: center;
+        margin-bottom: 8px;
+    }
+    
+    .status-badge {
+        font-size: 10px;
+        padding: 4px 8px;
+    }
+    
+    .capacity-indicator {
+        margin: 10px 0;
+    }
+}
+
+/* Dark mode support */
+@media (prefers-color-scheme: dark) {
+    .program-card.coming-soon {
+        background: linear-gradient(135deg, #2c2c2c, #1a1a1a);
+        color: #e9ecef;
+    }
+    
+    .capacity-bar {
+        background-color: #495057;
+    }
+    
+    .capacity-text {
+        color: #adb5bd;
+    }
+    
+    .details-link {
+        border-color: #adb5bd;
+        color: #adb5bd;
+    }
+    
+    .details-link:hover {
+        background: #adb5bd;
+        color: #212529;
+    }
+}
+
+/* Loading state for dynamic updates */
+.program-card.loading {
+    position: relative;
+    pointer-events: none;
+}
+
+.program-card.loading::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(255, 255, 255, 0.8);
+    z-index: 10;
+    border-radius: 15px;
+}
+
+.program-card.loading::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 20px;
+    height: 20px;
+    margin: -10px 0 0 -10px;
+    border: 2px solid #dee2e6;
+    border-top-color: #007bff;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    z-index: 11;
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+/* Enhanced CTA Section */
+.cta-section {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 80px 0;
+    text-align: center;
+}
+
+.cta-content h2 {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    font-weight: 700;
+}
+
+.cta-content p {
+    font-size: 1.2rem;
+    margin-bottom: 40px;
+    opacity: 0.9;
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.cta-buttons {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.cta-button {
+    padding: 15px 30px;
+    border-radius: 30px;
+    text-decoration: none;
+    font-weight: 600;
+    transition: all 0.3s ease;
+    font-size: 16px;
+    min-width: 180px;
+    display: inline-block;
+}
+
+.cta-button.primary {
+    background: white;
+    color: #667eea;
+}
+
+.cta-button.primary:hover {
+    background: #f8f9fa;
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.cta-button.secondary {
+    background: transparent;
+    color: white;
+    border: 2px solid white;
+}
+
+.cta-button.secondary:hover {
+    background: white;
+    color: #667eea;
+    transform: translateY(-2px);
+}
+
+/* Footer Styles */
+.holiday-footer {
+    background: #2c3e50;
+    color: white;
+    padding: 60px 0 20px;
+}
+
+.footer-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 40px;
+    margin-bottom: 40px;
+}
+
+.footer-section h3 {
+    margin-bottom: 20px;
+    font-size: 1.2rem;
+    font-weight: 600;
+}
+
+.footer-section ul {
+    list-style: none;
+    padding: 0;
+}
+
+.footer-section ul li {
+    margin-bottom: 10px;
+}
+
+.footer-section ul li a {
+    color: #bdc3c7;
+    text-decoration: none;
+    transition: color 0.3s ease;
+}
+
+.footer-section ul li a:hover {
+    color: white;
+}
+
+.social-links {
+    display: flex;
+    gap: 15px;
+}
+
+.social-links a {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    background: #34495e;
+    color: white;
+    border-radius: 50%;
+    text-decoration: none;
+    transition: all 0.3s ease;
+}
+
+.social-links a:hover {
+    background: #3498db;
+    transform: translateY(-2px);
+}
+
+.footer-bottom {
+    border-top: 1px solid #34495e;
+    padding-top: 20px;
+    text-align: center;
+    color: #bdc3c7;
+}
+
 /* Media Queries */
 @media (max-width: 992px) {
     .hero h1 {

@@ -13,6 +13,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true || $_SESSION[
 // Include required files
 require_once '../../../server.php';
 require_once '../../Controllers/HolidayProgramAdminController.php';
+require __DIR__ . '/../../../config/config.php'; // Include the config file
 
 // Initialize controller
 $adminController = new HolidayProgramAdminController($conn);
@@ -36,6 +37,115 @@ $currentProgramId = isset($_GET['program_id']) ? intval($_GET['program_id']) : n
 // Get dashboard data
 $dashboardData = $adminController->getDashboardData($currentProgramId);
 extract($dashboardData);
+
+// Function to handle AJAX status updates
+if (isset($_POST['action']) && $_POST['action'] === 'update_program_status') {
+    header('Content-Type: application/json');
+    
+    $programId = intval($_POST['program_id']);
+    $registrationOpen = intval($_POST['registration_open']);
+    
+    try {
+        // Update the program status in database
+        $updateSql = "UPDATE holiday_programs SET registration_open = ?, updated_at = NOW() WHERE id = ?";
+        $updateStmt = $conn->prepare($updateSql);
+        $updateStmt->bind_param("ii", $registrationOpen, $programId);
+        
+        if ($updateStmt->execute()) {
+            // Log the status change
+            $logSql = "INSERT INTO holiday_program_status_log (program_id, changed_by, old_status, new_status, change_reason, created_at) 
+                       VALUES (?, ?, ?, ?, ?, NOW())";
+            $logStmt = $conn->prepare($logSql);
+            $userId = $_SESSION['id'];
+            $oldStatus = 1 - $registrationOpen; // opposite of new status
+            $reason = "Manual status change by admin";
+            $logStmt->bind_param("iiiss", $programId, $userId, $oldStatus, $registrationOpen, $reason);
+            $logStmt->execute();
+            
+            echo json_encode([
+                'success' => true,
+                'message' => 'Program status updated successfully',
+                'new_status' => $registrationOpen,
+                'timestamp' => date('Y-m-d H:i:s')
+            ]);
+        } else {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Failed to update program status'
+            ]);
+        }
+    } catch (Exception $e) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Error: ' . $e->getMessage()
+        ]);
+    }
+    exit;
+}
+
+// Function to handle automation settings
+if (isset($_POST['action']) && $_POST['action'] === 'save_automation_setting') {
+    header('Content-Type: application/json');
+    
+    $programId = intval($_POST['program_id']);
+    $setting = $_POST['setting'];
+    $value = intval($_POST['value']);
+    
+    try {
+        $validSettings = ['auto_close_on_capacity', 'auto_close_on_date'];
+        if (!in_array($setting, $validSettings)) {
+            throw new Exception('Invalid setting');
+        }
+        
+        $updateSql = "UPDATE holiday_programs SET {$setting} = ?, updated_at = NOW() WHERE id = ?";
+        $updateStmt = $conn->prepare($updateSql);
+        $updateStmt->bind_param("ii", $value, $programId);
+        
+        if ($updateStmt->execute()) {
+            echo json_encode([
+                'success' => true,
+                'message' => 'Automation setting saved successfully'
+            ]);
+        } else {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Failed to save automation setting'
+            ]);
+        }
+    } catch (Exception $e) {
+        echo json_encode([
+            'success' => false,
+            'message' => 'Error: ' . $e->getMessage()
+        ]);
+    }
+    exit;
+}
+
+// Function to get program status history
+if (isset($_GET['action']) && $_GET['action'] === 'get_status_history') {
+    header('Content-Type: application/json');
+    
+    $programId = intval($_GET['program_id']);
+    
+    $historySql = "SELECT psl.*, u.name as changed_by_name 
+                   FROM holiday_program_status_log psl 
+                   LEFT JOIN users u ON psl.changed_by = u.id 
+                   WHERE psl.program_id = ? 
+                   ORDER BY psl.created_at DESC 
+                   LIMIT 10";
+    $historyStmt = $conn->prepare($historySql);
+    $historyStmt->bind_param("i", $programId);
+    $historyStmt->execute();
+    $historyResult = $historyStmt->get_result();
+    
+    $history = [];
+    while ($row = $historyResult->fetch_assoc()) {
+        $history[] = $row;
+    }
+    
+    echo json_encode($history);
+    exit;
+}
 
 ?>
 
@@ -378,9 +488,479 @@ extract($dashboardData);
             margin-bottom: 15px;
             color: #495057;
         }
-        
+
+                /* Status Management Styles */
+        .status-management-section {
+            background: white;
+            border-radius: 12px;
+            padding: 30px;
+            margin: 30px 0;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-header {
+            margin-bottom: 30px;
+            border-bottom: 2px solid #e9ecef;
+            padding-bottom: 15px;
+        }
+
+        .section-header h3 {
+            color: #2c3e50;
+            margin: 0 0 5px 0;
+            font-size: 1.5rem;
+        }
+
+        .section-header p {
+            color: #6c757d;
+            margin: 0;
+        }
+
+        .status-controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        .status-display-card,
+        .status-controls-card,
+        .registration-stats-card,
+        .automation-card {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid #e9ecef;
+        }
+
+        .status-display-card h4,
+        .status-controls-card h4,
+        .registration-stats-card h4,
+        .automation-card h4 {
+            margin: 0 0 15px 0;
+            color: #495057;
+            font-size: 1.1rem;
+        }
+
+        .current-status {
+            text-align: center;
+        }
+
+        .status-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 10px;
+            font-weight: 600;
+        }
+
+        .status-indicator.active {
+            background: linear-gradient(135deg, #d4edda, #c3e6cb);
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .status-indicator.inactive {
+            background: linear-gradient(135deg, #f8d7da, #f5c6cb);
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+        .status-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: currentColor;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+
+        .status-control-wrapper {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .status-select {
+            flex: 1;
+            padding: 10px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            background: white;
+            font-size: 14px;
+        }
+
+        .update-btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #007bff, #0056b3);
+            color: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .update-btn:hover {
+            background: linear-gradient(135deg, #0056b3, #004085);
+            transform: translateY(-1px);
+        }
+
+        .update-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .quick-actions {
+            margin-top: 20px;
+        }
+
+        .quick-actions h5 {
+            margin: 0 0 10px 0;
+            color: #495057;
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .action-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            color: white;
+        }
+
+        .action-btn.success {
+            background: #28a745;
+        }
+
+        .action-btn.danger {
+            background: #dc3545;
+        }
+
+        .action-btn.info {
+            background: #17a2b8;
+        }
+
+        .action-btn:hover:not(:disabled) {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .impact-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .stat-item {
+            text-align: center;
+            padding: 15px 10px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+        }
+
+        .stat-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #007bff;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 12px;
+            color: #6c757d;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .capacity-progress {
+            background: white;
+            padding: 15px;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            font-weight: 600;
+            color: #495057;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: #e9ecef;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #28a745, #20c997);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+
+        .automation-settings {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .rule-item {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            padding: 15px;
+            background: white;
+            border-radius: 6px;
+            border: 1px solid #e9ecef;
+        }
+
+        .rule-toggle {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+        }
+
+        .rule-toggle input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #ccc;
+            transition: 0.4s;
+            border-radius: 34px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 26px;
+            width: 26px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            transition: 0.4s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #007bff;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(26px);
+        }
+
+        .rule-description strong {
+            display: block;
+            color: #495057;
+            margin-bottom: 3px;
+        }
+
+        .rule-description small {
+            color: #6c757d;
+        }
+
+        .notification-settings {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            border: 1px solid #e9ecef;
+        }
+
+        .notification-settings h4 {
+            margin: 0 0 15px 0;
+            color: #495057;
+        }
+
+        .notification-options {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .notification-options label {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: #495057;
+            cursor: pointer;
+        }
+
+        .modal {
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 0;
+            border-radius: 12px;
+            width: 90%;
+            max-width: 600px;
+            max-height: 80vh;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 30px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .modal-header h3 {
+            margin: 0;
+            font-size: 1.3rem;
+        }
+
+        .close {
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .close:hover {
+            color: white;
+        }
+
+        .modal-body {
+            padding: 30px;
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        .history-timeline {
+            position: relative;
+            padding-left: 30px;
+        }
+
+        .history-timeline::before {
+            content: '';
+            position: absolute;
+            left: 15px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #e9ecef;
+        }
+
+        .history-item {
+            position: relative;
+            margin-bottom: 20px;
+            padding-left: 20px;
+        }
+
+        .history-dot {
+            position: absolute;
+            left: -25px;
+            top: 5px;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 0 0 2px #e9ecef;
+        }
+
+        .history-dot.success {
+            background: #28a745;
+            box-shadow: 0 0 0 2px #28a745;
+        }
+
+        .history-dot.danger {
+            background: #dc3545;
+            box-shadow: 0 0 0 2px #dc3545;
+        }
+
+        .history-action {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 5px;
+        }
+
+        .history-details {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+
+        .history-details small {
+            color: #6c757d;
+            font-size: 12px;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6c757d;
+        }
+
         /* Responsive Design */
         @media (max-width: 768px) {
+            /* Program status section */
+            .status-controls-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .impact-stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .status-control-wrapper {
+                flex-direction: column;
+                align-items: stretch;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            /* end of status section */
             .selector-row {
                 flex-direction: column;
             }
@@ -458,7 +1038,7 @@ extract($dashboardData);
         <div class="container">
             <?php if (!$current_program): ?>
                 <div class="empty-state">
-                    <h2>No Program Selected</h2>
+                    <h2>No Pro gram Selected</h2>
                     <p>Please select a holiday program from the dropdown above to view its dashboard.</p>
                 </div>
             <?php else: ?>
@@ -482,7 +1062,173 @@ extract($dashboardData);
                         <div class="stat-label">Mentor Applications</div>
                     </div>
                 </div>
-                
+                <?php if ($current_program): ?>
+
+                <!-- Enhanced Program Status Control Section -->
+                <div class="status-management-section">
+                    <div class="section-header">
+                        <h3><i class="fas fa-toggle-on"></i> Program Status Management</h3>
+                        <p>Control registration availability and monitor program status</p>
+                    </div>
+                    
+                    <div class="status-controls-grid">
+                        <!-- Current Status Display -->
+                        <div class="status-display-card">
+                            <h4>Current Status</h4>
+                            <div class="current-status">
+                                <div class="status-indicator <?php echo $current_program['registration_open'] ? 'active' : 'inactive'; ?>">
+                                    <div class="status-dot"></div>
+                                    <span class="status-text">
+                                        <?php echo $current_program['registration_open'] ? 'Registration Open' : 'Registration Closed'; ?>
+                                    </span>
+                                </div>
+                                <div class="status-details">
+                                    <small>Last updated: <?php echo date('M j, Y \a\t g:i A', strtotime($current_program['updated_at'] ?? 'now')); ?></small>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Status Controls -->
+                        <div class="status-controls-card">
+                            <h4>Change Status</h4>
+                            <div class="control-group">
+                                <label for="registration-status-select">Registration Status:</label>
+                                <div class="status-control-wrapper">
+                                    <select id="registration-status-select" class="status-select">
+                                        <option value="0" <?php echo !$current_program['registration_open'] ? 'selected' : ''; ?>>
+                                            🔒 Closed - No new registrations
+                                        </option>
+                                        <option value="1" <?php echo $current_program['registration_open'] ? 'selected' : ''; ?>>
+                                            ✅ Open - Accepting registrations
+                                        </option>
+                                    </select>
+                                    <button id="update-status-btn" class="update-btn" onclick="updateProgramStatus()">
+                                        <i class="fas fa-save"></i> Update Status
+                                    </button>
+                                </div>
+                            </div>
+                            
+                            <!-- Quick Actions -->
+                            <div class="quick-actions">
+                                <h5>Quick Actions:</h5>
+                                <div class="action-buttons">
+                                    <button class="action-btn success" onclick="openRegistration()" 
+                                            <?php echo $current_program['registration_open'] ? 'disabled' : ''; ?>>
+                                        <i class="fas fa-unlock"></i> Open Registration
+                                    </button>
+                                    <button class="action-btn danger" onclick="closeRegistration()" 
+                                            <?php echo !$current_program['registration_open'] ? 'disabled' : ''; ?>>
+                                        <i class="fas fa-lock"></i> Close Registration
+                                    </button>
+                                    <button class="action-btn info" onclick="viewStatusHistory()">
+                                        <i class="fas fa-history"></i> View History
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Registration Statistics -->
+                        <div class="registration-stats-card">
+                            <h4>Registration Impact</h4>
+                            <div class="impact-stats">
+                                <div class="stat-item">
+                                    <div class="stat-number"><?php echo $stats['total_registrations'] ?? 0; ?></div>
+                                    <div class="stat-label">Total Registrations</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-number"><?php echo $stats['pending_registrations'] ?? 0; ?></div>
+                                    <div class="stat-label">Pending Approval</div>
+                                </div>
+                                <div class="stat-item">
+                                    <div class="stat-number">
+                                        <?php 
+                                        $capacity = $current_program['max_participants'] ?? 30;
+                                        $remaining = $capacity - ($stats['confirmed_registrations'] ?? 0);
+                                        echo max(0, $remaining);
+                                        ?>
+                                    </div>
+                                    <div class="stat-label">Spots Remaining</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Capacity Progress Bar -->
+                            <div class="capacity-progress">
+                                <div class="progress-header">
+                                    <span>Capacity</span>
+                                    <span><?php echo ($stats['confirmed_registrations'] ?? 0); ?>/<?php echo $capacity; ?></span>
+                                </div>
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: <?php echo min((($stats['confirmed_registrations'] ?? 0) / $capacity) * 100, 100); ?>%"></div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Automated Rules -->
+                        <div class="automation-card">
+                            <h4>Automated Rules</h4>
+                            <div class="automation-settings">
+                                <div class="rule-item">
+                                    <label class="rule-toggle">
+                                        <input type="checkbox" id="auto-close-capacity" 
+                                            <?php echo ($current_program['auto_close_on_capacity'] ?? false) ? 'checked' : ''; ?>>
+                                        <span class="slider"></span>
+                                    </label>
+                                    <div class="rule-description">
+                                        <strong>Auto-close when full</strong>
+                                        <small>Automatically close registration when capacity is reached</small>
+                                    </div>
+                                </div>
+                                
+                                <div class="rule-item">
+                                    <label class="rule-toggle">
+                                        <input type="checkbox" id="auto-close-date" 
+                                            <?php echo ($current_program['auto_close_on_date'] ?? false) ? 'checked' : ''; ?>>
+                                        <span class="slider"></span>
+                                    </label>
+                                    <div class="rule-description">
+                                        <strong>Auto-close on deadline</strong>
+                                        <small>Close registration on: <?php echo date('M j, Y', strtotime($current_program['registration_deadline'] ?? '+7 days')); ?></small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Status Change Notifications -->
+                    <div class="notification-settings">
+                        <h4><i class="fas fa-bell"></i> Notification Settings</h4>
+                        <div class="notification-options">
+                            <label>
+                                <input type="checkbox" id="notify-status-change" checked>
+                                Send email notifications when registration status changes
+                            </label>
+                            <label>
+                                <input type="checkbox" id="notify-capacity-warning" checked>
+                                Alert when approaching capacity (90% full)
+                            </label>
+                            <label>
+                                <input type="checkbox" id="notify-deadline-approaching" checked>
+                                Remind 24 hours before registration deadline
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Status History Modal -->
+                <div id="statusHistoryModal" class="modal" style="display: none;">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h3><i class="fas fa-history"></i> Status Change History</h3>
+                            <span class="close" onclick="closeStatusHistoryModal()">&times;</span>
+                        </div>
+                        <div class="modal-body">
+                            <div id="status-history-content">
+                                <!-- History will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <?php endif; ?>
                 <!-- Program Status Control -->
                 <div class="status-section">
                     <h3><i class="fas fa-toggle-on"></i> Program Status</h3>
@@ -545,7 +1291,7 @@ extract($dashboardData);
                         </div>
                     </div>
                 </div>
-                <?php endif; ?>
+            <?php endif; ?>
                 
                 <!-- Dashboard Tabs -->
                 <div class="dashboard-tabs">
@@ -884,6 +1630,7 @@ extract($dashboardData);
         </div>
     </div>
     
+    <script src="<?php echo BASE_URL?>public/assets/js/holidayProgramIndex.js"></script>
     <script>
         // Chart data from PHP
         const statsData = <?php echo json_encode($stats ?? []); ?>;
@@ -1310,6 +2057,278 @@ extract($dashboardData);
                     modal.style.display = 'none';
                 }
             });
+        }
+
+        // Program Status Management JavaScript
+        
+        function updateProgramStatus() {
+            const statusSelect = document.getElementById('registration-status-select');
+            const updateBtn = document.getElementById('update-status-btn');
+            const programId = <?php echo $current_program['id']; ?>;
+            
+            // Disable button and show loading
+            updateBtn.disabled = true;
+            updateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
+            
+            // Prepare form data
+            const formData = new FormData();
+            formData.append('action', 'update_program_status');
+            formData.append('program_id', programId);
+            formData.append('registration_open', statusSelect.value);
+            
+            // Send AJAX request
+            fetch(window.location.href, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    // Show success message
+                    showNotification('Status updated successfully!', 'success');
+                    
+                    // Update UI elements
+                    updateStatusDisplay(data.new_status);
+                    
+                    // Reload page after short delay to refresh all data
+                    setTimeout(() => {
+                        window.location.reload();
+                    }, 1500);
+                } else {
+                    showNotification('Error: ' + data.message, 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Network error occurred', 'error');
+            })
+            .finally(() => {
+                // Re-enable button
+                updateBtn.disabled = false;
+                updateBtn.innerHTML = '<i class="fas fa-save"></i> Update Status';
+            });
+        }
+        
+        function openRegistration() {
+            document.getElementById('registration-status-select').value = '1';
+            updateProgramStatus();
+        }
+        
+        function closeRegistration() {
+            if (confirm('Are you sure you want to close registration? This will prevent new participants from registering.')) {
+                document.getElementById('registration-status-select').value = '0';
+                updateProgramStatus();
+            }
+        }
+        
+        function updateStatusDisplay(newStatus) {
+            const statusIndicator = document.querySelector('.status-indicator');
+            const statusText = document.querySelector('.status-text');
+            
+            if (newStatus == 1) {
+                statusIndicator.className = 'status-indicator active';
+                statusText.textContent = 'Registration Open';
+            } else {
+                statusIndicator.className = 'status-indicator inactive';
+                statusText.textContent = 'Registration Closed';
+            }
+        }
+        
+        function viewStatusHistory() {
+            const modal = document.getElementById('statusHistoryModal');
+            const content = document.getElementById('status-history-content');
+            const programId = <?php echo $current_program['id']; ?>;
+            
+            // Show modal
+            modal.style.display = 'block';
+            
+            // Load history
+            content.innerHTML = '<div class="loading">Loading history...</div>';
+            
+            fetch(`?action=get_status_history&program_id=${programId}`)
+                .then(response => response.json())
+                .then(history => {
+                    if (history.length > 0) {
+                        let historyHtml = '<div class="history-timeline">';
+                        history.forEach(entry => {
+                            const statusText = entry.new_status == 1 ? 'Opened' : 'Closed';
+                            const statusClass = entry.new_status == 1 ? 'success' : 'danger';
+                            const date = new Date(entry.created_at).toLocaleString();
+                            
+                            historyHtml += `
+                                <div class="history-item">
+                                    <div class="history-dot ${statusClass}"></div>
+                                    <div class="history-content">
+                                        <div class="history-action">Registration ${statusText}</div>
+                                        <div class="history-details">
+                                            <small>By: ${entry.changed_by_name || 'System'}</small>
+                                            <small>Date: ${date}</small>
+                                            ${entry.change_reason ? `<small>Reason: ${entry.change_reason}</small>` : ''}
+                                        </div>
+                                    </div>
+                                </div>
+                            `;
+                        });
+                        historyHtml += '</div>';
+                        content.innerHTML = historyHtml;
+                    } else {
+                        content.innerHTML = '<p>No status change history available.</p>';
+                    }
+                })
+                .catch(error => {
+                    content.innerHTML = '<p>Error loading history.</p>';
+                    console.error('Error:', error);
+                });
+        }
+        
+        function closeStatusHistoryModal() {
+            document.getElementById('statusHistoryModal').style.display = 'none';
+        }
+        
+        function showNotification(message, type) {
+            // Create notification element
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check' : 'exclamation'}-circle"></i>
+                ${message}
+            `;
+            
+            // Style the notification
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 20px;
+                border-radius: 8px;
+                color: white;
+                font-weight: 600;
+                z-index: 10000;
+                animation: slideIn 0.3s ease;
+                background: ${type === 'success' ? '#28a745' : '#dc3545'};
+                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            `;
+            
+            // Add to page
+            document.body.appendChild(notification);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.style.animation = 'slideOut 0.3s ease';
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                    }
+                }, 300);
+            }, 3000);
+        }
+        
+        // Close modal when clicking outside
+        window.onclick = function(event) {
+            const modal = document.getElementById('statusHistoryModal');
+            if (event.target === modal) {
+                closeStatusHistoryModal();
+            }
+        }
+        
+        // Auto-save automation settings
+        document.addEventListener('DOMContentLoaded', function() {
+            const autoCloseCapacity = document.getElementById('auto-close-capacity');
+            const autoCloseDate = document.getElementById('auto-close-date');
+            
+            if (autoCloseCapacity) {
+                autoCloseCapacity.addEventListener('change', function() {
+                    // Save automation setting
+                    saveAutomationSetting('auto_close_on_capacity', this.checked);
+                });
+            }
+            
+            if (autoCloseDate) {
+                autoCloseDate.addEventListener('change', function() {
+                    // Save automation setting
+                    saveAutomationSetting('auto_close_on_date', this.checked);
+                });
+            }
+        });
+        
+        function saveAutomationSetting(setting, value) {
+            const formData = new FormData();
+            formData.append('action', 'save_automation_setting');
+            formData.append('program_id', <?php echo $current_program['id']; ?>);
+            formData.append('setting', setting);
+            formData.append('value', value ? 1 : 0);
+            
+            fetch(window.location.href, {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification('Automation setting saved', 'success');
+                } else {
+                    showNotification('Failed to save setting', 'error');
+                }
+            })
+            .catch(error => {
+                console.error('Error saving automation setting:', error);
+                showNotification('Network error', 'error');
+            });
+        }
+        
+        // Add CSS animations for notifications
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // Periodic status refresh (every 30 seconds)
+        setInterval(function() {
+            if (!document.hidden) {
+                // Only refresh capacity info, not full page
+                refreshCapacityInfo();
+            }
+        }, 30000);
+        
+        function refreshCapacityInfo() {
+            const programId = <?php echo $current_program['id']; ?>;
+            
+            fetch(`./api/get-program-capacity.php?program_id=${programId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Update capacity display
+                        const progressFill = document.querySelector('.progress-fill');
+                        const progressText = document.querySelector('.progress-header span:last-child');
+                        const remainingSpots = document.querySelector('.stat-item:last-child .stat-number');
+                        
+                        if (progressFill && data.capacity_info) {
+                            const percentage = (data.capacity_info.current / data.capacity_info.max) * 100;
+                            progressFill.style.width = Math.min(percentage, 100) + '%';
+                            
+                            if (progressText) {
+                                progressText.textContent = `${data.capacity_info.current}/${data.capacity_info.max}`;
+                            }
+                            
+                            if (remainingSpots) {
+                                const remaining = Math.max(0, data.capacity_info.max - data.capacity_info.current);
+                                remainingSpots.textContent = remaining;
+                            }
+                        }
+                    }
+                })
+                .catch(error => {
+                    console.log('Capacity refresh failed:', error);
+                });
         }
     </script>
 </body>
