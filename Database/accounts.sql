@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 08, 2025 at 04:05 PM
+-- Generation Time: Jun 18, 2025 at 11:36 AM
 -- Server version: 10.4.28-MariaDB
 -- PHP Version: 8.2.4
 
@@ -20,6 +20,185 @@ SET time_zone = "+00:00";
 --
 -- Database: `accounts`
 --
+
+DELIMITER $$
+--
+-- Procedures
+--
+CREATE DEFINER=`root`@`localhost` PROCEDURE `CheckRegistrationDeadlines` ()   BEGIN
+    DECLARE done INT DEFAULT FALSE;
+    DECLARE v_program_id INT;
+    DECLARE deadline_cursor CURSOR FOR 
+        SELECT id FROM holiday_programs 
+        WHERE auto_close_on_date = 1 
+          AND registration_open = 1 
+          AND registration_deadline IS NOT NULL 
+          AND NOW() >= registration_deadline;
+    
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = TRUE;
+    
+    OPEN deadline_cursor;
+    
+    deadline_loop: LOOP
+        FETCH deadline_cursor INTO v_program_id;
+        IF done THEN
+            LEAVE deadline_loop;
+        END IF;
+        
+        -- Close registration
+        UPDATE holiday_programs 
+        SET registration_open = 0, updated_at = NOW()
+        WHERE id = v_program_id;
+        
+        -- Log the closure
+        INSERT INTO holiday_program_status_log 
+        (program_id, old_status, new_status, change_reason, ip_address, created_at)
+        SELECT 
+            id, 1, 0, 
+            CONCAT('Auto-closed: deadline reached (', registration_deadline, ')'), 
+            'system', 
+            NOW()
+        FROM holiday_programs 
+        WHERE id = v_program_id;
+        
+    END LOOP;
+    
+    CLOSE deadline_cursor;
+    
+    SELECT ROW_COUNT() as programs_closed;
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `GetProgramStatistics` (IN `p_program_id` INT)   BEGIN
+    SELECT 
+        p.id,
+        p.term,
+        p.title,
+        p.registration_open,
+        p.max_participants,
+        COUNT(a.id) as total_registrations,
+        COUNT(CASE WHEN a.status = 'confirmed' THEN 1 END) as confirmed_registrations,
+        COUNT(CASE WHEN a.status = 'pending' THEN 1 END) as pending_registrations,
+        COUNT(CASE WHEN a.status = 'cancelled' THEN 1 END) as cancelled_registrations,
+        COUNT(CASE WHEN a.mentor_registration = 1 THEN 1 END) as mentor_applications,
+        COUNT(CASE WHEN a.mentor_registration = 0 THEN 1 END) as member_registrations,
+        CASE 
+            WHEN p.max_participants > 0 THEN 
+                ROUND((COUNT(CASE WHEN a.status = 'confirmed' THEN 1 END) / p.max_participants) * 100, 1)
+            ELSE 0 
+        END as capacity_percentage,
+        (p.max_participants - COUNT(CASE WHEN a.status = 'confirmed' THEN 1 END)) as spots_remaining
+    FROM holiday_programs p
+    LEFT JOIN holiday_program_attendees a ON p.id = a.program_id
+    WHERE p.id = p_program_id
+    GROUP BY p.id;
+END$$
+
+CREATE DEFINER=`root`@`localhost` PROCEDURE `UpdateProgramStatus` (IN `p_program_id` INT, IN `p_new_status` TINYINT, IN `p_user_id` INT, IN `p_reason` VARCHAR(255), IN `p_ip_address` VARCHAR(45))   BEGIN
+    DECLARE v_old_status TINYINT DEFAULT 0;
+    DECLARE v_program_exists INT DEFAULT 0;
+    DECLARE exit handler for sqlexception
+    BEGIN
+        ROLLBACK;
+        RESIGNAL;
+    END;
+    
+    START TRANSACTION;
+    
+    -- Check if program exists and get current status
+    SELECT registration_open, 1 INTO v_old_status, v_program_exists
+    FROM holiday_programs 
+    WHERE id = p_program_id;
+    
+    IF v_program_exists = 0 THEN
+        SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Program not found';
+    END IF;
+    
+    -- Only update if status is actually changing
+    IF v_old_status != p_new_status THEN
+        -- Set session variables for trigger
+        SET @current_user_id = p_user_id;
+        SET @user_ip = p_ip_address;
+        
+        -- Update the program status
+        UPDATE holiday_programs 
+        SET registration_open = p_new_status,
+            updated_at = NOW()
+        WHERE id = p_program_id;
+        
+        -- Manual log entry with additional details
+        INSERT INTO holiday_program_status_log 
+        (program_id, changed_by, old_status, new_status, change_reason, ip_address, created_at)
+        VALUES 
+        (p_program_id, p_user_id, v_old_status, p_new_status, p_reason, p_ip_address, NOW());
+        
+        -- Clear the session variables
+        SET @current_user_id = NULL;
+        SET @user_ip = NULL;
+        
+        SELECT 'success' as result, 'Status updated successfully' as message, v_old_status as old_status, p_new_status as new_status;
+    ELSE
+        SELECT 'no_change' as result, 'Status is already set to the requested value' as message, v_old_status as old_status, p_new_status as new_status;
+    END IF;
+    
+    COMMIT;
+END$$
+
+--
+-- Functions
+--
+CREATE DEFINER=`root`@`localhost` FUNCTION `GetProgramCapacityPercentage` (`p_program_id` INT) RETURNS DECIMAL(5,2) DETERMINISTIC READS SQL DATA BEGIN
+    DECLARE v_confirmed_count INT DEFAULT 0;
+    DECLARE v_max_participants INT DEFAULT 0;
+    
+    SELECT 
+        COUNT(CASE WHEN a.status = 'confirmed' THEN 1 END),
+        p.max_participants
+    INTO v_confirmed_count, v_max_participants
+    FROM holiday_programs p
+    LEFT JOIN holiday_program_attendees a ON p.id = a.program_id
+    WHERE p.id = p_program_id
+    GROUP BY p.id, p.max_participants;
+    
+    IF v_max_participants > 0 THEN
+        RETURN ROUND((v_confirmed_count / v_max_participants) * 100, 2);
+    ELSE
+        RETURN 0;
+    END IF;
+END$$
+
+CREATE DEFINER=`root`@`localhost` FUNCTION `GetProgramCapacityStatus` (`p_program_id` INT) RETURNS VARCHAR(20) CHARSET utf8mb4 COLLATE utf8mb4_general_ci DETERMINISTIC READS SQL DATA BEGIN
+    DECLARE v_confirmed_count INT DEFAULT 0;
+    DECLARE v_max_participants INT DEFAULT 0;
+    DECLARE v_percentage DECIMAL(5,2) DEFAULT 0;
+    
+    SELECT 
+        COUNT(CASE WHEN a.status = 'confirmed' THEN 1 END),
+        p.max_participants
+    INTO v_confirmed_count, v_max_participants
+    FROM holiday_programs p
+    LEFT JOIN holiday_program_attendees a ON p.id = a.program_id
+    WHERE p.id = p_program_id
+    GROUP BY p.id, p.max_participants;
+    
+    IF v_max_participants > 0 THEN
+        SET v_percentage = (v_confirmed_count / v_max_participants) * 100;
+        
+        CASE 
+            WHEN v_confirmed_count >= v_max_participants THEN
+                RETURN 'full';
+            WHEN v_percentage >= 90 THEN
+                RETURN 'nearly_full';
+            WHEN v_percentage >= 75 THEN
+                RETURN 'filling_up';
+            ELSE
+                RETURN 'available';
+        END CASE;
+    ELSE
+        RETURN 'unlimited';
+    END IF;
+END$$
+
+DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -534,15 +713,44 @@ CREATE TABLE `holiday_programs` (
   `registration_open` tinyint(1) DEFAULT 1,
   `status` enum('draft','open','closing_soon','closed','completed','cancelled') DEFAULT 'draft',
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
+  `auto_close_on_capacity` tinyint(1) NOT NULL DEFAULT 0 COMMENT 'Auto-close registration when capacity is reached',
+  `auto_close_on_date` tinyint(1) NOT NULL DEFAULT 0 COMMENT 'Auto-close registration on deadline',
+  `notification_settings` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'JSON settings for notifications' CHECK (json_valid(`notification_settings`))
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `holiday_programs`
 --
 
-INSERT INTO `holiday_programs` (`id`, `term`, `title`, `description`, `dates`, `time`, `start_date`, `end_date`, `location`, `age_range`, `lunch_included`, `program_goals`, `registration_deadline`, `max_participants`, `registration_open`, `status`, `created_at`, `updated_at`) VALUES
-(1, 'Term 1', 'Multi-Media - Digital Design', 'Dive into the world of digital media creation, learning graphic design, video editing, and animation techniques.', 'March 31 - April 4, 2025', '9:00 AM - 4:00 PM', '2025-03-29', '2025-04-07', 'Sci-Bono Clubhouse', '13-18 years', 1, NULL, NULL, 35, 0, 'completed', '2025-03-26 19:24:06', '2025-06-06 11:07:39');
+INSERT INTO `holiday_programs` (`id`, `term`, `title`, `description`, `dates`, `time`, `start_date`, `end_date`, `location`, `age_range`, `lunch_included`, `program_goals`, `registration_deadline`, `max_participants`, `registration_open`, `status`, `created_at`, `updated_at`, `auto_close_on_capacity`, `auto_close_on_date`, `notification_settings`) VALUES
+(1, 'Term 1', 'Multi-Media - Digital Design', 'Dive into the world of digital media creation, learning graphic design, video editing, and animation techniques.', 'March 31 - April 4, 2025', '9:00 AM - 4:00 PM', '2025-03-29', '2025-04-07', 'Sci-Bono Clubhouse', '13-18 years', 1, NULL, '2025-03-22 00:00:00', 35, 0, 'completed', '2025-03-26 19:24:06', '2025-06-09 14:23:28', 1, 0, NULL),
+(2, 'Term 2', 'Sci-Bono Clubhouse Term 2 AI Festival ', 'The Term 2 AI Festival is designed to immerse participants in the exciting world of artificial intelligence through hands-on programming, web development, and electronics projects. This intensive program will explore AI through three distinct but interconnected tracks: Programming AI Projects, Web Projects, and Electronics Projects.', 'June 30 - July 18, 2025', '9:00 AM - 4:00 PM', '2025-06-30', '2025-07-18', 'Sci-Bono Clubhouse', '13-18 years', 1, 'Participants will gain practical experience with machine learning algorithms, web-based AI applications, and AI-powered hardware projects. The program emphasizes practical application of AI concepts through coding exercises, interactive workshops, and creative project development. All projects will incorporate real-world problem-solving scenarios that demonstrate how AI can be used to address challenges in education, healthcare, environment, and community development.', '27 June 2025', 30, 1, 'draft', '2025-06-09 14:36:41', '2025-06-09 14:36:41', 0, 0, NULL);
+
+--
+-- Triggers `holiday_programs`
+--
+DELIMITER $$
+CREATE TRIGGER `holiday_program_status_change_log` AFTER UPDATE ON `holiday_programs` FOR EACH ROW BEGIN
+    -- Log status changes
+    IF OLD.registration_open != NEW.registration_open THEN
+        INSERT INTO holiday_program_status_log 
+        (program_id, changed_by, old_status, new_status, change_reason, ip_address, created_at)
+        VALUES 
+        (NEW.id, 
+         COALESCE(@current_user_id, NULL), 
+         OLD.registration_open, 
+         NEW.registration_open, 
+         CASE 
+             WHEN NEW.registration_open = 1 THEN 'Registration opened'
+             ELSE 'Registration closed'
+         END,
+         COALESCE(@user_ip, 'system'), 
+         NOW());
+    END IF;
+END
+$$
+DELIMITER ;
 
 -- --------------------------------------------------------
 
@@ -642,19 +850,110 @@ CREATE TABLE `holiday_program_attendees` (
   `mentor_workshop_preference` int(11) DEFAULT NULL,
   `password` varchar(255) DEFAULT NULL,
   `last_login` datetime DEFAULT NULL,
-  `is_clubhouse_member` tinyint(1) DEFAULT 0
+  `is_clubhouse_member` tinyint(1) DEFAULT 0,
+  `status` varchar(20) NOT NULL DEFAULT 'pending'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `holiday_program_attendees`
 --
 
-INSERT INTO `holiday_program_attendees` (`id`, `program_id`, `user_id`, `first_name`, `last_name`, `email`, `phone`, `date_of_birth`, `gender`, `school`, `grade`, `address`, `city`, `province`, `postal_code`, `guardian_name`, `guardian_relationship`, `guardian_phone`, `guardian_email`, `emergency_contact_name`, `emergency_contact_relationship`, `emergency_contact_phone`, `workshop_preference`, `why_interested`, `experience_level`, `needs_equipment`, `medical_conditions`, `allergies`, `photo_permission`, `data_permission`, `dietary_restrictions`, `additional_notes`, `registration_status`, `created_at`, `updated_at`, `mentor_registration`, `mentor_status`, `mentor_workshop_preference`, `password`, `last_login`, `is_clubhouse_member`) VALUES
-(1, 1, 1, 'Vuyani', 'Magibisela', 'vuyani.magibisela@sci-bono.co.za', '638393157', '2010-08-23', 'Male', '0', 12, '123 Gull Street', 'Johannesburg', 'Gauteng', '2021', 'Mandisa', 'Mother', '0721166543', 'mandi@gmail.com', '', '', '', '[\"3\",\"4\"]', 'Learn', '0', 1, 'No', '0', 1, 1, 'No', 'Learn', 'confirmed', '2025-03-28 16:40:40', '2025-06-06 14:45:48', 0, NULL, NULL, NULL, NULL, 0),
-(2, 1, 7, 'Sam', 'Kabanga', 'sam@example.com', '688965565', '2025-02-21', 'Male', NULL, NULL, '123 Good Street', 'Johannesburg', '', '1920', NULL, NULL, NULL, NULL, 'Thabo', 'Uncle', '0832342342', '[]', 'sdf', 'Advanced', 0, 'dssdf', 'sd', 1, 1, 'dssd', 'sd', 'confirmed', '2025-03-30 14:48:38', '2025-06-06 14:46:01', 1, 'Approved', 4, NULL, NULL, 0),
-(3, 1, 2, 'Itumeleng', 'Kgakane', 'itum@gmail.com', '0', '2012-01-12', 'Male', 'Fernadale High School', 12, '123 Good Street', 'Johannesburg', 'Gauteng', '1920', 'Mandi', 'Mother', '736933940', 'mandi@gmail.com', '', '', '', '[\"3\",\"4\"]', 'df', 'Beginner', 0, 'fsd', 'sdf', 1, 1, 'sd', 'sdf', 'pending', '2025-03-30 15:31:51', '2025-03-30 15:31:51', 0, NULL, NULL, NULL, NULL, 0),
-(4, 1, 8, 'Jabu', 'Khumalo', 'jabut@example.com', '0', '2012-02-21', 'Male', 'Fernadale High School', 12, '123 Main St', 'Johannesburg', 'Gauteng', '2021', 'Mandisa', 'Mother', '0721166543', 'mandi@gmail.com', '', '', '', '[\"1\",\"2\"]', 'ds', 'Basic', 0, 'sd', 'fds', 1, 1, 'ds', 'sda', 'confirmed', '2025-03-30 16:35:22', '2025-06-06 14:46:44', 0, NULL, NULL, NULL, NULL, 0),
-(5, 1, NULL, 'Noma', 'Mabasa', 'noma@gmail.com', '0012000', '2012-02-16', 'Male', 'Fernadale High School', 10, '123 Main St', 'Johannesburg', 'Gauteng', '2021', 'Vuyani', 'Father', '0638393157', 'vuyani@gmail.com', '', '', '', '[\"4\",\"1\"]', 'Love 3D animations', 'Intermediate', 0, 'No', 'No', 1, 1, 'No', 'Want to have fun and learn.', 'confirmed', '2025-03-30 17:09:01', '2025-06-06 10:28:31', 0, NULL, NULL, NULL, NULL, 0);
+INSERT INTO `holiday_program_attendees` (`id`, `program_id`, `user_id`, `first_name`, `last_name`, `email`, `phone`, `date_of_birth`, `gender`, `school`, `grade`, `address`, `city`, `province`, `postal_code`, `guardian_name`, `guardian_relationship`, `guardian_phone`, `guardian_email`, `emergency_contact_name`, `emergency_contact_relationship`, `emergency_contact_phone`, `workshop_preference`, `why_interested`, `experience_level`, `needs_equipment`, `medical_conditions`, `allergies`, `photo_permission`, `data_permission`, `dietary_restrictions`, `additional_notes`, `registration_status`, `created_at`, `updated_at`, `mentor_registration`, `mentor_status`, `mentor_workshop_preference`, `password`, `last_login`, `is_clubhouse_member`, `status`) VALUES
+(1, 1, 1, 'Vuyani', 'Magibisela', 'vuyani.magibisela@sci-bono.co.za', '638393157', '2010-08-23', 'Male', '0', 12, '123 Gull Street', 'Johannesburg', 'Gauteng', '2021', 'Mandisa', 'Mother', '0721166543', 'mandi@gmail.com', '', '', '', '[\"3\",\"4\"]', 'Learn', '0', 1, 'No', '0', 1, 1, 'No', 'Learn', 'confirmed', '2025-03-28 16:40:40', '2025-06-06 14:45:48', 0, NULL, NULL, NULL, NULL, 0, 'pending'),
+(2, 1, 7, 'Sam', 'Kabanga', 'sam@example.com', '688965565', '2025-02-21', 'Male', NULL, NULL, '123 Good Street', 'Johannesburg', '', '1920', NULL, NULL, NULL, NULL, 'Thabo', 'Uncle', '0832342342', '[]', 'sdf', 'Advanced', 0, 'dssdf', 'sd', 1, 1, 'dssd', 'sd', 'confirmed', '2025-03-30 14:48:38', '2025-06-06 14:46:01', 1, 'Approved', 4, NULL, NULL, 0, 'pending'),
+(3, 1, 2, 'Itumeleng', 'Kgakane', 'itum@gmail.com', '0', '2012-01-12', 'Male', 'Fernadale High School', 12, '123 Good Street', 'Johannesburg', 'Gauteng', '1920', 'Mandi', 'Mother', '736933940', 'mandi@gmail.com', '', '', '', '[\"3\",\"4\"]', 'df', 'Beginner', 0, 'fsd', 'sdf', 1, 1, 'sd', 'sdf', 'pending', '2025-03-30 15:31:51', '2025-03-30 15:31:51', 0, NULL, NULL, NULL, NULL, 0, 'pending'),
+(4, 1, 8, 'Jabu', 'Khumalo', 'jabut@example.com', '0', '2012-02-21', 'Male', 'Fernadale High School', 12, '123 Main St', 'Johannesburg', 'Gauteng', '2021', 'Mandisa', 'Mother', '0721166543', 'mandi@gmail.com', '', '', '', '[\"1\",\"2\"]', 'ds', 'Basic', 0, 'sd', 'fds', 1, 1, 'ds', 'sda', 'confirmed', '2025-03-30 16:35:22', '2025-06-06 14:46:44', 0, NULL, NULL, NULL, NULL, 0, 'pending'),
+(5, 1, NULL, 'Noma', 'Mabasa', 'noma@gmail.com', '0012000', '2012-02-16', 'Male', 'Fernadale High School', 10, '123 Main St', 'Johannesburg', 'Gauteng', '2021', 'Vuyani', 'Father', '0638393157', 'vuyani@gmail.com', '', '', '', '[\"4\",\"1\"]', 'Love 3D animations', 'Intermediate', 0, 'No', 'No', 1, 1, 'No', 'Want to have fun and learn.', 'confirmed', '2025-03-30 17:09:01', '2025-06-09 14:25:54', 0, NULL, NULL, NULL, NULL, 0, 'pending'),
+(6, 2, NULL, 'Kgotso', 'Maponya', 'kgotso.maponya@live.com', '0658975346', '2010-05-19', 'Male', 'Fernadale High School', 9, '123 Main St', 'Johannesburg', 'Gauteng', '2021', 'John', 'Futher', '0788945689', 'john.maponya@live.com', '', '', '', '[\"7\"]', 'I love building things', 'Basic', 0, 'Discovery', 'None', 1, 1, 'None', 'None', 'pending', '2025-06-17 19:18:10', '2025-06-17 19:18:10', 0, NULL, NULL, NULL, NULL, 0, 'pending');
+
+--
+-- Triggers `holiday_program_attendees`
+--
+DELIMITER $$
+CREATE TRIGGER `holiday_program_capacity_check` AFTER INSERT ON `holiday_program_attendees` FOR EACH ROW BEGIN
+    DECLARE v_confirmed_count INT DEFAULT 0;
+    DECLARE v_max_participants INT DEFAULT 0;
+    DECLARE v_auto_close TINYINT DEFAULT 0;
+    DECLARE v_registration_open TINYINT DEFAULT 0;
+    
+    -- Get program details
+    SELECT max_participants, auto_close_on_capacity, registration_open
+    INTO v_max_participants, v_auto_close, v_registration_open
+    FROM holiday_programs 
+    WHERE id = NEW.program_id;
+    
+    -- Count confirmed attendees
+    SELECT COUNT(*) INTO v_confirmed_count
+    FROM holiday_program_attendees 
+    WHERE program_id = NEW.program_id AND status = 'confirmed';
+    
+    -- Auto-close if capacity reached and auto-close is enabled
+    IF v_auto_close = 1 AND v_registration_open = 1 AND v_confirmed_count >= v_max_participants THEN
+        UPDATE holiday_programs 
+        SET registration_open = 0, updated_at = NOW()
+        WHERE id = NEW.program_id;
+        
+        INSERT INTO holiday_program_status_log 
+        (program_id, old_status, new_status, change_reason, ip_address, created_at)
+        VALUES 
+        (NEW.program_id, 1, 0, 'Auto-closed: capacity reached', 'system', NOW());
+    END IF;
+END
+$$
+DELIMITER ;
+DELIMITER $$
+CREATE TRIGGER `holiday_program_capacity_check_update` AFTER UPDATE ON `holiday_program_attendees` FOR EACH ROW BEGIN
+    DECLARE v_confirmed_count INT DEFAULT 0;
+    DECLARE v_max_participants INT DEFAULT 0;
+    DECLARE v_auto_close TINYINT DEFAULT 0;
+    DECLARE v_registration_open TINYINT DEFAULT 0;
+    
+    -- Only check if status changed to confirmed
+    IF OLD.status != 'confirmed' AND NEW.status = 'confirmed' THEN
+        -- Get program details
+        SELECT max_participants, auto_close_on_capacity, registration_open
+        INTO v_max_participants, v_auto_close, v_registration_open
+        FROM holiday_programs 
+        WHERE id = NEW.program_id;
+        
+        -- Count confirmed attendees
+        SELECT COUNT(*) INTO v_confirmed_count
+        FROM holiday_program_attendees 
+        WHERE program_id = NEW.program_id AND status = 'confirmed';
+        
+        -- Auto-close if capacity reached and auto-close is enabled
+        IF v_auto_close = 1 AND v_registration_open = 1 AND v_confirmed_count >= v_max_participants THEN
+            UPDATE holiday_programs 
+            SET registration_open = 0, updated_at = NOW()
+            WHERE id = NEW.program_id;
+            
+            INSERT INTO holiday_program_status_log 
+            (program_id, old_status, new_status, change_reason, ip_address, created_at)
+            VALUES 
+            (NEW.program_id, 1, 0, 'Auto-closed: capacity reached', 'system', NOW());
+        END IF;
+    END IF;
+END
+$$
+DELIMITER ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `holiday_program_audit_trail`
+--
+
+CREATE TABLE `holiday_program_audit_trail` (
+  `id` int(11) NOT NULL,
+  `program_id` int(11) NOT NULL,
+  `user_id` int(11) DEFAULT NULL,
+  `action` varchar(100) NOT NULL,
+  `old_values` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`old_values`)),
+  `new_values` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`new_values`)),
+  `ip_address` varchar(45) DEFAULT NULL,
+  `user_agent` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -681,6 +980,32 @@ INSERT INTO `holiday_program_criteria` (`id`, `program_id`, `criterion`, `descri
 (3, 1, 'Message', 'Clear connection to SDGs and effective communication of message', 3, '2025-03-31 15:45:48'),
 (4, 1, 'Completion', 'Level of completion and polish', 4, '2025-03-31 15:45:48'),
 (5, 1, 'Presentation', 'Quality of showcase presentation', 5, '2025-03-31 15:45:48');
+
+-- --------------------------------------------------------
+
+--
+-- Stand-in structure for view `holiday_program_dashboard_stats`
+-- (See below for the actual view)
+--
+CREATE TABLE `holiday_program_dashboard_stats` (
+`program_id` int(11)
+,`term` varchar(50)
+,`title` varchar(255)
+,`registration_open` tinyint(1)
+,`max_participants` int(11)
+,`auto_close_on_capacity` tinyint(1)
+,`auto_close_on_date` tinyint(1)
+,`registration_deadline` varchar(100)
+,`created_at` timestamp
+,`updated_at` timestamp
+,`total_registrations` bigint(21)
+,`confirmed_registrations` bigint(21)
+,`pending_registrations` bigint(21)
+,`mentor_applications` bigint(21)
+,`member_registrations` bigint(21)
+,`capacity_percentage` decimal(25,1)
+,`capacity_status` varchar(11)
+);
 
 -- --------------------------------------------------------
 
@@ -754,6 +1079,23 @@ CREATE TABLE `holiday_program_mentor_details` (
 
 INSERT INTO `holiday_program_mentor_details` (`id`, `attendee_id`, `experience`, `availability`, `workshop_preference`, `notes`, `created_at`) VALUES
 (1, 2, 'sdf', 'full_time', 4, NULL, '2025-03-30 15:27:08');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `holiday_program_notifications`
+--
+
+CREATE TABLE `holiday_program_notifications` (
+  `id` int(11) NOT NULL,
+  `program_id` int(11) NOT NULL,
+  `notification_type` enum('status_change','capacity_warning','deadline_reminder','registration_received') NOT NULL,
+  `enabled` tinyint(1) NOT NULL DEFAULT 1,
+  `recipient_emails` text DEFAULT NULL,
+  `last_sent` timestamp NULL DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
 
@@ -924,6 +1266,24 @@ CREATE TABLE `holiday_program_stats` (
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `holiday_program_status_log`
+--
+
+CREATE TABLE `holiday_program_status_log` (
+  `id` int(11) NOT NULL,
+  `program_id` int(11) NOT NULL,
+  `changed_by` int(11) DEFAULT NULL,
+  `old_status` tinyint(1) NOT NULL DEFAULT 0,
+  `new_status` tinyint(1) NOT NULL DEFAULT 0,
+  `change_reason` varchar(255) DEFAULT NULL,
+  `ip_address` varchar(45) DEFAULT NULL,
+  `user_agent` text DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `holiday_program_workshops`
 --
 
@@ -949,7 +1309,10 @@ INSERT INTO `holiday_program_workshops` (`id`, `program_id`, `title`, `descripti
 (1, 1, 'Graphic Design Basics', 'Learn the fundamentals of graphic design using industry tools.', 'Carols Kanye', 10, NULL, NULL, NULL, '2025-03-26 19:24:54', '2025-03-31 19:31:53'),
 (2, 1, 'Music and Video Production', 'Create and edit Music and videos using professional techniques.', 'Andrew Klaas and Philani Mbatha', 10, NULL, NULL, NULL, '2025-03-26 19:24:54', '2025-03-31 19:33:04'),
 (3, 1, '3D Design Fundamentals', 'Explore the principles of 3D Design and create your 3D visualizations.', 'Samuel Kazadi ', 5, NULL, NULL, NULL, '2025-03-26 19:24:54', '2025-03-31 19:32:24'),
-(4, 1, 'Animation Fundamentals', 'Explore the principles of animation and create your animated shorts.', 'Vuyani Magibisela', 5, NULL, NULL, NULL, '2025-03-26 19:24:54', '2025-03-31 19:33:24');
+(4, 1, 'Animation Fundamentals', 'Explore the principles of animation and create your animated shorts.', 'Vuyani Magibisela', 5, NULL, NULL, NULL, '2025-03-26 19:24:54', '2025-03-31 19:33:24'),
+(5, 2, 'Programming AI Projects', 'Focus: Machine learning algorithms, data analysis, and AI model development\r\nLearning Objectives:\r\n•	Understand fundamental AI and machine learning concepts\r\n•	Implement basic machine learning algorithms from scratch\r\n•	Work with AI libraries and frameworks\r\n•	Develop data preprocessing and analysis skills\r\n•	Create AI models for classification and prediction\r\n', 'Vuyani', 10, NULL, NULL, 'Sci-Bono Clubhouse', '2025-06-09 14:36:41', '2025-06-09 14:36:41'),
+(6, 2, 'Web Projects', 'Focus: Web-based AI applications, APIs, and interactive AI interfaces\r\nLearning Objectives:\r\n•	Build responsive web applications with AI integration\r\n•	Understand API development and consumption\r\n•	Create interactive user interfaces for AI systems\r\n•	Implement real-time AI features in web applications\r\n•	Deploy web applications with AI capabilities\r\n', 'Phamela', 12, NULL, NULL, 'Sci-Bono YDP Classroom', '2025-06-09 14:36:41', '2025-06-09 14:36:41'),
+(7, 2, 'Electronics Projects', 'Focus: AI-powered hardware, IoT devices, and embedded systems\r\nLearning Objectives:\r\n•	Understand microcontroller programming\r\n•	Integrate sensors and actuators with AI processing\r\n•	Develop IoT applications with AI capabilities\r\n•	Create autonomous systems using AI\r\n•	Build AI-powered robotics projects\r\n', 'Simphiwe Phiri', 8, NULL, NULL, 'Sci-Bono Simplon Centre', '2025-06-09 14:36:41', '2025-06-09 14:36:41');
 
 -- --------------------------------------------------------
 
@@ -1292,7 +1655,7 @@ INSERT INTO `users` (`id`, `username`, `email`, `password`, `name`, `surname`, `
 (12, 'Pammy', 'default@example.com', '$2y$10$XVbGAfHni2g96herJzNxS.vK69a/1GQVLYnskgkPzw0GKskVV5Ql2', 'Pamela Sithandweyinkosi ', 'Ngwenya', 'mentor', NULL, 'Female', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Sci-Bono Clubhouse', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (13, 'NkuliTheGreat', 'default@example.com', '$2y$10$IjHh78npTETLCK2kgZ5UR.Anib0Pgjx91eOq//BiKb8I5iZyt6Y9m', 'Nonkululeko ', 'Shongwe ', 'admin', NULL, 'Female', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Sci-Bono Clubhouse', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
 (14, 'Pammy', 'default@example.com', '$2y$10$4naNeRn30g44Fl7KZ0KAzu/bfmsxus8nY/RHowmHgiRgkX7SArqHa', 'Pamela Sithandweyinkosi ', 'Ngwenya', 'mentor', NULL, 'Female', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Sci-Bono Clubhouse', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL),
-(16, 'Kgotso_Maponya', 'default@example.com', '$2y$10$e000Bj1pepX8f1LIFrZEy.OxJrQJEIVpXgr94efE7qL2ZiGGZFQuW', 'Kgotso', 'Maponya', 'member', NULL, 'Male', NULL, NULL, NULL, NULL, NULL, NULL, NULL, 'Sci-Bono Clubhouse', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
+(16, 'Kgotso_Maponya', 'kgotso.maponya@live.com', '$2y$10$fE6/F4ryBS1f1oC0dTnHY.n6fHAKx50tJxJevZkHKAr8fy1gzIUfS', 'Kgotso', 'Maponya', 'member', '2010-10-05', 'Male', 10, 'Fernadale High School', 'John', 'john.maponya@live.com', 638393157, 863895689, 'Father', 'Sci-Bono Clubhouse', 'South African', '201005890888', 'Sesotho', '123 Good Street', 'Soweto', 'Johannesburg', 'Gauteng', '2002', NULL, NULL, NULL, 'John Maponya', 'Father', '086895689', 'john.maponya@live.com', '123 Good Street\r\nSoweto\r\nJohannesburg\r\n2002', 'Gaming', 'Mom', 'Be the best developer', 1, 'Program', 'Home and School');
 
 -- --------------------------------------------------------
 
@@ -1423,6 +1786,15 @@ INSERT INTO `visits` (`id`, `visitor_id`, `sign_in_time`, `sign_out_time`, `comm
 DROP TABLE IF EXISTS `holiday_programs_with_status`;
 
 CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `holiday_programs_with_status`  AS SELECT `p`.`id` AS `id`, `p`.`term` AS `term`, `p`.`title` AS `title`, `p`.`description` AS `description`, `p`.`dates` AS `dates`, `p`.`time` AS `time`, `p`.`start_date` AS `start_date`, `p`.`end_date` AS `end_date`, `p`.`location` AS `location`, `p`.`age_range` AS `age_range`, `p`.`lunch_included` AS `lunch_included`, `p`.`program_goals` AS `program_goals`, `p`.`registration_deadline` AS `registration_deadline`, `p`.`max_participants` AS `max_participants`, `p`.`registration_open` AS `registration_open`, `p`.`status` AS `status`, `p`.`created_at` AS `created_at`, `p`.`updated_at` AS `updated_at`, CASE WHEN `p`.`status` = 'completed' OR `p`.`end_date` < curdate() THEN 'Completed' WHEN `p`.`status` = 'cancelled' THEN 'Cancelled' WHEN `p`.`status` = 'draft' THEN 'Draft' WHEN `p`.`registration_open` = 1 AND `p`.`status` in ('open','closing_soon') THEN 'Registration Open' WHEN `p`.`registration_open` = 0 OR `p`.`status` = 'closed' THEN 'Registration Closed' WHEN `p`.`start_date` > curdate() THEN 'Upcoming' WHEN curdate() between `p`.`start_date` and `p`.`end_date` THEN 'In Progress' ELSE 'Unknown' END AS `display_status`, (select count(0) from `holiday_program_attendees` where `holiday_program_attendees`.`program_id` = `p`.`id`) AS `total_registrations`, (select count(0) from `holiday_program_attendees` where `holiday_program_attendees`.`program_id` = `p`.`id` and `holiday_program_attendees`.`mentor_registration` = 0) AS `member_registrations`, (select count(0) from `holiday_program_attendees` where `holiday_program_attendees`.`program_id` = `p`.`id` and `holiday_program_attendees`.`mentor_registration` = 1) AS `mentor_registrations`, (select count(0) from `holiday_program_workshops` where `holiday_program_workshops`.`program_id` = `p`.`id`) AS `workshop_count` FROM `holiday_programs` AS `p` ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `holiday_program_dashboard_stats`
+--
+DROP TABLE IF EXISTS `holiday_program_dashboard_stats`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `holiday_program_dashboard_stats`  AS SELECT `p`.`id` AS `program_id`, `p`.`term` AS `term`, `p`.`title` AS `title`, `p`.`registration_open` AS `registration_open`, `p`.`max_participants` AS `max_participants`, `p`.`auto_close_on_capacity` AS `auto_close_on_capacity`, `p`.`auto_close_on_date` AS `auto_close_on_date`, `p`.`registration_deadline` AS `registration_deadline`, `p`.`created_at` AS `created_at`, `p`.`updated_at` AS `updated_at`, count(`a`.`id`) AS `total_registrations`, count(case when `a`.`status` = 'confirmed' then 1 end) AS `confirmed_registrations`, count(case when `a`.`status` = 'pending' then 1 end) AS `pending_registrations`, count(case when `a`.`mentor_registration` = 1 then 1 end) AS `mentor_applications`, count(case when `a`.`mentor_registration` = 0 then 1 end) AS `member_registrations`, CASE WHEN `p`.`max_participants` > 0 THEN round(count(case when `a`.`status` = 'confirmed' then 1 end) / `p`.`max_participants` * 100,1) ELSE 0 END AS `capacity_percentage`, CASE WHEN count(case when `a`.`status` = 'confirmed' then 1 end) >= `p`.`max_participants` THEN 'full' WHEN count(case when `a`.`status` = 'confirmed' then 1 end) >= `p`.`max_participants` * 0.9 THEN 'nearly_full' WHEN count(case when `a`.`status` = 'confirmed' then 1 end) >= `p`.`max_participants` * 0.75 THEN 'filling_up' ELSE 'available' END AS `capacity_status` FROM (`holiday_programs` `p` left join `holiday_program_attendees` `a` on(`p`.`id` = `a`.`program_id`)) GROUP BY `p`.`id`, `p`.`term`, `p`.`title`, `p`.`registration_open`, `p`.`max_participants`, `p`.`auto_close_on_capacity`, `p`.`auto_close_on_date`, `p`.`registration_deadline`, `p`.`created_at`, `p`.`updated_at` ;
 
 -- --------------------------------------------------------
 
@@ -1590,7 +1962,9 @@ ALTER TABLE `holiday_programs`
   ADD KEY `idx_status` (`status`),
   ADD KEY `idx_registration_open` (`registration_open`),
   ADD KEY `idx_dates` (`start_date`,`end_date`),
-  ADD KEY `idx_term` (`term`);
+  ADD KEY `idx_term` (`term`),
+  ADD KEY `idx_updated_at` (`updated_at`),
+  ADD KEY `idx_program_dates` (`start_date`,`end_date`);
 
 --
 -- Indexes for table `holiday_program_attendance`
@@ -1613,7 +1987,19 @@ ALTER TABLE `holiday_program_attendees`
   ADD KEY `idx_mentor_registration` (`mentor_registration`),
   ADD KEY `idx_mentor_status` (`mentor_status`),
   ADD KEY `idx_email` (`email`),
-  ADD KEY `idx_created_at` (`created_at`);
+  ADD KEY `idx_created_at` (`created_at`),
+  ADD KEY `idx_attendee_status` (`status`),
+  ADD KEY `idx_attendee_mentor` (`mentor_registration`);
+
+--
+-- Indexes for table `holiday_program_audit_trail`
+--
+ALTER TABLE `holiday_program_audit_trail`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_program_audit` (`program_id`),
+  ADD KEY `idx_user_audit` (`user_id`),
+  ADD KEY `idx_action_audit` (`action`),
+  ADD KEY `idx_created_audit` (`created_at`);
 
 --
 -- Indexes for table `holiday_program_criteria`
@@ -1643,6 +2029,14 @@ ALTER TABLE `holiday_program_mentor_details`
   ADD PRIMARY KEY (`id`),
   ADD KEY `attendee_id` (`attendee_id`),
   ADD KEY `workshop_preference` (`workshop_preference`);
+
+--
+-- Indexes for table `holiday_program_notifications`
+--
+ALTER TABLE `holiday_program_notifications`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `unique_program_notification` (`program_id`,`notification_type`),
+  ADD KEY `idx_program_notification` (`program_id`,`notification_type`);
 
 --
 -- Indexes for table `holiday_program_projects`
@@ -1681,6 +2075,15 @@ ALTER TABLE `holiday_program_schedules`
 ALTER TABLE `holiday_program_schedule_items`
   ADD PRIMARY KEY (`id`),
   ADD KEY `schedule_id` (`schedule_id`);
+
+--
+-- Indexes for table `holiday_program_status_log`
+--
+ALTER TABLE `holiday_program_status_log`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_program_id` (`program_id`),
+  ADD KEY `idx_changed_by` (`changed_by`),
+  ADD KEY `idx_created_at` (`created_at`);
 
 --
 -- Indexes for table `holiday_program_workshops`
@@ -1959,7 +2362,7 @@ ALTER TABLE `dell_surveys`
 -- AUTO_INCREMENT for table `holiday_programs`
 --
 ALTER TABLE `holiday_programs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `holiday_program_attendance`
@@ -1971,7 +2374,13 @@ ALTER TABLE `holiday_program_attendance`
 -- AUTO_INCREMENT for table `holiday_program_attendees`
 --
 ALTER TABLE `holiday_program_attendees`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+
+--
+-- AUTO_INCREMENT for table `holiday_program_audit_trail`
+--
+ALTER TABLE `holiday_program_audit_trail`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `holiday_program_criteria`
@@ -1996,6 +2405,12 @@ ALTER TABLE `holiday_program_items`
 --
 ALTER TABLE `holiday_program_mentor_details`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+
+--
+-- AUTO_INCREMENT for table `holiday_program_notifications`
+--
+ALTER TABLE `holiday_program_notifications`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `holiday_program_projects`
@@ -2028,10 +2443,16 @@ ALTER TABLE `holiday_program_schedule_items`
   MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
+-- AUTO_INCREMENT for table `holiday_program_status_log`
+--
+ALTER TABLE `holiday_program_status_log`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `holiday_program_workshops`
 --
 ALTER TABLE `holiday_program_workshops`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `holiday_report_images`
@@ -2277,6 +2698,13 @@ ALTER TABLE `holiday_program_attendees`
   ADD CONSTRAINT `fk_mentor_workshop` FOREIGN KEY (`mentor_workshop_preference`) REFERENCES `holiday_program_workshops` (`id`) ON DELETE SET NULL;
 
 --
+-- Constraints for table `holiday_program_audit_trail`
+--
+ALTER TABLE `holiday_program_audit_trail`
+  ADD CONSTRAINT `audit_program_fk` FOREIGN KEY (`program_id`) REFERENCES `holiday_programs` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `audit_user_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL;
+
+--
 -- Constraints for table `holiday_program_criteria`
 --
 ALTER TABLE `holiday_program_criteria`
@@ -2300,6 +2728,12 @@ ALTER TABLE `holiday_program_items`
 ALTER TABLE `holiday_program_mentor_details`
   ADD CONSTRAINT `holiday_program_mentor_details_ibfk_1` FOREIGN KEY (`attendee_id`) REFERENCES `holiday_program_attendees` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `holiday_program_mentor_details_ibfk_2` FOREIGN KEY (`workshop_preference`) REFERENCES `holiday_program_workshops` (`id`) ON DELETE SET NULL;
+
+--
+-- Constraints for table `holiday_program_notifications`
+--
+ALTER TABLE `holiday_program_notifications`
+  ADD CONSTRAINT `notification_program_fk` FOREIGN KEY (`program_id`) REFERENCES `holiday_programs` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `holiday_program_projects`
@@ -2333,6 +2767,13 @@ ALTER TABLE `holiday_program_schedules`
 --
 ALTER TABLE `holiday_program_schedule_items`
   ADD CONSTRAINT `schedule_item_fk` FOREIGN KEY (`schedule_id`) REFERENCES `holiday_program_schedules` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `holiday_program_status_log`
+--
+ALTER TABLE `holiday_program_status_log`
+  ADD CONSTRAINT `status_log_program_fk` FOREIGN KEY (`program_id`) REFERENCES `holiday_programs` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `status_log_user_fk` FOREIGN KEY (`changed_by`) REFERENCES `users` (`id`) ON DELETE SET NULL;
 
 --
 -- Constraints for table `holiday_program_workshops`

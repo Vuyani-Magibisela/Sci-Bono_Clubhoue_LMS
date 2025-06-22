@@ -190,6 +190,7 @@ section:nth-child(even) {
 .about-content {
     display: flex;
     flex-wrap: wrap;
+    flex-direction: column;
     gap: 40px;
     align-items: center;
 }
@@ -221,6 +222,22 @@ section:nth-child(even) {
     top: 4px;
 }
 
+.about-features {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    text-align: center;
+}
+
+.feature-item {
+    flex: 1;
+    min-width: 200px;
+    background-color: var(--white);
+    padding: 15px;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+}
+
 .about-image {
     flex: 1;
     min-width: 300px;
@@ -242,14 +259,14 @@ section:nth-child(even) {
     gap: 30px;
 }
 
-.program-card {
+/* .program-card {
     display: flex;
     background-color: var(--white);
     border-radius: 10px;
     overflow: hidden;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-}
+} */
 
 .program-card:hover {
     transform: translateY(-5px);
@@ -784,6 +801,7 @@ section:nth-child(even) {
     overflow: hidden;
     transition: all 0.3s ease;
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+    margin-bottom: 30px;
 }
 
 .program-card:hover {
@@ -922,6 +940,9 @@ section:nth-child(even) {
     
     .capacity-indicator {
         margin: 10px 0;
+    }
+    .program-card {
+        margin-bottom: 30px;
     }
 }
 

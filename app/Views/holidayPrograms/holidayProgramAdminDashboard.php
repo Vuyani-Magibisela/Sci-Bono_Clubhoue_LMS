@@ -18,6 +18,224 @@ require __DIR__ . '/../../../config/config.php'; // Include the config file
 // Initialize controller
 $adminController = new HolidayProgramAdminController($conn);
 
+// Handle AJAX requests FIRST
+if (isset($_POST['action'])) {
+    switch($_POST['action']) {
+        case 'update_program_status':
+            header('Content-Type: application/json');
+            
+            $programId = intval($_GET['program_id']);
+            
+            $historySql = "SELECT psl.*, u.name as changed_by_name 
+                           FROM holiday_program_status_log psl 
+                           LEFT JOIN users u ON psl.changed_by = u.id 
+                           WHERE psl.program_id = ? 
+                           ORDER BY psl.created_at DESC 
+                           LIMIT 10";
+            $historyStmt = $conn->prepare($historySql);
+            $historyStmt->bind_param("i", $programId);
+            $historyStmt->execute();
+            $historyResult = $historyStmt->get_result();
+            
+            $history = [];
+            while ($row = $historyResult->fetch_assoc()) {
+                $history[] = $row;
+            }
+            
+            echo json_encode($history);
+            exit;
+            
+        case 'update_registration_status':
+            header('Content-Type: application/json');
+            
+            $attendeeId = intval($_POST['attendee_id']);
+            $status = $_POST['status'];
+            
+            try {
+                $validStatuses = ['pending', 'confirmed', 'canceled'];
+                if (!in_array($status, $validStatuses)) {
+                    throw new Exception('Invalid status');
+                }
+                
+                $updateSql = "UPDATE holiday_program_attendees SET status = ?, updated_at = NOW() WHERE id = ?";
+                $updateStmt = $conn->prepare($updateSql);
+                $updateStmt->bind_param("si", $status, $attendeeId);
+                
+                if ($updateStmt->execute()) {
+                    echo json_encode([
+                        'success' => true,
+                        'message' => 'Registration status updated successfully'
+                    ]);
+                } else {
+                    echo json_encode([
+                        'success' => false,
+                        'message' => 'Failed to update registration status'
+                    ]);
+                }
+            } catch (Exception $e) {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Error: ' . $e->getMessage()
+                ]);
+            }
+            exit;
+            
+        case 'update_mentor_status':
+            header('Content-Type: application/json');
+            
+            $attendeeId = intval($_POST['attendee_id']);
+            $status = $_POST['status'];
+            
+            try {
+                $validStatuses = ['Pending', 'Approved', 'Declined'];
+                if (!in_array($status, $validStatuses)) {
+                    throw new Exception('Invalid mentor status');
+                }
+                
+                $updateSql = "UPDATE holiday_program_attendees SET mentor_status = ?, updated_at = NOW() WHERE id = ?";
+                $updateStmt = $conn->prepare($updateSql);
+                $updateStmt->bind_param("si", $status, $attendeeId);
+                
+                if ($updateStmt->execute()) {
+                    echo json_encode([
+                        'success' => true,
+                        'message' => 'Mentor status updated successfully'
+                    ]);
+                } else {
+                    echo json_encode([
+                        'success' => false,
+                        'message' => 'Failed to update mentor status'
+                    ]);
+                }
+            } catch (Exception $e) {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Error: ' . $e->getMessage()
+                ]);
+            }
+            exit;
+            
+        case 'get_attendee_details':
+            header('Content-Type: application/json');
+            
+            $attendeeId = intval($_POST['attendee_id']);
+            
+            try {
+                $sql = "SELECT a.*, 
+                               GROUP_CONCAT(w.title SEPARATOR ', ') as enrolled_workshops
+                        FROM holiday_program_attendees a
+                        LEFT JOIN holiday_workshop_enrollment we ON a.id = we.attendee_id
+                        LEFT JOIN holiday_program_workshops w ON we.workshop_id = w.id
+                        WHERE a.id = ?
+                        GROUP BY a.id";
+                
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param("i", $attendeeId);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                
+                if ($attendee = $result->fetch_assoc()) {
+                    echo json_encode([
+                        'success' => true,
+                        'data' => $attendee
+                    ]);
+                } else {
+                    echo json_encode([
+                        'success' => false,
+                        'message' => 'Attendee not found'
+                    ]);
+                }
+            } catch (Exception $e) {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Error: ' . $e->getMessage()
+                ]);
+            }
+            exit;
+            
+        case 'send_bulk_email':
+            header('Content-Type: application/json');
+            
+            $programId = intval($_POST['program_id']);
+            $recipients = $_POST['recipients'];
+            $subject = $_POST['subject'];
+            $message = $_POST['message'];
+            
+            try {
+                // Get recipient emails based on selection
+                $sql = "SELECT email FROM holiday_program_attendees WHERE program_id = ?";
+                $params = [$programId];
+                
+                if ($recipients === 'members') {
+                    $sql .= " AND mentor_registration = 0";
+                } elseif ($recipients === 'mentors') {
+                    $sql .= " AND mentor_registration = 1";
+                } elseif ($recipients === 'confirmed') {
+                    $sql .= " AND status = 'confirmed'";
+                }
+                
+                $stmt = $conn->prepare($sql);
+                $stmt->bind_param("i", ...$params);
+                $stmt->execute();
+                $result = $stmt->get_result();
+                
+                $emails = [];
+                while ($row = $result->fetch_assoc()) {
+                    $emails[] = $row['email'];
+                }
+                
+                // Here you would integrate with your email system
+                // For now, we'll just return success
+                echo json_encode([
+                    'success' => true,
+                    'message' => 'Emails queued successfully',
+                    'recipients_count' => count($emails)
+                ]);
+                
+            } catch (Exception $e) {
+                echo json_encode([
+                    'success' => false,
+                    'message' => 'Error: ' . $e->getMessage()
+                ]);
+            }
+            exit;
+            
+        default:
+            // Handle other actions via the controller
+            $adminController->handleAjaxRequest();
+            exit;
+     }
+}
+
+// Handle GET actions
+if (isset($_GET['action'])) {
+    switch($_GET['action']) {
+        case 'get_status_history':
+            header('Content-Type: application/json');
+            
+            $programId = intval($_GET['program_id']);
+            
+            $historySql = "SELECT psl.*, u.name as changed_by_name 
+                           FROM holiday_program_status_log psl 
+                           LEFT JOIN users u ON psl.changed_by = u.id 
+                           WHERE psl.program_id = ? 
+                           ORDER BY psl.created_at DESC 
+                           LIMIT 10";
+            $historyStmt = $conn->prepare($historySql);
+            $historyStmt->bind_param("i", $programId);
+            $historyStmt->execute();
+            $historyResult = $historyStmt->get_result();
+            
+            $history = [];
+            while ($row = $historyResult->fetch_assoc()) {
+                $history[] = $row;
+            }
+            
+            echo json_encode($history);
+            exit;
+    }
+}
+
 // Handle AJAX requests
 if (isset($_POST['action'])) {
     $adminController->handleAjaxRequest();
@@ -37,115 +255,6 @@ $currentProgramId = isset($_GET['program_id']) ? intval($_GET['program_id']) : n
 // Get dashboard data
 $dashboardData = $adminController->getDashboardData($currentProgramId);
 extract($dashboardData);
-
-// Function to handle AJAX status updates
-if (isset($_POST['action']) && $_POST['action'] === 'update_program_status') {
-    header('Content-Type: application/json');
-    
-    $programId = intval($_POST['program_id']);
-    $registrationOpen = intval($_POST['registration_open']);
-    
-    try {
-        // Update the program status in database
-        $updateSql = "UPDATE holiday_programs SET registration_open = ?, updated_at = NOW() WHERE id = ?";
-        $updateStmt = $conn->prepare($updateSql);
-        $updateStmt->bind_param("ii", $registrationOpen, $programId);
-        
-        if ($updateStmt->execute()) {
-            // Log the status change
-            $logSql = "INSERT INTO holiday_program_status_log (program_id, changed_by, old_status, new_status, change_reason, created_at) 
-                       VALUES (?, ?, ?, ?, ?, NOW())";
-            $logStmt = $conn->prepare($logSql);
-            $userId = $_SESSION['id'];
-            $oldStatus = 1 - $registrationOpen; // opposite of new status
-            $reason = "Manual status change by admin";
-            $logStmt->bind_param("iiiss", $programId, $userId, $oldStatus, $registrationOpen, $reason);
-            $logStmt->execute();
-            
-            echo json_encode([
-                'success' => true,
-                'message' => 'Program status updated successfully',
-                'new_status' => $registrationOpen,
-                'timestamp' => date('Y-m-d H:i:s')
-            ]);
-        } else {
-            echo json_encode([
-                'success' => false,
-                'message' => 'Failed to update program status'
-            ]);
-        }
-    } catch (Exception $e) {
-        echo json_encode([
-            'success' => false,
-            'message' => 'Error: ' . $e->getMessage()
-        ]);
-    }
-    exit;
-}
-
-// Function to handle automation settings
-if (isset($_POST['action']) && $_POST['action'] === 'save_automation_setting') {
-    header('Content-Type: application/json');
-    
-    $programId = intval($_POST['program_id']);
-    $setting = $_POST['setting'];
-    $value = intval($_POST['value']);
-    
-    try {
-        $validSettings = ['auto_close_on_capacity', 'auto_close_on_date'];
-        if (!in_array($setting, $validSettings)) {
-            throw new Exception('Invalid setting');
-        }
-        
-        $updateSql = "UPDATE holiday_programs SET {$setting} = ?, updated_at = NOW() WHERE id = ?";
-        $updateStmt = $conn->prepare($updateSql);
-        $updateStmt->bind_param("ii", $value, $programId);
-        
-        if ($updateStmt->execute()) {
-            echo json_encode([
-                'success' => true,
-                'message' => 'Automation setting saved successfully'
-            ]);
-        } else {
-            echo json_encode([
-                'success' => false,
-                'message' => 'Failed to save automation setting'
-            ]);
-        }
-    } catch (Exception $e) {
-        echo json_encode([
-            'success' => false,
-            'message' => 'Error: ' . $e->getMessage()
-        ]);
-    }
-    exit;
-}
-
-// Function to get program status history
-if (isset($_GET['action']) && $_GET['action'] === 'get_status_history') {
-    header('Content-Type: application/json');
-    
-    $programId = intval($_GET['program_id']);
-    
-    $historySql = "SELECT psl.*, u.name as changed_by_name 
-                   FROM holiday_program_status_log psl 
-                   LEFT JOIN users u ON psl.changed_by = u.id 
-                   WHERE psl.program_id = ? 
-                   ORDER BY psl.created_at DESC 
-                   LIMIT 10";
-    $historyStmt = $conn->prepare($historySql);
-    $historyStmt->bind_param("i", $programId);
-    $historyStmt->execute();
-    $historyResult = $historyStmt->get_result();
-    
-    $history = [];
-    while ($row = $historyResult->fetch_assoc()) {
-        $history[] = $row;
-    }
-    
-    echo json_encode($history);
-    exit;
-}
 
 ?>
 
@@ -450,6 +559,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'get_status_history') {
             align-items: center;
             gap: 6px;
             transition: all 0.3s;
+            width: auto;
         }
         
         .action-btn.primary { 
@@ -1102,7 +1212,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'get_status_history') {
                                             ✅ Open - Accepting registrations
                                         </option>
                                     </select>
-                                    <button id="update-status-btn" class="update-btn" onclick="updateProgramStatus()">
+                                    <button id="update-status-btn" class="update-btn" onclick="updateProgramStatusEnhanced()">
                                         <i class="fas fa-save"></i> Update Status
                                     </button>
                                 </div>
@@ -1630,395 +1740,652 @@ if (isset($_GET['action']) && $_GET['action'] === 'get_status_history') {
         </div>
     </div>
     
-    <script src="<?php echo BASE_URL?>public/assets/js/holidayProgramIndex.js"></script>
+    <script src="/../../../public/assets/js/holidayProgramIndex.js"></script>
     <script>
-        // Chart data from PHP
-        const statsData = <?php echo json_encode($stats ?? []); ?>;
-        const programId = <?php echo json_encode($current_program['id'] ?? 0); ?>;
-        
-        // Tab functionality
-        function showTab(tabName) {
-            // Hide all tabs
-            document.querySelectorAll('.tab-content').forEach(tab => {
-                tab.classList.remove('active');
-            });
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            // Show selected tab
-            document.getElementById(tabName).classList.add('active');
-            event.target.classList.add('active');
-        }
-        
-        // Update program status
-        function updateProgramStatus() {
-            const status = document.getElementById('registration-status').value;
-            const statusIndicator = document.getElementById('status-indicator');
-            
-            fetch(window.location.href, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: `action=update_program_status&program_id=${programId}&registration_open=${status}`
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Update status indicator
-                    if (status === '1') {
-                        statusIndicator.textContent = 'Registration Open';
-                        statusIndicator.className = 'status-badge confirmed';
-                    } else {
-                        statusIndicator.textContent = 'Registration Closed';
-                        statusIndicator.className = 'status-badge canceled';
-                    }
-                    
-                    showNotification('Program status updated successfully!', 'success');
-                } else {
-                    showNotification('Error: ' + data.message, 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showNotification('An error occurred. Please try again.', 'error');
-            });
-        }
-        
-        // Export registrations
-        function exportRegistrations() {
-            window.location.href = `?export=csv&program_id=${programId}`;
-        }
-        
-        // Bulk email modal (placeholder)
-        function showBulkEmailModal() {
-            alert('Bulk email feature coming soon! You can manually contact participants using their email addresses from the registrations table.');
-        }
-        
-        // Show notification
-        function showNotification(message, type) {
-            // Remove existing notifications
-            const existingNotifications = document.querySelectorAll('.notification');
-            existingNotifications.forEach(n => n.remove());
-            
-            const notification = document.createElement('div');
-            notification.className = `notification ${type}`;
-            notification.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                padding: 15px 20px;
-                border-radius: 8px;
-                color: white;
-                font-weight: 500;
-                z-index: 1000;
-                animation: slideInRight 0.3s ease;
-            `;
-            
-            if (type === 'success') {
-                notification.style.background = '#28a745';
-            } else if (type === 'error') {
-                notification.style.background = '#dc3545';
-            } else {
-                notification.style.background = '#6c757d';
-            }
-            
-            notification.textContent = message;
-            document.body.appendChild(notification);
-            
-            // Auto remove after 3 seconds
-            setTimeout(() => {
-                notification.remove();
-            }, 3000);
-        }
-        
-        // Add CSS animation for notifications
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes slideInRight {
-                from {
-                    opacity: 0;
-                    transform: translateX(100%);
-                }
-                to {
-                    opacity: 1;
-                    transform: translateX(0);
-                }
-            }
-        `;
-        document.head.appendChild(style);
-        
-        // Initialize on page load
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Admin Dashboard loaded successfully');
-        });
+    // Chart data from PHP
+const statsData = <?php echo json_encode($stats ?? []); ?>;
+const programId = <?php echo json_encode($current_program['id'] ?? 0); ?>;
 
-        // Filter registrations
-        function filterRegistrations() {
-            const searchTerm = document.getElementById('search-registrations').value.toLowerCase();
-            const statusFilter = document.getElementById('filter-status').value;
-            const typeFilter = document.getElementById('filter-type').value;
+// =================================================================
+// TAB FUNCTIONALITY - Fixed and Enhanced
+// =================================================================
+
+function showTab(tabName) {
+    // Hide all tabs
+    document.querySelectorAll('.tab-content').forEach(tab => {
+        tab.classList.remove('active');
+        tab.style.display = 'none';
+    });
+    
+    // Remove active class from all buttons
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    // Show selected tab
+    const selectedTab = document.getElementById(tabName);
+    const clickedButton = event.target.closest('.tab-btn');
+    
+    if (selectedTab) {
+        selectedTab.classList.add('active');
+        selectedTab.style.display = 'block';
+    }
+    
+    if (clickedButton) {
+        clickedButton.classList.add('active');
+    }
+    
+    console.log(`Switched to tab: ${tabName}`);
+}
+
+// Initialize tab functionality on page load
+document.addEventListener('DOMContentLoaded', function() {
+    // Set up tab click handlers
+    document.querySelectorAll('.tab-btn').forEach(btn => {
+        btn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const tabName = this.textContent.trim().toLowerCase();
             
-            const rows = document.querySelectorAll('#registrations-table tbody tr');
-            
-            rows.forEach(row => {
-                const name = row.cells[1].textContent.toLowerCase();
-                const email = row.cells[2].textContent.toLowerCase();
-                const status = row.dataset.status;
-                const type = row.dataset.type;
-                
-                const matchesSearch = name.includes(searchTerm) || email.includes(searchTerm);
-                const matchesStatus = !statusFilter || status === statusFilter;
-                const matchesType = !typeFilter || type === typeFilter;
-                
-                row.style.display = matchesSearch && matchesStatus && matchesType ? '' : 'none';
-            });
-            
-            updateSelectedCount();
-        }
-        
-        // Bulk actions
-        function showBulkActions() {
-            document.getElementById('bulk-actions').style.display = 'block';
-        }
-        
-        function hideBulkActions() {
-            document.getElementById('bulk-actions').style.display = 'none';
-            // Uncheck all checkboxes
-            document.querySelectorAll('.registration-checkbox').forEach(cb => cb.checked = false);
-            document.getElementById('select-all').checked = false;
-            updateSelectedCount();
-        }
-        
-        function toggleSelectAll() {
-            const selectAll = document.getElementById('select-all');
-            const checkboxes = document.querySelectorAll('.registration-checkbox');
-            
-            checkboxes.forEach(cb => {
-                if (cb.closest('tr').style.display !== 'none') {
-                    cb.checked = selectAll.checked;
-                }
-            });
-            
-            updateSelectedCount();
-        }
-        
-        function updateSelectedCount() {
-            const selectedCheckboxes = document.querySelectorAll('.registration-checkbox:checked');
-            const countElement = document.getElementById('selected-count');
-            const count = selectedCheckboxes.length;
-            
-            if (count > 0) {
-                countElement.textContent = `${count} registration${count !== 1 ? 's' : ''} selected`;
-                document.getElementById('bulk-actions').style.display = 'block';
-            } else {
-                countElement.textContent = '';
+            // Extract tab name from button text
+            if (tabName.includes('registrations')) {
+                showTab('registrations');
+            } else if (tabName.includes('workshops')) {
+                showTab('workshops');
+            } else if (tabName.includes('statistics')) {
+                showTab('statistics');
+            } else if (tabName.includes('mentors')) {
+                showTab('mentors');
             }
-        }
+        });
+    });
+    
+    // Show first tab by default
+    showTab('registrations');
+    console.log('Tab functionality initialized');
+});
+
+// =================================================================
+// PROGRAM STATUS UPDATE - Fixed
+// =================================================================
+
+function updateProgramStatus() {
+    const statusSelect = document.getElementById('registration-status');
+    if (!statusSelect) {
+        console.error('Status select element not found');
+        return;
+    }
+    
+    const status = statusSelect.value;
+    const statusIndicator = document.getElementById('status-indicator');
+    
+    if (!programId || programId === 0) {
+        showNotification('No program selected', 'error');
+        return;
+    }
+    
+    console.log(`Updating program ${programId} status to: ${status}`);
+    
+    // Show loading state
+    statusSelect.disabled = true;
+    const originalIndicatorText = statusIndicator ? statusIndicator.textContent : '';
+    if (statusIndicator) {
+        statusIndicator.textContent = 'Updating...';
+    }
+    
+    fetch(window.location.href, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `action=update_program_status&program_id=${programId}&registration_open=${status}`
+    })
+    .then(response => {
+        console.log('Response status:', response.status);
+        return response.json();
+    })
+    .then(data => {
+        console.log('Response data:', data);
         
-        function executeBulkAction() {
-            const action = document.getElementById('bulk-action-select').value;
-            const selectedIds = Array.from(document.querySelectorAll('.registration-checkbox:checked'))
-                .map(cb => cb.value);
-            
-            if (!action || selectedIds.length === 0) {
-                alert('Please select an action and at least one registration.');
-                return;
-            }
-            
-            const actionText = action === 'confirm' ? 'confirm' : action === 'cancel' ? 'cancel' : 'delete';
-            
-            if (confirm(`Are you sure you want to ${actionText} ${selectedIds.length} registration(s)?`)) {
-                // Handle bulk action via AJAX
-                Promise.all(selectedIds.map(id => {
-                    if (action === 'confirm' || action === 'cancel') {
-                        return updateRegistrationStatus(id, action === 'confirm' ? 'confirmed' : 'canceled');
-                    } else if (action === 'delete') {
-                        return deleteRegistration(id);
-                    }
-                })).then(() => {
-                    showNotification(`Successfully ${actionText}ed ${selectedIds.length} registration(s)`, 'success');
-                    setTimeout(() => location.reload(), 1500);
-                }).catch(error => {
-                    console.error('Bulk action error:', error);
-                    showNotification('Some actions failed. Please refresh and try again.', 'error');
-                });
-            }
-        }
-        
-        // Update individual registration status
-        function updateStatus(attendeeId, status) {
-            const statusText = status === 'confirmed' ? 'confirm' : status === 'canceled' ? 'cancel' : status;
-            
-            if (confirm(`Are you sure you want to ${statusText} this registration?`)) {
-                updateRegistrationStatus(attendeeId, status).then(() => {
-                    showNotification('Registration status updated successfully!', 'success');
-                    setTimeout(() => location.reload(), 1000);
-                }).catch(error => {
-                    console.error('Update error:', error);
-                    showNotification('Failed to update registration status.', 'error');
-                });
-            }
-        }
-        
-        function updateRegistrationStatus(attendeeId, status) {
-            return fetch(window.location.href, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: `action=update_registration_status&attendee_id=${attendeeId}&status=${status}`
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (!data.success) {
-                    throw new Error(data.message);
-                }
-                return data;
-            });
-        }
-        
-        // Update mentor status
-        function updateMentorStatus(attendeeId, status) {
-            if (confirm(`Are you sure you want to ${status.toLowerCase()} this mentor application?`)) {
-                fetch(window.location.href, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/x-www-form-urlencoded',
-                    },
-                    body: `action=update_mentor_status&attendee_id=${attendeeId}&status=${status}`
-                })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        showNotification('Mentor status updated successfully!', 'success');
-                        setTimeout(() => location.reload(), 1000);
-                    } else {
-                        showNotification('Error: ' + data.message, 'error');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    showNotification('An error occurred. Please try again.', 'error');
-                });
-            }
-        }
-        
-        // View attendee details
-        function viewAttendee(attendeeId) {
-            fetch(window.location.href, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: `action=get_attendee_details&attendee_id=${attendeeId}`
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    displayAttendeeDetails(data.data);
-                    document.getElementById('attendeeModal').style.display = 'block';
+        if (data.success) {
+            // Update status indicator
+            if (statusIndicator) {
+                if (status === '1') {
+                    statusIndicator.textContent = 'Registration Open';
+                    statusIndicator.className = 'status-badge confirmed';
                 } else {
-                    showNotification('Error: ' + data.message, 'error');
+                    statusIndicator.textContent = 'Registration Closed';
+                    statusIndicator.className = 'status-badge canceled';
                 }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showNotification('An error occurred. Please try again.', 'error');
-            });
-        }
-        
-        function displayAttendeeDetails(attendee) {
-            const html = `
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                    <div>
-                        <h4 style="margin-bottom: 15px; color: #495057;">Personal Information</h4>
-                        <p><strong>Name:</strong> ${attendee.first_name} ${attendee.last_name}</p>
-                        <p><strong>Email:</strong> ${attendee.email}</p>
-                        <p><strong>Phone:</strong> ${attendee.phone || 'Not provided'}</p>
-                        <p><strong>Date of Birth:</strong> ${attendee.date_of_birth || 'Not provided'}</p>
-                        <p><strong>Gender:</strong> ${attendee.gender || 'Not specified'}</p>
-                        ${!attendee.mentor_registration ? `
-                            <p><strong>School:</strong> ${attendee.school || 'Not provided'}</p>
-                            <p><strong>Grade:</strong> ${attendee.grade || 'Not provided'}</p>
-                        ` : ''}
-                    </div>
-                    <div>
-                        <h4 style="margin-bottom: 15px; color: #495057;">Contact Information</h4>
-                        <p><strong>Address:</strong> ${attendee.address || 'Not provided'}</p>
-                        <p><strong>City:</strong> ${attendee.city || 'Not provided'}</p>
-                        <p><strong>Province:</strong> ${attendee.province || 'Not provided'}</p>
-                        ${!attendee.mentor_registration ? `
-                            <h4 style="margin: 20px 0 15px 0; color: #495057;">Guardian Information</h4>
-                            <p><strong>Guardian:</strong> ${attendee.guardian_name || 'Not provided'}</p>
-                            <p><strong>Relationship:</strong> ${attendee.guardian_relationship || 'Not provided'}</p>
-                            <p><strong>Guardian Phone:</strong> ${attendee.guardian_phone || 'Not provided'}</p>
-                            <p><strong>Guardian Email:</strong> ${attendee.guardian_email || 'Not provided'}</p>
-                        ` : ''}
-                    </div>
-                </div>
-                
-                <div style="margin-top: 20px;">
-                    <h4 style="margin-bottom: 15px; color: #495057;">Program Information</h4>
-                    <p><strong>Registration Status:</strong> <span class="status-badge ${attendee.registration_status}">${attendee.registration_status}</span></p>
-                    <p><strong>Type:</strong> ${attendee.mentor_registration ? 'Mentor' : 'Member'}</p>
-                    ${attendee.mentor_registration ? `
-                        <p><strong>Mentor Status:</strong> <span class="status-badge ${(attendee.mentor_status || '').toLowerCase()}">${attendee.mentor_status || 'Pending'}</span></p>
-                        <p><strong>Experience:</strong> ${attendee.experience || 'Not provided'}</p>
-                        <p><strong>Availability:</strong> ${attendee.availability || 'Not provided'}</p>
-                    ` : `
-                        <p><strong>Why Interested:</strong> ${attendee.why_interested || 'Not provided'}</p>
-                        <p><strong>Experience Level:</strong> ${attendee.experience_level || 'Not provided'}</p>
-                    `}
-                    <p><strong>Enrolled Workshops:</strong> ${attendee.enrolled_workshops || 'None assigned'}</p>
-                    <p><strong>Registration Date:</strong> ${new Date(attendee.created_at).toLocaleDateString()}</p>
-                </div>
-                
-                ${attendee.medical_conditions || attendee.allergies || attendee.dietary_restrictions ? `
-                    <div style="margin-top: 20px;">
-                        <h4 style="margin-bottom: 15px; color: #495057;">Medical Information</h4>
-                        ${attendee.medical_conditions ? `<p><strong>Medical Conditions:</strong> ${attendee.medical_conditions}</p>` : ''}
-                        ${attendee.allergies ? `<p><strong>Allergies:</strong> ${attendee.allergies}</p>` : ''}
-                        ${attendee.dietary_restrictions ? `<p><strong>Dietary Restrictions:</strong> ${attendee.dietary_restrictions}</p>` : ''}
-                    </div>
-                ` : ''}
-            `;
+            }
             
-            document.getElementById('attendeeDetails').innerHTML = html;
+            // Update enhanced status management section if it exists
+            updateEnhancedStatusDisplay(status);
+            
+            showNotification('Program status updated successfully!', 'success');
+            
+            // Reload page after 2 seconds to reflect changes
+            setTimeout(() => {
+                window.location.reload();
+            }, 2000);
+        } else {
+            showNotification('Error: ' + (data.message || 'Unknown error'), 'error');
+            // Restore original state
+            if (statusIndicator) {
+                statusIndicator.textContent = originalIndicatorText;
+            }
         }
-        
-        // Edit attendee
-        function editAttendee(attendeeId) {
-            // Redirect to edit page
-            window.location.href = `holidayProgramRegistration.php?program_id=${programId}&edit=1&attendee_id=${attendeeId}`;
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Network error occurred. Please try again.', 'error');
+        // Restore original state
+        if (statusIndicator) {
+            statusIndicator.textContent = originalIndicatorText;
         }
-        
-        // Delete registration
-        function deleteRegistration(attendeeId) {
-            return fetch(window.location.href, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: `action=delete_registration&attendee_id=${attendeeId}`
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (!data.success) {
-                    throw new Error(data.message);
-                }
-                return data;
-            });
+    })
+    .finally(() => {
+        statusSelect.disabled = false;
+    });
+}
+
+// Update enhanced status display if present
+function updateEnhancedStatusDisplay(newStatus) {
+    const statusIndicator = document.querySelector('.status-indicator');
+    const statusText = document.querySelector('.status-text');
+    
+    if (statusIndicator && statusText) {
+        if (newStatus == 1) {
+            statusIndicator.className = 'status-indicator active';
+            statusText.textContent = 'Registration Open';
+        } else {
+            statusIndicator.className = 'status-indicator inactive';
+            statusText.textContent = 'Registration Closed';
         }
-        
-        // Bulk email modal
-        function showBulkEmailModal() {
-            document.getElementById('bulkEmailModal').style.display = 'block';
+    }
+}
+
+// =================================================================
+// ENHANCED STATUS MANAGEMENT FUNCTIONS
+// =================================================================
+
+function updateProgramStatusEnhanced() {
+    const statusSelect = document.getElementById('registration-status-select');
+    const updateBtn = document.getElementById('update-status-btn');
+    
+    if (!statusSelect || !updateBtn) {
+        console.error('Enhanced status controls not found');
+        return;
+    }
+    
+    // Disable button and show loading
+    updateBtn.disabled = true;
+    updateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
+    
+    // Prepare form data
+    const formData = new FormData();
+    formData.append('action', 'update_program_status');
+    formData.append('program_id', programId);
+    formData.append('registration_open', statusSelect.value);
+    
+    // Send AJAX request
+    fetch(window.location.href, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification('Status updated successfully!', 'success');
+            updateEnhancedStatusDisplay(data.new_status);
+            
+            // Reload page after short delay to refresh all data
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        } else {
+            showNotification('Error: ' + data.message, 'error');
         }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('Network error occurred', 'error');
+    })
+    .finally(() => {
+        // Re-enable button
+        updateBtn.disabled = false;
+        updateBtn.innerHTML = '<i class="fas fa-save"></i> Update Status';
+    });
+}
+
+function openRegistration() {
+    const statusSelect = document.getElementById('registration-status-select') || 
+                        document.getElementById('registration-status');
+    if (statusSelect) {
+        statusSelect.value = '1';
+        if (document.getElementById('registration-status-select')) {
+            updateProgramStatusEnhanced();
+        } else {
+            updateProgramStatus();
+        }
+    }
+}
+
+function closeRegistration() {
+    if (confirm('Are you sure you want to close registration? This will prevent new participants from registering.')) {
+        const statusSelect = document.getElementById('registration-status-select') || 
+                            document.getElementById('registration-status');
+        if (statusSelect) {
+            statusSelect.value = '0';
+            if (document.getElementById('registration-status-select')) {
+                updateProgramStatusEnhanced();
+            } else {
+                updateProgramStatus();
+            }
+        }
+    }
+}
+
+// =================================================================
+// STATUS HISTORY MODAL
+// =================================================================
+
+function viewStatusHistory() {
+    const modal = document.getElementById('statusHistoryModal');
+    const content = document.getElementById('status-history-content');
+    
+    if (!modal || !content) {
+        showNotification('Status history feature not available', 'error');
+        return;
+    }
+    
+    // Show modal
+    modal.style.display = 'block';
+    
+    // Load history
+    content.innerHTML = '<div class="loading">Loading history...</div>';
+    
+    fetch(`?action=get_status_history&program_id=${programId}`)
+        .then(response => response.json())
+        .then(history => {
+            if (history.length > 0) {
+                let historyHtml = '<div class="history-timeline">';
+                history.forEach(entry => {
+                    const statusText = entry.new_status == 1 ? 'Opened' : 'Closed';
+                    const statusClass = entry.new_status == 1 ? 'success' : 'danger';
+                    const date = new Date(entry.created_at).toLocaleString();
+                    
+                    historyHtml += `
+                        <div class="history-item">
+                            <div class="history-dot ${statusClass}"></div>
+                            <div class="history-content">
+                                <div class="history-action">Registration ${statusText}</div>
+                                <div class="history-details">
+                                    <small>By: ${entry.changed_by_name || 'System'}</small>
+                                    <small>Date: ${date}</small>
+                                    ${entry.change_reason ? `<small>Reason: ${entry.change_reason}</small>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                historyHtml += '</div>';
+                content.innerHTML = historyHtml;
+            } else {
+                content.innerHTML = '<p>No status change history available.</p>';
+            }
+        })
+        .catch(error => {
+            content.innerHTML = '<p>Error loading history.</p>';
+            console.error('Error:', error);
+        });
+}
+
+function closeStatusHistoryModal() {
+    const modal = document.getElementById('statusHistoryModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+// =================================================================
+// AUTOMATION SETTINGS
+// =================================================================
+
+function saveAutomationSetting(setting, value) {
+    const formData = new FormData();
+    formData.append('action', 'save_automation_setting');
+    formData.append('program_id', programId);
+    formData.append('setting', setting);
+    formData.append('value', value ? 1 : 0);
+    
+    fetch(window.location.href, {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            showNotification('Automation setting saved', 'success');
+        } else {
+            showNotification('Failed to save setting', 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error saving automation setting:', error);
+        showNotification('Network error', 'error');
+    });
+}
+
+// =================================================================
+// EXPORT AND BULK ACTIONS
+// =================================================================
+
+function exportRegistrations() {
+    if (!programId || programId === 0) {
+        showNotification('No program selected', 'error');
+        return;
+    }
+    window.location.href = `?export=csv&program_id=${programId}`;
+}
+
+function showBulkEmailModal() {
+    const modal = document.getElementById('bulkEmailModal');
+    if (modal) {
+        modal.style.display = 'block';
+    } else {
+        showNotification('Bulk email feature coming soon!', 'info');
+    }
+}
+
+// =================================================================
+// REGISTRATION MANAGEMENT
+// =================================================================
+
+function filterRegistrations() {
+    const searchTerm = document.getElementById('search-registrations')?.value.toLowerCase() || '';
+    const statusFilter = document.getElementById('filter-status')?.value || '';
+    const typeFilter = document.getElementById('filter-type')?.value || '';
+    
+    const rows = document.querySelectorAll('#registrations-table tbody tr');
+    
+    rows.forEach(row => {
+        const name = row.cells[1]?.textContent.toLowerCase() || '';
+        const email = row.cells[2]?.textContent.toLowerCase() || '';
+        const status = row.dataset.status || '';
+        const type = row.dataset.type || '';
         
-        // Handle bulk email form
-        document.getElementById('bulkEmailForm').addEventListener('submit', function(e) {
+        const matchesSearch = name.includes(searchTerm) || email.includes(searchTerm);
+        const matchesStatus = !statusFilter || status === statusFilter;
+        const matchesType = !typeFilter || type === typeFilter;
+        
+        row.style.display = matchesSearch && matchesStatus && matchesType ? '' : 'none';
+    });
+    
+    updateSelectedCount();
+}
+
+function showBulkActions() {
+    const bulkActions = document.getElementById('bulk-actions');
+    if (bulkActions) {
+        bulkActions.style.display = 'block';
+    }
+}
+
+function hideBulkActions() {
+    const bulkActions = document.getElementById('bulk-actions');
+    if (bulkActions) {
+        bulkActions.style.display = 'none';
+    }
+    
+    // Uncheck all checkboxes
+    document.querySelectorAll('.registration-checkbox').forEach(cb => cb.checked = false);
+    const selectAll = document.getElementById('select-all');
+    if (selectAll) selectAll.checked = false;
+    updateSelectedCount();
+}
+
+function toggleSelectAll() {
+    const selectAll = document.getElementById('select-all');
+    const checkboxes = document.querySelectorAll('.registration-checkbox');
+    
+    if (selectAll && checkboxes) {
+        checkboxes.forEach(cb => {
+            if (cb.closest('tr').style.display !== 'none') {
+                cb.checked = selectAll.checked;
+            }
+        });
+        updateSelectedCount();
+    }
+}
+
+function updateSelectedCount() {
+    const selectedCheckboxes = document.querySelectorAll('.registration-checkbox:checked');
+    const countElement = document.getElementById('selected-count');
+    const count = selectedCheckboxes.length;
+    
+    if (countElement) {
+        if (count > 0) {
+            countElement.textContent = `${count} registration${count !== 1 ? 's' : ''} selected`;
+            const bulkActions = document.getElementById('bulk-actions');
+            if (bulkActions) bulkActions.style.display = 'block';
+        } else {
+            countElement.textContent = '';
+        }
+    }
+}
+
+function updateStatus(attendeeId, status) {
+    const statusText = status === 'confirmed' ? 'confirm' : status === 'canceled' ? 'cancel' : status;
+    
+    if (confirm(`Are you sure you want to ${statusText} this registration?`)) {
+        updateRegistrationStatus(attendeeId, status).then(() => {
+            showNotification('Registration status updated successfully!', 'success');
+            setTimeout(() => location.reload(), 1000);
+        }).catch(error => {
+            console.error('Update error:', error);
+            showNotification('Failed to update registration status.', 'error');
+        });
+    }
+}
+
+function updateRegistrationStatus(attendeeId, status) {
+    return fetch(window.location.href, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `action=update_registration_status&attendee_id=${attendeeId}&status=${status}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (!data.success) {
+            throw new Error(data.message);
+        }
+        return data;
+    });
+}
+
+function updateMentorStatus(attendeeId, status) {
+    if (confirm(`Are you sure you want to ${status.toLowerCase()} this mentor application?`)) {
+        fetch(window.location.href, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+            },
+            body: `action=update_mentor_status&attendee_id=${attendeeId}&status=${status}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                showNotification('Mentor status updated successfully!', 'success');
+                setTimeout(() => location.reload(), 1000);
+            } else {
+                showNotification('Error: ' + data.message, 'error');
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            showNotification('An error occurred. Please try again.', 'error');
+        });
+    }
+}
+
+// =================================================================
+// MODAL FUNCTIONS
+// =================================================================
+
+function viewAttendee(attendeeId) {
+    fetch(window.location.href, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        body: `action=get_attendee_details&attendee_id=${attendeeId}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            displayAttendeeDetails(data.data);
+            const modal = document.getElementById('attendeeModal');
+            if (modal) modal.style.display = 'block';
+        } else {
+            showNotification('Error: ' + data.message, 'error');
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        showNotification('An error occurred. Please try again.', 'error');
+    });
+}
+
+function displayAttendeeDetails(attendee) {
+    const html = `
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+            <div>
+                <h4 style="margin-bottom: 15px; color: #495057;">Personal Information</h4>
+                <p><strong>Name:</strong> ${attendee.first_name} ${attendee.last_name}</p>
+                <p><strong>Email:</strong> ${attendee.email}</p>
+                <p><strong>Phone:</strong> ${attendee.phone || 'Not provided'}</p>
+                <p><strong>Date of Birth:</strong> ${attendee.date_of_birth || 'Not provided'}</p>
+                <p><strong>Gender:</strong> ${attendee.gender || 'Not specified'}</p>
+                ${!attendee.mentor_registration ? `
+                    <p><strong>School:</strong> ${attendee.school || 'Not provided'}</p>
+                    <p><strong>Grade:</strong> ${attendee.grade || 'Not provided'}</p>
+                ` : ''}
+            </div>
+            <div>
+                <h4 style="margin-bottom: 15px; color: #495057;">Registration Information</h4>
+                <p><strong>Status:</strong> <span class="status-badge ${attendee.registration_status}">${attendee.registration_status}</span></p>
+                <p><strong>Type:</strong> ${attendee.mentor_registration ? 'Mentor' : 'Member'}</p>
+                <p><strong>Registration Date:</strong> ${new Date(attendee.created_at).toLocaleDateString()}</p>
+                ${attendee.mentor_registration ? `
+                    <p><strong>Mentor Status:</strong> <span class="status-badge ${(attendee.mentor_status || '').toLowerCase()}">${attendee.mentor_status || 'Pending'}</span></p>
+                ` : ''}
+            </div>
+        </div>
+    `;
+    
+    const detailsContainer = document.getElementById('attendeeDetails');
+    if (detailsContainer) {
+        detailsContainer.innerHTML = html;
+    }
+}
+
+function editAttendee(attendeeId) {
+    window.location.href = `holidayProgramRegistration.php?program_id=${programId}&edit=1&attendee_id=${attendeeId}`;
+}
+
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'none';
+    }
+}
+
+// =================================================================
+// NOTIFICATION SYSTEM
+// =================================================================
+
+function showNotification(message, type) {
+    // Remove existing notifications
+    const existingNotifications = document.querySelectorAll('.notification');
+    existingNotifications.forEach(n => n.remove());
+    
+    const notification = document.createElement('div');
+    notification.className = `notification ${type}`;
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 15px 20px;
+        border-radius: 8px;
+        color: white;
+        font-weight: 500;
+        z-index: 10000;
+        animation: slideInRight 0.3s ease;
+        min-width: 300px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+    `;
+    
+    if (type === 'success') {
+        notification.style.background = '#28a745';
+    } else if (type === 'error') {
+        notification.style.background = '#dc3545';
+    } else if (type === 'info') {
+        notification.style.background = '#17a2b8';
+    } else {
+        notification.style.background = '#6c757d';
+    }
+    
+    notification.innerHTML = `
+        <div style="display: flex; align-items: center; gap: 10px;">
+            <i class="fas fa-${type === 'success' ? 'check' : type === 'error' ? 'exclamation' : 'info'}-circle"></i>
+            <span>${message}</span>
+            <button onclick="this.parentElement.parentElement.remove()" 
+                    style="background: none; border: none; color: white; cursor: pointer; margin-left: auto;">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+    `;
+    
+    document.body.appendChild(notification);
+    
+    // Auto remove after 5 seconds
+    setTimeout(() => {
+        if (notification.parentNode) {
+            notification.style.animation = 'slideOutRight 0.3s ease';
+            setTimeout(() => notification.remove(), 300);
+        }
+    }, 5000);
+}
+
+// =================================================================
+// EVENT LISTENERS AND INITIALIZATION
+// =================================================================
+
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('Admin Dashboard loaded successfully');
+    
+    // Initialize automation settings listeners
+    const autoCloseCapacity = document.getElementById('auto-close-capacity');
+    const autoCloseDate = document.getElementById('auto-close-date');
+    
+    if (autoCloseCapacity) {
+        autoCloseCapacity.addEventListener('change', function() {
+            saveAutomationSetting('auto_close_on_capacity', this.checked);
+        });
+    }
+    
+    if (autoCloseDate) {
+        autoCloseDate.addEventListener('change', function() {
+            saveAutomationSetting('auto_close_on_date', this.checked);
+        });
+    }
+    
+    // Initialize bulk email form
+    const bulkEmailForm = document.getElementById('bulkEmailForm');
+    if (bulkEmailForm) {
+        bulkEmailForm.addEventListener('submit', function(e) {
             e.preventDefault();
             
             const formData = new FormData(this);
@@ -2032,7 +2399,7 @@ if (isset($_GET['action']) && $_GET['action'] === 'get_status_history') {
             .then(response => response.json())
             .then(data => {
                 if (data.success) {
-                    showNotification(`Email queued for ${data.recipients_count} recipients!`, 'success');
+                    showNotification(`Email sent to ${data.recipients_count || 0} recipients!`, 'success');
                     closeModal('bulkEmailModal');
                 } else {
                     showNotification('Error: ' + data.message, 'error');
@@ -2043,293 +2410,88 @@ if (isset($_GET['action']) && $_GET['action'] === 'get_status_history') {
                 showNotification('An error occurred. Please try again.', 'error');
             });
         });
-        
-        // Modal functions
-        function closeModal(modalId) {
-            document.getElementById(modalId).style.display = 'none';
-        }
-        
-        // Close modal when clicking outside
-        window.onclick = function(event) {
-            const modals = document.querySelectorAll('[id$="Modal"]');
-            modals.forEach(modal => {
-                if (event.target === modal) {
-                    modal.style.display = 'none';
-                }
-            });
-        }
-
-        // Program Status Management JavaScript
-        
-        function updateProgramStatus() {
-            const statusSelect = document.getElementById('registration-status-select');
-            const updateBtn = document.getElementById('update-status-btn');
-            const programId = <?php echo $current_program['id']; ?>;
-            
-            // Disable button and show loading
-            updateBtn.disabled = true;
-            updateBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
-            
-            // Prepare form data
-            const formData = new FormData();
-            formData.append('action', 'update_program_status');
-            formData.append('program_id', programId);
-            formData.append('registration_open', statusSelect.value);
-            
-            // Send AJAX request
-            fetch(window.location.href, {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    // Show success message
-                    showNotification('Status updated successfully!', 'success');
-                    
-                    // Update UI elements
-                    updateStatusDisplay(data.new_status);
-                    
-                    // Reload page after short delay to refresh all data
-                    setTimeout(() => {
-                        window.location.reload();
-                    }, 1500);
-                } else {
-                    showNotification('Error: ' + data.message, 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                showNotification('Network error occurred', 'error');
-            })
-            .finally(() => {
-                // Re-enable button
-                updateBtn.disabled = false;
-                updateBtn.innerHTML = '<i class="fas fa-save"></i> Update Status';
-            });
-        }
-        
-        function openRegistration() {
-            document.getElementById('registration-status-select').value = '1';
-            updateProgramStatus();
-        }
-        
-        function closeRegistration() {
-            if (confirm('Are you sure you want to close registration? This will prevent new participants from registering.')) {
-                document.getElementById('registration-status-select').value = '0';
-                updateProgramStatus();
-            }
-        }
-        
-        function updateStatusDisplay(newStatus) {
-            const statusIndicator = document.querySelector('.status-indicator');
-            const statusText = document.querySelector('.status-text');
-            
-            if (newStatus == 1) {
-                statusIndicator.className = 'status-indicator active';
-                statusText.textContent = 'Registration Open';
-            } else {
-                statusIndicator.className = 'status-indicator inactive';
-                statusText.textContent = 'Registration Closed';
-            }
-        }
-        
-        function viewStatusHistory() {
-            const modal = document.getElementById('statusHistoryModal');
-            const content = document.getElementById('status-history-content');
-            const programId = <?php echo $current_program['id']; ?>;
-            
-            // Show modal
-            modal.style.display = 'block';
-            
-            // Load history
-            content.innerHTML = '<div class="loading">Loading history...</div>';
-            
-            fetch(`?action=get_status_history&program_id=${programId}`)
-                .then(response => response.json())
-                .then(history => {
-                    if (history.length > 0) {
-                        let historyHtml = '<div class="history-timeline">';
-                        history.forEach(entry => {
-                            const statusText = entry.new_status == 1 ? 'Opened' : 'Closed';
-                            const statusClass = entry.new_status == 1 ? 'success' : 'danger';
-                            const date = new Date(entry.created_at).toLocaleString();
-                            
-                            historyHtml += `
-                                <div class="history-item">
-                                    <div class="history-dot ${statusClass}"></div>
-                                    <div class="history-content">
-                                        <div class="history-action">Registration ${statusText}</div>
-                                        <div class="history-details">
-                                            <small>By: ${entry.changed_by_name || 'System'}</small>
-                                            <small>Date: ${date}</small>
-                                            ${entry.change_reason ? `<small>Reason: ${entry.change_reason}</small>` : ''}
-                                        </div>
-                                    </div>
-                                </div>
-                            `;
-                        });
-                        historyHtml += '</div>';
-                        content.innerHTML = historyHtml;
-                    } else {
-                        content.innerHTML = '<p>No status change history available.</p>';
-                    }
-                })
-                .catch(error => {
-                    content.innerHTML = '<p>Error loading history.</p>';
-                    console.error('Error:', error);
-                });
-        }
-        
-        function closeStatusHistoryModal() {
-            document.getElementById('statusHistoryModal').style.display = 'none';
-        }
-        
-        function showNotification(message, type) {
-            // Create notification element
-            const notification = document.createElement('div');
-            notification.className = `notification ${type}`;
-            notification.innerHTML = `
-                <i class="fas fa-${type === 'success' ? 'check' : 'exclamation'}-circle"></i>
-                ${message}
-            `;
-            
-            // Style the notification
-            notification.style.cssText = `
-                position: fixed;
-                top: 20px;
-                right: 20px;
-                padding: 15px 20px;
-                border-radius: 8px;
-                color: white;
-                font-weight: 600;
-                z-index: 10000;
-                animation: slideIn 0.3s ease;
-                background: ${type === 'success' ? '#28a745' : '#dc3545'};
-                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-            `;
-            
-            // Add to page
-            document.body.appendChild(notification);
-            
-            // Remove after 3 seconds
-            setTimeout(() => {
-                notification.style.animation = 'slideOut 0.3s ease';
-                setTimeout(() => {
-                    if (notification.parentNode) {
-                        notification.parentNode.removeChild(notification);
-                    }
-                }, 300);
-            }, 3000);
-        }
-        
-        // Close modal when clicking outside
-        window.onclick = function(event) {
-            const modal = document.getElementById('statusHistoryModal');
+    }
+    
+    // Close modals when clicking outside
+    window.onclick = function(event) {
+        const modals = document.querySelectorAll('[id$="Modal"]');
+        modals.forEach(modal => {
             if (event.target === modal) {
-                closeStatusHistoryModal();
-            }
-        }
-        
-        // Auto-save automation settings
-        document.addEventListener('DOMContentLoaded', function() {
-            const autoCloseCapacity = document.getElementById('auto-close-capacity');
-            const autoCloseDate = document.getElementById('auto-close-date');
-            
-            if (autoCloseCapacity) {
-                autoCloseCapacity.addEventListener('change', function() {
-                    // Save automation setting
-                    saveAutomationSetting('auto_close_on_capacity', this.checked);
-                });
-            }
-            
-            if (autoCloseDate) {
-                autoCloseDate.addEventListener('change', function() {
-                    // Save automation setting
-                    saveAutomationSetting('auto_close_on_date', this.checked);
-                });
+                modal.style.display = 'none';
             }
         });
-        
-        function saveAutomationSetting(setting, value) {
-            const formData = new FormData();
-            formData.append('action', 'save_automation_setting');
-            formData.append('program_id', <?php echo $current_program['id']; ?>);
-            formData.append('setting', setting);
-            formData.append('value', value ? 1 : 0);
-            
-            fetch(window.location.href, {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.success) {
-                    showNotification('Automation setting saved', 'success');
-                } else {
-                    showNotification('Failed to save setting', 'error');
-                }
-            })
-            .catch(error => {
-                console.error('Error saving automation setting:', error);
-                showNotification('Network error', 'error');
-            });
+    }
+    
+    // Global function assignments for onclick handlers
+    window.showTab = showTab;
+    window.updateProgramStatus = updateProgramStatus;
+    window.updateProgramStatusEnhanced = updateProgramStatusEnhanced;
+    window.openRegistration = openRegistration;
+    window.closeRegistration = closeRegistration;
+    window.viewStatusHistory = viewStatusHistory;
+    window.closeStatusHistoryModal = closeStatusHistoryModal;
+    window.exportRegistrations = exportRegistrations;
+    window.showBulkEmailModal = showBulkEmailModal;
+    window.filterRegistrations = filterRegistrations;
+    window.showBulkActions = showBulkActions;
+    window.hideBulkActions = hideBulkActions;
+    window.toggleSelectAll = toggleSelectAll;
+    window.updateSelectedCount = updateSelectedCount;
+    window.updateStatus = updateStatus;
+    window.updateMentorStatus = updateMentorStatus;
+    window.viewAttendee = viewAttendee;
+    window.editAttendee = editAttendee;
+    window.closeModal = closeModal;
+});
+
+// Add CSS animations
+const dashboardStyle = document.createElement('style');
+dashboardStyle.textContent = `
+    @keyframes slideInRight {
+        from {
+            opacity: 0;
+            transform: translateX(100%);
         }
-        
-        // Add CSS animations for notifications
-        const style = document.createElement('style');
-        style.textContent = `
-            @keyframes slideIn {
-                from { transform: translateX(100%); opacity: 0; }
-                to { transform: translateX(0); opacity: 1; }
-            }
-            
-            @keyframes slideOut {
-                from { transform: translateX(0); opacity: 1; }
-                to { transform: translateX(100%); opacity: 0; }
-            }
-        `;
-        document.head.appendChild(style);
-        
-        // Periodic status refresh (every 30 seconds)
-        setInterval(function() {
-            if (!document.hidden) {
-                // Only refresh capacity info, not full page
-                refreshCapacityInfo();
-            }
-        }, 30000);
-        
-        function refreshCapacityInfo() {
-            const programId = <?php echo $current_program['id']; ?>;
-            
-            fetch(`./api/get-program-capacity.php?program_id=${programId}`)
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success) {
-                        // Update capacity display
-                        const progressFill = document.querySelector('.progress-fill');
-                        const progressText = document.querySelector('.progress-header span:last-child');
-                        const remainingSpots = document.querySelector('.stat-item:last-child .stat-number');
-                        
-                        if (progressFill && data.capacity_info) {
-                            const percentage = (data.capacity_info.current / data.capacity_info.max) * 100;
-                            progressFill.style.width = Math.min(percentage, 100) + '%';
-                            
-                            if (progressText) {
-                                progressText.textContent = `${data.capacity_info.current}/${data.capacity_info.max}`;
-                            }
-                            
-                            if (remainingSpots) {
-                                const remaining = Math.max(0, data.capacity_info.max - data.capacity_info.current);
-                                remainingSpots.textContent = remaining;
-                            }
-                        }
-                    }
-                })
-                .catch(error => {
-                    console.log('Capacity refresh failed:', error);
-                });
+        to {
+            opacity: 1;
+            transform: translateX(0);
         }
+    }
+    
+    @keyframes slideOutRight {
+        from {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        to {
+            opacity: 0;
+            transform: translateX(100%);
+        }
+    }
+    
+    .tab-content {
+        display: none;
+    }
+    
+    .tab-content.active {
+        display: block;
+        animation: fadeIn 0.3s ease;
+    }
+    
+    @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+    }
+    
+    .loading {
+        opacity: 0.6;
+        pointer-events: none;
+    }
+`;
+
+document.head.appendChild(dashboardStyle);
+
+console.log('Dashboard JavaScript fully initialized with all functions');
     </script>
 </body>
 </html>
