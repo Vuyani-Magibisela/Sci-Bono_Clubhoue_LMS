@@ -1,8 +1,8 @@
 <?php
 // Database credentials
 $host = "localhost";
-$user = "root";
-$password = "";
+$user = "vuksDev";
+$password = "Vu13#k*s3D3V";
 $dbname = "accounts";
 
 // Connect to MySQL database
