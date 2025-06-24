@@ -1,11 +1,11 @@
 -- phpMyAdmin SQL Dump
--- version 5.2.1
+-- version 5.1.1deb5ubuntu1
 -- https://www.phpmyadmin.net/
 --
--- Host: 127.0.0.1
--- Generation Time: Jun 18, 2025 at 11:36 AM
--- Server version: 10.4.28-MariaDB
--- PHP Version: 8.2.4
+-- Host: localhost:3306
+-- Generation Time: Jun 24, 2025 at 09:55 AM
+-- Server version: 8.0.42-0ubuntu0.22.04.1
+-- PHP Version: 8.1.2-1ubuntu2.21
 
 SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
 START TRANSACTION;
@@ -25,7 +25,7 @@ DELIMITER $$
 --
 -- Procedures
 --
-CREATE DEFINER=`root`@`localhost` PROCEDURE `CheckRegistrationDeadlines` ()   BEGIN
+CREATE DEFINER=`root`@`localhost` PROCEDURE `CheckRegistrationDeadlines` ()  BEGIN
     DECLARE done INT DEFAULT FALSE;
     DECLARE v_program_id INT;
     DECLARE deadline_cursor CURSOR FOR 
@@ -68,7 +68,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `CheckRegistrationDeadlines` ()   BE
     SELECT ROW_COUNT() as programs_closed;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `GetProgramStatistics` (IN `p_program_id` INT)   BEGIN
+CREATE DEFINER=`root`@`localhost` PROCEDURE `GetProgramStatistics` (IN `p_program_id` INT)  BEGIN
     SELECT 
         p.id,
         p.term,
@@ -93,7 +93,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `GetProgramStatistics` (IN `p_progra
     GROUP BY p.id;
 END$$
 
-CREATE DEFINER=`root`@`localhost` PROCEDURE `UpdateProgramStatus` (IN `p_program_id` INT, IN `p_new_status` TINYINT, IN `p_user_id` INT, IN `p_reason` VARCHAR(255), IN `p_ip_address` VARCHAR(45))   BEGIN
+CREATE DEFINER=`root`@`localhost` PROCEDURE `UpdateProgramStatus` (IN `p_program_id` INT, IN `p_new_status` TINYINT, IN `p_user_id` INT, IN `p_reason` VARCHAR(255), IN `p_ip_address` VARCHAR(45))  BEGIN
     DECLARE v_old_status TINYINT DEFAULT 0;
     DECLARE v_program_exists INT DEFAULT 0;
     DECLARE exit handler for sqlexception
@@ -146,7 +146,9 @@ END$$
 --
 -- Functions
 --
-CREATE DEFINER=`root`@`localhost` FUNCTION `GetProgramCapacityPercentage` (`p_program_id` INT) RETURNS DECIMAL(5,2) DETERMINISTIC READS SQL DATA BEGIN
+CREATE DEFINER=`root`@`localhost` FUNCTION `GetProgramCapacityPercentage` (`p_program_id` INT) RETURNS DECIMAL(5,2) READS SQL DATA
+    DETERMINISTIC
+BEGIN
     DECLARE v_confirmed_count INT DEFAULT 0;
     DECLARE v_max_participants INT DEFAULT 0;
     
@@ -166,7 +168,9 @@ CREATE DEFINER=`root`@`localhost` FUNCTION `GetProgramCapacityPercentage` (`p_pr
     END IF;
 END$$
 
-CREATE DEFINER=`root`@`localhost` FUNCTION `GetProgramCapacityStatus` (`p_program_id` INT) RETURNS VARCHAR(20) CHARSET utf8mb4 COLLATE utf8mb4_general_ci DETERMINISTIC READS SQL DATA BEGIN
+CREATE DEFINER=`root`@`localhost` FUNCTION `GetProgramCapacityStatus` (`p_program_id` INT) RETURNS VARCHAR(20) CHARSET utf8mb4 COLLATE utf8mb4_general_ci READS SQL DATA
+    DETERMINISTIC
+BEGIN
     DECLARE v_confirmed_count INT DEFAULT 0;
     DECLARE v_max_participants INT DEFAULT 0;
     DECLARE v_percentage DECIMAL(5,2) DEFAULT 0;
@@ -207,21 +211,21 @@ DELIMITER ;
 --
 
 CREATE TABLE `activity_submissions` (
-  `id` int(11) NOT NULL,
-  `activity_id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `submission_content` longtext DEFAULT NULL,
-  `file_path` varchar(255) DEFAULT NULL,
-  `submission_url` varchar(255) DEFAULT NULL,
-  `points_earned` int(11) DEFAULT NULL,
-  `max_points` int(11) NOT NULL,
-  `feedback` text DEFAULT NULL,
-  `status` enum('draft','submitted','graded','returned') NOT NULL DEFAULT 'draft',
+  `id` int NOT NULL,
+  `activity_id` int NOT NULL,
+  `user_id` int NOT NULL,
+  `submission_content` longtext COLLATE utf8mb4_general_ci,
+  `file_path` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `submission_url` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `points_earned` int DEFAULT NULL,
+  `max_points` int NOT NULL,
+  `feedback` text COLLATE utf8mb4_general_ci,
+  `status` enum('draft','submitted','graded','returned') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'draft',
   `submitted_at` timestamp NULL DEFAULT NULL,
   `graded_at` timestamp NULL DEFAULT NULL,
-  `graded_by` int(11) DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `graded_by` int DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -231,20 +235,20 @@ CREATE TABLE `activity_submissions` (
 --
 
 CREATE TABLE `assessment_attempts` (
-  `id` int(11) NOT NULL,
-  `assessment_id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `attempt_number` int(11) NOT NULL DEFAULT 1,
-  `points_earned` int(11) DEFAULT NULL,
-  `total_points` int(11) NOT NULL,
+  `id` int NOT NULL,
+  `assessment_id` int NOT NULL,
+  `user_id` int NOT NULL,
+  `attempt_number` int NOT NULL DEFAULT '1',
+  `points_earned` int DEFAULT NULL,
+  `total_points` int NOT NULL,
   `percentage` decimal(5,2) DEFAULT NULL,
-  `passed` tinyint(1) DEFAULT 0,
-  `time_spent_minutes` int(11) DEFAULT NULL,
-  `started_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `passed` tinyint(1) DEFAULT '0',
+  `time_spent_minutes` int DEFAULT NULL,
+  `started_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `completed_at` timestamp NULL DEFAULT NULL,
-  `status` enum('in_progress','completed','abandoned','expired') NOT NULL DEFAULT 'in_progress',
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `status` enum('in_progress','completed','abandoned','expired') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'in_progress',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -254,11 +258,11 @@ CREATE TABLE `assessment_attempts` (
 --
 
 CREATE TABLE `attendance` (
-  `id` int(11) UNSIGNED NOT NULL,
-  `user_id` int(11) NOT NULL,
+  `id` int UNSIGNED NOT NULL,
+  `user_id` int NOT NULL,
   `checked_in` datetime DEFAULT NULL,
   `checked_out` datetime DEFAULT NULL,
-  `sign_in_status` enum('signedIn','signedOut') DEFAULT 'signedOut'
+  `sign_in_status` enum('signedIn','signedOut') COLLATE utf8mb4_general_ci DEFAULT 'signedOut'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -318,17 +322,17 @@ INSERT INTO `attendance` (`id`, `user_id`, `checked_in`, `checked_out`, `sign_in
 --
 
 CREATE TABLE `clubhouse_programs` (
-  `id` int(11) NOT NULL,
-  `title` varchar(255) NOT NULL,
-  `description` text DEFAULT NULL,
-  `learning_outcomes` text DEFAULT NULL,
-  `target_age_group` varchar(50) DEFAULT NULL,
-  `duration` varchar(50) DEFAULT NULL,
-  `max_participants` int(11) DEFAULT NULL,
-  `materials_needed` text DEFAULT NULL,
-  `difficulty_level` enum('Beginner','Intermediate','Advanced') DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `id` int NOT NULL,
+  `title` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `description` text COLLATE utf8mb4_general_ci,
+  `learning_outcomes` text COLLATE utf8mb4_general_ci,
+  `target_age_group` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `duration` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `max_participants` int DEFAULT NULL,
+  `materials_needed` text COLLATE utf8mb4_general_ci,
+  `difficulty_level` enum('Beginner','Intermediate','Advanced') COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -349,13 +353,13 @@ INSERT INTO `clubhouse_programs` (`id`, `title`, `description`, `learning_outcom
 --
 
 CREATE TABLE `clubhouse_reports` (
-  `id` int(11) NOT NULL,
-  `program_name` varchar(255) NOT NULL,
-  `participants` int(11) NOT NULL,
-  `narrative` text DEFAULT NULL,
-  `challenges` text DEFAULT NULL,
-  `image_path` varchar(255) DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `id` int NOT NULL,
+  `program_name` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `participants` int NOT NULL,
+  `narrative` text COLLATE utf8mb4_general_ci,
+  `challenges` text COLLATE utf8mb4_general_ci,
+  `image_path` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -374,33 +378,33 @@ INSERT INTO `clubhouse_reports` (`id`, `program_name`, `participants`, `narrativ
 --
 
 CREATE TABLE `courses` (
-  `id` int(11) NOT NULL,
-  `course_code` varchar(50) NOT NULL,
-  `title` varchar(255) NOT NULL,
-  `description` text DEFAULT NULL,
-  `learning_objectives` text DEFAULT NULL,
-  `course_requirements` text DEFAULT NULL,
-  `prerequisites` text DEFAULT NULL,
-  `completion_criteria` text DEFAULT NULL,
-  `certification_criteria` text DEFAULT NULL,
-  `pass_percentage` decimal(5,2) DEFAULT 70.00,
-  `type` enum('full_course','short_course','lesson','skill_activity') NOT NULL,
-  `category` varchar(100) NOT NULL DEFAULT 'General',
-  `difficulty_level` enum('Beginner','Intermediate','Advanced') NOT NULL DEFAULT 'Beginner',
-  `duration` varchar(50) DEFAULT NULL,
-  `estimated_duration_hours` int(11) DEFAULT NULL,
-  `image_path` varchar(255) DEFAULT NULL,
-  `thumbnail_path` varchar(255) DEFAULT NULL,
-  `enrollment_count` int(11) NOT NULL DEFAULT 0,
-  `max_enrollments` int(11) DEFAULT NULL,
-  `display_order` int(11) NOT NULL DEFAULT 0,
-  `is_featured` tinyint(1) NOT NULL DEFAULT 0,
-  `is_published` tinyint(1) NOT NULL DEFAULT 0,
-  `status` enum('active','inactive','draft','archived') NOT NULL DEFAULT 'draft',
-  `created_by` int(11) NOT NULL,
-  `last_updated_by` int(11) DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `id` int NOT NULL,
+  `course_code` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
+  `title` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `description` text COLLATE utf8mb4_general_ci,
+  `learning_objectives` text COLLATE utf8mb4_general_ci,
+  `course_requirements` text COLLATE utf8mb4_general_ci,
+  `prerequisites` text COLLATE utf8mb4_general_ci,
+  `completion_criteria` text COLLATE utf8mb4_general_ci,
+  `certification_criteria` text COLLATE utf8mb4_general_ci,
+  `pass_percentage` decimal(5,2) DEFAULT '70.00',
+  `type` enum('full_course','short_course','lesson','skill_activity') COLLATE utf8mb4_general_ci NOT NULL,
+  `category` varchar(100) COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'General',
+  `difficulty_level` enum('Beginner','Intermediate','Advanced') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'Beginner',
+  `duration` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `estimated_duration_hours` int DEFAULT NULL,
+  `image_path` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `thumbnail_path` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `enrollment_count` int NOT NULL DEFAULT '0',
+  `max_enrollments` int DEFAULT NULL,
+  `display_order` int NOT NULL DEFAULT '0',
+  `is_featured` tinyint(1) NOT NULL DEFAULT '0',
+  `is_published` tinyint(1) NOT NULL DEFAULT '0',
+  `status` enum('active','inactive','draft','archived') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'draft',
+  `created_by` int NOT NULL,
+  `last_updated_by` int DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -408,11 +412,11 @@ CREATE TABLE `courses` (
 --
 
 INSERT INTO `courses` (`id`, `course_code`, `title`, `description`, `learning_objectives`, `course_requirements`, `prerequisites`, `completion_criteria`, `certification_criteria`, `pass_percentage`, `type`, `category`, `difficulty_level`, `duration`, `estimated_duration_hours`, `image_path`, `thumbnail_path`, `enrollment_count`, `max_enrollments`, `display_order`, `is_featured`, `is_published`, `status`, `created_by`, `last_updated_by`, `created_at`, `updated_at`) VALUES
-(1, '', 'Introduction to Robotics', 'Learn the basics of robotics programming and design. This course covers fundamental concepts of robotics, including sensors, motors, and programming for autonomous behavior.', NULL, NULL, NULL, NULL, NULL, 70.00, 'full_course', 'General', 'Beginner', '8 weeks', NULL, NULL, NULL, 0, NULL, 0, 1, 1, 'active', 1, NULL, '2025-05-08 10:59:04', '2025-05-22 12:06:51'),
-(10, 'FC-TC', 'Test Course', 'Best Course Ever', NULL, NULL, NULL, NULL, NULL, 70.00, 'full_course', 'General', 'Beginner', '2 weeks', NULL, '682f015feceb6_1747911007.jpeg', NULL, 1, NULL, 0, 0, 0, 'draft', 1, NULL, '2025-05-22 10:50:07', '2025-05-22 11:00:53'),
-(11, 'SC-TSC', 'Test Short Course', 'Best Short Course ever!!', NULL, NULL, NULL, NULL, NULL, 70.00, 'short_course', 'General', 'Beginner', '1 week', NULL, '682f02af53c86_1747911343.jpg', NULL, 1, NULL, 0, 0, 0, 'draft', 1, NULL, '2025-05-22 10:55:43', '2025-05-22 11:00:48'),
-(12, 'LN-TL', 'Test Lesson', 'Best lesson ever!!', NULL, NULL, NULL, NULL, NULL, 70.00, 'lesson', 'General', 'Beginner', '1 hour', NULL, '682f02fc8ae36_1747911420.png', NULL, 1, NULL, 0, 0, 0, 'draft', 1, NULL, '2025-05-22 10:57:00', '2025-05-22 11:00:40'),
-(13, 'SA-TSA', 'Test Skills Activity', 'Best Practical activity ever', NULL, NULL, NULL, NULL, NULL, 70.00, 'skill_activity', 'General', 'Beginner', '1 day', NULL, '682f0354b82a6_1747911508.webp', NULL, 1, NULL, 0, 0, 0, 'draft', 1, NULL, '2025-05-22 10:58:28', '2025-05-22 11:00:30');
+(1, '', 'Introduction to Robotics', 'Learn the basics of robotics programming and design. This course covers fundamental concepts of robotics, including sensors, motors, and programming for autonomous behavior.', NULL, NULL, NULL, NULL, NULL, '70.00', 'full_course', 'General', 'Beginner', '8 weeks', NULL, NULL, NULL, 0, NULL, 0, 1, 1, 'active', 1, NULL, '2025-05-08 10:59:04', '2025-05-22 12:06:51'),
+(10, 'FC-TC', 'Test Course', 'Best Course Ever', NULL, NULL, NULL, NULL, NULL, '70.00', 'full_course', 'General', 'Beginner', '2 weeks', NULL, '682f015feceb6_1747911007.jpeg', NULL, 1, NULL, 0, 0, 0, 'draft', 1, NULL, '2025-05-22 10:50:07', '2025-05-22 11:00:53'),
+(11, 'SC-TSC', 'Test Short Course', 'Best Short Course ever!!', NULL, NULL, NULL, NULL, NULL, '70.00', 'short_course', 'General', 'Beginner', '1 week', NULL, '682f02af53c86_1747911343.jpg', NULL, 1, NULL, 0, 0, 0, 'draft', 1, NULL, '2025-05-22 10:55:43', '2025-05-22 11:00:48'),
+(12, 'LN-TL', 'Test Lesson', 'Best lesson ever!!', NULL, NULL, NULL, NULL, NULL, '70.00', 'lesson', 'General', 'Beginner', '1 hour', NULL, '682f02fc8ae36_1747911420.png', NULL, 1, NULL, 0, 0, 0, 'draft', 1, NULL, '2025-05-22 10:57:00', '2025-05-22 11:00:40'),
+(13, 'SA-TSA', 'Test Skills Activity', 'Best Practical activity ever', NULL, NULL, NULL, NULL, NULL, '70.00', 'skill_activity', 'General', 'Beginner', '1 day', NULL, '682f0354b82a6_1747911508.webp', NULL, 1, NULL, 0, 0, 0, 'draft', 1, NULL, '2025-05-22 10:58:28', '2025-05-22 11:00:30');
 
 -- --------------------------------------------------------
 
@@ -421,26 +425,26 @@ INSERT INTO `courses` (`id`, `course_code`, `title`, `description`, `learning_ob
 --
 
 CREATE TABLE `course_activities` (
-  `id` int(11) NOT NULL,
-  `course_id` int(11) DEFAULT NULL,
-  `module_id` int(11) DEFAULT NULL,
-  `lesson_id` int(11) DEFAULT NULL,
-  `lesson_section_id` int(11) DEFAULT NULL,
-  `title` varchar(255) NOT NULL,
-  `description` text DEFAULT NULL,
-  `activity_type` enum('practical','assignment','project','quiz','assessment','skill_exercise') NOT NULL,
-  `instructions` longtext DEFAULT NULL,
-  `resources_needed` text DEFAULT NULL,
-  `estimated_duration_minutes` int(11) DEFAULT NULL,
-  `max_points` int(11) DEFAULT 100,
-  `pass_points` int(11) DEFAULT 70,
-  `submission_type` enum('text','file','link','code','none') DEFAULT 'text',
-  `auto_grade` tinyint(1) DEFAULT 0,
-  `order_number` int(11) NOT NULL DEFAULT 0,
-  `is_published` tinyint(1) NOT NULL DEFAULT 0,
+  `id` int NOT NULL,
+  `course_id` int DEFAULT NULL,
+  `module_id` int DEFAULT NULL,
+  `lesson_id` int DEFAULT NULL,
+  `lesson_section_id` int DEFAULT NULL,
+  `title` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `description` text COLLATE utf8mb4_general_ci,
+  `activity_type` enum('practical','assignment','project','quiz','assessment','skill_exercise') COLLATE utf8mb4_general_ci NOT NULL,
+  `instructions` longtext COLLATE utf8mb4_general_ci,
+  `resources_needed` text COLLATE utf8mb4_general_ci,
+  `estimated_duration_minutes` int DEFAULT NULL,
+  `max_points` int DEFAULT '100',
+  `pass_points` int DEFAULT '70',
+  `submission_type` enum('text','file','link','code','none') COLLATE utf8mb4_general_ci DEFAULT 'text',
+  `auto_grade` tinyint(1) DEFAULT '0',
+  `order_number` int NOT NULL DEFAULT '0',
+  `is_published` tinyint(1) NOT NULL DEFAULT '0',
   `due_date` datetime DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -457,22 +461,22 @@ INSERT INTO `course_activities` (`id`, `course_id`, `module_id`, `lesson_id`, `l
 --
 
 CREATE TABLE `course_assessments` (
-  `id` int(11) NOT NULL,
-  `course_id` int(11) DEFAULT NULL,
-  `module_id` int(11) DEFAULT NULL,
-  `title` varchar(255) NOT NULL,
-  `description` text DEFAULT NULL,
-  `assessment_type` enum('module_quiz','module_exam','course_final','course_project') NOT NULL,
-  `total_points` int(11) NOT NULL DEFAULT 100,
-  `pass_points` int(11) NOT NULL DEFAULT 70,
-  `time_limit_minutes` int(11) DEFAULT NULL,
-  `attempts_allowed` int(11) DEFAULT 1,
-  `instructions` longtext DEFAULT NULL,
-  `is_published` tinyint(1) NOT NULL DEFAULT 0,
+  `id` int NOT NULL,
+  `course_id` int DEFAULT NULL,
+  `module_id` int DEFAULT NULL,
+  `title` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `description` text COLLATE utf8mb4_general_ci,
+  `assessment_type` enum('module_quiz','module_exam','course_final','course_project') COLLATE utf8mb4_general_ci NOT NULL,
+  `total_points` int NOT NULL DEFAULT '100',
+  `pass_points` int NOT NULL DEFAULT '70',
+  `time_limit_minutes` int DEFAULT NULL,
+  `attempts_allowed` int DEFAULT '1',
+  `instructions` longtext COLLATE utf8mb4_general_ci,
+  `is_published` tinyint(1) NOT NULL DEFAULT '0',
   `start_date` datetime DEFAULT NULL,
   `end_date` datetime DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -482,13 +486,13 @@ CREATE TABLE `course_assessments` (
 --
 
 CREATE TABLE `course_categories` (
-  `id` int(11) NOT NULL,
-  `name` varchar(255) NOT NULL,
-  `description` text DEFAULT NULL,
-  `parent_id` int(11) DEFAULT NULL,
-  `order_number` int(11) NOT NULL DEFAULT 0,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `id` int NOT NULL,
+  `name` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `description` text COLLATE utf8mb4_general_ci,
+  `parent_id` int DEFAULT NULL,
+  `order_number` int NOT NULL DEFAULT '0',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -498,10 +502,10 @@ CREATE TABLE `course_categories` (
 --
 
 CREATE TABLE `course_category_relationships` (
-  `id` int(11) NOT NULL,
-  `course_id` int(11) NOT NULL,
-  `category_id` int(11) NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `id` int NOT NULL,
+  `course_id` int NOT NULL,
+  `category_id` int NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -511,17 +515,17 @@ CREATE TABLE `course_category_relationships` (
 --
 
 CREATE TABLE `course_certificates` (
-  `id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `course_id` int(11) NOT NULL,
-  `certificate_number` varchar(50) NOT NULL,
+  `id` int NOT NULL,
+  `user_id` int NOT NULL,
+  `course_id` int NOT NULL,
+  `certificate_number` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
   `completion_date` date NOT NULL,
   `final_score` decimal(5,2) NOT NULL,
-  `grade` enum('A+','A','B+','B','C+','C','D','F') DEFAULT NULL,
-  `certificate_template` varchar(255) DEFAULT NULL,
-  `verification_code` varchar(100) NOT NULL,
-  `issued_by` int(11) NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `grade` enum('A+','A','B+','B','C+','C','D','F') COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `certificate_template` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `verification_code` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `issued_by` int NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -531,24 +535,24 @@ CREATE TABLE `course_certificates` (
 --
 
 CREATE TABLE `course_lessons` (
-  `id` int(11) NOT NULL,
-  `section_id` int(11) NOT NULL,
-  `course_id` int(11) DEFAULT NULL,
-  `module_id` int(11) DEFAULT NULL,
-  `title` varchar(255) NOT NULL,
-  `content` longtext DEFAULT NULL,
-  `lesson_objectives` text DEFAULT NULL,
-  `lesson_type` enum('text','video','quiz','assignment','interactive') NOT NULL DEFAULT 'text',
-  `difficulty_level` enum('Beginner','Intermediate','Advanced') DEFAULT 'Beginner',
-  `pass_percentage` decimal(5,2) DEFAULT 70.00,
-  `prerequisites` text DEFAULT NULL,
-  `video_url` varchar(255) DEFAULT NULL,
-  `duration_minutes` int(11) DEFAULT NULL,
-  `estimated_duration_minutes` int(11) DEFAULT NULL,
-  `order_number` int(11) NOT NULL DEFAULT 0,
-  `is_published` tinyint(1) NOT NULL DEFAULT 0,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `id` int NOT NULL,
+  `section_id` int NOT NULL,
+  `course_id` int DEFAULT NULL,
+  `module_id` int DEFAULT NULL,
+  `title` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `content` longtext COLLATE utf8mb4_general_ci,
+  `lesson_objectives` text COLLATE utf8mb4_general_ci,
+  `lesson_type` enum('text','video','quiz','assignment','interactive') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'text',
+  `difficulty_level` enum('Beginner','Intermediate','Advanced') COLLATE utf8mb4_general_ci DEFAULT 'Beginner',
+  `pass_percentage` decimal(5,2) DEFAULT '70.00',
+  `prerequisites` text COLLATE utf8mb4_general_ci,
+  `video_url` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `duration_minutes` int DEFAULT NULL,
+  `estimated_duration_minutes` int DEFAULT NULL,
+  `order_number` int NOT NULL DEFAULT '0',
+  `is_published` tinyint(1) NOT NULL DEFAULT '0',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -556,17 +560,17 @@ CREATE TABLE `course_lessons` (
 --
 
 INSERT INTO `course_lessons` (`id`, `section_id`, `course_id`, `module_id`, `title`, `content`, `lesson_objectives`, `lesson_type`, `difficulty_level`, `pass_percentage`, `prerequisites`, `video_url`, `duration_minutes`, `estimated_duration_minutes`, `order_number`, `is_published`, `created_at`, `updated_at`) VALUES
-(1, 1, NULL, NULL, 'What is Robotics?', '<p>This lesson introduces the field of robotics and its applications in the modern world.</p><p>Robotics is an interdisciplinary field that combines mechanical engineering, electrical engineering, and computer science. Robots are designed to assist humans or to perform tasks autonomously.</p><h3>Key Concepts</h3><ul><li>Definition of robots and robotics</li><li>History of robotics development</li><li>Types of robots: industrial, service, educational</li><li>Basic components: sensors, actuators, controllers</li></ul><p>By the end of this course, you will be able to design, build, and program a simple robot that can navigate its environment and perform basic tasks.</p>', NULL, 'text', 'Beginner', 70.00, NULL, NULL, 20, NULL, 1, 1, '2025-05-08 11:11:17', '2025-05-08 11:11:17'),
-(2, 1, NULL, NULL, 'Robot Components Overview', '<p>This lesson covers the essential components that make up a robot.</p><h3>Main Components of a Robot</h3><ol><li><strong>Structure/Frame</strong>: The physical body that supports all other components</li><li><strong>Actuators</strong>: Motors and other devices that create movement</li><li><strong>Sensors</strong>: Devices that collect information about the environment</li><li><strong>Controller</strong>: The \"brain\" (usually a microcontroller) that processes information and controls behavior</li><li><strong>Power Source</strong>: Batteries or other energy sources</li></ol><p>In the next lessons, we will explore each of these components in more detail.</p>', NULL, 'text', 'Beginner', 70.00, NULL, NULL, 25, NULL, 2, 1, '2025-05-08 11:11:17', '2025-05-08 11:11:17'),
-(3, 1, NULL, NULL, 'Introduction to Robot Controllers', '<p>Learn about the various controllers used in robotics, from simple microcontrollers to advanced computing systems.</p><h3>Common Robot Controllers</h3><ul><li>Arduino boards</li><li>Raspberry Pi</li><li>LEGO Mindstorms EV3</li><li>Specialized robotics platforms</li></ul><p>In this course, we will primarily use Arduino for our robotics projects.</p>', NULL, 'text', 'Beginner', 70.00, NULL, NULL, 30, NULL, 3, 1, '2025-05-08 11:11:17', '2025-05-08 11:11:17'),
-(4, 2, NULL, NULL, 'Types of Sensors', '<p>This lesson explores different types of sensors used in robotics.</p><h3>Common Sensor Types</h3><ul><li>Distance sensors (ultrasonic, infrared)</li><li>Light sensors (photoresistors, photodiodes)</li><li>Touch sensors (buttons, switches)</li><li>Color sensors</li><li>Gyroscopes and accelerometers</li></ul><p>Each sensor type provides different kinds of information about the environment.</p>', NULL, 'text', 'Beginner', 70.00, NULL, NULL, 25, NULL, 1, 1, '2025-05-08 11:11:17', '2025-05-08 11:11:17'),
-(5, 2, NULL, NULL, 'Working with Ultrasonic Sensors', '<p>Learn how to use ultrasonic sensors to detect obstacles and measure distances.</p><h3>How Ultrasonic Sensors Work</h3><p>Ultrasonic sensors emit high-frequency sound waves and time how long it takes for the echo to return. This time can be converted to distance.</p><h3>Connecting and Programming</h3><p>We will connect an HC-SR04 ultrasonic sensor to our Arduino and write code to read distance values.</p>', NULL, 'video', 'Beginner', 70.00, NULL, 'https://www.youtube.com/embed/dQw4w9WgXcQ', 40, NULL, 2, 1, '2025-05-08 11:11:17', '2025-05-08 11:11:17'),
-(6, 2, NULL, NULL, 'Sensor Quiz', '<p>Test your knowledge about different types of sensors and their applications in robotics.</p>', NULL, 'quiz', 'Beginner', 70.00, NULL, NULL, 15, NULL, 3, 1, '2025-05-08 11:11:17', '2025-05-08 11:11:17'),
-(7, 3, NULL, NULL, 'DC Motors and Servo Motors', '<p>This lesson covers the differences between DC motors and servo motors, and when to use each.</p><h3>DC Motors</h3><p>Continuous rotation, good for wheels and general movement.</p><h3>Servo Motors</h3><p>Precise position control, good for robotic arms and controlled movements.</p>', NULL, 'text', 'Beginner', 70.00, NULL, NULL, 30, NULL, 1, 1, '2025-05-08 11:11:17', '2025-05-08 11:11:17'),
-(8, 3, NULL, NULL, 'Motor Drivers and Control Circuits', '<p>Learn why motors need special control circuits and how to use motor drivers with your controller.</p><h3>Why Motor Drivers?</h3><p>Most microcontrollers cannot provide enough current to drive motors directly. Motor drivers act as intermediaries that can handle the higher current requirements.</p>', NULL, 'text', 'Beginner', 70.00, NULL, NULL, 35, NULL, 2, 1, '2025-05-08 11:11:17', '2025-05-08 11:11:17'),
-(9, 4, NULL, NULL, 'Introduction to Autonomous Behavior', '<p>This lesson introduces the concept of autonomous behavior in robots.</p><h3>What is Autonomous Behavior?</h3><p>Autonomous behavior refers to a robot\'s ability to perform tasks and make decisions without human intervention, based on sensor input and programmed logic.</p>', NULL, 'text', 'Beginner', 70.00, NULL, NULL, 25, NULL, 1, 1, '2025-05-08 11:11:17', '2025-05-08 11:11:17'),
-(10, 4, NULL, NULL, 'Simple Line Following Robot', '<p>In this lesson, we\'ll create a robot that can follow a line on the ground.</p><h3>Components Needed</h3><ul><li>Chassis with two motors</li><li>Line sensors</li><li>Arduino controller</li><li>Motor driver</li></ul><h3>Line Following Algorithm</h3><p>We\'ll implement a simple algorithm that adjusts the robot\'s direction based on sensor readings.</p>', NULL, 'assignment', 'Beginner', 70.00, NULL, NULL, 60, NULL, 2, 1, '2025-05-08 11:11:17', '2025-05-08 11:11:17'),
-(11, 4, NULL, NULL, 'Final Project: Obstacle Avoiding Robot', '<p>For the final project, you will create a robot that can navigate autonomously while avoiding obstacles.</p><h3>Project Requirements</h3><ul><li>Robot must detect obstacles using sensors</li><li>Robot must make decisions about path changes</li><li>Robot should be able to navigate a simple maze</li></ul><p>You will document your design process and demonstrate your robot\'s capabilities.</p>', NULL, 'assignment', 'Beginner', 70.00, NULL, NULL, 120, NULL, 3, 1, '2025-05-08 11:11:17', '2025-05-08 11:11:17');
+(1, 1, NULL, NULL, 'What is Robotics?', '<p>This lesson introduces the field of robotics and its applications in the modern world.</p><p>Robotics is an interdisciplinary field that combines mechanical engineering, electrical engineering, and computer science. Robots are designed to assist humans or to perform tasks autonomously.</p><h3>Key Concepts</h3><ul><li>Definition of robots and robotics</li><li>History of robotics development</li><li>Types of robots: industrial, service, educational</li><li>Basic components: sensors, actuators, controllers</li></ul><p>By the end of this course, you will be able to design, build, and program a simple robot that can navigate its environment and perform basic tasks.</p>', NULL, 'text', 'Beginner', '70.00', NULL, NULL, 20, NULL, 1, 1, '2025-05-08 11:11:17', '2025-05-08 11:11:17'),
+(2, 1, NULL, NULL, 'Robot Components Overview', '<p>This lesson covers the essential components that make up a robot.</p><h3>Main Components of a Robot</h3><ol><li><strong>Structure/Frame</strong>: The physical body that supports all other components</li><li><strong>Actuators</strong>: Motors and other devices that create movement</li><li><strong>Sensors</strong>: Devices that collect information about the environment</li><li><strong>Controller</strong>: The \"brain\" (usually a microcontroller) that processes information and controls behavior</li><li><strong>Power Source</strong>: Batteries or other energy sources</li></ol><p>In the next lessons, we will explore each of these components in more detail.</p>', NULL, 'text', 'Beginner', '70.00', NULL, NULL, 25, NULL, 2, 1, '2025-05-08 11:11:17', '2025-05-08 11:11:17'),
+(3, 1, NULL, NULL, 'Introduction to Robot Controllers', '<p>Learn about the various controllers used in robotics, from simple microcontrollers to advanced computing systems.</p><h3>Common Robot Controllers</h3><ul><li>Arduino boards</li><li>Raspberry Pi</li><li>LEGO Mindstorms EV3</li><li>Specialized robotics platforms</li></ul><p>In this course, we will primarily use Arduino for our robotics projects.</p>', NULL, 'text', 'Beginner', '70.00', NULL, NULL, 30, NULL, 3, 1, '2025-05-08 11:11:17', '2025-05-08 11:11:17'),
+(4, 2, NULL, NULL, 'Types of Sensors', '<p>This lesson explores different types of sensors used in robotics.</p><h3>Common Sensor Types</h3><ul><li>Distance sensors (ultrasonic, infrared)</li><li>Light sensors (photoresistors, photodiodes)</li><li>Touch sensors (buttons, switches)</li><li>Color sensors</li><li>Gyroscopes and accelerometers</li></ul><p>Each sensor type provides different kinds of information about the environment.</p>', NULL, 'text', 'Beginner', '70.00', NULL, NULL, 25, NULL, 1, 1, '2025-05-08 11:11:17', '2025-05-08 11:11:17'),
+(5, 2, NULL, NULL, 'Working with Ultrasonic Sensors', '<p>Learn how to use ultrasonic sensors to detect obstacles and measure distances.</p><h3>How Ultrasonic Sensors Work</h3><p>Ultrasonic sensors emit high-frequency sound waves and time how long it takes for the echo to return. This time can be converted to distance.</p><h3>Connecting and Programming</h3><p>We will connect an HC-SR04 ultrasonic sensor to our Arduino and write code to read distance values.</p>', NULL, 'video', 'Beginner', '70.00', NULL, 'https://www.youtube.com/embed/dQw4w9WgXcQ', 40, NULL, 2, 1, '2025-05-08 11:11:17', '2025-05-08 11:11:17'),
+(6, 2, NULL, NULL, 'Sensor Quiz', '<p>Test your knowledge about different types of sensors and their applications in robotics.</p>', NULL, 'quiz', 'Beginner', '70.00', NULL, NULL, 15, NULL, 3, 1, '2025-05-08 11:11:17', '2025-05-08 11:11:17'),
+(7, 3, NULL, NULL, 'DC Motors and Servo Motors', '<p>This lesson covers the differences between DC motors and servo motors, and when to use each.</p><h3>DC Motors</h3><p>Continuous rotation, good for wheels and general movement.</p><h3>Servo Motors</h3><p>Precise position control, good for robotic arms and controlled movements.</p>', NULL, 'text', 'Beginner', '70.00', NULL, NULL, 30, NULL, 1, 1, '2025-05-08 11:11:17', '2025-05-08 11:11:17'),
+(8, 3, NULL, NULL, 'Motor Drivers and Control Circuits', '<p>Learn why motors need special control circuits and how to use motor drivers with your controller.</p><h3>Why Motor Drivers?</h3><p>Most microcontrollers cannot provide enough current to drive motors directly. Motor drivers act as intermediaries that can handle the higher current requirements.</p>', NULL, 'text', 'Beginner', '70.00', NULL, NULL, 35, NULL, 2, 1, '2025-05-08 11:11:17', '2025-05-08 11:11:17'),
+(9, 4, NULL, NULL, 'Introduction to Autonomous Behavior', '<p>This lesson introduces the concept of autonomous behavior in robots.</p><h3>What is Autonomous Behavior?</h3><p>Autonomous behavior refers to a robot\'s ability to perform tasks and make decisions without human intervention, based on sensor input and programmed logic.</p>', NULL, 'text', 'Beginner', '70.00', NULL, NULL, 25, NULL, 1, 1, '2025-05-08 11:11:17', '2025-05-08 11:11:17'),
+(10, 4, NULL, NULL, 'Simple Line Following Robot', '<p>In this lesson, we\'ll create a robot that can follow a line on the ground.</p><h3>Components Needed</h3><ul><li>Chassis with two motors</li><li>Line sensors</li><li>Arduino controller</li><li>Motor driver</li></ul><h3>Line Following Algorithm</h3><p>We\'ll implement a simple algorithm that adjusts the robot\'s direction based on sensor readings.</p>', NULL, 'assignment', 'Beginner', '70.00', NULL, NULL, 60, NULL, 2, 1, '2025-05-08 11:11:17', '2025-05-08 11:11:17'),
+(11, 4, NULL, NULL, 'Final Project: Obstacle Avoiding Robot', '<p>For the final project, you will create a robot that can navigate autonomously while avoiding obstacles.</p><h3>Project Requirements</h3><ul><li>Robot must detect obstacles using sensors</li><li>Robot must make decisions about path changes</li><li>Robot should be able to navigate a simple maze</li></ul><p>You will document your design process and demonstrate your robot\'s capabilities.</p>', NULL, 'assignment', 'Beginner', '70.00', NULL, NULL, 120, NULL, 3, 1, '2025-05-08 11:11:17', '2025-05-08 11:11:17');
 
 -- --------------------------------------------------------
 
@@ -575,17 +579,17 @@ INSERT INTO `course_lessons` (`id`, `section_id`, `course_id`, `module_id`, `tit
 --
 
 CREATE TABLE `course_modules` (
-  `id` int(11) NOT NULL,
-  `course_id` int(11) NOT NULL,
-  `title` varchar(255) NOT NULL,
-  `description` text DEFAULT NULL,
-  `learning_objectives` text DEFAULT NULL,
-  `estimated_duration_hours` int(11) DEFAULT NULL,
-  `order_number` int(11) NOT NULL DEFAULT 0,
-  `is_published` tinyint(1) NOT NULL DEFAULT 0,
-  `pass_percentage` decimal(5,2) DEFAULT 70.00,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `id` int NOT NULL,
+  `course_id` int NOT NULL,
+  `title` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `description` text COLLATE utf8mb4_general_ci,
+  `learning_objectives` text COLLATE utf8mb4_general_ci,
+  `estimated_duration_hours` int DEFAULT NULL,
+  `order_number` int NOT NULL DEFAULT '0',
+  `is_published` tinyint(1) NOT NULL DEFAULT '0',
+  `pass_percentage` decimal(5,2) DEFAULT '70.00',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -593,8 +597,8 @@ CREATE TABLE `course_modules` (
 --
 
 INSERT INTO `course_modules` (`id`, `course_id`, `title`, `description`, `learning_objectives`, `estimated_duration_hours`, `order_number`, `is_published`, `pass_percentage`, `created_at`, `updated_at`) VALUES
-(1, 10, 'First Module', 'This is the first module of this Course', 'You will learn\r\nYou will also learn', 2, 1, 0, 70.00, '2025-05-26 13:45:45', '2025-05-26 13:45:45'),
-(2, 10, 'Second Module', 'This is the Second Module', 'Lean a lot in the second module', 4, 2, 0, 70.00, '2025-05-26 14:23:19', '2025-05-26 14:23:19');
+(1, 10, 'First Module', 'This is the first module of this Course', 'You will learn\r\nYou will also learn', 2, 1, 0, '70.00', '2025-05-26 13:45:45', '2025-05-26 13:45:45'),
+(2, 10, 'Second Module', 'This is the Second Module', 'Lean a lot in the second module', 4, 2, 0, '70.00', '2025-05-26 14:23:19', '2025-05-26 14:23:19');
 
 -- --------------------------------------------------------
 
@@ -603,11 +607,11 @@ INSERT INTO `course_modules` (`id`, `course_id`, `title`, `description`, `learni
 --
 
 CREATE TABLE `course_prerequisites` (
-  `id` int(11) NOT NULL,
-  `course_id` int(11) NOT NULL,
-  `prerequisite_course_id` int(11) NOT NULL,
-  `is_required` tinyint(1) NOT NULL DEFAULT 1,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `id` int NOT NULL,
+  `course_id` int NOT NULL,
+  `prerequisite_course_id` int NOT NULL,
+  `is_required` tinyint(1) NOT NULL DEFAULT '1',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -617,14 +621,14 @@ CREATE TABLE `course_prerequisites` (
 --
 
 CREATE TABLE `course_quizzes` (
-  `id` int(11) NOT NULL,
-  `lesson_id` int(11) NOT NULL,
-  `title` varchar(255) NOT NULL,
-  `description` text DEFAULT NULL,
-  `passing_score` int(11) NOT NULL DEFAULT 70,
-  `time_limit_minutes` int(11) DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `id` int NOT NULL,
+  `lesson_id` int NOT NULL,
+  `title` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `description` text COLLATE utf8mb4_general_ci,
+  `passing_score` int NOT NULL DEFAULT '70',
+  `time_limit_minutes` int DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -634,13 +638,13 @@ CREATE TABLE `course_quizzes` (
 --
 
 CREATE TABLE `course_ratings` (
-  `id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `course_id` int(11) NOT NULL,
-  `rating` int(11) NOT NULL,
-  `review` text DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `id` int NOT NULL,
+  `user_id` int NOT NULL,
+  `course_id` int NOT NULL,
+  `rating` int NOT NULL,
+  `review` text COLLATE utf8mb4_general_ci,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -650,13 +654,13 @@ CREATE TABLE `course_ratings` (
 --
 
 CREATE TABLE `course_sections` (
-  `id` int(11) NOT NULL,
-  `course_id` int(11) NOT NULL,
-  `title` varchar(255) NOT NULL,
-  `description` text DEFAULT NULL,
-  `order_number` int(11) NOT NULL DEFAULT 0,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `id` int NOT NULL,
+  `course_id` int NOT NULL,
+  `title` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `description` text COLLATE utf8mb4_general_ci,
+  `order_number` int NOT NULL DEFAULT '0',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -676,8 +680,8 @@ INSERT INTO `course_sections` (`id`, `course_id`, `title`, `description`, `order
 --
 
 CREATE TABLE `dell_surveys` (
-  `id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
+  `id` int NOT NULL,
+  `user_id` int NOT NULL,
   `first_time_participation` tinyint(1) DEFAULT NULL,
   `used_computer_first_time` tinyint(1) DEFAULT NULL,
   `showed_tech_to_others` tinyint(1) DEFAULT NULL,
@@ -686,7 +690,7 @@ CREATE TABLE `dell_surveys` (
   `more_confident_sharing` tinyint(1) DEFAULT NULL,
   `thinking_about_staying_in_school` tinyint(1) DEFAULT NULL,
   `interested_in_tech_jobs` tinyint(1) DEFAULT NULL,
-  `submission_date` timestamp NOT NULL DEFAULT current_timestamp()
+  `submission_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -696,36 +700,37 @@ CREATE TABLE `dell_surveys` (
 --
 
 CREATE TABLE `holiday_programs` (
-  `id` int(11) NOT NULL,
-  `term` varchar(50) NOT NULL,
-  `title` varchar(255) NOT NULL,
-  `description` text DEFAULT NULL,
-  `dates` varchar(100) NOT NULL,
-  `time` varchar(50) DEFAULT '9:00 AM - 4:00 PM',
+  `id` int NOT NULL,
+  `term` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
+  `title` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `description` text COLLATE utf8mb4_general_ci,
+  `dates` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `time` varchar(50) COLLATE utf8mb4_general_ci DEFAULT '9:00 AM - 4:00 PM',
   `start_date` date NOT NULL,
   `end_date` date NOT NULL,
-  `location` varchar(255) DEFAULT 'Sci-Bono Clubhouse',
-  `age_range` varchar(50) DEFAULT '13-18 years',
-  `lunch_included` tinyint(1) DEFAULT 1,
-  `program_goals` text DEFAULT NULL,
-  `registration_deadline` varchar(100) DEFAULT NULL,
-  `max_participants` int(11) DEFAULT 30,
-  `registration_open` tinyint(1) DEFAULT 1,
-  `status` enum('draft','open','closing_soon','closed','completed','cancelled') DEFAULT 'draft',
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `auto_close_on_capacity` tinyint(1) NOT NULL DEFAULT 0 COMMENT 'Auto-close registration when capacity is reached',
-  `auto_close_on_date` tinyint(1) NOT NULL DEFAULT 0 COMMENT 'Auto-close registration on deadline',
-  `notification_settings` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL COMMENT 'JSON settings for notifications' CHECK (json_valid(`notification_settings`))
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `location` varchar(255) COLLATE utf8mb4_general_ci DEFAULT 'Sci-Bono Clubhouse',
+  `age_range` varchar(50) COLLATE utf8mb4_general_ci DEFAULT '13-18 years',
+  `lunch_included` tinyint(1) DEFAULT '1',
+  `program_goals` text COLLATE utf8mb4_general_ci,
+  `registration_deadline` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `max_participants` int DEFAULT '30',
+  `registration_open` tinyint(1) DEFAULT '1',
+  `status` enum('draft','open','closing_soon','closed','completed','cancelled') COLLATE utf8mb4_general_ci DEFAULT 'draft',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `auto_close_on_capacity` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Auto-close registration when capacity is reached',
+  `auto_close_on_date` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'Auto-close registration on deadline',
+  `notification_settings` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin COMMENT 'JSON settings for notifications',
+  `program_structure` text COLLATE utf8mb4_general_ci COMMENT 'Stores program configuration'
+) ;
 
 --
 -- Dumping data for table `holiday_programs`
 --
 
-INSERT INTO `holiday_programs` (`id`, `term`, `title`, `description`, `dates`, `time`, `start_date`, `end_date`, `location`, `age_range`, `lunch_included`, `program_goals`, `registration_deadline`, `max_participants`, `registration_open`, `status`, `created_at`, `updated_at`, `auto_close_on_capacity`, `auto_close_on_date`, `notification_settings`) VALUES
-(1, 'Term 1', 'Multi-Media - Digital Design', 'Dive into the world of digital media creation, learning graphic design, video editing, and animation techniques.', 'March 31 - April 4, 2025', '9:00 AM - 4:00 PM', '2025-03-29', '2025-04-07', 'Sci-Bono Clubhouse', '13-18 years', 1, NULL, '2025-03-22 00:00:00', 35, 0, 'completed', '2025-03-26 19:24:06', '2025-06-09 14:23:28', 1, 0, NULL),
-(2, 'Term 2', 'Sci-Bono Clubhouse Term 2 AI Festival ', 'The Term 2 AI Festival is designed to immerse participants in the exciting world of artificial intelligence through hands-on programming, web development, and electronics projects. This intensive program will explore AI through three distinct but interconnected tracks: Programming AI Projects, Web Projects, and Electronics Projects.', 'June 30 - July 18, 2025', '9:00 AM - 4:00 PM', '2025-06-30', '2025-07-18', 'Sci-Bono Clubhouse', '13-18 years', 1, 'Participants will gain practical experience with machine learning algorithms, web-based AI applications, and AI-powered hardware projects. The program emphasizes practical application of AI concepts through coding exercises, interactive workshops, and creative project development. All projects will incorporate real-world problem-solving scenarios that demonstrate how AI can be used to address challenges in education, healthcare, environment, and community development.', '27 June 2025', 30, 1, 'draft', '2025-06-09 14:36:41', '2025-06-09 14:36:41', 0, 0, NULL);
+INSERT INTO `holiday_programs` (`id`, `term`, `title`, `description`, `dates`, `time`, `start_date`, `end_date`, `location`, `age_range`, `lunch_included`, `program_goals`, `registration_deadline`, `max_participants`, `registration_open`, `status`, `created_at`, `updated_at`, `auto_close_on_capacity`, `auto_close_on_date`, `notification_settings`, `program_structure`) VALUES
+(1, 'Term 1', 'Multi-Media - Digital Design', 'Dive into the world of digital media creation, learning graphic design, video editing, and animation techniques.', 'March 31 - April 4, 2025', '9:00 AM - 4:00 PM', '2025-03-29', '2025-04-07', 'Sci-Bono Clubhouse', '13-18 years', 1, NULL, '2025-03-22 00:00:00', 35, 0, 'completed', '2025-03-26 19:24:06', '2025-06-23 18:05:19', 1, 0, NULL, '{\"updated_at\": \"2025-06-23 20:05:19.000000\", \"cohort_size\": 20, \"max_cohorts\": 2, \"cohort_system\": true, \"duration_weeks\": 2, \"prerequisites_enabled\": true}'),
+(2, 'Term 2', 'Sci-Bono Clubhouse Term 2 AI Festival ', 'The Term 2 AI Festival is designed to immerse participants in the exciting world of artificial intelligence through hands-on programming, web development, and electronics projects. This intensive program will explore AI through three distinct but interconnected tracks: Programming AI Projects, Web Projects, and Electronics Projects.', 'June 30 - July 18, 2025', '9:00 AM - 4:00 PM', '2025-06-30', '2025-07-18', 'Sci-Bono Clubhouse', '13-18 years', 1, 'Participants will gain practical experience with machine learning algorithms, web-based AI applications, and AI-powered hardware projects. The program emphasizes practical application of AI concepts through coding exercises, interactive workshops, and creative project development. All projects will incorporate real-world problem-solving scenarios that demonstrate how AI can be used to address challenges in education, healthcare, environment, and community development.', '27 June 2025', 30, 1, 'draft', '2025-06-09 14:36:41', '2025-06-23 18:14:57', 0, 0, NULL, '{\"updated_at\": \"2025-06-23 20:14:57.000000\", \"cohort_system\": false, \"duration_weeks\": 2, \"prerequisites_enabled\": false}');
 
 --
 -- Triggers `holiday_programs`
@@ -759,7 +764,7 @@ DELIMITER ;
 -- (See below for the actual view)
 --
 CREATE TABLE `holiday_programs_with_status` (
-`id` int(11)
+`id` int
 ,`term` varchar(50)
 ,`title` varchar(255)
 ,`description` text
@@ -772,16 +777,16 @@ CREATE TABLE `holiday_programs_with_status` (
 ,`lunch_included` tinyint(1)
 ,`program_goals` text
 ,`registration_deadline` varchar(100)
-,`max_participants` int(11)
+,`max_participants` int
 ,`registration_open` tinyint(1)
 ,`status` enum('draft','open','closing_soon','closed','completed','cancelled')
 ,`created_at` timestamp
 ,`updated_at` timestamp
 ,`display_status` varchar(19)
-,`total_registrations` bigint(21)
-,`member_registrations` bigint(21)
-,`mentor_registrations` bigint(21)
-,`workshop_count` bigint(21)
+,`total_registrations` bigint
+,`member_registrations` bigint
+,`mentor_registrations` bigint
+,`workshop_count` bigint
 );
 
 -- --------------------------------------------------------
@@ -791,16 +796,16 @@ CREATE TABLE `holiday_programs_with_status` (
 --
 
 CREATE TABLE `holiday_program_attendance` (
-  `id` int(11) NOT NULL,
-  `attendee_id` int(11) NOT NULL,
-  `workshop_id` int(11) NOT NULL,
+  `id` int NOT NULL,
+  `attendee_id` int NOT NULL,
+  `workshop_id` int NOT NULL,
   `date` date NOT NULL,
   `check_in_time` time DEFAULT NULL,
   `check_out_time` time DEFAULT NULL,
-  `status` enum('present','absent','late','excused') DEFAULT 'present',
-  `notes` text DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `status` enum('present','absent','late','excused') COLLATE utf8mb4_general_ci DEFAULT 'present',
+  `notes` text COLLATE utf8mb4_general_ci,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -810,61 +815,64 @@ CREATE TABLE `holiday_program_attendance` (
 --
 
 CREATE TABLE `holiday_program_attendees` (
-  `id` int(11) NOT NULL,
-  `program_id` int(11) NOT NULL,
-  `user_id` int(11) DEFAULT NULL,
-  `first_name` varchar(255) NOT NULL,
-  `last_name` varchar(255) NOT NULL,
-  `email` varchar(255) NOT NULL,
-  `phone` varchar(20) DEFAULT NULL,
+  `id` int NOT NULL,
+  `program_id` int NOT NULL,
+  `user_id` int DEFAULT NULL,
+  `first_name` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `last_name` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `email` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `phone` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `date_of_birth` date DEFAULT NULL,
-  `gender` enum('Male','Female','Other','Prefer not to say') DEFAULT NULL,
-  `school` varchar(255) DEFAULT NULL,
-  `grade` int(2) DEFAULT NULL,
-  `address` text DEFAULT NULL,
-  `city` varchar(100) DEFAULT NULL,
-  `province` varchar(100) DEFAULT NULL,
-  `postal_code` varchar(20) DEFAULT NULL,
-  `guardian_name` varchar(255) DEFAULT NULL,
-  `guardian_relationship` varchar(50) DEFAULT NULL,
-  `guardian_phone` varchar(20) DEFAULT NULL,
-  `guardian_email` varchar(255) DEFAULT NULL,
-  `emergency_contact_name` varchar(255) DEFAULT NULL,
-  `emergency_contact_relationship` varchar(50) DEFAULT NULL,
-  `emergency_contact_phone` varchar(20) DEFAULT NULL,
-  `workshop_preference` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`workshop_preference`)),
-  `why_interested` text DEFAULT NULL,
-  `experience_level` varchar(50) DEFAULT NULL,
-  `needs_equipment` tinyint(1) DEFAULT 0,
-  `medical_conditions` text DEFAULT NULL,
-  `allergies` text DEFAULT NULL,
-  `photo_permission` tinyint(1) DEFAULT 0,
-  `data_permission` tinyint(1) DEFAULT 0,
-  `dietary_restrictions` text DEFAULT NULL,
-  `additional_notes` text DEFAULT NULL,
-  `registration_status` enum('pending','confirmed','canceled','waitlisted','completed') DEFAULT 'pending',
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp(),
-  `mentor_registration` tinyint(1) DEFAULT 0,
-  `mentor_status` enum('Pending','Approved','Declined') DEFAULT NULL,
-  `mentor_workshop_preference` int(11) DEFAULT NULL,
-  `password` varchar(255) DEFAULT NULL,
+  `gender` enum('Male','Female','Other','Prefer not to say') COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `school` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `grade` int DEFAULT NULL,
+  `address` text COLLATE utf8mb4_general_ci,
+  `city` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `province` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `postal_code` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `guardian_name` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `guardian_relationship` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `guardian_phone` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `guardian_email` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `emergency_contact_name` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `emergency_contact_relationship` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `emergency_contact_phone` varchar(20) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `workshop_preference` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin,
+  `why_interested` text COLLATE utf8mb4_general_ci,
+  `experience_level` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `needs_equipment` tinyint(1) DEFAULT '0',
+  `medical_conditions` text COLLATE utf8mb4_general_ci,
+  `allergies` text COLLATE utf8mb4_general_ci,
+  `photo_permission` tinyint(1) DEFAULT '0',
+  `data_permission` tinyint(1) DEFAULT '0',
+  `dietary_restrictions` text COLLATE utf8mb4_general_ci,
+  `additional_notes` text COLLATE utf8mb4_general_ci,
+  `registration_status` enum('pending','confirmed','canceled','waitlisted','completed') COLLATE utf8mb4_general_ci DEFAULT 'pending',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `mentor_registration` tinyint(1) DEFAULT '0',
+  `mentor_status` enum('Pending','Approved','Declined') COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `mentor_workshop_preference` int DEFAULT NULL,
+  `password` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `last_login` datetime DEFAULT NULL,
-  `is_clubhouse_member` tinyint(1) DEFAULT 0,
-  `status` varchar(20) NOT NULL DEFAULT 'pending'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `is_clubhouse_member` tinyint(1) DEFAULT '0',
+  `status` varchar(20) COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'pending',
+  `cohort_id` int DEFAULT NULL COMMENT 'Assigned cohort for this attendee',
+  `prerequisites_met` json DEFAULT NULL COMMENT 'Track which prerequisites are satisfied'
+) ;
 
 --
 -- Dumping data for table `holiday_program_attendees`
 --
 
-INSERT INTO `holiday_program_attendees` (`id`, `program_id`, `user_id`, `first_name`, `last_name`, `email`, `phone`, `date_of_birth`, `gender`, `school`, `grade`, `address`, `city`, `province`, `postal_code`, `guardian_name`, `guardian_relationship`, `guardian_phone`, `guardian_email`, `emergency_contact_name`, `emergency_contact_relationship`, `emergency_contact_phone`, `workshop_preference`, `why_interested`, `experience_level`, `needs_equipment`, `medical_conditions`, `allergies`, `photo_permission`, `data_permission`, `dietary_restrictions`, `additional_notes`, `registration_status`, `created_at`, `updated_at`, `mentor_registration`, `mentor_status`, `mentor_workshop_preference`, `password`, `last_login`, `is_clubhouse_member`, `status`) VALUES
-(1, 1, 1, 'Vuyani', 'Magibisela', 'vuyani.magibisela@sci-bono.co.za', '638393157', '2010-08-23', 'Male', '0', 12, '123 Gull Street', 'Johannesburg', 'Gauteng', '2021', 'Mandisa', 'Mother', '0721166543', 'mandi@gmail.com', '', '', '', '[\"3\",\"4\"]', 'Learn', '0', 1, 'No', '0', 1, 1, 'No', 'Learn', 'confirmed', '2025-03-28 16:40:40', '2025-06-06 14:45:48', 0, NULL, NULL, NULL, NULL, 0, 'pending'),
-(2, 1, 7, 'Sam', 'Kabanga', 'sam@example.com', '688965565', '2025-02-21', 'Male', NULL, NULL, '123 Good Street', 'Johannesburg', '', '1920', NULL, NULL, NULL, NULL, 'Thabo', 'Uncle', '0832342342', '[]', 'sdf', 'Advanced', 0, 'dssdf', 'sd', 1, 1, 'dssd', 'sd', 'confirmed', '2025-03-30 14:48:38', '2025-06-06 14:46:01', 1, 'Approved', 4, NULL, NULL, 0, 'pending'),
-(3, 1, 2, 'Itumeleng', 'Kgakane', 'itum@gmail.com', '0', '2012-01-12', 'Male', 'Fernadale High School', 12, '123 Good Street', 'Johannesburg', 'Gauteng', '1920', 'Mandi', 'Mother', '736933940', 'mandi@gmail.com', '', '', '', '[\"3\",\"4\"]', 'df', 'Beginner', 0, 'fsd', 'sdf', 1, 1, 'sd', 'sdf', 'pending', '2025-03-30 15:31:51', '2025-03-30 15:31:51', 0, NULL, NULL, NULL, NULL, 0, 'pending'),
-(4, 1, 8, 'Jabu', 'Khumalo', 'jabut@example.com', '0', '2012-02-21', 'Male', 'Fernadale High School', 12, '123 Main St', 'Johannesburg', 'Gauteng', '2021', 'Mandisa', 'Mother', '0721166543', 'mandi@gmail.com', '', '', '', '[\"1\",\"2\"]', 'ds', 'Basic', 0, 'sd', 'fds', 1, 1, 'ds', 'sda', 'confirmed', '2025-03-30 16:35:22', '2025-06-06 14:46:44', 0, NULL, NULL, NULL, NULL, 0, 'pending'),
-(5, 1, NULL, 'Noma', 'Mabasa', 'noma@gmail.com', '0012000', '2012-02-16', 'Male', 'Fernadale High School', 10, '123 Main St', 'Johannesburg', 'Gauteng', '2021', 'Vuyani', 'Father', '0638393157', 'vuyani@gmail.com', '', '', '', '[\"4\",\"1\"]', 'Love 3D animations', 'Intermediate', 0, 'No', 'No', 1, 1, 'No', 'Want to have fun and learn.', 'confirmed', '2025-03-30 17:09:01', '2025-06-09 14:25:54', 0, NULL, NULL, NULL, NULL, 0, 'pending'),
-(6, 2, NULL, 'Kgotso', 'Maponya', 'kgotso.maponya@live.com', '0658975346', '2010-05-19', 'Male', 'Fernadale High School', 9, '123 Main St', 'Johannesburg', 'Gauteng', '2021', 'John', 'Futher', '0788945689', 'john.maponya@live.com', '', '', '', '[\"7\"]', 'I love building things', 'Basic', 0, 'Discovery', 'None', 1, 1, 'None', 'None', 'pending', '2025-06-17 19:18:10', '2025-06-17 19:18:10', 0, NULL, NULL, NULL, NULL, 0, 'pending');
+INSERT INTO `holiday_program_attendees` (`id`, `program_id`, `user_id`, `first_name`, `last_name`, `email`, `phone`, `date_of_birth`, `gender`, `school`, `grade`, `address`, `city`, `province`, `postal_code`, `guardian_name`, `guardian_relationship`, `guardian_phone`, `guardian_email`, `emergency_contact_name`, `emergency_contact_relationship`, `emergency_contact_phone`, `workshop_preference`, `why_interested`, `experience_level`, `needs_equipment`, `medical_conditions`, `allergies`, `photo_permission`, `data_permission`, `dietary_restrictions`, `additional_notes`, `registration_status`, `created_at`, `updated_at`, `mentor_registration`, `mentor_status`, `mentor_workshop_preference`, `password`, `last_login`, `is_clubhouse_member`, `status`, `cohort_id`, `prerequisites_met`) VALUES
+(1, 1, 1, 'Vuyani', 'Magibisela', 'vuyani.magibisela@sci-bono.co.za', '638393157', '2010-08-23', 'Male', '0', 12, '123 Gull Street', 'Johannesburg', 'Gauteng', '2021', 'Mandisa', 'Mother', '0721166543', 'mandi@gmail.com', '', '', '', '[\"3\",\"4\"]', 'Learn', '0', 1, 'No', '0', 1, 1, 'No', 'Learn', 'confirmed', '2025-03-28 16:40:40', '2025-06-06 14:45:48', 0, NULL, NULL, NULL, NULL, 0, 'pending', NULL, NULL),
+(2, 1, 7, 'Sam', 'Kabanga', 'sam@example.com', '688965565', '2025-02-21', 'Male', NULL, NULL, '123 Good Street', 'Johannesburg', '', '1920', NULL, NULL, NULL, NULL, 'Thabo', 'Uncle', '0832342342', '[]', 'sdf', 'Advanced', 0, 'dssdf', 'sd', 1, 1, 'dssd', 'sd', 'confirmed', '2025-03-30 14:48:38', '2025-06-06 14:46:01', 1, 'Approved', 4, NULL, NULL, 0, 'pending', NULL, NULL),
+(3, 1, 2, 'Itumeleng', 'Kgakane', 'itum@gmail.com', '0', '2012-01-12', 'Male', 'Fernadale High School', 12, '123 Good Street', 'Johannesburg', 'Gauteng', '1920', 'Mandi', 'Mother', '736933940', 'mandi@gmail.com', '', '', '', '[\"3\",\"4\"]', 'df', 'Beginner', 0, 'fsd', 'sdf', 1, 1, 'sd', 'sdf', 'pending', '2025-03-30 15:31:51', '2025-03-30 15:31:51', 0, NULL, NULL, NULL, NULL, 0, 'pending', NULL, NULL),
+(4, 1, 8, 'Jabu', 'Khumalo', 'jabut@example.com', '0', '2012-02-21', 'Male', 'Fernadale High School', 12, '123 Main St', 'Johannesburg', 'Gauteng', '2021', 'Mandisa', 'Mother', '0721166543', 'mandi@gmail.com', '', '', '', '[\"1\",\"2\"]', 'ds', 'Basic', 0, 'sd', 'fds', 1, 1, 'ds', 'sda', 'confirmed', '2025-03-30 16:35:22', '2025-06-06 14:46:44', 0, NULL, NULL, NULL, NULL, 0, 'pending', NULL, NULL),
+(5, 1, NULL, 'Noma', 'Mabasa', 'noma@gmail.com', '0012000', '2012-02-16', 'Male', 'Fernadale High School', 10, '123 Main St', 'Johannesburg', 'Gauteng', '2021', 'Vuyani', 'Father', '0638393157', 'vuyani@gmail.com', '', '', '', '[\"4\",\"1\"]', 'Love 3D animations', 'Intermediate', 0, 'No', 'No', 1, 1, 'No', 'Want to have fun and learn.', 'confirmed', '2025-03-30 17:09:01', '2025-06-09 14:25:54', 0, NULL, NULL, NULL, NULL, 0, 'pending', NULL, NULL),
+(6, 2, NULL, 'Kgotso', 'Maponya', 'kgotso.maponya@live.com', '0658975346', '2010-05-19', 'Male', 'Fernadale High School', 9, '123 Main St', 'Johannesburg', 'Gauteng', '2021', 'John', 'Futher', '0788945689', 'john.maponya@live.com', '', '', '', '[\"7\"]', 'I love building things', 'Basic', 0, 'Discovery', 'None', 1, 1, 'None', 'None', 'pending', '2025-06-17 19:18:10', '2025-06-24 07:48:49', 0, NULL, NULL, NULL, NULL, 0, 'confirmed', NULL, NULL),
+(7, 2, 7, 'Sam', 'Kabanga', 'sam@example.com', '0817851714', '2017-02-21', 'Male', 'Fernadale High School', 9, '123 Main St', 'Johannesburg', 'Gauteng', '2021', 'Tshepo Kabanga', 'Father', '0868965623', 'tshepo.kabanga@live.com', '', '', '', '[7,6]', 'I love coding and electronics', 'Beginner', 1, 'Discovery', 'No', 1, 1, 'No', 'I would like this to work please!', 'pending', '2025-06-24 07:46:45', '2025-06-24 07:48:24', 0, NULL, NULL, NULL, NULL, 0, 'confirmed', NULL, NULL);
 
 --
 -- Triggers `holiday_program_attendees`
@@ -944,16 +952,45 @@ DELIMITER ;
 --
 
 CREATE TABLE `holiday_program_audit_trail` (
-  `id` int(11) NOT NULL,
-  `program_id` int(11) NOT NULL,
-  `user_id` int(11) DEFAULT NULL,
-  `action` varchar(100) NOT NULL,
-  `old_values` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`old_values`)),
-  `new_values` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`new_values`)),
-  `ip_address` varchar(45) DEFAULT NULL,
-  `user_agent` text DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `id` int NOT NULL,
+  `program_id` int NOT NULL,
+  `user_id` int DEFAULT NULL,
+  `action` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `old_values` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin,
+  `new_values` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin,
+  `ip_address` varchar(45) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `user_agent` text COLLATE utf8mb4_general_ci,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `holiday_program_cohorts`
+--
+
+CREATE TABLE `holiday_program_cohorts` (
+  `id` int NOT NULL,
+  `program_id` int NOT NULL,
+  `name` varchar(100) NOT NULL,
+  `start_date` date NOT NULL,
+  `end_date` date NOT NULL,
+  `max_participants` int DEFAULT '20',
+  `current_participants` int DEFAULT '0',
+  `status` enum('active','full','completed','cancelled') DEFAULT 'active',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `holiday_program_cohorts`
+--
+
+INSERT INTO `holiday_program_cohorts` (`id`, `program_id`, `name`, `start_date`, `end_date`, `max_participants`, `current_participants`, `status`, `created_at`, `updated_at`) VALUES
+(1, 1, 'Week 1 - Morning Cohort', '2025-07-07', '2025-07-11', 20, 0, 'active', '2025-06-23 18:05:43', '2025-06-23 18:05:43'),
+(2, 1, 'Week 2 - Morning Cohort', '2025-07-14', '2025-07-18', 20, 0, 'active', '2025-06-23 18:05:43', '2025-06-23 18:05:43'),
+(3, 2, 'Week 1 Group', '2025-06-30', '2025-07-04', 30, 0, 'active', '2025-06-23 18:16:39', '2025-06-23 18:16:39'),
+(4, 2, 'Week 2 Group', '2025-07-07', '2025-07-11', 30, 0, 'active', '2025-06-23 18:17:34', '2025-06-23 18:17:34');
 
 -- --------------------------------------------------------
 
@@ -962,12 +999,12 @@ CREATE TABLE `holiday_program_audit_trail` (
 --
 
 CREATE TABLE `holiday_program_criteria` (
-  `id` int(11) NOT NULL,
-  `program_id` int(11) NOT NULL,
-  `criterion` varchar(255) NOT NULL,
-  `description` text DEFAULT NULL,
-  `order_number` int(11) DEFAULT 0,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `id` int NOT NULL,
+  `program_id` int NOT NULL,
+  `criterion` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `description` text COLLATE utf8mb4_general_ci,
+  `order_number` int DEFAULT '0',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -988,21 +1025,21 @@ INSERT INTO `holiday_program_criteria` (`id`, `program_id`, `criterion`, `descri
 -- (See below for the actual view)
 --
 CREATE TABLE `holiday_program_dashboard_stats` (
-`program_id` int(11)
+`program_id` int
 ,`term` varchar(50)
 ,`title` varchar(255)
 ,`registration_open` tinyint(1)
-,`max_participants` int(11)
+,`max_participants` int
 ,`auto_close_on_capacity` tinyint(1)
 ,`auto_close_on_date` tinyint(1)
 ,`registration_deadline` varchar(100)
 ,`created_at` timestamp
 ,`updated_at` timestamp
-,`total_registrations` bigint(21)
-,`confirmed_registrations` bigint(21)
-,`pending_registrations` bigint(21)
-,`mentor_applications` bigint(21)
-,`member_registrations` bigint(21)
+,`total_registrations` bigint
+,`confirmed_registrations` bigint
+,`pending_registrations` bigint
+,`mentor_applications` bigint
+,`member_registrations` bigint
 ,`capacity_percentage` decimal(25,1)
 ,`capacity_status` varchar(11)
 );
@@ -1014,12 +1051,12 @@ CREATE TABLE `holiday_program_dashboard_stats` (
 --
 
 CREATE TABLE `holiday_program_faqs` (
-  `id` int(11) NOT NULL,
-  `program_id` int(11) NOT NULL,
-  `question` text NOT NULL,
-  `answer` text NOT NULL,
-  `order_number` int(11) DEFAULT 0,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `id` int NOT NULL,
+  `program_id` int NOT NULL,
+  `question` text COLLATE utf8mb4_general_ci NOT NULL,
+  `answer` text COLLATE utf8mb4_general_ci NOT NULL,
+  `order_number` int DEFAULT '0',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -1040,11 +1077,11 @@ INSERT INTO `holiday_program_faqs` (`id`, `program_id`, `question`, `answer`, `o
 --
 
 CREATE TABLE `holiday_program_items` (
-  `id` int(11) NOT NULL,
-  `program_id` int(11) NOT NULL,
-  `item` varchar(255) NOT NULL,
-  `order_number` int(11) DEFAULT 0,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `id` int NOT NULL,
+  `program_id` int NOT NULL,
+  `item` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `order_number` int DEFAULT '0',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -1064,13 +1101,13 @@ INSERT INTO `holiday_program_items` (`id`, `program_id`, `item`, `order_number`,
 --
 
 CREATE TABLE `holiday_program_mentor_details` (
-  `id` int(11) NOT NULL,
-  `attendee_id` int(11) NOT NULL,
-  `experience` text DEFAULT NULL,
-  `availability` varchar(50) DEFAULT NULL,
-  `workshop_preference` int(11) DEFAULT NULL,
-  `notes` text DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `id` int NOT NULL,
+  `attendee_id` int NOT NULL,
+  `experience` text COLLATE utf8mb4_general_ci,
+  `availability` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `workshop_preference` int DEFAULT NULL,
+  `notes` text COLLATE utf8mb4_general_ci,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -1087,15 +1124,60 @@ INSERT INTO `holiday_program_mentor_details` (`id`, `attendee_id`, `experience`,
 --
 
 CREATE TABLE `holiday_program_notifications` (
-  `id` int(11) NOT NULL,
-  `program_id` int(11) NOT NULL,
-  `notification_type` enum('status_change','capacity_warning','deadline_reminder','registration_received') NOT NULL,
-  `enabled` tinyint(1) NOT NULL DEFAULT 1,
-  `recipient_emails` text DEFAULT NULL,
+  `id` int NOT NULL,
+  `program_id` int NOT NULL,
+  `notification_type` enum('status_change','capacity_warning','deadline_reminder','registration_received') COLLATE utf8mb4_general_ci NOT NULL,
+  `enabled` tinyint(1) NOT NULL DEFAULT '1',
+  `recipient_emails` text COLLATE utf8mb4_general_ci,
   `last_sent` timestamp NULL DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `holiday_program_offerings`
+--
+
+CREATE TABLE `holiday_program_offerings` (
+  `id` int NOT NULL,
+  `program_id` int NOT NULL,
+  `workshop_id` int NOT NULL,
+  `cohort_id` int DEFAULT NULL,
+  `offering_date` date DEFAULT NULL,
+  `time_slot` varchar(50) DEFAULT NULL,
+  `available_spots` int NOT NULL,
+  `status` enum('scheduled','running','completed','cancelled') DEFAULT 'scheduled',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `holiday_program_prerequisites`
+--
+
+CREATE TABLE `holiday_program_prerequisites` (
+  `id` int NOT NULL,
+  `workshop_id` int NOT NULL,
+  `prerequisite_type` enum('age','skill','workshop','equipment') NOT NULL,
+  `requirement_value` varchar(255) NOT NULL,
+  `description` text,
+  `is_mandatory` tinyint(1) DEFAULT '1',
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `holiday_program_prerequisites`
+--
+
+INSERT INTO `holiday_program_prerequisites` (`id`, `workshop_id`, `prerequisite_type`, `requirement_value`, `description`, `is_mandatory`, `created_at`) VALUES
+(1, 1, 'age', '13', 'Minimum age requirement for graphic design workshop', 1, '2025-06-23 18:06:35'),
+(2, 1, 'skill', 'basic_computer', 'Basic computer navigation and file management', 1, '2025-06-23 18:06:35'),
+(3, 2, 'age', '15', 'Minimum age for video editing due to software complexity', 1, '2025-06-23 18:06:35'),
+(4, 3, 'age', '12', 'Minimum age for animation workshop', 1, '2025-06-23 18:06:35');
 
 -- --------------------------------------------------------
 
@@ -1104,20 +1186,20 @@ CREATE TABLE `holiday_program_notifications` (
 --
 
 CREATE TABLE `holiday_program_projects` (
-  `id` int(11) NOT NULL,
-  `attendee_id` int(11) NOT NULL,
-  `program_id` int(11) NOT NULL,
-  `workshop_id` int(11) DEFAULT NULL,
-  `title` varchar(255) NOT NULL,
-  `description` text DEFAULT NULL,
-  `file_path` varchar(255) DEFAULT NULL,
-  `file_type` varchar(50) DEFAULT NULL,
-  `submission_date` timestamp NOT NULL DEFAULT current_timestamp(),
-  `feedback` text DEFAULT NULL,
-  `rating` int(1) DEFAULT NULL,
-  `status` enum('submitted','reviewed','approved','featured') DEFAULT 'submitted',
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `id` int NOT NULL,
+  `attendee_id` int NOT NULL,
+  `program_id` int NOT NULL,
+  `workshop_id` int DEFAULT NULL,
+  `title` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `description` text COLLATE utf8mb4_general_ci,
+  `file_path` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `file_type` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `submission_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `feedback` text COLLATE utf8mb4_general_ci,
+  `rating` int DEFAULT NULL,
+  `status` enum('submitted','reviewed','approved','featured') COLLATE utf8mb4_general_ci DEFAULT 'submitted',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -1127,23 +1209,23 @@ CREATE TABLE `holiday_program_projects` (
 --
 
 CREATE TABLE `holiday_program_reports` (
-  `id` int(11) NOT NULL,
-  `program_id` int(11) NOT NULL,
-  `total_attendees` int(11) DEFAULT 0,
-  `male_attendees` int(11) DEFAULT 0,
-  `female_attendees` int(11) DEFAULT 0,
-  `other_attendees` int(11) DEFAULT 0,
-  `age_groups` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`age_groups`)),
-  `grade_distribution` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`grade_distribution`)),
-  `workshop_attendance` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`workshop_attendance`)),
-  `narrative` text DEFAULT NULL,
-  `challenges` text DEFAULT NULL,
-  `outcomes` text DEFAULT NULL,
-  `recommendations` text DEFAULT NULL,
-  `created_by` int(11) DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `id` int NOT NULL,
+  `program_id` int NOT NULL,
+  `total_attendees` int DEFAULT '0',
+  `male_attendees` int DEFAULT '0',
+  `female_attendees` int DEFAULT '0',
+  `other_attendees` int DEFAULT '0',
+  `age_groups` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin,
+  `grade_distribution` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin,
+  `workshop_attendance` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin,
+  `narrative` text COLLATE utf8mb4_general_ci,
+  `challenges` text COLLATE utf8mb4_general_ci,
+  `outcomes` text COLLATE utf8mb4_general_ci,
+  `recommendations` text COLLATE utf8mb4_general_ci,
+  `created_by` int DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ;
 
 -- --------------------------------------------------------
 
@@ -1152,11 +1234,11 @@ CREATE TABLE `holiday_program_reports` (
 --
 
 CREATE TABLE `holiday_program_requirements` (
-  `id` int(11) NOT NULL,
-  `program_id` int(11) NOT NULL,
-  `requirement` text NOT NULL,
-  `order_number` int(11) DEFAULT 0,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `id` int NOT NULL,
+  `program_id` int NOT NULL,
+  `requirement` text COLLATE utf8mb4_general_ci NOT NULL,
+  `order_number` int DEFAULT '0',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -1176,14 +1258,14 @@ INSERT INTO `holiday_program_requirements` (`id`, `program_id`, `requirement`, `
 --
 
 CREATE TABLE `holiday_program_schedules` (
-  `id` int(11) NOT NULL,
-  `program_id` int(11) NOT NULL,
-  `day_number` int(11) NOT NULL,
-  `day_name` varchar(50) NOT NULL,
+  `id` int NOT NULL,
+  `program_id` int NOT NULL,
+  `day_number` int NOT NULL,
+  `day_name` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
   `date` date DEFAULT NULL,
-  `theme` varchar(255) DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `theme` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -1195,7 +1277,12 @@ INSERT INTO `holiday_program_schedules` (`id`, `program_id`, `day_number`, `day_
 (2, 1, 2, 'Tuesday', '2025-04-01', 'Skill Development', '2025-03-31 15:56:28', '2025-03-31 15:56:28'),
 (3, 1, 3, 'Wednesday', '2025-04-02', 'Project Development', '2025-03-31 15:56:28', '2025-03-31 15:56:28'),
 (4, 1, 4, 'Thursday', '2025-04-03', 'Project Refinement', '2025-03-31 15:56:28', '2025-03-31 15:56:28'),
-(5, 1, 5, 'Friday', '2025-04-04', 'Showcase & Celebration', '2025-03-31 15:56:28', '2025-03-31 15:56:28');
+(5, 1, 5, 'Friday', '2025-04-04', 'Showcase & Celebration', '2025-03-31 15:56:28', '2025-03-31 15:56:28'),
+(9, 2, 2, 'Week 1 - Skill Building', NULL, 'Week 1 Focus: Skill Building', '2025-06-24 05:15:15', '2025-06-24 05:15:15'),
+(10, 2, 1, 'Day 1', '2025-06-30', 'Introductions', '2025-06-24 05:15:15', '2025-06-24 05:21:23'),
+(11, 2, 5, 'Week 1 - Showcase', NULL, 'Week 1 Focus: Showcase', '2025-06-24 05:15:15', '2025-06-24 05:15:15'),
+(13, 2, 3, 'Week 1 - Project Work', NULL, 'Week 1 Focus: Project Work', '2025-06-24 05:15:15', '2025-06-24 05:15:15'),
+(14, 2, 4, 'Week 1 - Advanced Topics', NULL, 'Week 1 Focus: Advanced Topics', '2025-06-24 05:15:15', '2025-06-24 05:15:15');
 
 -- --------------------------------------------------------
 
@@ -1204,12 +1291,12 @@ INSERT INTO `holiday_program_schedules` (`id`, `program_id`, `day_number`, `day_
 --
 
 CREATE TABLE `holiday_program_schedule_items` (
-  `id` int(11) NOT NULL,
-  `schedule_id` int(11) NOT NULL,
-  `time_slot` varchar(50) NOT NULL,
-  `activity` text NOT NULL,
-  `session_type` enum('morning','afternoon') NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `id` int NOT NULL,
+  `schedule_id` int NOT NULL,
+  `time_slot` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
+  `activity` text COLLATE utf8mb4_general_ci NOT NULL,
+  `session_type` enum('morning','afternoon') COLLATE utf8mb4_general_ci NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -1247,19 +1334,19 @@ INSERT INTO `holiday_program_schedule_items` (`id`, `schedule_id`, `time_slot`, 
 -- (See below for the actual view)
 --
 CREATE TABLE `holiday_program_stats` (
-`id` int(11)
+`id` int
 ,`term` varchar(50)
 ,`title` varchar(255)
 ,`dates` varchar(100)
 ,`registration_open` tinyint(1)
 ,`status` enum('draft','open','closing_soon','closed','completed','cancelled')
-,`max_participants` int(11)
-,`total_registrations` bigint(21)
-,`member_count` bigint(21)
-,`mentor_count` bigint(21)
-,`confirmed_count` bigint(21)
-,`pending_count` bigint(21)
-,`workshop_count` bigint(21)
+,`max_participants` int
+,`total_registrations` bigint
+,`member_count` bigint
+,`mentor_count` bigint
+,`confirmed_count` bigint
+,`pending_count` bigint
+,`workshop_count` bigint
 ,`capacity_percentage` decimal(25,1)
 );
 
@@ -1270,15 +1357,15 @@ CREATE TABLE `holiday_program_stats` (
 --
 
 CREATE TABLE `holiday_program_status_log` (
-  `id` int(11) NOT NULL,
-  `program_id` int(11) NOT NULL,
-  `changed_by` int(11) DEFAULT NULL,
-  `old_status` tinyint(1) NOT NULL DEFAULT 0,
-  `new_status` tinyint(1) NOT NULL DEFAULT 0,
-  `change_reason` varchar(255) DEFAULT NULL,
-  `ip_address` varchar(45) DEFAULT NULL,
-  `user_agent` text DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `id` int NOT NULL,
+  `program_id` int NOT NULL,
+  `changed_by` int DEFAULT NULL,
+  `old_status` tinyint(1) NOT NULL DEFAULT '0',
+  `new_status` tinyint(1) NOT NULL DEFAULT '0',
+  `change_reason` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `ip_address` varchar(45) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `user_agent` text COLLATE utf8mb4_general_ci,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -1288,31 +1375,34 @@ CREATE TABLE `holiday_program_status_log` (
 --
 
 CREATE TABLE `holiday_program_workshops` (
-  `id` int(11) NOT NULL,
-  `program_id` int(11) NOT NULL,
-  `title` varchar(255) NOT NULL,
-  `description` text DEFAULT NULL,
-  `instructor` varchar(255) DEFAULT NULL,
-  `max_participants` int(11) DEFAULT 15,
+  `id` int NOT NULL,
+  `program_id` int NOT NULL,
+  `title` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `description` text COLLATE utf8mb4_general_ci,
+  `instructor` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `max_participants` int DEFAULT '15',
   `start_time` time DEFAULT NULL,
   `end_time` time DEFAULT NULL,
-  `location` varchar(255) DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `location` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `prerequisites` text COLLATE utf8mb4_general_ci COMMENT 'Workshop prerequisites and requirements',
+  `cohort_id` int DEFAULT NULL COMMENT 'Link workshop to specific cohort',
+  `week_number` int DEFAULT '1' COMMENT 'Which week of program this workshop runs'
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
 -- Dumping data for table `holiday_program_workshops`
 --
 
-INSERT INTO `holiday_program_workshops` (`id`, `program_id`, `title`, `description`, `instructor`, `max_participants`, `start_time`, `end_time`, `location`, `created_at`, `updated_at`) VALUES
-(1, 1, 'Graphic Design Basics', 'Learn the fundamentals of graphic design using industry tools.', 'Carols Kanye', 10, NULL, NULL, NULL, '2025-03-26 19:24:54', '2025-03-31 19:31:53'),
-(2, 1, 'Music and Video Production', 'Create and edit Music and videos using professional techniques.', 'Andrew Klaas and Philani Mbatha', 10, NULL, NULL, NULL, '2025-03-26 19:24:54', '2025-03-31 19:33:04'),
-(3, 1, '3D Design Fundamentals', 'Explore the principles of 3D Design and create your 3D visualizations.', 'Samuel Kazadi ', 5, NULL, NULL, NULL, '2025-03-26 19:24:54', '2025-03-31 19:32:24'),
-(4, 1, 'Animation Fundamentals', 'Explore the principles of animation and create your animated shorts.', 'Vuyani Magibisela', 5, NULL, NULL, NULL, '2025-03-26 19:24:54', '2025-03-31 19:33:24'),
-(5, 2, 'Programming AI Projects', 'Focus: Machine learning algorithms, data analysis, and AI model development\r\nLearning Objectives:\r\n•	Understand fundamental AI and machine learning concepts\r\n•	Implement basic machine learning algorithms from scratch\r\n•	Work with AI libraries and frameworks\r\n•	Develop data preprocessing and analysis skills\r\n•	Create AI models for classification and prediction\r\n', 'Vuyani', 10, NULL, NULL, 'Sci-Bono Clubhouse', '2025-06-09 14:36:41', '2025-06-09 14:36:41'),
-(6, 2, 'Web Projects', 'Focus: Web-based AI applications, APIs, and interactive AI interfaces\r\nLearning Objectives:\r\n•	Build responsive web applications with AI integration\r\n•	Understand API development and consumption\r\n•	Create interactive user interfaces for AI systems\r\n•	Implement real-time AI features in web applications\r\n•	Deploy web applications with AI capabilities\r\n', 'Phamela', 12, NULL, NULL, 'Sci-Bono YDP Classroom', '2025-06-09 14:36:41', '2025-06-09 14:36:41'),
-(7, 2, 'Electronics Projects', 'Focus: AI-powered hardware, IoT devices, and embedded systems\r\nLearning Objectives:\r\n•	Understand microcontroller programming\r\n•	Integrate sensors and actuators with AI processing\r\n•	Develop IoT applications with AI capabilities\r\n•	Create autonomous systems using AI\r\n•	Build AI-powered robotics projects\r\n', 'Simphiwe Phiri', 8, NULL, NULL, 'Sci-Bono Simplon Centre', '2025-06-09 14:36:41', '2025-06-09 14:36:41');
+INSERT INTO `holiday_program_workshops` (`id`, `program_id`, `title`, `description`, `instructor`, `max_participants`, `start_time`, `end_time`, `location`, `created_at`, `updated_at`, `prerequisites`, `cohort_id`, `week_number`) VALUES
+(1, 1, 'Graphic Design Basics', 'Learn the fundamentals of graphic design using industry tools.', 'Carols Kanye', 10, NULL, NULL, NULL, '2025-03-26 19:24:54', '2025-06-23 18:06:09', 'Basic computer skills, Age 13+', NULL, 1),
+(2, 1, 'Music and Video Production', 'Create and edit Music and videos using professional techniques.', 'Andrew Klaas and Philani Mbatha', 10, NULL, NULL, NULL, '2025-03-26 19:24:54', '2025-06-23 18:06:09', 'Familiarity with editing software, Age 15+', NULL, 1),
+(3, 1, '3D Design Fundamentals', 'Explore the principles of 3D Design and create your 3D visualizations.', 'Samuel Kazadi ', 5, NULL, NULL, NULL, '2025-03-26 19:24:54', '2025-06-23 18:06:09', 'Creative mindset, Age 12+', NULL, 2),
+(4, 1, 'Animation Fundamentals', 'Explore the principles of animation and create your animated shorts.', 'Vuyani Magibisela', 5, NULL, NULL, NULL, '2025-03-26 19:24:54', '2025-03-31 19:33:24', NULL, NULL, 1),
+(5, 2, 'Programming AI Projects', 'Focus: Machine learning algorithms, data analysis, and AI model development\r\nLearning Objectives:\r\n•	Understand fundamental AI and machine learning concepts\r\n•	Implement basic machine learning algorithms from scratch\r\n•	Work with AI libraries and frameworks\r\n•	Develop data preprocessing and analysis skills\r\n•	Create AI models for classification and prediction\r\n', 'Vuyani', 10, NULL, NULL, 'Sci-Bono Clubhouse', '2025-06-09 14:36:41', '2025-06-09 14:36:41', NULL, NULL, 1),
+(6, 2, 'Web Projects', 'Focus: Web-based AI applications, APIs, and interactive AI interfaces\r\nLearning Objectives:\r\n•	Build responsive web applications with AI integration\r\n•	Understand API development and consumption\r\n•	Create interactive user interfaces for AI systems\r\n•	Implement real-time AI features in web applications\r\n•	Deploy web applications with AI capabilities\r\n', 'Phamela', 12, NULL, NULL, 'Sci-Bono YDP Classroom', '2025-06-09 14:36:41', '2025-06-09 14:36:41', NULL, NULL, 1),
+(7, 2, 'Electronics Projects', 'Focus: AI-powered hardware, IoT devices, and embedded systems\r\nLearning Objectives:\r\n•	Understand microcontroller programming\r\n•	Integrate sensors and actuators with AI processing\r\n•	Develop IoT applications with AI capabilities\r\n•	Create autonomous systems using AI\r\n•	Build AI-powered robotics projects\r\n', 'Simphiwe Phiri', 8, NULL, NULL, 'Sci-Bono Simplon Centre', '2025-06-09 14:36:41', '2025-06-09 14:36:41', NULL, NULL, 1);
 
 -- --------------------------------------------------------
 
@@ -1321,11 +1411,11 @@ INSERT INTO `holiday_program_workshops` (`id`, `program_id`, `title`, `descripti
 --
 
 CREATE TABLE `holiday_report_images` (
-  `id` int(11) NOT NULL,
-  `report_id` int(11) NOT NULL,
-  `image_path` varchar(255) NOT NULL,
-  `caption` text DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `id` int NOT NULL,
+  `report_id` int NOT NULL,
+  `image_path` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `caption` text COLLATE utf8mb4_general_ci,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -1335,13 +1425,13 @@ CREATE TABLE `holiday_report_images` (
 --
 
 CREATE TABLE `holiday_workshop_enrollment` (
-  `id` int(11) NOT NULL,
-  `attendee_id` int(11) NOT NULL,
-  `workshop_id` int(11) NOT NULL,
-  `enrollment_date` timestamp NOT NULL DEFAULT current_timestamp(),
-  `attendance_status` enum('registered','attended','absent','excused') DEFAULT 'registered',
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `id` int NOT NULL,
+  `attendee_id` int NOT NULL,
+  `workshop_id` int NOT NULL,
+  `enrollment_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `attendance_status` enum('registered','attended','absent','excused') COLLATE utf8mb4_general_ci DEFAULT 'registered',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -1351,16 +1441,16 @@ CREATE TABLE `holiday_workshop_enrollment` (
 --
 
 CREATE TABLE `lesson_progress` (
-  `id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `lesson_id` int(11) NOT NULL,
-  `status` enum('not_started','in_progress','completed') NOT NULL DEFAULT 'not_started',
-  `progress` float NOT NULL DEFAULT 0,
-  `completed` tinyint(1) NOT NULL DEFAULT 0,
+  `id` int NOT NULL,
+  `user_id` int NOT NULL,
+  `lesson_id` int NOT NULL,
+  `status` enum('not_started','in_progress','completed') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'not_started',
+  `progress` float NOT NULL DEFAULT '0',
+  `completed` tinyint(1) NOT NULL DEFAULT '0',
   `completion_date` timestamp NULL DEFAULT NULL,
-  `last_accessed` timestamp NOT NULL DEFAULT current_timestamp(),
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `last_accessed` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -1370,17 +1460,17 @@ CREATE TABLE `lesson_progress` (
 --
 
 CREATE TABLE `lesson_sections` (
-  `id` int(11) NOT NULL,
-  `lesson_id` int(11) NOT NULL,
-  `title` varchar(255) NOT NULL,
-  `content` longtext DEFAULT NULL,
-  `section_type` enum('text','video','interactive','quiz','assignment') NOT NULL DEFAULT 'text',
-  `video_url` varchar(255) DEFAULT NULL,
-  `estimated_duration_minutes` int(11) DEFAULT NULL,
-  `order_number` int(11) NOT NULL DEFAULT 0,
-  `is_published` tinyint(1) NOT NULL DEFAULT 0,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `id` int NOT NULL,
+  `lesson_id` int NOT NULL,
+  `title` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `content` longtext COLLATE utf8mb4_general_ci,
+  `section_type` enum('text','video','interactive','quiz','assignment') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'text',
+  `video_url` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `estimated_duration_minutes` int DEFAULT NULL,
+  `order_number` int NOT NULL DEFAULT '0',
+  `is_published` tinyint(1) NOT NULL DEFAULT '0',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -1390,17 +1480,17 @@ CREATE TABLE `lesson_sections` (
 --
 
 CREATE TABLE `monthly_reports` (
-  `id` int(11) NOT NULL,
+  `id` int NOT NULL,
   `report_date` date NOT NULL,
-  `total_attendees` int(11) NOT NULL DEFAULT 0,
-  `male_attendees` int(11) NOT NULL DEFAULT 0,
-  `female_attendees` int(11) NOT NULL DEFAULT 0,
-  `age_groups` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin DEFAULT NULL CHECK (json_valid(`age_groups`)),
-  `narrative` text DEFAULT NULL,
-  `challenges` text DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `total_attendees` int NOT NULL DEFAULT '0',
+  `male_attendees` int NOT NULL DEFAULT '0',
+  `female_attendees` int NOT NULL DEFAULT '0',
+  `age_groups` longtext CHARACTER SET utf8mb4 COLLATE utf8mb4_bin,
+  `narrative` text COLLATE utf8mb4_general_ci,
+  `challenges` text COLLATE utf8mb4_general_ci,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ;
 
 --
 -- Dumping data for table `monthly_reports`
@@ -1418,15 +1508,15 @@ INSERT INTO `monthly_reports` (`id`, `report_date`, `total_attendees`, `male_att
 --
 
 CREATE TABLE `monthly_report_activities` (
-  `id` int(11) NOT NULL,
-  `report_id` int(11) NOT NULL,
-  `program_id` int(11) NOT NULL,
-  `participants` int(11) NOT NULL DEFAULT 0,
-  `completed_projects` int(11) NOT NULL DEFAULT 0,
-  `in_progress_projects` int(11) NOT NULL DEFAULT 0,
-  `not_started_projects` int(11) NOT NULL DEFAULT 0,
-  `narrative` text DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `id` int NOT NULL,
+  `report_id` int NOT NULL,
+  `program_id` int NOT NULL,
+  `participants` int NOT NULL DEFAULT '0',
+  `completed_projects` int NOT NULL DEFAULT '0',
+  `in_progress_projects` int NOT NULL DEFAULT '0',
+  `not_started_projects` int NOT NULL DEFAULT '0',
+  `narrative` text COLLATE utf8mb4_general_ci,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -1446,10 +1536,10 @@ INSERT INTO `monthly_report_activities` (`id`, `report_id`, `program_id`, `parti
 --
 
 CREATE TABLE `monthly_report_images` (
-  `id` int(11) NOT NULL,
-  `activity_id` int(11) NOT NULL,
-  `image_path` varchar(255) NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `id` int NOT NULL,
+  `activity_id` int NOT NULL,
+  `image_path` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -1467,17 +1557,36 @@ INSERT INTO `monthly_report_images` (`id`, `activity_id`, `image_path`, `created
 -- --------------------------------------------------------
 
 --
+-- Stand-in structure for view `program_structure_view`
+-- (See below for the actual view)
+--
+CREATE TABLE `program_structure_view` (
+`id` int
+,`title` varchar(255)
+,`start_date` date
+,`end_date` date
+,`duration_weeks` json
+,`has_cohorts` json
+,`has_prerequisites` json
+,`total_cohorts` bigint
+,`total_workshops` bigint
+,`total_attendees` bigint
+);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `quiz_answers`
 --
 
 CREATE TABLE `quiz_answers` (
-  `id` int(11) NOT NULL,
-  `question_id` int(11) NOT NULL,
-  `answer_text` text NOT NULL,
-  `is_correct` tinyint(1) NOT NULL DEFAULT 0,
-  `order_number` int(11) NOT NULL DEFAULT 0,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `id` int NOT NULL,
+  `question_id` int NOT NULL,
+  `answer_text` text COLLATE utf8mb4_general_ci NOT NULL,
+  `is_correct` tinyint(1) NOT NULL DEFAULT '0',
+  `order_number` int NOT NULL DEFAULT '0',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -1487,17 +1596,17 @@ CREATE TABLE `quiz_answers` (
 --
 
 CREATE TABLE `quiz_attempts` (
-  `id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `quiz_id` int(11) NOT NULL,
-  `score` float NOT NULL DEFAULT 0,
-  `percentage` float NOT NULL DEFAULT 0,
-  `passed` tinyint(1) NOT NULL DEFAULT 0,
-  `time_spent_seconds` int(11) DEFAULT NULL,
-  `started_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `id` int NOT NULL,
+  `user_id` int NOT NULL,
+  `quiz_id` int NOT NULL,
+  `score` float NOT NULL DEFAULT '0',
+  `percentage` float NOT NULL DEFAULT '0',
+  `passed` tinyint(1) NOT NULL DEFAULT '0',
+  `time_spent_seconds` int DEFAULT NULL,
+  `started_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `completed_at` timestamp NULL DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -1507,14 +1616,14 @@ CREATE TABLE `quiz_attempts` (
 --
 
 CREATE TABLE `quiz_questions` (
-  `id` int(11) NOT NULL,
-  `quiz_id` int(11) NOT NULL,
-  `question_text` text NOT NULL,
-  `question_type` enum('multiple_choice','true_false','short_answer','matching') NOT NULL DEFAULT 'multiple_choice',
-  `points` int(11) NOT NULL DEFAULT 1,
-  `order_number` int(11) NOT NULL DEFAULT 0,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `id` int NOT NULL,
+  `quiz_id` int NOT NULL,
+  `question_text` text COLLATE utf8mb4_general_ci NOT NULL,
+  `question_type` enum('multiple_choice','true_false','short_answer','matching') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'multiple_choice',
+  `points` int NOT NULL DEFAULT '1',
+  `order_number` int NOT NULL DEFAULT '0',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -1524,27 +1633,27 @@ CREATE TABLE `quiz_questions` (
 --
 
 CREATE TABLE `skill_activities` (
-  `id` int(11) NOT NULL,
-  `title` varchar(255) NOT NULL,
-  `description` text DEFAULT NULL,
-  `skill_category` varchar(100) DEFAULT NULL,
-  `technique_taught` varchar(255) DEFAULT NULL,
-  `tools_required` text DEFAULT NULL,
-  `materials_needed` text DEFAULT NULL,
-  `difficulty_level` enum('Beginner','Intermediate','Advanced') NOT NULL DEFAULT 'Beginner',
-  `estimated_duration_minutes` int(11) DEFAULT NULL,
-  `final_outcome_description` text DEFAULT NULL,
-  `instructions` longtext DEFAULT NULL,
-  `image_path` varchar(255) DEFAULT NULL,
-  `video_url` varchar(255) DEFAULT NULL,
-  `resources_links` text DEFAULT NULL,
-  `created_by` int(11) NOT NULL,
-  `is_published` tinyint(1) NOT NULL DEFAULT 0,
-  `is_featured` tinyint(1) NOT NULL DEFAULT 0,
-  `view_count` int(11) DEFAULT 0,
-  `completion_count` int(11) DEFAULT 0,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `id` int NOT NULL,
+  `title` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `description` text COLLATE utf8mb4_general_ci,
+  `skill_category` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `technique_taught` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `tools_required` text COLLATE utf8mb4_general_ci,
+  `materials_needed` text COLLATE utf8mb4_general_ci,
+  `difficulty_level` enum('Beginner','Intermediate','Advanced') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'Beginner',
+  `estimated_duration_minutes` int DEFAULT NULL,
+  `final_outcome_description` text COLLATE utf8mb4_general_ci,
+  `instructions` longtext COLLATE utf8mb4_general_ci,
+  `image_path` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `video_url` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `resources_links` text COLLATE utf8mb4_general_ci,
+  `created_by` int NOT NULL,
+  `is_published` tinyint(1) NOT NULL DEFAULT '0',
+  `is_featured` tinyint(1) NOT NULL DEFAULT '0',
+  `view_count` int DEFAULT '0',
+  `completion_count` int DEFAULT '0',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -1554,21 +1663,21 @@ CREATE TABLE `skill_activities` (
 --
 
 CREATE TABLE `skill_activity_completions` (
-  `id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `skill_activity_id` int(11) NOT NULL,
-  `completion_percentage` decimal(5,2) DEFAULT 0.00,
-  `current_step` int(11) DEFAULT 1,
-  `final_submission_path` varchar(255) DEFAULT NULL,
-  `notes` text DEFAULT NULL,
-  `rating` int(1) DEFAULT NULL CHECK (`rating` >= 1 and `rating` <= 5),
-  `feedback` text DEFAULT NULL,
-  `status` enum('started','in_progress','completed','abandoned') NOT NULL DEFAULT 'started',
-  `started_at` timestamp NOT NULL DEFAULT current_timestamp(),
+  `id` int NOT NULL,
+  `user_id` int NOT NULL,
+  `skill_activity_id` int NOT NULL,
+  `completion_percentage` decimal(5,2) DEFAULT '0.00',
+  `current_step` int DEFAULT '1',
+  `final_submission_path` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `notes` text COLLATE utf8mb4_general_ci,
+  `rating` int DEFAULT NULL,
+  `feedback` text COLLATE utf8mb4_general_ci,
+  `status` enum('started','in_progress','completed','abandoned') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'started',
+  `started_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `completed_at` timestamp NULL DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ;
 
 -- --------------------------------------------------------
 
@@ -1577,18 +1686,18 @@ CREATE TABLE `skill_activity_completions` (
 --
 
 CREATE TABLE `skill_activity_steps` (
-  `id` int(11) NOT NULL,
-  `skill_activity_id` int(11) NOT NULL,
-  `step_number` int(11) NOT NULL,
-  `title` varchar(255) NOT NULL,
-  `instructions` longtext NOT NULL,
-  `image_path` varchar(255) DEFAULT NULL,
-  `video_url` varchar(255) DEFAULT NULL,
-  `estimated_duration_minutes` int(11) DEFAULT NULL,
-  `tips` text DEFAULT NULL,
-  `common_mistakes` text DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `id` int NOT NULL,
+  `skill_activity_id` int NOT NULL,
+  `step_number` int NOT NULL,
+  `title` varchar(255) COLLATE utf8mb4_general_ci NOT NULL,
+  `instructions` longtext COLLATE utf8mb4_general_ci NOT NULL,
+  `image_path` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `video_url` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `estimated_duration_minutes` int DEFAULT NULL,
+  `tips` text COLLATE utf8mb4_general_ci,
+  `common_mistakes` text COLLATE utf8mb4_general_ci,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -1598,7 +1707,7 @@ CREATE TABLE `skill_activity_steps` (
 --
 
 CREATE TABLE `users` (
-  `id` int(100) NOT NULL,
+  `id` int NOT NULL,
   `username` varchar(255) NOT NULL,
   `email` varchar(255) NOT NULL DEFAULT 'default@example.com',
   `password` varchar(255) NOT NULL,
@@ -1607,12 +1716,12 @@ CREATE TABLE `users` (
   `user_type` enum('admin','mentor','member','alumni','community') NOT NULL DEFAULT 'member',
   `date_of_birth` date DEFAULT NULL,
   `Gender` enum('Male','Female','Other') NOT NULL,
-  `grade` int(12) DEFAULT NULL,
+  `grade` int DEFAULT NULL,
   `school` varchar(255) DEFAULT NULL,
   `parent` varchar(255) DEFAULT NULL,
   `parent_email` varchar(255) DEFAULT NULL,
-  `leaner_number` int(10) DEFAULT NULL,
-  `parent_number` int(10) DEFAULT NULL,
+  `leaner_number` int DEFAULT NULL,
+  `parent_number` int DEFAULT NULL,
   `Relationship` varchar(255) DEFAULT NULL,
   `Center` enum('Sci-Bono Clubhouse','Waverly Girls Solar Lab','Mapetla Solar Lab','Emdeni Solar Lab') NOT NULL DEFAULT 'Sci-Bono Clubhouse',
   `nationality` varchar(100) DEFAULT NULL,
@@ -1630,14 +1739,14 @@ CREATE TABLE `users` (
   `emergency_contact_relationship` varchar(100) DEFAULT NULL,
   `emergency_contact_phone` varchar(50) DEFAULT NULL,
   `emergency_contact_email` varchar(255) DEFAULT NULL,
-  `emergency_contact_address` text DEFAULT NULL,
-  `interests` text DEFAULT NULL,
-  `role_models` text DEFAULT NULL,
-  `goals` text DEFAULT NULL,
+  `emergency_contact_address` text,
+  `interests` text,
+  `role_models` text,
+  `goals` text,
   `has_computer` tinyint(1) DEFAULT NULL,
-  `computer_skills` text DEFAULT NULL,
+  `computer_skills` text,
   `computer_skills_source` varchar(255) DEFAULT NULL
-) ENGINE=InnoDB DEFAULT CHARSET=latin1 COLLATE=latin1_swedish_ci;
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 --
 -- Dumping data for table `users`
@@ -1664,16 +1773,16 @@ INSERT INTO `users` (`id`, `username`, `email`, `password`, `name`, `surname`, `
 --
 
 CREATE TABLE `user_enrollments` (
-  `id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `course_id` int(11) NOT NULL,
-  `enrollment_date` timestamp NOT NULL DEFAULT current_timestamp(),
-  `progress` float NOT NULL DEFAULT 0,
-  `completed` tinyint(1) NOT NULL DEFAULT 0,
+  `id` int NOT NULL,
+  `user_id` int NOT NULL,
+  `course_id` int NOT NULL,
+  `enrollment_date` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `progress` float NOT NULL DEFAULT '0',
+  `completed` tinyint(1) NOT NULL DEFAULT '0',
   `completion_date` timestamp NULL DEFAULT NULL,
-  `last_accessed` timestamp NOT NULL DEFAULT current_timestamp(),
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `last_accessed` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -1694,22 +1803,22 @@ INSERT INTO `user_enrollments` (`id`, `user_id`, `course_id`, `enrollment_date`,
 --
 
 CREATE TABLE `user_progress` (
-  `id` int(11) NOT NULL,
-  `user_id` int(11) NOT NULL,
-  `course_id` int(11) DEFAULT NULL,
-  `module_id` int(11) DEFAULT NULL,
-  `lesson_id` int(11) DEFAULT NULL,
-  `lesson_section_id` int(11) DEFAULT NULL,
-  `activity_id` int(11) DEFAULT NULL,
-  `progress_type` enum('course','module','lesson','lesson_section','activity') NOT NULL,
-  `completion_percentage` decimal(5,2) DEFAULT 0.00,
-  `total_points_earned` int(11) DEFAULT 0,
-  `total_points_possible` int(11) DEFAULT 0,
-  `status` enum('not_started','in_progress','completed','passed','failed') NOT NULL DEFAULT 'not_started',
-  `last_accessed` timestamp NOT NULL DEFAULT current_timestamp(),
+  `id` int NOT NULL,
+  `user_id` int NOT NULL,
+  `course_id` int DEFAULT NULL,
+  `module_id` int DEFAULT NULL,
+  `lesson_id` int DEFAULT NULL,
+  `lesson_section_id` int DEFAULT NULL,
+  `activity_id` int DEFAULT NULL,
+  `progress_type` enum('course','module','lesson','lesson_section','activity') COLLATE utf8mb4_general_ci NOT NULL,
+  `completion_percentage` decimal(5,2) DEFAULT '0.00',
+  `total_points_earned` int DEFAULT '0',
+  `total_points_possible` int DEFAULT '0',
+  `status` enum('not_started','in_progress','completed','passed','failed') COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'not_started',
+  `last_accessed` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `completed_at` timestamp NULL DEFAULT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -1719,15 +1828,15 @@ CREATE TABLE `user_progress` (
 --
 
 CREATE TABLE `user_question_answers` (
-  `id` int(11) NOT NULL,
-  `attempt_id` int(11) NOT NULL,
-  `question_id` int(11) NOT NULL,
-  `answer_id` int(11) DEFAULT NULL,
-  `text_answer` text DEFAULT NULL,
-  `is_correct` tinyint(1) NOT NULL DEFAULT 0,
-  `points_earned` float NOT NULL DEFAULT 0,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
-  `updated_at` timestamp NOT NULL DEFAULT current_timestamp() ON UPDATE current_timestamp()
+  `id` int NOT NULL,
+  `attempt_id` int NOT NULL,
+  `question_id` int NOT NULL,
+  `answer_id` int DEFAULT NULL,
+  `text_answer` text COLLATE utf8mb4_general_ci,
+  `is_correct` tinyint(1) NOT NULL DEFAULT '0',
+  `points_earned` float NOT NULL DEFAULT '0',
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 -- --------------------------------------------------------
@@ -1737,17 +1846,17 @@ CREATE TABLE `user_question_answers` (
 --
 
 CREATE TABLE `visitors` (
-  `id` int(11) NOT NULL,
-  `name` varchar(100) NOT NULL,
-  `surname` varchar(100) NOT NULL,
-  `age` int(11) NOT NULL,
-  `grade_school` varchar(100) NOT NULL,
-  `student_number` varchar(50) DEFAULT NULL,
-  `parent_name` varchar(100) NOT NULL,
-  `parent_surname` varchar(100) NOT NULL,
-  `email` varchar(100) NOT NULL,
-  `phone_number` varchar(20) NOT NULL,
-  `created_at` timestamp NOT NULL DEFAULT current_timestamp()
+  `id` int NOT NULL,
+  `name` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `surname` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `age` int NOT NULL,
+  `grade_school` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `student_number` varchar(50) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `parent_name` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `parent_surname` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `email` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
+  `phone_number` varchar(20) COLLATE utf8mb4_general_ci NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -1764,11 +1873,11 @@ INSERT INTO `visitors` (`id`, `name`, `surname`, `age`, `grade_school`, `student
 --
 
 CREATE TABLE `visits` (
-  `id` int(11) NOT NULL,
-  `visitor_id` int(11) NOT NULL,
-  `sign_in_time` timestamp NOT NULL DEFAULT current_timestamp(),
+  `id` int NOT NULL,
+  `visitor_id` int NOT NULL,
+  `sign_in_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `sign_out_time` timestamp NULL DEFAULT NULL,
-  `comment` text DEFAULT NULL
+  `comment` text COLLATE utf8mb4_general_ci
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
 --
@@ -1781,11 +1890,29 @@ INSERT INTO `visits` (`id`, `visitor_id`, `sign_in_time`, `sign_out_time`, `comm
 -- --------------------------------------------------------
 
 --
+-- Stand-in structure for view `workshop_capacity_view`
+-- (See below for the actual view)
+--
+CREATE TABLE `workshop_capacity_view` (
+`workshop_id` int
+,`title` varchar(255)
+,`max_participants` int
+,`prerequisites` text
+,`cohort_name` varchar(100)
+,`cohort_id` int
+,`enrolled_count` bigint
+,`available_spots` bigint
+,`capacity_percentage` decimal(25,1)
+);
+
+-- --------------------------------------------------------
+
+--
 -- Structure for view `holiday_programs_with_status`
 --
 DROP TABLE IF EXISTS `holiday_programs_with_status`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `holiday_programs_with_status`  AS SELECT `p`.`id` AS `id`, `p`.`term` AS `term`, `p`.`title` AS `title`, `p`.`description` AS `description`, `p`.`dates` AS `dates`, `p`.`time` AS `time`, `p`.`start_date` AS `start_date`, `p`.`end_date` AS `end_date`, `p`.`location` AS `location`, `p`.`age_range` AS `age_range`, `p`.`lunch_included` AS `lunch_included`, `p`.`program_goals` AS `program_goals`, `p`.`registration_deadline` AS `registration_deadline`, `p`.`max_participants` AS `max_participants`, `p`.`registration_open` AS `registration_open`, `p`.`status` AS `status`, `p`.`created_at` AS `created_at`, `p`.`updated_at` AS `updated_at`, CASE WHEN `p`.`status` = 'completed' OR `p`.`end_date` < curdate() THEN 'Completed' WHEN `p`.`status` = 'cancelled' THEN 'Cancelled' WHEN `p`.`status` = 'draft' THEN 'Draft' WHEN `p`.`registration_open` = 1 AND `p`.`status` in ('open','closing_soon') THEN 'Registration Open' WHEN `p`.`registration_open` = 0 OR `p`.`status` = 'closed' THEN 'Registration Closed' WHEN `p`.`start_date` > curdate() THEN 'Upcoming' WHEN curdate() between `p`.`start_date` and `p`.`end_date` THEN 'In Progress' ELSE 'Unknown' END AS `display_status`, (select count(0) from `holiday_program_attendees` where `holiday_program_attendees`.`program_id` = `p`.`id`) AS `total_registrations`, (select count(0) from `holiday_program_attendees` where `holiday_program_attendees`.`program_id` = `p`.`id` and `holiday_program_attendees`.`mentor_registration` = 0) AS `member_registrations`, (select count(0) from `holiday_program_attendees` where `holiday_program_attendees`.`program_id` = `p`.`id` and `holiday_program_attendees`.`mentor_registration` = 1) AS `mentor_registrations`, (select count(0) from `holiday_program_workshops` where `holiday_program_workshops`.`program_id` = `p`.`id`) AS `workshop_count` FROM `holiday_programs` AS `p` ;
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `holiday_programs_with_status`  AS SELECT `p`.`id` AS `id`, `p`.`term` AS `term`, `p`.`title` AS `title`, `p`.`description` AS `description`, `p`.`dates` AS `dates`, `p`.`time` AS `time`, `p`.`start_date` AS `start_date`, `p`.`end_date` AS `end_date`, `p`.`location` AS `location`, `p`.`age_range` AS `age_range`, `p`.`lunch_included` AS `lunch_included`, `p`.`program_goals` AS `program_goals`, `p`.`registration_deadline` AS `registration_deadline`, `p`.`max_participants` AS `max_participants`, `p`.`registration_open` AS `registration_open`, `p`.`status` AS `status`, `p`.`created_at` AS `created_at`, `p`.`updated_at` AS `updated_at`, (case when ((`p`.`status` = 'completed') or (`p`.`end_date` < curdate())) then 'Completed' when (`p`.`status` = 'cancelled') then 'Cancelled' when (`p`.`status` = 'draft') then 'Draft' when ((`p`.`registration_open` = 1) and (`p`.`status` in ('open','closing_soon'))) then 'Registration Open' when ((`p`.`registration_open` = 0) or (`p`.`status` = 'closed')) then 'Registration Closed' when (`p`.`start_date` > curdate()) then 'Upcoming' when (curdate() between `p`.`start_date` and `p`.`end_date`) then 'In Progress' else 'Unknown' end) AS `display_status`, (select count(0) from `holiday_program_attendees` where (`holiday_program_attendees`.`program_id` = `p`.`id`)) AS `total_registrations`, (select count(0) from `holiday_program_attendees` where ((`holiday_program_attendees`.`program_id` = `p`.`id`) and (`holiday_program_attendees`.`mentor_registration` = 0))) AS `member_registrations`, (select count(0) from `holiday_program_attendees` where ((`holiday_program_attendees`.`program_id` = `p`.`id`) and (`holiday_program_attendees`.`mentor_registration` = 1))) AS `mentor_registrations`, (select count(0) from `holiday_program_workshops` where (`holiday_program_workshops`.`program_id` = `p`.`id`)) AS `workshop_count` FROM `holiday_programs` AS `p` ;
 
 -- --------------------------------------------------------
 
@@ -1794,7 +1921,7 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
 --
 DROP TABLE IF EXISTS `holiday_program_dashboard_stats`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `holiday_program_dashboard_stats`  AS SELECT `p`.`id` AS `program_id`, `p`.`term` AS `term`, `p`.`title` AS `title`, `p`.`registration_open` AS `registration_open`, `p`.`max_participants` AS `max_participants`, `p`.`auto_close_on_capacity` AS `auto_close_on_capacity`, `p`.`auto_close_on_date` AS `auto_close_on_date`, `p`.`registration_deadline` AS `registration_deadline`, `p`.`created_at` AS `created_at`, `p`.`updated_at` AS `updated_at`, count(`a`.`id`) AS `total_registrations`, count(case when `a`.`status` = 'confirmed' then 1 end) AS `confirmed_registrations`, count(case when `a`.`status` = 'pending' then 1 end) AS `pending_registrations`, count(case when `a`.`mentor_registration` = 1 then 1 end) AS `mentor_applications`, count(case when `a`.`mentor_registration` = 0 then 1 end) AS `member_registrations`, CASE WHEN `p`.`max_participants` > 0 THEN round(count(case when `a`.`status` = 'confirmed' then 1 end) / `p`.`max_participants` * 100,1) ELSE 0 END AS `capacity_percentage`, CASE WHEN count(case when `a`.`status` = 'confirmed' then 1 end) >= `p`.`max_participants` THEN 'full' WHEN count(case when `a`.`status` = 'confirmed' then 1 end) >= `p`.`max_participants` * 0.9 THEN 'nearly_full' WHEN count(case when `a`.`status` = 'confirmed' then 1 end) >= `p`.`max_participants` * 0.75 THEN 'filling_up' ELSE 'available' END AS `capacity_status` FROM (`holiday_programs` `p` left join `holiday_program_attendees` `a` on(`p`.`id` = `a`.`program_id`)) GROUP BY `p`.`id`, `p`.`term`, `p`.`title`, `p`.`registration_open`, `p`.`max_participants`, `p`.`auto_close_on_capacity`, `p`.`auto_close_on_date`, `p`.`registration_deadline`, `p`.`created_at`, `p`.`updated_at` ;
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `holiday_program_dashboard_stats`  AS SELECT `p`.`id` AS `program_id`, `p`.`term` AS `term`, `p`.`title` AS `title`, `p`.`registration_open` AS `registration_open`, `p`.`max_participants` AS `max_participants`, `p`.`auto_close_on_capacity` AS `auto_close_on_capacity`, `p`.`auto_close_on_date` AS `auto_close_on_date`, `p`.`registration_deadline` AS `registration_deadline`, `p`.`created_at` AS `created_at`, `p`.`updated_at` AS `updated_at`, count(`a`.`id`) AS `total_registrations`, count((case when (`a`.`status` = 'confirmed') then 1 end)) AS `confirmed_registrations`, count((case when (`a`.`status` = 'pending') then 1 end)) AS `pending_registrations`, count((case when (`a`.`mentor_registration` = 1) then 1 end)) AS `mentor_applications`, count((case when (`a`.`mentor_registration` = 0) then 1 end)) AS `member_registrations`, (case when (`p`.`max_participants` > 0) then round(((count((case when (`a`.`status` = 'confirmed') then 1 end)) / `p`.`max_participants`) * 100),1) else 0 end) AS `capacity_percentage`, (case when (count((case when (`a`.`status` = 'confirmed') then 1 end)) >= `p`.`max_participants`) then 'full' when (count((case when (`a`.`status` = 'confirmed') then 1 end)) >= (`p`.`max_participants` * 0.9)) then 'nearly_full' when (count((case when (`a`.`status` = 'confirmed') then 1 end)) >= (`p`.`max_participants` * 0.75)) then 'filling_up' else 'available' end) AS `capacity_status` FROM (`holiday_programs` `p` left join `holiday_program_attendees` `a` on((`p`.`id` = `a`.`program_id`))) GROUP BY `p`.`id`, `p`.`term`, `p`.`title`, `p`.`registration_open`, `p`.`max_participants`, `p`.`auto_close_on_capacity`, `p`.`auto_close_on_date`, `p`.`registration_deadline`, `p`.`created_at`, `p`.`updated_at` ;
 
 -- --------------------------------------------------------
 
@@ -1803,7 +1930,25 @@ CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW 
 --
 DROP TABLE IF EXISTS `holiday_program_stats`;
 
-CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `holiday_program_stats`  AS SELECT `p`.`id` AS `id`, `p`.`term` AS `term`, `p`.`title` AS `title`, `p`.`dates` AS `dates`, `p`.`registration_open` AS `registration_open`, `p`.`status` AS `status`, `p`.`max_participants` AS `max_participants`, count(distinct `a`.`id`) AS `total_registrations`, count(distinct case when `a`.`mentor_registration` = 0 then `a`.`id` end) AS `member_count`, count(distinct case when `a`.`mentor_registration` = 1 then `a`.`id` end) AS `mentor_count`, count(distinct case when `a`.`registration_status` = 'confirmed' then `a`.`id` end) AS `confirmed_count`, count(distinct case when `a`.`registration_status` = 'pending' then `a`.`id` end) AS `pending_count`, count(distinct `w`.`id`) AS `workshop_count`, round(count(distinct `a`.`id`) / `p`.`max_participants` * 100,1) AS `capacity_percentage` FROM ((`holiday_programs` `p` left join `holiday_program_attendees` `a` on(`p`.`id` = `a`.`program_id`)) left join `holiday_program_workshops` `w` on(`p`.`id` = `w`.`program_id`)) ;
+CREATE ALGORITHM=UNDEFINED DEFINER=`root`@`localhost` SQL SECURITY DEFINER VIEW `holiday_program_stats`  AS SELECT `p`.`id` AS `id`, `p`.`term` AS `term`, `p`.`title` AS `title`, `p`.`dates` AS `dates`, `p`.`registration_open` AS `registration_open`, `p`.`status` AS `status`, `p`.`max_participants` AS `max_participants`, count(distinct `a`.`id`) AS `total_registrations`, count(distinct (case when (`a`.`mentor_registration` = 0) then `a`.`id` end)) AS `member_count`, count(distinct (case when (`a`.`mentor_registration` = 1) then `a`.`id` end)) AS `mentor_count`, count(distinct (case when (`a`.`registration_status` = 'confirmed') then `a`.`id` end)) AS `confirmed_count`, count(distinct (case when (`a`.`registration_status` = 'pending') then `a`.`id` end)) AS `pending_count`, count(distinct `w`.`id`) AS `workshop_count`, round(((count(distinct `a`.`id`) / `p`.`max_participants`) * 100),1) AS `capacity_percentage` FROM ((`holiday_programs` `p` left join `holiday_program_attendees` `a` on((`p`.`id` = `a`.`program_id`))) left join `holiday_program_workshops` `w` on((`p`.`id` = `w`.`program_id`))) ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `program_structure_view`
+--
+DROP TABLE IF EXISTS `program_structure_view`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`vuksDev`@`localhost` SQL SECURITY DEFINER VIEW `program_structure_view`  AS SELECT `p`.`id` AS `id`, `p`.`title` AS `title`, `p`.`start_date` AS `start_date`, `p`.`end_date` AS `end_date`, json_extract(`p`.`program_structure`,'$.duration_weeks') AS `duration_weeks`, json_extract(`p`.`program_structure`,'$.cohort_system') AS `has_cohorts`, json_extract(`p`.`program_structure`,'$.prerequisites_enabled') AS `has_prerequisites`, count(distinct `c`.`id`) AS `total_cohorts`, count(distinct `w`.`id`) AS `total_workshops`, count(distinct `a`.`id`) AS `total_attendees` FROM (((`holiday_programs` `p` left join `holiday_program_cohorts` `c` on((`p`.`id` = `c`.`program_id`))) left join `holiday_program_workshops` `w` on((`p`.`id` = `w`.`program_id`))) left join `holiday_program_attendees` `a` on((`p`.`id` = `a`.`program_id`))) GROUP BY `p`.`id` ;
+
+-- --------------------------------------------------------
+
+--
+-- Structure for view `workshop_capacity_view`
+--
+DROP TABLE IF EXISTS `workshop_capacity_view`;
+
+CREATE ALGORITHM=UNDEFINED DEFINER=`vuksDev`@`localhost` SQL SECURITY DEFINER VIEW `workshop_capacity_view`  AS SELECT `w`.`id` AS `workshop_id`, `w`.`title` AS `title`, `w`.`max_participants` AS `max_participants`, `w`.`prerequisites` AS `prerequisites`, `c`.`name` AS `cohort_name`, `c`.`id` AS `cohort_id`, count(distinct `a`.`id`) AS `enrolled_count`, (`w`.`max_participants` - count(distinct `a`.`id`)) AS `available_spots`, (case when (`w`.`max_participants` > 0) then round(((count(distinct `a`.`id`) / `w`.`max_participants`) * 100),1) else 0 end) AS `capacity_percentage` FROM ((`holiday_program_workshops` `w` left join `holiday_program_cohorts` `c` on((`w`.`cohort_id` = `c`.`id`))) left join `holiday_program_attendees` `a` on(((`w`.`program_id` = `a`.`program_id`) and json_contains(`a`.`workshop_preference`,cast(`w`.`id` as json))))) GROUP BY `w`.`id`, `c`.`id` ;
 
 --
 -- Indexes for dumped tables
@@ -1989,7 +2134,8 @@ ALTER TABLE `holiday_program_attendees`
   ADD KEY `idx_email` (`email`),
   ADD KEY `idx_created_at` (`created_at`),
   ADD KEY `idx_attendee_status` (`status`),
-  ADD KEY `idx_attendee_mentor` (`mentor_registration`);
+  ADD KEY `idx_attendee_mentor` (`mentor_registration`),
+  ADD KEY `idx_attendee_cohort` (`cohort_id`);
 
 --
 -- Indexes for table `holiday_program_audit_trail`
@@ -2000,6 +2146,13 @@ ALTER TABLE `holiday_program_audit_trail`
   ADD KEY `idx_user_audit` (`user_id`),
   ADD KEY `idx_action_audit` (`action`),
   ADD KEY `idx_created_audit` (`created_at`);
+
+--
+-- Indexes for table `holiday_program_cohorts`
+--
+ALTER TABLE `holiday_program_cohorts`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_program_dates` (`program_id`,`start_date`,`end_date`);
 
 --
 -- Indexes for table `holiday_program_criteria`
@@ -2037,6 +2190,22 @@ ALTER TABLE `holiday_program_notifications`
   ADD PRIMARY KEY (`id`),
   ADD UNIQUE KEY `unique_program_notification` (`program_id`,`notification_type`),
   ADD KEY `idx_program_notification` (`program_id`,`notification_type`);
+
+--
+-- Indexes for table `holiday_program_offerings`
+--
+ALTER TABLE `holiday_program_offerings`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `unique_offering` (`workshop_id`,`cohort_id`,`offering_date`),
+  ADD KEY `idx_program_schedule` (`program_id`,`offering_date`),
+  ADD KEY `fk_offerings_cohort` (`cohort_id`);
+
+--
+-- Indexes for table `holiday_program_prerequisites`
+--
+ALTER TABLE `holiday_program_prerequisites`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `idx_workshop_prereqs` (`workshop_id`,`prerequisite_type`);
 
 --
 -- Indexes for table `holiday_program_projects`
@@ -2092,7 +2261,8 @@ ALTER TABLE `holiday_program_workshops`
   ADD PRIMARY KEY (`id`),
   ADD KEY `program_id` (`program_id`),
   ADD KEY `idx_program_id` (`program_id`),
-  ADD KEY `idx_instructor` (`instructor`);
+  ADD KEY `idx_instructor` (`instructor`),
+  ADD KEY `idx_workshop_cohort` (`cohort_id`);
 
 --
 -- Indexes for table `holiday_report_images`
@@ -2254,319 +2424,337 @@ ALTER TABLE `visits`
 -- AUTO_INCREMENT for table `activity_submissions`
 --
 ALTER TABLE `activity_submissions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `assessment_attempts`
 --
 ALTER TABLE `assessment_attempts`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `attendance`
 --
 ALTER TABLE `attendance`
-  MODIFY `id` int(11) UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=52;
+  MODIFY `id` int UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=52;
 
 --
 -- AUTO_INCREMENT for table `clubhouse_programs`
 --
 ALTER TABLE `clubhouse_programs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `clubhouse_reports`
 --
 ALTER TABLE `clubhouse_reports`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
 
 --
 -- AUTO_INCREMENT for table `courses`
 --
 ALTER TABLE `courses`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=14;
 
 --
 -- AUTO_INCREMENT for table `course_activities`
 --
 ALTER TABLE `course_activities`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `course_assessments`
 --
 ALTER TABLE `course_assessments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `course_categories`
 --
 ALTER TABLE `course_categories`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `course_category_relationships`
 --
 ALTER TABLE `course_category_relationships`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `course_certificates`
 --
 ALTER TABLE `course_certificates`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `course_lessons`
 --
 ALTER TABLE `course_lessons`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `course_modules`
 --
 ALTER TABLE `course_modules`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `course_prerequisites`
 --
 ALTER TABLE `course_prerequisites`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `course_quizzes`
 --
 ALTER TABLE `course_quizzes`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `course_ratings`
 --
 ALTER TABLE `course_ratings`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `course_sections`
 --
 ALTER TABLE `course_sections`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `dell_surveys`
 --
 ALTER TABLE `dell_surveys`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `holiday_programs`
 --
 ALTER TABLE `holiday_programs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `holiday_program_attendance`
 --
 ALTER TABLE `holiday_program_attendance`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `holiday_program_attendees`
 --
 ALTER TABLE `holiday_program_attendees`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `holiday_program_audit_trail`
 --
 ALTER TABLE `holiday_program_audit_trail`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `holiday_program_cohorts`
+--
+ALTER TABLE `holiday_program_cohorts`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `holiday_program_criteria`
 --
 ALTER TABLE `holiday_program_criteria`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `holiday_program_faqs`
 --
 ALTER TABLE `holiday_program_faqs`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `holiday_program_items`
 --
 ALTER TABLE `holiday_program_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `holiday_program_mentor_details`
 --
 ALTER TABLE `holiday_program_mentor_details`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `holiday_program_notifications`
 --
 ALTER TABLE `holiday_program_notifications`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `holiday_program_offerings`
+--
+ALTER TABLE `holiday_program_offerings`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `holiday_program_prerequisites`
+--
+ALTER TABLE `holiday_program_prerequisites`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `holiday_program_projects`
 --
 ALTER TABLE `holiday_program_projects`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `holiday_program_reports`
 --
 ALTER TABLE `holiday_program_reports`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `holiday_program_requirements`
 --
 ALTER TABLE `holiday_program_requirements`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `holiday_program_schedules`
 --
 ALTER TABLE `holiday_program_schedules`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=16;
 
 --
 -- AUTO_INCREMENT for table `holiday_program_schedule_items`
 --
 ALTER TABLE `holiday_program_schedule_items`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=23;
 
 --
 -- AUTO_INCREMENT for table `holiday_program_status_log`
 --
 ALTER TABLE `holiday_program_status_log`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `holiday_program_workshops`
 --
 ALTER TABLE `holiday_program_workshops`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
 
 --
 -- AUTO_INCREMENT for table `holiday_report_images`
 --
 ALTER TABLE `holiday_report_images`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `holiday_workshop_enrollment`
 --
 ALTER TABLE `holiday_workshop_enrollment`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `lesson_progress`
 --
 ALTER TABLE `lesson_progress`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `lesson_sections`
 --
 ALTER TABLE `lesson_sections`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `monthly_reports`
 --
 ALTER TABLE `monthly_reports`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `monthly_report_activities`
 --
 ALTER TABLE `monthly_report_activities`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
 
 --
 -- AUTO_INCREMENT for table `monthly_report_images`
 --
 ALTER TABLE `monthly_report_images`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=7;
 
 --
 -- AUTO_INCREMENT for table `quiz_answers`
 --
 ALTER TABLE `quiz_answers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `quiz_attempts`
 --
 ALTER TABLE `quiz_attempts`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `quiz_questions`
 --
 ALTER TABLE `quiz_questions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `skill_activities`
 --
 ALTER TABLE `skill_activities`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `skill_activity_completions`
 --
 ALTER TABLE `skill_activity_completions`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `skill_activity_steps`
 --
 ALTER TABLE `skill_activity_steps`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int(100) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=17;
 
 --
 -- AUTO_INCREMENT for table `user_enrollments`
 --
 ALTER TABLE `user_enrollments`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `user_progress`
 --
 ALTER TABLE `user_progress`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `user_question_answers`
 --
 ALTER TABLE `user_question_answers`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `visitors`
 --
 ALTER TABLE `visitors`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- AUTO_INCREMENT for table `visits`
 --
 ALTER TABLE `visits`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
 
 --
 -- Constraints for dumped tables
@@ -2695,6 +2883,7 @@ ALTER TABLE `holiday_program_attendance`
 ALTER TABLE `holiday_program_attendees`
   ADD CONSTRAINT `attendee_program_fk` FOREIGN KEY (`program_id`) REFERENCES `holiday_programs` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `attendee_user_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_attendees_cohort` FOREIGN KEY (`cohort_id`) REFERENCES `holiday_program_cohorts` (`id`) ON DELETE SET NULL,
   ADD CONSTRAINT `fk_mentor_workshop` FOREIGN KEY (`mentor_workshop_preference`) REFERENCES `holiday_program_workshops` (`id`) ON DELETE SET NULL;
 
 --
@@ -2703,6 +2892,12 @@ ALTER TABLE `holiday_program_attendees`
 ALTER TABLE `holiday_program_audit_trail`
   ADD CONSTRAINT `audit_program_fk` FOREIGN KEY (`program_id`) REFERENCES `holiday_programs` (`id`) ON DELETE CASCADE,
   ADD CONSTRAINT `audit_user_fk` FOREIGN KEY (`user_id`) REFERENCES `users` (`id`) ON DELETE SET NULL;
+
+--
+-- Constraints for table `holiday_program_cohorts`
+--
+ALTER TABLE `holiday_program_cohorts`
+  ADD CONSTRAINT `fk_cohorts_program` FOREIGN KEY (`program_id`) REFERENCES `holiday_programs` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `holiday_program_criteria`
@@ -2734,6 +2929,20 @@ ALTER TABLE `holiday_program_mentor_details`
 --
 ALTER TABLE `holiday_program_notifications`
   ADD CONSTRAINT `notification_program_fk` FOREIGN KEY (`program_id`) REFERENCES `holiday_programs` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `holiday_program_offerings`
+--
+ALTER TABLE `holiday_program_offerings`
+  ADD CONSTRAINT `fk_offerings_cohort` FOREIGN KEY (`cohort_id`) REFERENCES `holiday_program_cohorts` (`id`) ON DELETE SET NULL,
+  ADD CONSTRAINT `fk_offerings_program` FOREIGN KEY (`program_id`) REFERENCES `holiday_programs` (`id`) ON DELETE CASCADE,
+  ADD CONSTRAINT `fk_offerings_workshop` FOREIGN KEY (`workshop_id`) REFERENCES `holiday_program_workshops` (`id`) ON DELETE CASCADE;
+
+--
+-- Constraints for table `holiday_program_prerequisites`
+--
+ALTER TABLE `holiday_program_prerequisites`
+  ADD CONSTRAINT `fk_prerequisites_workshop` FOREIGN KEY (`workshop_id`) REFERENCES `holiday_program_workshops` (`id`) ON DELETE CASCADE;
 
 --
 -- Constraints for table `holiday_program_projects`
@@ -2779,6 +2988,7 @@ ALTER TABLE `holiday_program_status_log`
 -- Constraints for table `holiday_program_workshops`
 --
 ALTER TABLE `holiday_program_workshops`
+  ADD CONSTRAINT `fk_workshops_cohort` FOREIGN KEY (`cohort_id`) REFERENCES `holiday_program_cohorts` (`id`) ON DELETE SET NULL,
   ADD CONSTRAINT `workshop_program_fk` FOREIGN KEY (`program_id`) REFERENCES `holiday_programs` (`id`) ON DELETE CASCADE;
 
 --

@@ -485,7 +485,7 @@ if (isset($_SESSION['loggedin']) && $_SESSION['loggedin']) {
                 </div>
                 <?php endif; ?>
 
-                <!-- Registration capcity card -->
+                <!-- Registration capacity card -->
                 <div class="sidebar-card capacity-card">
                 <h3>Registration Status</h3>
                 <div class="card-content">

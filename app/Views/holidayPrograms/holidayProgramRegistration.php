@@ -1,15 +1,153 @@
 <?php
 session_start();
-// Handle different user paths from URL parameters
-$isNewUser = !isset($_GET['member']) && !isset($_GET['mentor']);
-$isExistingMember = isset($_GET['member']) && $_GET['member'] == 1;
-$isMentorApplication = isset($_GET['mentor']) && $_GET['mentor'] == 1;
+require_once '../../../server.php';
+require_once '../../Models/holiday-program-functions.php';
 
-// Set default mentor registration based on URL parameter
-$defaultMentorRegistration = $isMentorApplication ? 1 : 0;
+if (isset($_GET['debug'])) include_once 'debug_registration.php';
 
-require_once '../../../server.php'; // Database connection
-include '../../Models/holiday-program-functions.php';// Include shared functions file
+// Function to get program configuration and structure
+function getProgramConfiguration($conn, $programId) {
+    $sql = "SELECT 
+                p.*,
+                JSON_EXTRACT(p.program_structure, '$.duration_weeks') as duration_weeks,
+                JSON_EXTRACT(p.program_structure, '$.cohort_system') as has_cohorts,
+                JSON_EXTRACT(p.program_structure, '$.prerequisites_enabled') as has_prerequisites
+            FROM holiday_programs p 
+            WHERE p.id = ?";
+    
+    $stmt = $conn->prepare($sql);
+    if (!$stmt) {
+        error_log("Failed to prepare statement: " . $conn->error);
+        return null;
+    }
+    
+    $stmt->bind_param("i", $programId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    return $result->fetch_assoc();
+}
+
+// Function to get available cohorts for program
+function getAvailableCohorts($conn, $programId) {
+    $sql = "SELECT 
+                c.*,
+                (c.max_participants - c.current_participants) as available_spots
+            FROM holiday_program_cohorts c
+            WHERE c.program_id = ? 
+            AND c.status = 'active'
+            AND c.start_date > CURDATE()
+            ORDER BY c.start_date";
+    
+    $stmt = $conn->prepare($sql);
+    if (!$stmt) {
+        error_log("Failed to prepare statement: " . $conn->error);
+        return [];
+    }
+    
+    $stmt->bind_param("i", $programId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    $cohorts = [];
+    while ($row = $result->fetch_assoc()) {
+        $cohorts[] = $row;
+    }
+    return $cohorts;
+}
+
+// Function to get workshops with prerequisites and cohort information
+function getWorkshopsWithPrerequisites($conn, $programId) {
+    $sql = "SELECT 
+                w.*,
+                c.name as cohort_name,
+                c.start_date as cohort_start_date,
+                c.end_date as cohort_end_date,
+                GROUP_CONCAT(DISTINCT pr.description SEPARATOR '; ') as prerequisite_descriptions
+            FROM holiday_program_workshops w
+            LEFT JOIN holiday_program_cohorts c ON w.cohort_id = c.id
+            LEFT JOIN holiday_program_prerequisites pr ON w.id = pr.workshop_id AND pr.is_mandatory = TRUE
+            WHERE w.program_id = ?
+            GROUP BY w.id
+            ORDER BY w.title";
+    
+    $stmt = $conn->prepare($sql);
+    if (!$stmt) {
+        error_log("Failed to prepare statement: " . $conn->error);
+        return [];
+    }
+    
+    $stmt->bind_param("i", $programId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    $workshops = [];
+    while ($row = $result->fetch_assoc()) {
+        $workshops[] = $row;
+    }
+    return $workshops;
+}
+
+// Function to get workshop enrollment counts
+function getWorkshopEnrollmentCounts($conn, $programId) {
+    $counts = [];
+    
+    $sql = "SELECT 
+                w.id,
+                w.title,
+                w.max_participants,
+                COUNT(DISTINCT CASE 
+                    WHEN JSON_CONTAINS(a.workshop_preference, CAST(w.id AS JSON)) 
+                    AND a.status NOT IN ('cancelled', 'declined')
+                    THEN a.id 
+                END) as enrolled_count
+            FROM holiday_program_workshops w
+            LEFT JOIN holiday_program_attendees a ON w.program_id = a.program_id
+            WHERE w.program_id = ?
+            GROUP BY w.id";
+    
+    $stmt = $conn->prepare($sql);
+    if (!$stmt) {
+        error_log("Failed to prepare statement: " . $conn->error);
+        return [];
+    }
+    
+    $stmt->bind_param("i", $programId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    while ($row = $result->fetch_assoc()) {
+        $counts[$row['id']] = [
+            'title' => $row['title'],
+            'max' => $row['max_participants'],
+            'enrolled' => $row['enrolled_count']
+        ];
+    }
+    
+    return $counts;
+}
+
+// Function to sanitize input
+function sanitizeInput($input) {
+    return htmlspecialchars(trim($input), ENT_QUOTES, 'UTF-8');
+}
+
+// Function to validate email
+function isValidEmail($email) {
+    return filter_var($email, FILTER_VALIDATE_EMAIL);
+}
+
+// Function to validate phone number
+function isValidPhone($phone) {
+    return preg_match('/^[\d\s\-\+\(\)]{10,15}$/', $phone);
+}
+
+// Get program ID from URL
+$programId = isset($_GET['program_id']) ? intval($_GET['program_id']) : 1;
+
+// Check for mentor registration parameter
+$defaultMentorRegistration = isset($_GET['mentor']) && $_GET['mentor'] == '1';
+
 // Initialize variables
 $formSubmitted = false;
 $registrationSuccess = false;
@@ -17,19 +155,23 @@ $errorMessage = '';
 $userExists = false;
 $userData = [];
 
-// Initialize variables with default values
-$isMemberFull = false;
-$isMentorFull = false;
-$isEditing = isset($_GET['edit']) && $_GET['edit'] == 1;
-$isExistingMentor = false;
-
-// Process email check
+// Process email check FIRST (before other processing)
 if (isset($_POST['check_email'])) {
-    $email = $_POST['email'];
+    $email = filter_var($_POST['email'], FILTER_SANITIZE_EMAIL);
     
-    // Check if user exists in the database
+    if (!isValidEmail($email)) {
+        echo json_encode(['exists' => false, 'error' => 'Invalid email format']);
+        exit;
+    }
+    
+    // Check if user exists in the users table
     $sql = "SELECT * FROM users WHERE email = ?";
     $stmt = $conn->prepare($sql);
+    if (!$stmt) {
+        echo json_encode(['exists' => false, 'error' => 'Database error']);
+        exit;
+    }
+    
     $stmt->bind_param("s", $email);
     $stmt->execute();
     $result = $stmt->get_result();
@@ -37,7 +179,6 @@ if (isset($_POST['check_email'])) {
     if ($result->num_rows > 0) {
         $userExists = true;
         $userData = $result->fetch_assoc();
-        // Return JSON response for AJAX
         echo json_encode([
             'exists' => true,
             'data' => $userData
@@ -47,6 +188,11 @@ if (isset($_POST['check_email'])) {
         // Check if the email exists in holiday_program_attendees table
         $sql = "SELECT * FROM holiday_program_attendees WHERE email = ?";
         $stmt = $conn->prepare($sql);
+        if (!$stmt) {
+            echo json_encode(['exists' => false, 'error' => 'Database error']);
+            exit;
+        }
+        
         $stmt->bind_param("s", $email);
         $stmt->execute();
         $result = $stmt->get_result();
@@ -65,431 +211,321 @@ if (isset($_POST['check_email'])) {
     }
 }
 
-// Process form submission
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['submit_registration'])) {
+// Get program configuration
+$programConfig = getProgramConfiguration($conn, $programId);
+if (!$programConfig) {
+    die("Program not found or database error.");
+}
+
+$cohorts = getAvailableCohorts($conn, $programId);
+$workshops = getWorkshopsWithPrerequisites($conn, $programId);
+$workshopEnrollmentCounts = getWorkshopEnrollmentCounts($conn, $programId);
+
+// Default to basic workshops if none configured
+if (empty($workshops)) {
+    $workshops = [
+        [
+            'id' => 1, 
+            'title' => 'Graphic Design Basics', 
+            'description' => 'Learn the fundamentals of graphic design using industry tools.',
+            'prerequisites' => 'Basic computer skills, Age 13+',
+            'max_participants' => 15
+        ],
+        [
+            'id' => 2, 
+            'title' => 'Video Editing', 
+            'description' => 'Create and edit videos using professional techniques.',
+            'prerequisites' => 'Intermediate computer skills, Age 15+',
+            'max_participants' => 12
+        ],
+        [
+            'id' => 3, 
+            'title' => 'Animation Fundamentals', 
+            'description' => 'Explore the principles of animation and create your own animated shorts.',
+            'prerequisites' => 'Creative mindset, Age 12+',
+            'max_participants' => 10
+        ]
+    ];
+}
+
+// Get program details
+$sql = "SELECT * FROM holiday_programs WHERE id = ?";
+$stmt = $conn->prepare($sql);
+if (!$stmt) {
+    die("Database error: " . $conn->error);
+}
+
+$stmt->bind_param("i", $programId);
+$stmt->execute();
+$result = $stmt->get_result();
+$programDetails = $result->fetch_assoc();
+
+if (!$programDetails) {
+    die("Program not found.");
+}
+
+// Check if registration is open
+$registrationClosed = !$programDetails['registration_open'];
+
+// Process form submission for registration
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_registration'])) {
     $formSubmitted = true;
-
-
-
-    // Check program capacity
-    $programId = isset($_GET['program_id']) ? intval($_GET['program_id']) : 1;
-    $capacityStatus = checkProgramCapacity($conn, $programId);
     
-    // Check if registering as mentor
-    $isMentor = isset($_POST['mentor_registration']) && $_POST['mentor_registration'] == 1;
+    // Collect and sanitize form data
+    $firstName = sanitizeInput($_POST['first_name']);
+    $lastName = sanitizeInput($_POST['last_name']);
+    $email = filter_var($_POST['email'], FILTER_SANITIZE_EMAIL);
+    $phone = sanitizeInput($_POST['phone']);
+    $dob = $_POST['date_of_birth'];
+    $gender = sanitizeInput($_POST['gender']);
+    $address = sanitizeInput($_POST['address']);
+    $city = sanitizeInput($_POST['city']);
+    $province = sanitizeInput($_POST['province']);
+    $postalCode = sanitizeInput($_POST['postal_code']);
     
-    // Get program ID
-    $programId = isset($_GET['program_id']) ? intval($_GET['program_id']) : 1;
-
-    // Set capacity status
-    $isMemberFull = $capacityStatus['member_full'];
-    $isMentorFull = $capacityStatus['mentor_full'];
-
-    // If editing an existing registration, get the attendee ID
-    if ($isEditing && isset($_SESSION['id'])) {
-        $userId = $_SESSION['id'];
-        $email = $_SESSION['email'] ?? '';
+    // Validate required fields
+    if (empty($firstName) || empty($lastName) || empty($email) || empty($phone)) {
+        $errorMessage = "Please fill in all required fields.";
+        goto end_processing;
+    }
+    
+    if (!isValidEmail($email)) {
+        $errorMessage = "Please enter a valid email address.";
+        goto end_processing;
+    }
+    
+    if (!isValidPhone($phone)) {
+        $errorMessage = "Please enter a valid phone number.";
+        goto end_processing;
+    }
+    
+    // DUPLICATE REGISTRATION CHECK
+    $duplicateCheckSql = "SELECT id, first_name, last_name, email, status, registration_status 
+                         FROM holiday_program_attendees 
+                         WHERE (email = ? OR (first_name = ? AND last_name = ? AND phone = ?)) 
+                         AND program_id = ?
+                         AND status NOT IN ('cancelled', 'declined')";
+    
+    $duplicateStmt = $conn->prepare($duplicateCheckSql);
+    if (!$duplicateStmt) {
+        $errorMessage = "Database error occurred. Please try again.";
+        goto end_processing;
+    }
+    
+    $duplicateStmt->bind_param("ssssi", $email, $firstName, $lastName, $phone, $programId);
+    $duplicateStmt->execute();
+    $duplicateResult = $duplicateStmt->get_result();
+    
+    if ($duplicateResult->num_rows > 0) {
+        $existingRegistration = $duplicateResult->fetch_assoc();
+        $registrationSuccess = false;
         
-        $sql = "SELECT id, mentor_registration FROM holiday_program_attendees 
-                WHERE (user_id = ? OR email = ?) AND program_id = ?";
+        $existingStatus = $existingRegistration['status'] ?? $existingRegistration['registration_status'];
         
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("isi", $userId, $email, $programId);
+        switch($existingStatus) {
+            case 'pending':
+                $errorMessage = "You are already registered for this program. Your registration is currently pending approval.";
+                break;
+            case 'confirmed':
+                $errorMessage = "You are already registered and confirmed for this program.";
+                break;
+            case 'waitlisted':
+                $errorMessage = "You are already on the waitlist for this program.";
+                break;
+            case 'completed':
+                $errorMessage = "You have already completed this program.";
+                break;
+            default:
+                $errorMessage = "You are already registered for this program.";
+        }
+        
+        $errorMessage .= " If you need to update your information or have questions, please contact our support team.";
+        error_log("Duplicate registration attempt for program ID $programId: Email: $email, Name: $firstName $lastName");
+        goto end_processing;
+    }
+    
+    // Dashboard password handling
+    $dashboardPassword = null;
+    $createFullAccount = isset($_POST['create_full_account']) && $_POST['create_full_account'] == 1;
+    $isExistingMember = false;
+    $userIdFromMainTable = null;
+    
+    // Check if user exists in main users table
+    $sql = "SELECT id, password FROM users WHERE email = ?";
+    $stmt = $conn->prepare($sql);
+    if ($stmt) {
+        $stmt->bind_param("s", $email);
         $stmt->execute();
         $result = $stmt->get_result();
         
         if ($result->num_rows > 0) {
             $row = $result->fetch_assoc();
-            $attendeeId = $row['id'];
-            $existingAttendeeId = $row['id']; // Set both variable names to the same value
-            $isExistingMentor = $row['mentor_registration'] == 1;
+            $userIdFromMainTable = $row['id'];
+            $isExistingMember = !empty($row['password']);
         }
     }
     
-    // Check capacity if not editing
-    if (!$isEditing) {
-        $capacityStatus = checkProgramCapacity($conn, $programId);
-        
-        if ($isMentor && $capacityStatus['mentor_full']) {
-            $errorMessage = "We've reached full capacity for mentors. Please register as a member instead.";
-            // Don't process the form
-            $formSubmitted = false;
-        } elseif (!$isMentor && $capacityStatus['member_full']) {
-            $errorMessage = "We've reached full capacity for members. Please try applying as a mentor if you're qualified.";
-            // Don't process the form
-            $formSubmitted = false;
+    // Handle password creation for non-members
+    if (!$isExistingMember) {
+        if (isset($_POST['dashboard_password']) && !empty($_POST['dashboard_password'])) {
+            $password = $_POST['dashboard_password'];
+            $confirmPassword = $_POST['confirm_password'];
+            
+            if ($password !== $confirmPassword) {
+                $errorMessage = "Passwords do not match. Please try again.";
+                goto end_processing;
+            }
+            
+            if (strlen($password) < 8) {
+                $errorMessage = "Password must be at least 8 characters long.";
+                goto end_processing;
+            }
+            
+            $dashboardPassword = password_hash($password, PASSWORD_DEFAULT);
+            
+            // Create full account if requested and user doesn't exist
+            if ($createFullAccount && !$userIdFromMainTable) {
+                $insertUserSql = "INSERT INTO users (name, surname, email, phone, password, date_of_birth, gender, address, city, province, postal_code, created_at) 
+                                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())";
+                $userStmt = $conn->prepare($insertUserSql);
+                if ($userStmt) {
+                    $userStmt->bind_param("sssssssssss", $firstName, $lastName, $email, $phone, $dashboardPassword, $dob, $gender, $address, $city, $province, $postalCode);
+                    
+                    if ($userStmt->execute()) {
+                        $userIdFromMainTable = $conn->insert_id;
+                        error_log("Created full Clubhouse account for new user: Email: $email, User ID: $userIdFromMainTable");
+                    } else {
+                        error_log("Failed to create full Clubhouse account: " . $conn->error);
+                    }
+                }
+            }
+        } else {
+            $errorMessage = "Please create a password for dashboard access.";
+            goto end_processing;
         }
     }
+    
+    // School information
+    $school = sanitizeInput($_POST['school'] ?? '');
 
-
-
-    // Continue with form processing if no capacity issues
-    if ($formSubmitted) {
+    // FIXED: Grade field - handle as integer, not string
+    $grade = null;
+    if (isset($_POST['grade']) && !empty(trim($_POST['grade'])) && is_numeric($_POST['grade'])) {
+        $grade = intval($_POST['grade']);
+    }
     
-    // Get form data with sanitization
-    $firstName = htmlspecialchars(trim($_POST['first_name']));
-    $lastName = htmlspecialchars(trim($_POST['last_name']));
-    $email = filter_var(trim($_POST['email']), FILTER_SANITIZE_EMAIL);
-    $phone = htmlspecialchars(trim($_POST['phone']));
-    $dob = htmlspecialchars(trim($_POST['dob']));
-    $gender = htmlspecialchars(trim($_POST['gender']));
+    // Guardian information
+    $guardianName = sanitizeInput($_POST['guardian_name'] ?? '');
+    $guardianRelationship = sanitizeInput($_POST['guardian_relationship'] ?? '');
+    $guardianPhone = sanitizeInput($_POST['guardian_phone'] ?? '');
+    $guardianEmail = filter_var($_POST['guardian_email'] ?? '', FILTER_SANITIZE_EMAIL);
     
-    // School information - optional for mentors
-    $school = $isMentor ? null : (isset($_POST['school']) ? htmlspecialchars(trim($_POST['school'])) : '');
-    $grade = $isMentor ? null : (isset($_POST['grade']) ? intval($_POST['grade']) : 0);
+    // Emergency contact information
+    $emergencyContactName = sanitizeInput($_POST['emergency_contact_name'] ?? '');
+    $emergencyContactRelationship = sanitizeInput($_POST['emergency_contact_relationship'] ?? '');
+    $emergencyContactPhone = sanitizeInput($_POST['emergency_contact_phone'] ?? '');
     
-    // Address information
-    $address = htmlspecialchars(trim($_POST['address']));
-    $city = htmlspecialchars(trim($_POST['city']));
-    $province = htmlspecialchars(trim($_POST['province']));
-    $postalCode = htmlspecialchars(trim($_POST['postal_code']));
+    // Workshop preferences - ensure it's valid JSON
+    $workshopPreferences = $_POST['workshop_preferences'] ?? '[]';
+    if (!json_decode($workshopPreferences)) {
+        $workshopPreferences = '[]';
+    }
     
-    // Guardian information - optional for mentors
-    $guardianName = $isMentor ? null : (isset($_POST['guardian_name']) ? htmlspecialchars(trim($_POST['guardian_name'])) : '');
-    $guardianRelationship = $isMentor ? null : (isset($_POST['guardian_relationship']) ? htmlspecialchars(trim($_POST['guardian_relationship'])) : '');
-    $guardianPhone = $isMentor ? null : (isset($_POST['guardian_phone']) ? htmlspecialchars(trim($_POST['guardian_phone'])) : '');
-    $guardianEmail = $isMentor ? null : (isset($_POST['guardian_email']) ? filter_var(trim($_POST['guardian_email']), FILTER_SANITIZE_EMAIL) : '');
-    
-    // Emergency contact
-    $emergencyContactName = isset($_POST['emergency_contact_name']) ? htmlspecialchars(trim($_POST['emergency_contact_name'])) : '';
-    $emergencyContactRelationship = isset($_POST['emergency_contact_relationship']) ? htmlspecialchars(trim($_POST['emergency_contact_relationship'])) : '';
-    $emergencyContactPhone = isset($_POST['emergency_contact_phone']) ? htmlspecialchars(trim($_POST['emergency_contact_phone'])) : '';
-    
-    // Workshop preferences - only for students
-    $workshopPreference = $isMentor ? [] : (isset($_POST['workshop_preference']) ? $_POST['workshop_preference'] : []);
-    $workshopPreferenceJson = json_encode($workshopPreference);
-    
-    // Why interested - different handling for mentor vs student
-    $whyInterested = $isMentor ? (isset($_POST['mentor_experience']) ? htmlspecialchars(trim($_POST['mentor_experience'])) : '') : 
-                               (isset($_POST['why_interested']) ? htmlspecialchars(trim($_POST['why_interested'])) : '');
-    
-    // Experience level
-    $experienceLevel = $isMentor ? 'Advanced' : (isset($_POST['experience_level']) ? htmlspecialchars(trim($_POST['experience_level'])) : '');
-    
-    // Equipment needs
+    // Other information
+    $whyInterested = sanitizeInput($_POST['why_interested'] ?? '');
+    $experienceLevel = sanitizeInput($_POST['experience_level'] ?? '');
     $needsEquipment = isset($_POST['needs_equipment']) ? 1 : 0;
     
     // Medical information
-    $medicalConditions = isset($_POST['medical_conditions']) ? htmlspecialchars(trim($_POST['medical_conditions'])) : '';
-    $allergies = isset($_POST['allergies']) ? htmlspecialchars(trim($_POST['allergies'])) : '';
+    $medicalConditions = sanitizeInput($_POST['medical_conditions'] ?? '');
+    $allergies = sanitizeInput($_POST['allergies'] ?? '');
     
     // Permissions
     $photoPermission = isset($_POST['photo_permission']) ? 1 : 0;
     $dataPermission = isset($_POST['data_permission']) ? 1 : 0;
     
     // Additional information
-    $dietaryRestrictions = isset($_POST['dietary_restrictions']) ? htmlspecialchars(trim($_POST['dietary_restrictions'])) : '';
-    $additionalNotes = isset($_POST['additional_notes']) ? htmlspecialchars(trim($_POST['additional_notes'])) : '';
+    $dietaryRestrictions = sanitizeInput($_POST['dietary_restrictions'] ?? '');
+    $additionalNotes = sanitizeInput($_POST['additional_notes'] ?? '');
+    
+    // Check if registering as mentor
+    $isMentor = isset($_POST['mentor_registration']) && $_POST['mentor_registration'] == 1;
     
     // Mentor specific information
     $mentorRegistration = $isMentor ? 1 : 0;
     $mentorStatus = $isMentor ? 'Pending' : NULL;
-    $mentorExperience = $isMentor ? (isset($_POST['mentor_experience']) ? htmlspecialchars(trim($_POST['mentor_experience'])) : '') : NULL;
-    $mentorAvailability = $isMentor ? (isset($_POST['mentor_availability']) ? htmlspecialchars(trim($_POST['mentor_availability'])) : '') : NULL;
-    $mentorWorkshopPreference = $isMentor ? (isset($_POST['mentor_workshop_preference']) ? intval($_POST['mentor_workshop_preference']) : 0) : NULL;
+    $mentorExperience = $isMentor ? sanitizeInput($_POST['mentor_experience'] ?? '') : NULL;
+    $mentorAvailability = $isMentor ? sanitizeInput($_POST['mentor_availability'] ?? '') : NULL;
+    $mentorWorkshopPreference = $isMentor ? intval($_POST['mentor_workshop_preference'] ?? 0) : NULL;
     
-    // Check if user exists in the main users table
-    $userIdFromMainTable = null;
-    $sql = "SELECT id FROM users WHERE email = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("s", $email);
-    $stmt->execute();
-    $result = $stmt->get_result();
+    // Cohort selection
+    $cohortId = isset($_POST['cohort_id']) ? intval($_POST['cohort_id']) : NULL;
     
-    if ($result->num_rows > 0) {
-        $row = $result->fetch_assoc();
-        $userIdFromMainTable = $row['id'];
+    // Insert new registration
+    $sql = "INSERT INTO holiday_program_attendees (
+            program_id, user_id, first_name, last_name, email, phone, 
+            date_of_birth, gender, school, grade, address, city, province, 
+            postal_code, guardian_name, guardian_relationship, guardian_phone, 
+            guardian_email, emergency_contact_name, emergency_contact_relationship, 
+            emergency_contact_phone, workshop_preference, why_interested, 
+            experience_level, needs_equipment, medical_conditions, allergies, 
+            photo_permission, data_permission, dietary_restrictions, additional_notes,
+            mentor_registration, mentor_status, mentor_workshop_preference, password, cohort_id
+        ) VALUES (
+            ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
+        )";
+    
+    $params = [
+        $programId, $userIdFromMainTable, $firstName, $lastName, $email, $phone, 
+        $dob, $gender, $school, $grade, $address, $city, $province, 
+        $postalCode, $guardianName, $guardianRelationship, $guardianPhone, 
+        $guardianEmail, $emergencyContactName, $emergencyContactRelationship, 
+        $emergencyContactPhone, $workshopPreferences, $whyInterested, 
+        $experienceLevel, $needsEquipment, $medicalConditions, $allergies,
+        $photoPermission, $dataPermission, $dietaryRestrictions, 
+        $additionalNotes, $mentorRegistration, $mentorStatus, $mentorWorkshopPreference, $dashboardPassword, $cohortId
+    ];
+    
+    // Build type string
+    $types = str_repeat('s', count($params));
+$types[0] = 'i'; // programId is integer
+    if ($userIdFromMainTable !== null) {
+        $types[1] = 'i'; // user_id is integer
+    }
+    if ($cohortId !== null) {
+        $types[count($params)-1] = 'i'; // cohort_id is integer
     }
     
-    // Check if the user has already registered for this program
-    $sql = "SELECT id FROM holiday_program_attendees WHERE email = ? AND program_id = ?";
     $stmt = $conn->prepare($sql);
-    $stmt->bind_param("si", $email, $programId);
-    $stmt->execute();
-    $result = $stmt->get_result();
+    if ($stmt === false) {
+        $errorMessage = "Database error occurred. Please try again.";
+        error_log("Error preparing statement: " . $conn->error);
+        goto end_processing;
+    }
     
-    // For the UPDATE statement
-    if ($result->num_rows > 0) {
-        // Update existing registration
-        $row = $result->fetch_assoc();
-        $attendeeId = $row['id'];
+    $stmt->bind_param($types, ...$params);
+    
+    if ($stmt->execute()) {
+        $registrationSuccess = true;
+        $newRegistrationId = $conn->insert_id;
+        error_log("Successful registration for program ID $programId: Registration ID: $newRegistrationId, Email: $email, Name: $firstName $lastName");
         
-        $sql = "UPDATE holiday_program_attendees SET 
-                first_name = ?, last_name = ?, phone = ?, date_of_birth = ?, 
-                gender = ?, school = ?, grade = ?, address = ?, city = ?, 
-                province = ?, postal_code = ?, guardian_name = ?, 
-                guardian_relationship = ?, guardian_phone = ?, guardian_email = ?,
-                emergency_contact_name = ?, emergency_contact_relationship = ?, 
-                emergency_contact_phone = ?, workshop_preference = ?, 
-                why_interested = ?, experience_level = ?, needs_equipment = ?,
-                medical_conditions = ?, allergies = ?, photo_permission = ?,
-                data_permission = ?, dietary_restrictions = ?, additional_notes = ?, 
-                mentor_registration = ?, mentor_status = ?, mentor_workshop_preference = ?
-                WHERE id = ?";
-        
-        // Count the placeholders to verify
-        $placeholders_count = substr_count($sql, '?');
-        
-        // Define all parameters in an array (in the exact order they appear in the SQL)
-        $params = [
-            $firstName, $lastName, $phone, $dob, $gender, $school, $grade, 
-            $address, $city, $province, $postalCode, $guardianName, 
-            $guardianRelationship, $guardianPhone, $guardianEmail, 
-            $emergencyContactName, $emergencyContactRelationship, 
-            $emergencyContactPhone, $workshopPreferenceJson, $whyInterested, 
-            $experienceLevel, $needsEquipment, $medicalConditions, $allergies,
-            $photoPermission, $dataPermission, $dietaryRestrictions, 
-            $additionalNotes, $mentorRegistration, $mentorStatus, $mentorWorkshopPreference, 
-            $attendeeId
-        ];
-        
-        // Make sure we have the right number of parameters
-        if (count($params) !== $placeholders_count) {
-            die("Parameter count (" . count($params) . ") doesn't match placeholder count (" . $placeholders_count . ")");
-        }
-        
-        // Build type string dynamically based on parameter types
-        $types = '';
-        foreach ($params as $param) {
-            if (is_int($param) || is_bool($param)) {
-                $types .= 'i';
-            } elseif (is_float($param)) {
-                $types .= 'd';
-            } else {
-                $types .= 's'; // Default to string for everything else
+        // Insert mentor details if applicable
+        if ($mentorRegistration && !empty($mentorExperience)) {
+            $mentorSql = "INSERT INTO holiday_program_mentor_details (attendee_id, experience, availability, workshop_preference) VALUES (?, ?, ?, ?)";
+            $mentorStmt = $conn->prepare($mentorSql);
+            if ($mentorStmt) {
+                $mentorStmt->bind_param("issi", $newRegistrationId, $mentorExperience, $mentorAvailability, $mentorWorkshopPreference);
+                $mentorStmt->execute();
             }
         }
         
-        $stmt = $conn->prepare($sql);
-        if ($stmt === false) {
-            $errorMessage = "Error preparing statement: " . $conn->error;
-            error_log($errorMessage);
-        } else {
-            // Use the spread operator to bind all parameters
-            $stmt->bind_param($types, ...$params);
-            
-            if ($stmt->execute()) {
-                $registrationSuccess = true;
-            } else {
-                $errorMessage = "Error updating registration: " . $stmt->error;
-                error_log($errorMessage);
-            }
-        }
     } else {
-        // Insert new registration
-        $sql = "INSERT INTO holiday_program_attendees (
-                program_id, user_id, first_name, last_name, email, phone, 
-                date_of_birth, gender, school, grade, address, city, province, 
-                postal_code, guardian_name, guardian_relationship, guardian_phone, 
-                guardian_email, emergency_contact_name, emergency_contact_relationship, 
-                emergency_contact_phone, workshop_preference, why_interested, 
-                experience_level, needs_equipment, medical_conditions, allergies, 
-                photo_permission, data_permission, dietary_restrictions, additional_notes,
-                mentor_registration, mentor_status, mentor_workshop_preference
-            ) VALUES (
-                ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?
-            )";
-        
-        // Count the placeholders to verify
-        $placeholders_count = substr_count($sql, '?');
-        
-        // Define all parameters in an array (in the exact order they appear in the SQL)
-        $params = [
-            $programId, $userIdFromMainTable, $firstName, $lastName, $email, $phone, 
-            $dob, $gender, $school, $grade, $address, $city, $province, 
-            $postalCode, $guardianName, $guardianRelationship, $guardianPhone, 
-            $guardianEmail, $emergencyContactName, $emergencyContactRelationship, 
-            $emergencyContactPhone, $workshopPreferenceJson, $whyInterested, 
-            $experienceLevel, $needsEquipment, $medicalConditions, $allergies,
-            $photoPermission, $dataPermission, $dietaryRestrictions, $additionalNotes,
-            $mentorRegistration, $mentorStatus, $mentorWorkshopPreference
-        ];
-        
-        // Make sure we have the right number of parameters
-        if (count($params) !== $placeholders_count) {
-            die("Parameter count (" . count($params) . ") doesn't match placeholder count (" . $placeholders_count . ")");
-        }
-        
-        // Build type string dynamically based on parameter types
-        $types = '';
-        foreach ($params as $param) {
-            if (is_int($param) || is_bool($param)) {
-                $types .= 'i';
-            } elseif (is_float($param)) {
-                $types .= 'd';
-            } else {
-                $types .= 's'; // Default to string for everything else
-            }
-        }
-        
-        $stmt = $conn->prepare($sql);
-        if ($stmt === false) {
-            $errorMessage = "Error preparing statement: " . $conn->error;
-            error_log($errorMessage);
-        } else {
-            // Use the spread operator to bind all parameters
-            $stmt->bind_param($types, ...$params);
-            
-            if ($stmt->execute()) {
-                $registrationSuccess = true;
-                $attendeeId = $conn->insert_id;
-            } else {
-                $errorMessage = "Error creating registration: " . $stmt->error;
-                error_log($errorMessage);
-            }
-        }
-    }
-
-    // After successful insert or update to holiday_program_attendees
-    if ($registrationSuccess && $mentorRegistration) {
-        // Get the attendee ID (either from existing record or newly inserted)
-        $attendeeId = isset($attendeeId) ? $attendeeId : $conn->insert_id;
-        
-        // Check if mentor details already exist
-        $sql = "SELECT id FROM holiday_program_mentor_details WHERE attendee_id = ?";
-        $stmt = $conn->prepare($sql);
-        
-        if ($stmt) {
-            $stmt->bind_param("i", $attendeeId);
-            $stmt->execute();
-            $result = $stmt->get_result();
-            
-            if ($result->num_rows > 0) {
-                // Update existing mentor details
-                $row = $result->fetch_assoc();
-                $mentorDetailsId = $row['id'];
-                
-                $sql = "UPDATE holiday_program_mentor_details SET 
-                        experience = ?, availability = ?, workshop_preference = ? 
-                        WHERE id = ?";
-                $stmt = $conn->prepare($sql);
-                
-                if ($stmt) {
-                    $stmt->bind_param("ssii", $mentorExperience, $mentorAvailability, $mentorWorkshopPreference, $mentorDetailsId);
-                    $stmt->execute();
-                }
-            } else {
-                // Insert new mentor details
-                $sql = "INSERT INTO holiday_program_mentor_details 
-                        (attendee_id, experience, availability, workshop_preference) 
-                        VALUES (?, ?, ?, ?)";
-                $stmt = $conn->prepare($sql);
-                
-                if ($stmt) {
-                    $stmt->bind_param("issi", $attendeeId, $mentorExperience, $mentorAvailability, $mentorWorkshopPreference);
-                    $stmt->execute();
-                }
-            }
-        }
-    }
-}
-}
-
-// Get program details
-$programId = isset($_GET['program_id']) ? intval($_GET['program_id']) : 1;
-$programDetails = [];
-
-$sql = "SELECT * FROM holiday_programs WHERE id = ?";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $programId);
-$stmt->execute();
-$result = $stmt->get_result();
-
-if ($result->num_rows > 0) {
-    $programDetails = $result->fetch_assoc();
-} else {
-    // Default program details if not found
-    $programDetails = [
-        'id' => 1,
-        'term' => 'Term 1',
-        'title' => 'Multi-Media - Digital Design',
-        'dates' => 'March 29 - April 4, 2025',
-        'description' => 'Dive into the world of digital media creation, learning graphic design, video editing, and animation techniques.'
-    ];
-}
-
-$programId = isset($_GET['program_id']) ? intval($_GET['program_id']) : 1;
-
-
-// Function to get workshop enrollment counts
-function getWorkshopEnrollmentCounts($conn, $programId) {
-    $counts = [];
-    
-    // First get all workshops for this program
-    $sql = "SELECT id, title, max_participants 
-            FROM holiday_program_workshops
-            WHERE program_id = ?";
-    
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("i", $programId);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    
-    while ($row = $result->fetch_assoc()) {
-        $counts[$row['id']] = [
-            'title' => $row['title'],
-            'max' => $row['max_participants'],
-            'enrolled' => 0 // Default to 0, will update below
-        ];
+        $errorMessage = "Registration failed. Please try again.";
+        error_log("Error executing statement: " . $stmt->error);
     }
     
-    // Now get attendance preferences counts from holiday_program_attendees
-    $sqlPrefs = "SELECT workshop_preference
-                 FROM holiday_program_attendees 
-                 WHERE program_id = ? AND mentor_registration = 0";
-    
-    $stmtPrefs = $conn->prepare($sqlPrefs);
-    $stmtPrefs->bind_param("i", $programId);
-    $stmtPrefs->execute();
-    $resultPrefs = $stmtPrefs->get_result();
-    
-    while ($row = $resultPrefs->fetch_assoc()) {
-        if (empty($row['workshop_preference'])) {
-            continue;
-        }
-        
-        $preferences = json_decode($row['workshop_preference'], true);
-        
-        if (!is_array($preferences) || empty($preferences)) {
-            continue;
-        }
-        
-        // Get the first preference (highest priority)
-        $topPreference = is_array($preferences[0]) ? $preferences[0]['id'] : $preferences[0];
-        
-        // Increment the count if this workshop exists in our counts array
-        if (isset($counts[$topPreference])) {
-            $counts[$topPreference]['enrolled']++;
-        }
-    }
-    
-    return $counts;
-}
-
-// Get workshop enrollment counts
-$workshopEnrollmentCounts = getWorkshopEnrollmentCounts($conn, $programId);
-
-
-// Get workshop options for this program
-$workshops = [];
-$sql = "SELECT * FROM holiday_program_workshops WHERE program_id = ? ORDER BY title";
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("i", $programId);
-$stmt->execute();
-$result = $stmt->get_result();
-
-if ($result->num_rows > 0) {
-    while ($row = $result->fetch_assoc()) {
-        $workshops[] = $row;
-    }
-} else {
-    // Default workshops if none found
-    $workshops = [
-        ['id' => 1, 'title' => 'Graphic Design Basics', 'description' => 'Learn the fundamentals of graphic design using industry tools.'],
-        ['id' => 2, 'title' => 'Video Editing', 'description' => 'Create and edit videos using professional techniques.'],
-        ['id' => 3, 'title' => 'Animation Fundamentals', 'description' => 'Explore the principles of animation and create your own animated shorts.'],
-        ['id' => 4, 'title' => 'Digital Photography', 'description' => 'Master digital photography techniques and photo editing.']
-    ];
+    end_processing: // Label for goto statements
 }
 ?>
 
@@ -498,228 +534,614 @@ if ($result->num_rows > 0) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Holiday Program Registration - Sci-Bono Clubhouse</title>
-    <!-- <link rel="stylesheet" href="../../public/assets/css/holidayProgramStyles.css"> -->
+    <title>Register for <?php echo htmlspecialchars($programDetails['title']); ?> - Sci-Bono Clubhouse</title>
     <link rel="stylesheet" href="../../../public/assets/css/holidayProgramStyles.css">
-    <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <!-- jQuery for form functionality -->
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <style>
+        .program-structure-info {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 25px;
+            border-radius: 12px;
+            margin-bottom: 30px;
+        }
+        
+        .structure-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+            margin-top: 15px;
+        }
+        
+        .structure-item {
+            text-align: center;
+            padding: 15px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            backdrop-filter: blur(10px);
+        }
+        
+        .structure-item i {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            display: block;
+        }
+        
+        .cohort-selection {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border-left: 4px solid #28a745;
+        }
+        
+        .cohort-option {
+            display: flex;
+            align-items: center;
+            padding: 15px;
+            margin: 10px 0;
+            background: white;
+            border-radius: 8px;
+            border: 2px solid #e1e8ed;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .cohort-option:hover {
+            border-color: #6c63ff;
+            box-shadow: 0 2px 8px rgba(108, 99, 255, 0.1);
+        }
+        
+        .cohort-option.selected {
+            border-color: #6c63ff;
+            background: #f8f7ff;
+        }
+        
+        .cohort-option input[type="radio"] {
+            margin-right: 15px;
+            transform: scale(1.2);
+        }
+        
+        .cohort-details h4 {
+            margin: 0 0 5px 0;
+            color: #2c3e50;
+        }
+        
+        .cohort-details p {
+            margin: 0;
+            color: #666;
+            font-size: 0.9rem;
+        }
+        
+        .cohort-availability {
+            margin-left: auto;
+            text-align: right;
+        }
+        
+        .availability-good {
+            color: #28a745;
+        }
+        
+        .availability-limited {
+            color: #ffc107;
+        }
+        
+        .availability-full {
+            color: #dc3545;
+        }
+        
+        .workshop-card {
+            position: relative;
+            background: white;
+            border: 2px solid #e9ecef;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 15px 0;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .workshop-card:hover {
+            border-color: #6c63ff;
+            box-shadow: 0 4px 15px rgba(108, 99, 255, 0.1);
+        }
+        
+        .workshop-card.selected {
+            border-color: #6c63ff;
+            background: #f8f7ff;
+        }
+        
+        .workshop-card.first-choice {
+            border-color: #28a745;
+            background: #f8fff8;
+        }
+        
+        .workshop-card.second-choice {
+            border-color: #ffc107;
+            background: #fffbf0;
+        }
+        
+        .workshop-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        .selection-number {
+            background: #6c63ff;
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: 600;
+        }
+        
+        .workshop-card.first-choice .selection-number {
+            background: #28a745;
+        }
+        
+        .workshop-card.second-choice .selection-number {
+            background: #ffc107;
+            color: #000;
+        }
+        
+        .workshop-capacity {
+            margin-top: 15px;
+        }
+        
+        .capacity-info {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 5px;
+            font-size: 0.9rem;
+        }
+        
+        .capacity-bar {
+            height: 6px;
+            background: #e9ecef;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .capacity-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #28a745, #ffc107, #dc3545);
+            transition: width 0.3s;
+        }
+        
+        .prerequisites-info {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 6px;
+            padding: 10px;
+            margin-top: 10px;
+            font-size: 0.85rem;
+        }
+        
+        .prerequisites-info strong {
+            color: #856404;
+        }
+        
+        .workshop-card.disabled {
+            opacity: 0.6;
+            pointer-events: none;
+        }
+        
+        .disabled-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            font-weight: 600;
+            color: #dc3545;
+        }
+        
+        .cohort-info {
+            background: #e3f2fd;
+            padding: 10px;
+            border-radius: 6px;
+            margin-top: 10px;
+            font-size: 0.9rem;
+        }
+        
+        .cohort-info i {
+            color: #1976d2;
+            margin-right: 5px;
+        }
+        
+        .form-section {
+            background: white;
+            padding: 30px;
+            margin-bottom: 30px;
+            border-radius: 12px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .form-section h2 {
+            color: #495057;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #495057;
+        }
+        
+        .form-input, .form-select, .form-textarea {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: border-color 0.3s;
+            box-sizing: border-box;
+        }
+        
+        .form-input:focus, .form-select:focus, .form-textarea:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .required {
+            color: #dc3545;
+        }
+        
+        .checkbox-group {
+            display: flex;
+            align-items: flex-start;
+            gap: 10px;
+            margin: 15px 0;
+        }
+        
+        .checkbox-group input[type="checkbox"] {
+            margin-top: 3px;
+        }
+        
+        .primary-button, .secondary-button {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .primary-button {
+            background: #667eea;
+            color: white;
+        }
+        
+        .primary-button:hover {
+            background: #5a52d5;
+            transform: translateY(-1px);
+        }
+        
+        .secondary-button {
+            background: #6c757d;
+            color: white;
+        }
+        
+        .secondary-button:hover {
+            background: #5a6268;
+        }
+        
+        .help-text {
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+        
+        #mentor_fields {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            border-left: 4px solid #17a2b8;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .success {
+            background-color: #d4edda;
+            border: 1px solid #c3e6cb;
+            color: #155724;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        
+        #email-check-result {
+            margin-top: 10px;
+        }
+        
+        .success-message {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+            text-align: center;
+            padding: 40px;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+        
+        .success-content i {
+            font-size: 3rem;
+            margin-bottom: 20px;
+        }
+        
+        .alert {
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+        
+        .alert.error {
+            background: #f8d7da;
+            border: 1px solid #f5c6cb;
+            color: #721c24;
+        }
+        
+        .member-status-info {
+            background: #d4edda;
+            border: 1px solid #c3e6cb;
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .member-status-info i {
+            color: #28a745;
+            font-size: 1.5rem;
+        }
+        
+        .member-status-info p {
+            margin: 0;
+            color: #155724;
+        }
+        
+        .password-info {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 8px;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .password-info i {
+            color: #856404;
+            font-size: 1.5rem;
+        }
+        
+        .password-info p {
+            margin: 0;
+            color: #856404;
+        }
+        
+        .password-strength {
+            margin-top: 5px;
+            font-size: 0.85rem;
+        }
+        
+        .password-weak {
+            color: #dc3545;
+        }
+        
+        .password-medium {
+            color: #ffc107;
+        }
+        
+        .password-strong {
+            color: #28a745;
+        }
+        
+        .password-match-success {
+            color: #28a745;
+        }
+        
+        .password-match-error {
+            color: #dc3545;
+        }
+        
+        .form-actions {
+            text-align: center;
+            margin-top: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            
+            .structure-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .cohort-option {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .cohort-availability {
+                margin-left: 0;
+                margin-top: 10px;
+            }
+            
+            .workshop-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 10px;
+            }
+        }
+    </style>
 </head>
-
+<body>
     <?php include './holidayPrograms-header.php'; ?>
     
-    <main class="registration-container">
-        <div class="registration-header">
-            <h1>Registration: <?php echo htmlspecialchars($programDetails['title']); ?></h1>
-            <p class="program-dates"><i class="fas fa-calendar-alt"></i> <?php echo htmlspecialchars($programDetails['dates']); ?></p>
-            <p class="program-description"><?php echo htmlspecialchars($programDetails['description']); ?></p>
-        </div>
-
-        <!-- password creation section for successful registrations -->
-        <?php if ($registrationSuccess && !$formSubmitted): ?>
-        <div class="password-creation-section">
-            <h2><i class="fas fa-key"></i> Create Your Account Password</h2>
-            <p>To access your dashboard and manage your registration, please create a password for your account.</p>
-            
-            <form method="POST" action="holiday-create-password.php" class="password-form">
-                <input type="hidden" name="email" value="<?php echo htmlspecialchars($email); ?>">
-                <input type="hidden" name="attendee_id" value="<?php echo $attendeeId; ?>">
-                
-                <div class="form-row">
-                    <div class="form-group">
-                        <label for="password">Password <span class="required">*</span></label>
-                        <input type="password" id="password" name="password" class="form-input" required>
-                        <div class="help-text">Minimum 8 characters</div>
-                    </div>
-                    <div class="form-group">
-                        <label for="confirm_password">Confirm Password <span class="required">*</span></label>
-                        <input type="password" id="confirm_password" name="confirm_password" class="form-input" required>
-                    </div>
-                </div>
-                
-                <button type="submit" class="primary-button">Create Password & Access Dashboard</button>
-            </form>
-        </div>
-        <?php endif; ?>
-        
-        <?php if ($formSubmitted && $registrationSuccess): ?>
+    <div class="container">
+        <?php if ($registrationClosed): ?>
+            <div class="alert error">
+                <h2>Registration Closed</h2>
+                <p>Registration for this program is currently closed. Please check back later or contact us for more information.</p>
+            </div>
+        <?php elseif ($formSubmitted && $registrationSuccess): ?>
             <div class="success-message">
                 <div class="success-content">
                     <i class="fas fa-check-circle"></i>
-                    <?php if ($mentorRegistration): ?>
-                        <h2>Mentor Registration Submitted!</h2>
-                        <p>Thank you for registering as a mentor for the <?php echo htmlspecialchars($programDetails['title']); ?> holiday program. We've sent a confirmation email to <?php echo htmlspecialchars($email); ?>. Your application will be reviewed by our program coordinator.</p>
-                        <div class="next-steps">
-                            <h3>Next Steps:</h3>
-                            <ul>
-                                <li>Check your email for confirmation and additional information</li>
-                                <li>You will be notified about the status of your application within 5 business days</li>
-                                <li>If approved, you'll receive details about mentor training and workshop preparation</li>
-                            </ul>
-                        </div>
-                    <?php else: ?>
-                        <h2>Registration Successful!</h2>
-                        <p>Thank you for registering for the <?php echo htmlspecialchars($programDetails['title']); ?> holiday program. We've sent a confirmation email to <?php echo htmlspecialchars($email); ?> with all the details.</p>
-                        <div class="next-steps">
-                            <h3>Next Steps:</h3>
-                            <ul>
-                                <li>Check your email for confirmation and additional information</li>
-                                <li>Create a password to access your participant dashboard: <a href="holidayProgramLogin.php">Login Here</a></li>
-                                <li>Mark your calendar for <?php echo htmlspecialchars($programDetails['dates']); ?></li>
-                                <li>Prepare any materials or equipment mentioned in the email</li>
-                            </ul>
-                        </div>
-                    <?php endif; ?>
-                    <div class="action-buttons">
-                        <a href="holiday-dashboard.php" class="primary-button">Go to Dashboard</a>
-                        <a href="holidayProgramIndex.php" class="secondary-button">Back to Programs</a>
-                    </div>
+                    <h2>Registration Successful!</h2>
+                    <p>Thank you for registering for the <?php echo htmlspecialchars($programDetails['title']); ?> holiday program.</p>
+                    <p>You will receive a confirmation email shortly with further details.</p>
+                </div>
+            </div>
+        <?php elseif ($formSubmitted && !$registrationSuccess && !empty($errorMessage)): ?>
+            <div class="alert error">
+                <h2><i class="fas fa-exclamation-triangle"></i> Registration Not Completed</h2>
+                <p><?php echo htmlspecialchars($errorMessage); ?></p>
+                <div style="margin-top: 15px;">
+                    <p><strong>Need help?</strong></p>
+                    <ul style="margin: 10px 0; padding-left: 20px;">
+                        <li>Contact our support team for assistance</li>
+                        <li>Check your email for any previous registration confirmations</li>
+                        <li>If you need to update your information, please contact us directly</li>
+                    </ul>
                 </div>
             </div>
         <?php else: ?>
-
-        <!-- Capacity check messages -->
-        <?php if (($isMemberFull && $isMentorFull) && !$isEditing): ?>
-            <div class="capacity-message">
-                <div class="capacity-icon"><i class="fas fa-exclamation-circle"></i></div>
-                <h2>Registration Closed</h2>
-                <p>We've reached full capacity for both members and mentors for this program. Please check back for future programs or contact us for more information.</p>
-                <a href="holidayProgramIndex.php" class="primary-button">Browse Other Programs</a>
-            </div>
-        <?php elseif ($isMemberFull && !$isMentorFull && !$isEditing): ?>
-            <div class="capacity-message member-full">
-                <div class="capacity-icon"><i class="fas fa-exclamation-circle"></i></div>
-                <h2>Member Registration Closed</h2>
-                <p>We've reached full capacity for members for this program. However, we're still accepting mentor applications if you're interested in volunteering.</p>
-                <div class="capacity-actions">
-                    <button id="show-mentor-form" class="primary-button">Apply as Mentor</button>
-                    <a href="holidayProgramIndex.php" class="secondary-button">Browse Other Programs</a>
-                </div>
-            </div>
-        <?php elseif (!$isMemberFull && $isMentorFull && !$isEditing): ?>
-            <div class="capacity-message mentor-full">
-                <div class="capacity-icon"><i class="fas fa-exclamation-circle"></i></div>
-                <h2>Mentor Registration Closed</h2>
-                <p>We've reached full capacity for mentors for this program. However, you can still register as a participant.</p>
-            </div>
-        <?php endif; ?>
-        
-        <?php if (!empty($errorMessage)): ?>
-        <div class="error-message">
-            <p><i class="fas fa-exclamation-circle"></i> <?php echo $errorMessage; ?></p>
-        </div>
-        <?php endif; ?>
-        
-        <?php 
-        // Show registration form if:
-        // 1. User is editing their existing registration, OR
-        // 2. There's still capacity for at least one registration type (member or mentor)
-        if ($isEditing || !($isMemberFull && $isMentorFull)): 
-        ?>
-        <div class="registration-form-container">
-            <div class="email-check-container">
-                <h2>Already registered or a Clubhouse member?</h2>
-                <p>Enter your email to quickly fill out the form:</p>
-                <div class="email-check-form">
-                    <input type="email" id="check-email" placeholder="Enter your email address" class="form-input">
-                    <button id="check-email-btn" class="primary-button">Check Email</button>
-                </div>
-                <div id="email-check-result" class="hidden">
-                    <p class="success-text">Email found! Form will be pre-filled with your information.</p>
-                </div>
-            </div>
-
-            <div class="registration-path-info">
-                <div class="path-indicator">
-                    <?php if ($isMentorApplication): ?>
-                        <div class="path-badge mentor-path">
-                            <i class="fas fa-chalkboard-teacher"></i>
-                            <span>Mentor Application</span>
-                        </div>
-                        <p>You're applying to become a mentor for this holiday program. Mentors guide participants through workshops and help facilitate learning.</p>
-                    <?php elseif ($isExistingMember): ?>
-                        <div class="path-badge member-path">
-                            <i class="fas fa-users"></i>
-                            <span>Clubhouse Member Registration</span>
-                        </div>
-                        <p>As an existing Clubhouse member, some of your information may be pre-filled. Please review and update as needed.</p>
-                    <?php else: ?>
-                        <div class="path-badge new-user-path">
-                            <i class="fas fa-user-plus"></i>
-                            <span>New Participant Registration</span>
-                        </div>
-                        <p>Welcome to Sci-Bono Clubhouse! Please complete the registration form below to join this holiday program.</p>
+            <!-- Program Structure Information -->
+            <?php if ($programConfig): ?>
+            <div class="program-structure-info">
+                <h2><i class="fas fa-info-circle"></i> <?php echo htmlspecialchars($programConfig['title']); ?> Structure</h2>
+                <p><?php echo htmlspecialchars($programConfig['description'] ?? 'Comprehensive holiday program designed to enhance your skills.'); ?></p>
+                
+                <div class="structure-grid">
+                    <div class="structure-item">
+                        <i class="fas fa-clock"></i>
+                        <h4><?php echo $programConfig['duration_weeks'] ?? 2; ?> Week<?php echo ($programConfig['duration_weeks'] ?? 2) > 1 ? 's' : ''; ?></h4>
+                        <p>Program Duration</p>
+                    </div>
+                    
+                    <?php if ($programConfig['has_cohorts']): ?>
+                    <div class="structure-item">
+                        <i class="fas fa-users"></i>
+                        <h4><?php echo count($cohorts); ?> Cohort<?php echo count($cohorts) != 1 ? 's' : ''; ?></h4>
+                        <p>Available Groups</p>
+                    </div>
+                    <?php endif; ?>
+                    
+                    <div class="structure-item">
+                        <i class="fas fa-laptop-code"></i>
+                        <h4><?php echo count($workshops); ?> Workshop<?php echo count($workshops) != 1 ? 's' : ''; ?></h4>
+                        <p>Available Sessions</p>
+                    </div>
+                    
+                    <?php if ($programConfig['has_prerequisites']): ?>
+                    <div class="structure-item">
+                        <i class="fas fa-check-circle"></i>
+                        <h4>Prerequisites</h4>
+                        <p>Some workshops have requirements</p>
+                    </div>
                     <?php endif; ?>
                 </div>
             </div>
-
-            <form method="POST" action="" class="registration-form" id="registration-form" novalidate>
-
-            <!-- Update the mentor registration checkbox section -->
-            <div class="form-section">
-                <h2><i class="fas fa-chalkboard-teacher"></i> Registration Type</h2>
+            <?php endif; ?>
+            
+            <form id="registration-form" method="POST" action="">
+                <input type="hidden" name="program_id" value="<?php echo $programId; ?>">
                 
-                <?php if ($isMentorApplication): ?>
+                <!-- Email Check Section -->
+                <div class="form-section">
+                    <h2><i class="fas fa-search"></i> Check Existing Information</h2>
+                    <p>If you're already a Sci-Bono member, we can pre-fill your information.</p>
                     <div class="form-group">
-                        <div class="info-message">
-                            <i class="fas fa-info-circle"></i>
-                            <p>You are applying as a <strong>mentor</strong> for this program. Mentors must be 18+ years old and have relevant experience in the program area.</p>
-                        </div>
-                        <input type="hidden" name="mentor_registration" value="1">
-                    </div>
-                <?php else: ?>
-                    <div class="form-group">
-                        <div class="checkbox-group">
-                            <input type="checkbox" id="mentor_registration" name="mentor_registration" value="1" 
-                                <?php echo ($defaultMentorRegistration) ? 'checked' : ''; ?>
-                                <?php echo ($isMemberFull && !$isExistingMentor) ? 'disabled' : ''; ?>>
-                            <label for="mentor_registration">
-                                I would like to register as a mentor for this program
-                                <?php if ($isMemberFull && !$isExistingMentor): ?>
-                                    <span class="capacity-label">(Mentor positions filled)</span>
-                                <?php endif; ?>
-                            </label>
-                        </div>
-                        <div class="help-text">
-                            <small>Mentors must be 18+ years old and have relevant experience. Mentor applications are subject to approval.</small>
+                        <label for="check-email">Enter your email address:</label>
+                        <div style="display: flex; gap: 10px;">
+                            <input type="email" id="check-email" class="form-input" placeholder="your@email.com" style="flex: 1;">
+                            <button type="button" id="check-email-btn" class="secondary-button">Check Email</button>
                         </div>
                     </div>
-                <?php endif; ?>
-                
-                <!-- Mentor fields section -->
-                <div id="mentor_fields" style="<?php echo ($defaultMentorRegistration) ? 'display: block;' : 'display: none;'; ?>">
-                    <!-- Existing mentor fields content -->
-                    <div class="form-group">
-                        <label for="mentor_experience">Please describe your experience relevant to this program: <span class="required">*</span></label>
-                        <textarea id="mentor_experience" name="mentor_experience" class="form-textarea" rows="4" 
-                            placeholder="Describe your background, skills, and experience that qualify you to mentor in this program..."></textarea>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="mentor_availability">Please indicate your availability during the program dates: <span class="required">*</span></label>
-                        <select id="mentor_availability" name="mentor_availability" class="form-select">
-                            <option value="">Select Availability</option>
-                            <option value="full_time">Full time (all program days)</option>
-                            <option value="part_time">Part time (specific days only)</option>
-                            <option value="specific_hours">Specific hours each day</option>
-                        </select>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="mentor_workshop_preference">Which workshop would you prefer to mentor? <span class="required">*</span></label>
-                        <select id="mentor_workshop_preference" name="mentor_workshop_preference" class="form-select">
-                            <option value="">Select Workshop</option>
-                            <?php foreach ($workshops as $workshop): ?>
-                                <option value="<?php echo $workshop['id']; ?>"><?php echo htmlspecialchars($workshop['title']); ?></option>
-                            <?php endforeach; ?>
-                        </select>
+                    <div id="email-check-result" class="hidden">
+                        <p></p>
                     </div>
                 </div>
-            </div>           
 
+                <!-- Mentor Registration Option -->
+                <div class="form-section">
+                    <h2><i class="fas fa-chalkboard-teacher"></i> Registration Type</h2>
+                    <div class="form-group">
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="mentor_registration" name="mentor_registration" value="1" <?php echo $defaultMentorRegistration ? 'checked' : ''; ?>>
+                            <label for="mentor_registration">I want to register as a mentor for this program</label>
+                        </div>
+                        <div class="help-text">
+                            <small>Mentors assist in facilitating workshops and guiding participants. Mentor applications are subject to approval.</small>
+                        </div>
+                    </div>
+                    
+                    <!-- Mentor Fields -->
+                    <div id="mentor_fields" style="<?php echo $defaultMentorRegistration ? 'display: block;' : 'display: none;'; ?>">
+                        <div class="form-group">
+                            <label for="mentor_experience">Please describe your experience relevant to this program: <span class="required">*</span></label>
+                            <textarea id="mentor_experience" name="mentor_experience" class="form-textarea" rows="4" 
+                                placeholder="Describe your background, skills, and experience that qualify you to mentor in this program..."></textarea>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="mentor_availability">Please indicate your availability during the program dates: <span class="required">*</span></label>
+                            <select id="mentor_availability" name="mentor_availability" class="form-select">
+                                <option value="">Select Availability</option>
+                                <option value="full_time">Full time (all program days)</option>
+                                <option value="part_time">Part time (specific days only)</option>
+                                <option value="specific_hours">Specific hours each day</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="mentor_workshop_preference">Which workshop would you prefer to mentor?</label>
+                            <select id="mentor_workshop_preference" name="mentor_workshop_preference" class="form-select">
+                                <option value="">No preference</option>
+                                <?php foreach ($workshops as $workshop): ?>
+                                    <option value="<?php echo $workshop['id']; ?>"><?php echo htmlspecialchars($workshop['title']); ?></option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Personal Information -->
                 <div class="form-section">
                     <h2><i class="fas fa-user"></i> Personal Information</h2>
                     <div class="form-row">
@@ -747,7 +1169,7 @@ if ($result->num_rows > 0) {
                     <div class="form-row">
                         <div class="form-group">
                             <label for="dob">Date of Birth <span class="required">*</span></label>
-                            <input type="date" id="dob" name="dob" class="form-input" required>
+                            <input type="date" id="dob" name="date_of_birth" class="form-input" required>
                         </div>
                         <div class="form-group">
                             <label for="gender">Gender <span class="required">*</span></label>
@@ -762,30 +1184,65 @@ if ($result->num_rows > 0) {
                     </div>
                 </div>
                 
-                <div id="school_section" class="form-section">
-                    <h2><i class="fas fa-school"></i> School Information</h2>
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="school">School Name <span class="required">*</span></label>
-                            <input type="text" id="school" name="school" class="form-input" required>
+                <!-- Dashboard Access Section -->
+                <div class="form-section" id="dashboard_access_section">
+                    <h2><i class="fas fa-key"></i> Dashboard Access</h2>
+                    
+                    <!-- Member Status Display -->
+                    <div id="member_status_display" class="hidden">
+                        <div class="member-status-info">
+                            <i class="fas fa-check-circle"></i>
+                            <div>
+                                <p><strong>Great! You're already a Sci-Bono Clubhouse member.</strong></p>
+                                <p>You can use your existing Clubhouse password to access your holiday program dashboard after registration.</p>
+                            </div>
                         </div>
+                    </div>
+                    
+                    <!-- Password Creation for Non-Members -->
+                    <div id="password_creation_section">
+                        <div class="password-info">
+                            <i class="fas fa-info-circle"></i>
+                            <div>
+                                <p><strong>Create a Dashboard Password</strong></p>
+                                <p>Since you don't have a Sci-Bono Clubhouse account yet, please create a password to access your holiday program dashboard.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="dashboard_password">Dashboard Password <span class="required">*</span></label>
+                                <input type="password" id="dashboard_password" name="dashboard_password" class="form-input" 
+                                       minlength="8" placeholder="Minimum 8 characters" required>
+                                <div class="help-text">
+                                    <small>Password must be at least 8 characters long and contain letters and numbers</small>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="confirm_password">Confirm Password <span class="required">*</span></label>
+                                <input type="password" id="confirm_password" name="confirm_password" class="form-input" 
+                                       minlength="8" placeholder="Re-enter your password" required>
+                                <div id="password_match_feedback" class="help-text"></div>
+                            </div>
+                        </div>
+                        
                         <div class="form-group">
-                            <label for="grade">Grade <span class="required">*</span></label>
-                            <select id="grade" name="grade" class="form-select" required>
-                                <option value="">Select Grade</option>
-                                <?php for ($i = 1; $i <= 12; $i++): ?>
-                                    <option value="<?php echo $i; ?>">Grade <?php echo $i; ?></option>
-                                <?php endfor; ?>
-                            </select>
+                            <!-- <div class="checkbox-group">
+                                <input type="checkbox" id="create_full_account" name="create_full_account" value="1">
+                                <label for="create_full_account">Also create a full Sci-Bono Clubhouse account for me (recommended)</label>
+                            </div> 
+                            <div class="help-text">
+                                <small>This will give you access to all Clubhouse programs and courses, not just holiday programs.</small>
+                            </div>-->
                         </div>
                     </div>
                 </div>
-
                 
+                <!-- Address Information -->
                 <div class="form-section">
-                    <h2><i class="fas fa-map-marker-alt"></i> Contact Information</h2>
+                    <h2><i class="fas fa-map-marker-alt"></i> Address Information</h2>
                     <div class="form-group">
-                        <label for="address">Address <span class="required">*</span></label>
+                        <label for="address">Street Address <span class="required">*</span></label>
                         <input type="text" id="address" name="address" class="form-input" required>
                     </div>
                     
@@ -798,15 +1255,15 @@ if ($result->num_rows > 0) {
                             <label for="province">Province <span class="required">*</span></label>
                             <select id="province" name="province" class="form-select" required>
                                 <option value="">Select Province</option>
+                                <option value="Gauteng">Gauteng</option>
+                                <option value="Western Cape">Western Cape</option>
+                                <option value="KwaZulu-Natal">KwaZulu-Natal</option>
                                 <option value="Eastern Cape">Eastern Cape</option>
                                 <option value="Free State">Free State</option>
-                                <option value="Gauteng">Gauteng</option>
-                                <option value="KwaZulu-Natal">KwaZulu-Natal</option>
                                 <option value="Limpopo">Limpopo</option>
                                 <option value="Mpumalanga">Mpumalanga</option>
-                                <option value="North West">North West</option>
                                 <option value="Northern Cape">Northern Cape</option>
-                                <option value="Western Cape">Western Cape</option>
+                                <option value="North West">North West</option>
                             </select>
                         </div>
                     </div>
@@ -817,6 +1274,27 @@ if ($result->num_rows > 0) {
                     </div>
                 </div>
                 
+                <!-- School Information (for students) -->
+                <div id="school_section" class="form-section">
+                    <h2><i class="fas fa-school"></i> School Information</h2>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label for="school">School Name <span class="required">*</span></label>
+                            <input type="text" id="school" name="school" class="form-input" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="grade">Grade <span class="required">*</span></label>
+                            <select id="grade" name="grade" class="form-select" required>
+                                <option value="">Select Grade</option>
+                                <?php for ($i = 5; $i <= 12; $i++): ?>
+                                    <option value="<?php echo $i; ?>">Grade <?php echo $i; ?></option>
+                                <?php endfor; ?>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Guardian Information (for students) -->
                 <div id="guardian_section" class="form-section">
                     <h2><i class="fas fa-user-shield"></i> Parent/Guardian Information</h2>
                     <div class="form-row">
@@ -842,6 +1320,7 @@ if ($result->num_rows > 0) {
                     </div>
                 </div>
                 
+                <!-- Emergency Contact -->
                 <div class="form-section">
                     <h2><i class="fas fa-first-aid"></i> Emergency Contact</h2>
                     <div class="form-group">
@@ -870,15 +1349,62 @@ if ($result->num_rows > 0) {
                     </div>
                 </div>
                 
-                <script>
-                // Workshop capacity data
-                const workshopCapacityData = <?php echo json_encode($workshopEnrollmentCounts); ?>;
-                </script>
-
-                <!--workshop preferences section  -->
+                
+                
+                <!-- Cohort Selection (if cohorts are enabled) -->
+                <?php if ($programConfig['has_cohorts'] && !empty($cohorts)): ?>
+                <div class="form-section">
+                    <h2><i class="fas fa-users"></i> Cohort Selection</h2>
+                    <p class="section-description">Please choose which week you'd like to attend the holiday program.
+The same workshops will run each week, so you only need to attend one week. Select the week that works best for you.</p>
+                    
+                    <div class="cohort-selection">
+                        <?php foreach ($cohorts as $cohort): ?>
+                            <?php 
+                            $availability = '';
+                            $availabilityClass = '';
+                            if ($cohort['available_spots'] > 10) {
+                                $availability = 'Good availability';
+                                $availabilityClass = 'availability-good';
+                            } elseif ($cohort['available_spots'] > 0) {
+                                $availability = 'Limited spots';
+                                $availabilityClass = 'availability-limited';
+                            } else {
+                                $availability = 'Full';
+                                $availabilityClass = 'availability-full';
+                            }
+                            ?>
+                            <div class="cohort-option <?php echo $cohort['available_spots'] <= 0 ? 'disabled' : ''; ?>" 
+                                 onclick="selectCohort(<?php echo $cohort['id']; ?>, this)">
+                                <input type="radio" name="cohort_id" value="<?php echo $cohort['id']; ?>" 
+                                       <?php echo $cohort['available_spots'] <= 0 ? 'disabled' : ''; ?>>
+                                <div class="cohort-details">
+                                    <h4><?php echo htmlspecialchars($cohort['name']); ?></h4>
+                                    <p><i class="fas fa-calendar"></i> <?php echo date('M j', strtotime($cohort['start_date'])); ?> - <?php echo date('M j, Y', strtotime($cohort['end_date'])); ?></p>
+                                    <p><i class="fas fa-users"></i> Max <?php echo $cohort['max_participants']; ?> participants</p>
+                                </div>
+                                <div class="cohort-availability">
+                                    <span class="<?php echo $availabilityClass; ?>">
+                                        <?php echo $availability; ?>
+                                    </span>
+                                    <br>
+                                    <small><?php echo $cohort['available_spots']; ?> spots left</small>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                </div>
+                <?php endif; ?>
+                
+                <!-- Workshop Preferences Section -->
                 <div id="workshop_preferences_section" class="form-section">
                     <h2><i class="fas fa-laptop-code"></i> Workshop Preferences</h2>
-                    <p class="section-description">Please select your 1st and 2nd choice workshops (you can only select 2 workshops)</p>
+                    <p class="section-description">
+                        Please select your 1st and 2nd choice workshops. 
+                        <?php if ($programConfig['has_prerequisites']): ?>
+                        <strong>Note:</strong> Some workshops have prerequisites that must be met.
+                        <?php endif; ?>
+                    </p>
                     
                     <div class="selection-info" id="selection-info" style="display: none;">
                         <p>Selected workshops are prioritized in the order selected. Your first selection will be considered your preferred choice.</p>
@@ -893,120 +1419,107 @@ if ($result->num_rows > 0) {
                         <?php foreach ($workshops as $workshop): 
                             $capacity = $workshopEnrollmentCounts[$workshop['id']] ?? null;
                             $isFull = $capacity && $capacity['enrolled'] >= $capacity['max'];
-                            $capacityPercentage = $capacity ? ($capacity['enrolled'] / $capacity['max']) * 100 : 0;
-                            $workshopClass = $isFull ? 'workshop-option full-workshop' : 'workshop-option';
+                            $capacityPercentage = $capacity ? round(($capacity['enrolled'] / $capacity['max']) * 100) : 0;
                         ?>
-                            <div class="<?php echo $workshopClass; ?>">
-                                <div class="checkbox-group">
-                                    <input type="checkbox" id="workshop_<?php echo $workshop['id']; ?>" 
-                                        name="workshop_preference[]" value="<?php echo $workshop['id']; ?>"
-                                        <?php echo $isFull ? 'disabled' : ''; ?>>
-                                    <label for="workshop_<?php echo $workshop['id']; ?>"><?php echo htmlspecialchars($workshop['title']); ?></label>
-                                    <span class="selection-label"></span>
+                            <div class="workshop-card <?php echo $isFull ? 'disabled' : ''; ?>" 
+                                 data-workshop-id="<?php echo $workshop['id']; ?>"
+                                 onclick="selectWorkshop(<?php echo $workshop['id']; ?>, this)">
+                                
+                                <?php if ($isFull): ?>
+                                <div class="disabled-overlay">
+                                    <i class="fas fa-times-circle"></i> Workshop Full
                                 </div>
+                                <?php endif; ?>
+                                
+                                <div class="workshop-header">
+                                    <h3><?php echo htmlspecialchars($workshop['title']); ?></h3>
+                                    <div class="selection-number" style="display: none;"></div>
+                                </div>
+                                
                                 <p class="workshop-description"><?php echo htmlspecialchars($workshop['description']); ?></p>
                                 
-                                <?php if ($capacity): ?>
-                                <div class="capacity-indicator">
+                                <?php if (!empty($workshop['instructor'])): ?>
+                                <p class="workshop-instructor">
+                                    <i class="fas fa-user-tie"></i> 
+                                    <strong>Instructor:</strong> <?php echo htmlspecialchars($workshop['instructor']); ?>
+                                </p>
+                                <?php endif; ?>
+                                
+                                <div class="workshop-capacity">
+                                    <div class="capacity-info">
+                                        <span>Capacity: <?php echo $capacity ? $capacity['enrolled'] : 0; ?>/<?php echo $workshop['max_participants']; ?></span>
+                                        <span class="capacity-percentage"><?php echo $capacityPercentage; ?>% full</span>
+                                    </div>
                                     <div class="capacity-bar">
                                         <div class="capacity-fill" style="width: <?php echo min($capacityPercentage, 100); ?>%;"></div>
                                     </div>
-                                    <div class="capacity-text">
-                                        <?php echo $capacity['enrolled']; ?>/<?php echo $capacity['max']; ?> spots filled
-                                        <?php if ($isFull): ?>
-                                            <span class="capacity-full">FULL</span>
-                                        <?php endif; ?>
-                                    </div>
+                                </div>
+                                
+                                <?php if ($programConfig['has_prerequisites'] && !empty($workshop['prerequisites'])): ?>
+                                <div class="prerequisites-info">
+                                    <strong><i class="fas fa-exclamation-triangle"></i> Prerequisites:</strong>
+                                    <?php echo htmlspecialchars($workshop['prerequisites']); ?>
+                                </div>
+                                <?php endif; ?>
+                                
+                                <?php if (!empty($workshop['cohort_name'])): ?>
+                                <div class="cohort-info">
+                                    <i class="fas fa-users"></i> 
+                                    <strong>Cohort:</strong> <?php echo htmlspecialchars($workshop['cohort_name']); ?>
                                 </div>
                                 <?php endif; ?>
                             </div>
                         <?php endforeach; ?>
-                        
-                        <input type="hidden" id="workshop_preferences_ordered" name="workshop_preferences_ordered">
                     </div>
                     
-                    <div id="workshop_note" style="display: none;"></div>
-                    
+                    <input type="hidden" id="workshop_preferences" name="workshop_preferences" value="">
+                </div>
+                
+                <!-- Why Interested Section -->
+                <div class="form-section">
+                    <h2><i class="fas fa-question-circle"></i> Interest & Experience</h2>
                     <div class="form-group">
-                        <label for="why_interested">Why are you interested in this holiday program? <span class="required">*</span></label>
-                        <textarea id="why_interested" name="why_interested" class="form-textarea" rows="3" required></textarea>
+                        <label for="why_interested">Why are you interested in this program? <span class="required">*</span></label>
+                        <textarea id="why_interested" name="why_interested" class="form-textarea" rows="4" required 
+                                  placeholder="Tell us what interests you about this program and what you hope to learn..."></textarea>
                     </div>
                     
                     <div class="form-group">
-                        <label for="experience_level">What is your experience level with digital media and design? <span class="required">*</span></label>
+                        <label for="experience_level">What is your experience level with technology/programming? <span class="required">*</span></label>
                         <select id="experience_level" name="experience_level" class="form-select" required>
                             <option value="">Select Experience Level</option>
-                            <option value="Beginner">Beginner - No experience</option>
-                            <option value="Basic">Basic - Some experience but limited skills</option>
-                            <option value="Intermediate">Intermediate - Familiar with basic concepts and tools</option>
-                            <option value="Advanced">Advanced - Experienced with various digital media tools</option>
-                        </select>
-                    </div>
-                </div>
-
-                <!-- Enhance mentor fields section -->
-                <div id="mentor_fields" style="display: none;">
-                    <div class="form-group">
-                        <label for="mentor_experience">Please describe your experience relevant to this program: <span class="required">*</span></label>
-                        <textarea id="mentor_experience" name="mentor_experience" class="form-textarea" rows="3"></textarea>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="mentor_availability">Please indicate your availability during the program dates: <span class="required">*</span></label>
-                        <select id="mentor_availability" name="mentor_availability" class="form-select">
-                            <option value="">Select Availability</option>
-                            <option value="full_time">Full time (all program days)</option>
-                            <option value="part_time">Part time (specific days only)</option>
-                            <option value="specific_hours">Specific hours each day</option>
+                            <option value="Beginner">Beginner - Little to no experience</option>
+                            <option value="Novice">Novice - Some basic knowledge</option>
+                            <option value="Intermediate">Intermediate - Comfortable with basics</option>
+                            <option value="Advanced">Advanced - Strong technical skills</option>
                         </select>
                     </div>
                     
                     <div class="form-group">
-                        <label for="mentor_workshop_preference">Which workshop would you prefer to mentor? <span class="required">*</span></label>
-                        <select id="mentor_workshop_preference" name="mentor_workshop_preference" class="form-select">
-                            <option value="">Select Workshop</option>
-                            <?php foreach ($workshops as $workshop): 
-                                $capacity = $workshopEnrollmentCounts[$workshop['id']] ?? null;
-                                $isFull = $capacity && $capacity['enrolled'] >= $capacity['max'];
-                                $fullText = $isFull ? ' (FULL)' : '';
-                                $enrollmentText = $capacity ? " ({$capacity['enrolled']}/{$capacity['max']})" : "";
-                            ?>
-                                <option value="<?php echo $workshop['id']; ?>"><?php echo htmlspecialchars($workshop['title'] . $enrollmentText . $fullText); ?></option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    
-                    <div class="workshop-capacity-info">
-                        <h4>Current Workshop Enrollments:</h4>
-                        <?php foreach ($workshops as $workshop): 
-                            $capacity = $workshopEnrollmentCounts[$workshop['id']] ?? null;
-                            if ($capacity):
-                                $capacityPercentage = ($capacity['enrolled'] / $capacity['max']) * 100;
-                        ?>
-                        <div class="workshop-capacity-row">
-                            <div class="workshop-name"><?php echo htmlspecialchars($workshop['title']); ?></div>
-                            <div class="workshop-capacity-bar">
-                                <div class="workshop-capacity-fill" style="width: <?php echo min($capacityPercentage, 100); ?>%;"></div>
-                            </div>
-                            <div class="workshop-capacity-text"><?php echo $capacity['enrolled']; ?>/<?php echo $capacity['max']; ?></div>
+                        <div class="checkbox-group">
+                            <input type="checkbox" id="needs_equipment" name="needs_equipment" value="1">
+                            <label for="needs_equipment">I will bring my own device (Laptop).</label>
                         </div>
-                        <?php endif; endforeach; ?>
                     </div>
                 </div>
                 
+                <!-- Medical Information -->
                 <div class="form-section">
                     <h2><i class="fas fa-notes-medical"></i> Medical Information</h2>
                     <div class="form-group">
                         <label for="medical_conditions">Do you have any medical conditions we should be aware of?</label>
-                        <textarea id="medical_conditions" name="medical_conditions" class="form-textarea" rows="2"></textarea>
+                        <textarea id="medical_conditions" name="medical_conditions" class="form-textarea" rows="2" 
+                                  placeholder="Please list any medical conditions, medications, or health considerations..."></textarea>
                     </div>
                     
                     <div class="form-group">
                         <label for="allergies">Do you have any allergies?</label>
-                        <textarea id="allergies" name="allergies" class="form-textarea" rows="2"></textarea>
+                        <textarea id="allergies" name="allergies" class="form-textarea" rows="2" 
+                                  placeholder="Please list any food allergies, environmental allergies, etc..."></textarea>
                     </div>
                 </div>
                 
+                <!-- Permissions -->
                 <div class="form-section">
                     <h2><i class="fas fa-check-circle"></i> Permissions</h2>
                     <div class="form-group">
@@ -1024,295 +1537,164 @@ if ($result->num_rows > 0) {
                     </div>
                 </div>
                 
+                <!-- Additional Information -->
                 <div class="form-section">
                     <h2><i class="fas fa-info-circle"></i> Additional Information</h2>
                     <div class="form-group">
                         <label for="dietary_restrictions">Do you have any dietary restrictions or preferences?</label>
-                        <textarea id="dietary_restrictions" name="dietary_restrictions" class="form-textarea" rows="2"></textarea>
+                        <textarea id="dietary_restrictions" name="dietary_restrictions" class="form-textarea" rows="2" 
+                                  placeholder="Please list any dietary restrictions, food preferences, or special meal requirements..."></textarea>
                     </div>
                     
                     <div class="form-group">
                         <label for="additional_notes">Any additional information you would like to share?</label>
-                        <textarea id="additional_notes" name="additional_notes" class="form-textarea" rows="3"></textarea>
+                        <textarea id="additional_notes" name="additional_notes" class="form-textarea" rows="3" 
+                                  placeholder="Anything else you think we should know..."></textarea>
                     </div>
                 </div>
                 
+                <!-- Submit Button -->
                 <div class="form-actions">
-                    <button type="submit" name="submit_registration" class="primary-button">Complete Registration</button>
-                    <a href="holidayProgramIndex.php" class="secondary-button">Cancel</a>
+                    <button type="submit" name="submit_registration" class="primary-button">
+                        <i class="fas fa-paper-plane"></i> Complete Registration
+                    </button>
                 </div>
             </form>
-        </div>
         <?php endif; ?>
-    <?php endif; ?>
-    </main>
+    </div>
 
-    <!-- Mobile Navigation (visible on mobile only) -->
-    <nav class="mobile-nav">
-        <a href="../../home.php" class="mobile-menu-item">
-            <div class="mobile-menu-icon">
-                <i class="fas fa-home"></i>
-            </div>
-            <span>Home</span>
-        </a>
-        <a href="holidayProgramIndex.php" class="mobile-menu-item">
-            <div class="mobile-menu-icon">
-                <i class="fas fa-calendar-alt"></i>
-            </div>
-            <span>Programs</span>
-        </a>
-        <a href="../../app/Views/learn.php" class="mobile-menu-item">
-            <div class="mobile-menu-icon">
-                <i class="fas fa-book"></i>
-            </div>
-            <span>Learn</span>
-        </a>
-        <a href="holiday-dashboard.php" class="mobile-menu-item">
-            <div class="mobile-menu-icon">
-                <i class="fas fa-user"></i>
-            </div>
-            <span>Account</span>
-        </a>
-    </nav>
-    
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="../../../public/assets/js/workshopSelection.js"></script>
-    <script src="../../../public/assets/js/holidayProgramRegistrationScript.js"></script>
     <script>
-        // Add this to your script section
-        document.addEventListener('DOMContentLoaded', function() {
-            const showMentorFormButton = document.getElementById('show-mentor-form');
-            const mentorRegistrationCheckbox = document.getElementById('mentor_registration');
-            
-            if (showMentorFormButton && mentorRegistrationCheckbox) {
-                showMentorFormButton.addEventListener('click', function() {
-                    // Check the mentor registration checkbox
-                    mentorRegistrationCheckbox.checked = true;
-                    
-                    // Trigger the change event to show mentor fields
-                    mentorRegistrationCheckbox.dispatchEvent(new Event('change'));
-                    
-                    // Scroll to the form
-                    document.querySelector('.registration-form-container').scrollIntoView({
-                        behavior: 'smooth'
-                    });
-                });
-            }
-        });
-    </script>
-    <script>
-    
-    $(document).ready(function() { 
-        // Set initial state based on URL parameters
-        <?php if ($isMentorApplication): ?>
-            $('#mentor_registration').prop('checked', true).trigger('change');
-        <?php endif; ?>
-        // Trigger the change event to set proper initial state
-        $('#mentor_registration').trigger('change');
+        let selectedWorkshops = [];
+        const maxSelections = 2;
         
-        // Email check functionality
-        $('#check-email-btn').click(function(e) {
-            e.preventDefault();
-            const email = $('#check-email').val();
-            
-            if (!email) {
-                alert('Please enter an email address');
-                return;
-            }
-            
-            // Show loading indicator
-                            $(this).html('<i class="fas fa-spinner fa-spin"></i> Checking...');
-            
-            $.ajax({
-                url: window.location.href,
-                type: 'POST',
-                data: {
-                    check_email: true,
-                    email: email
-                },
-                dataType: 'json',
-                success: function(response) {
-                    if (response.exists) {
-                        $('#email-check-result').removeClass('hidden').addClass('success');
-                        $('#email-check-result p').text('Email found! Form will be pre-filled with your information.');
-                        
-                        // Fill the form with user data
-                        const data = response.data;
-                        $('#first_name').val(data.first_name || data.name);
-                        $('#last_name').val(data.last_name || data.surname);
-                        $('#email').val(data.email);
-                        $('#phone').val(data.phone || data.leaner_number);
-                        $('#dob').val(data.date_of_birth);
-                        $('#gender').val(data.gender || data.Gender);
-                        $('#school').val(data.school);
-                        $('#grade').val(data.grade);
-                        $('#address').val(data.address || data.address_street);
-                        $('#city').val(data.city || data.address_city);
-                        $('#province').val(data.province || data.address_province);
-                        $('#postal_code').val(data.postal_code || data.address_postal_code);
-                        
-                        // Parent/Guardian information
-                        $('#guardian_name').val(data.guardian_name || data.parent);
-                        $('#guardian_relationship').val(data.guardian_relationship || data.Relationship);
-                        $('#guardian_phone').val(data.guardian_phone || data.parent_number);
-                        $('#guardian_email').val(data.guardian_email || data.parent_email);
-                        
-                        // Emergency contact information
-                        $('#emergency_contact_name').val(data.emergency_contact_name || '');
-                        $('#emergency_contact_relationship').val(data.emergency_contact_relationship || '');
-                        $('#emergency_contact_phone').val(data.emergency_contact_phone || '');
-                        
-                        // Medical information and additional details if available
-                        if (data.medical_conditions) $('#medical_conditions').val(data.medical_conditions);
-                        if (data.allergies) $('#allergies').val(data.allergies);
-                        if (data.dietary_restrictions) $('#dietary_restrictions').val(data.dietary_restrictions);
-                        if (data.additional_notes) $('#additional_notes').val(data.additional_notes);
-                        
-                        // Workshop preferences - this would need to be handled specially for existing registrations
-                        if (data.workshop_preference) {
-                            try {
-                                const workshops = JSON.parse(data.workshop_preference);
-                                workshops.forEach(workshopId => {
-                                    $(`#workshop_${workshopId}`).prop('checked', true);
-                                });
-                            } catch (e) {
-                                console.error('Error parsing workshop preferences:', e);
+        // Workshop capacity data
+        const workshopCapacityData = <?php echo json_encode($workshopEnrollmentCounts); ?>;
+        
+        $(document).ready(function() {
+            // Email check functionality
+            $('#check-email-btn').click(function(e) {
+                e.preventDefault();
+                const email = $('#check-email').val();
+                
+                if (!email) {
+                    alert('Please enter an email address');
+                    return;
+                }
+                
+                if (!isValidEmail(email)) {
+                    alert('Please enter a valid email address');
+                    return;
+                }
+                
+                // Show loading indicator
+                $(this).html('<i class="fas fa-spinner fa-spin"></i> Checking...');
+                
+                $.ajax({
+                    url: window.location.href,
+                    type: 'POST',
+                    data: {
+                        check_email: true,
+                        email: email
+                    },
+                    dataType: 'json',
+                    success: function(response) {
+                        if (response.exists) {
+                            $('#email-check-result').removeClass('hidden').addClass('success');
+                            $('#email-check-result p').text('Email found! Form will be pre-filled with your information.');
+                            
+                            // Pre-fill form with user data
+                            const data = response.data;
+                            $('#first_name').val(data.first_name || data.name);
+                            $('#last_name').val(data.last_name || data.surname);
+                            $('#email').val(data.email);
+                            $('#phone').val(data.phone);
+                            if (data.date_of_birth) $('#dob').val(data.date_of_birth);
+                            if (data.gender) $('#gender').val(data.gender);
+                            if (data.school) $('#school').val(data.school);
+                            if (data.grade) $('#grade').val(data.grade);
+                            if (data.address) $('#address').val(data.address);
+                            if (data.city) $('#city').val(data.city);
+                            if (data.province) $('#province').val(data.province);
+                            if (data.postal_code) $('#postal_code').val(data.postal_code);
+                            if (data.guardian_name) $('#guardian_name').val(data.guardian_name);
+                            if (data.guardian_relationship) $('#guardian_relationship').val(data.guardian_relationship);
+                            if (data.guardian_phone) $('#guardian_phone').val(data.guardian_phone);
+                            if (data.guardian_email) $('#guardian_email').val(data.guardian_email);
+                            if (data.medical_conditions) $('#medical_conditions').val(data.medical_conditions);
+                            if (data.allergies) $('#allergies').val(data.allergies);
+                            if (data.dietary_restrictions) $('#dietary_restrictions').val(data.dietary_restrictions);
+                            if (data.additional_notes) $('#additional_notes').val(data.additional_notes);
+                            
+                            // Handle dashboard access section based on member status
+                            handleMembershipStatus(data);
+                            
+                            // Workshop preferences - handle existing registrations
+                            if (data.workshop_preference) {
+                                try {
+                                    const workshops = JSON.parse(data.workshop_preference);
+                                    workshops.forEach(workshopId => {
+                                        selectWorkshop(parseInt(workshopId), document.querySelector(`[data-workshop-id="${workshopId}"]`));
+                                    });
+                                } catch (e) {
+                                    console.error('Error parsing workshop preferences:', e);
+                                }
                             }
+                            
+                            // Scroll to form
+                            $('html, body').animate({
+                                scrollTop: $("#registration-form").offset().top - 100
+                            }, 500);
+                        } else {
+                            $('#email-check-result').removeClass('hidden').removeClass('success');
+                            $('#email-check-result p').text('Email not found. Please fill out the form below.');
+                            
+                            // Show password creation section for new users
+                            handleMembershipStatus(null);
                         }
-                        
-                        // Scroll to form
-                        $('html, body').animate({
-                            scrollTop: $("#registration-form").offset().top - 100
-                        }, 500);
-                    } else {
+                    },
+                    error: function() {
                         $('#email-check-result').removeClass('hidden').removeClass('success');
-                        $('#email-check-result p').text('Email not found. Please fill out the form below.');
+                        $('#email-check-result p').text('Error checking email. Please try again or fill out the form manually.');
+                    },
+                    complete: function() {
+                        $('#check-email-btn').html('Check Email');
                     }
-                },
-                error: function() {
-                    $('#email-check-result').removeClass('hidden').removeClass('success');
-                    $('#email-check-result p').text('Error checking email. Please try again or fill out the form manually.');
-                },
-                complete: function() {
-                    $('#check-email-btn').html('Check Email');
+                });
+            });
+            
+            // Emergency contact same as guardian
+            $('#same_as_guardian').change(function() {
+                if ($(this).is(':checked')) {
+                    // Copy parent/guardian info to emergency contact
+                    $('#emergency_contact_name').val($('#guardian_name').val());
+                    $('#emergency_contact_relationship').val($('#guardian_relationship').val());
+                    $('#emergency_contact_phone').val($('#guardian_phone').val());
+                    
+                    // Disable emergency contact fields
+                    $('#emergency_contact_fields input').prop('disabled', true);
+                    $('#emergency_contact_fields input').prop('required', false);
+                } else {
+                    // Clear and enable emergency contact fields
+                    $('#emergency_contact_fields input').prop('disabled', false);
+                    $('#emergency_contact_fields input').prop('required', true);
                 }
             });
-        });
-        
-        // Same as guardian checkbox
-        $('#same_as_guardian').change(function() {
-            if ($(this).is(':checked')) {
-                // Copy parent/guardian info to emergency contact
-                $('#emergency_contact_name').val($('#guardian_name').val());
-                $('#emergency_contact_relationship').val($('#guardian_relationship').val());
-                $('#emergency_contact_phone').val($('#guardian_phone').val());
-                
-                // Disable emergency contact fields
-                $('#emergency_contact_fields input').prop('disabled', true);
-            } else {
-                // Enable emergency contact fields
-                $('#emergency_contact_fields input').prop('disabled', false);
-            }
-        });
-
-        $('#mentor_registration').change(function() {
-            if ($(this).is(':checked')) {
-                $('#mentor_fields').slideDown();
-
-            // Make mentor fields required
-            $('#mentor_experience, #mentor_availability, #mentor_workshop_preference').prop('required', true);
-            } else {
-            $('#mentor_fields').slideUp();
-            // Remove required attribute
-            $('#mentor_experience, #mentor_availability, #mentor_workshop_preference').prop('required', false);
+            
+            // Listen for changes in guardian fields to update emergency contact if checkbox is checked
+            $('#guardian_name, #guardian_relationship, #guardian_phone').on('input', function() {
+                if ($('#same_as_guardian').is(':checked')) {
+                    $('#emergency_contact_name').val($('#guardian_name').val());
+                    $('#emergency_contact_relationship').val($('#guardian_relationship').val());
+                    $('#emergency_contact_phone').val($('#guardian_phone').val());
                 }
-        });
-
-        // Check initial state of mentor checkbox
-        if ($('#mentor_registration').is(':checked')) {
-            //Show mentor-specific fields
-            $('#mentor_fields').show();
-            $('#mentor_experience, #mentor_availability, #mentor_workshop_preference').prop('required', true);
+            });
             
-            // Hide student-specific sections
-            $('#school_section').hide();
-            $('#guardian_section').hide();
-            $('#workshop_preferences_section').hide();
-            
-            // Remove required attributes from student-specific fields
-            $('#school, #grade').prop('required', false);
-            $('#guardian_name, #guardian_relationship, #guardian_phone, #guardian_email').prop('required', false);
-            $('input[name="workshop_preference[]"]').prop('required', false);
-            
-            // Add a note about mentor workshop assignment
-            $('#workshop_note').html('<div class="info-message"><i class="fas fa-info-circle"></i> As a mentor, you will be assigned to a specific workshop based on program needs and your expertise.</div>').show();
-        }
-
-        $('#mentor_registration').change(function() {
-            if ($(this).is(':checked')) {
-                // Hide student-specific sections
-                $('#school_section').hide();
-                $('#guardian_section').hide();
-                $('#workshop_preferences_section').hide();
-                
-                // Remove required attributes from ALL student-specific fields
-                $('#school, #grade').prop('required', false);
-                $('#guardian_name, #guardian_relationship, #guardian_phone, #guardian_email').prop('required', false);
-                
-                // Also remove required from the workshop section fields
-                $('#why_interested, #experience_level').prop('required', false);
-                $('input[name="workshop_preference[]"]').prop('required', false);
-                
-                // Show mentor-specific fields
-                $('#mentor_fields').show();
-                $('#mentor_experience, #mentor_availability, #mentor_workshop_preference').prop('required', true);
-                
-                // Add note about mentor workshop assignment
-                $('#workshop_note').html('<div class="info-message"><i class="fas fa-info-circle"></i> As a mentor, you will be assigned to a specific workshop based on program needs and your expertise.</div>').show();
-            } else {
-                // Show student-specific sections
-                $('#school_section').show();
-                $('#guardian_section').show();
-                $('#workshop_preferences_section').show();
-                $('#workshop_note').hide();
-                
-                // Hide mentor-specific fields
-                $('#mentor_fields').hide();
-                $('#mentor_experience, #mentor_availability, #mentor_workshop_preference').prop('required', false);
-                
-                // Make student fields required again
-                $('#school, #grade').prop('required', true);
-                $('#guardian_name, #guardian_relationship, #guardian_phone, #guardian_email').prop('required', true);
-                $('#why_interested, #experience_level').prop('required', true);
-                // Note: We don't make workshop checkboxes required here as that's handled separately
-            }
-        });
-                
-        // Form validation
-        $('#registration-form').submit(function(e) {
-            // First check if this is a mentor registration
-            const isMentor = $('#mentor_registration').is(':checked');
-
-            // Only validate workshop selection for non-mentors
-            if (!isMentor && $('input[name="workshop_preference[]"]:checked').length === 0) {
-                e.preventDefault();
-                alert('Please select at least one workshop preference');
-                return false;
-            }
-            
-            // Check required checkboxes
-            if (!$('#photo_permission').is(':checked') || !$('#data_permission').is(':checked')) {
-                e.preventDefault();
-                alert('Please agree to the required permissions');
-                return false;
-            }
-
-            // Mentor registration toggle functionality
+            // Mentor registration toggle
             $('#mentor_registration').change(function() {
                 if ($(this).is(':checked')) {
                     // Show mentor-specific fields
                     $('#mentor_fields').slideDown();
-                    $('#mentor_experience, #mentor_availability, #mentor_workshop_preference').prop('required', true);
+                    $('#mentor_experience, #mentor_availability').prop('required', true);
                     
                     // Hide student-specific sections
                     $('#school_section').slideUp();
@@ -1322,104 +1704,317 @@ if ($result->num_rows > 0) {
                     // Remove required attributes from student-specific fields
                     $('#school, #grade').prop('required', false);
                     $('#guardian_name, #guardian_relationship, #guardian_phone, #guardian_email').prop('required', false);
-                    $('input[name="workshop_preference[]"]').prop('required', false);
-                    
-                    // Add a note about mentor workshop assignment
-                    $('#workshop_note').html('<div class="info-message"><i class="fas fa-info-circle"></i> As a mentor, you will be assigned to a specific workshop based on program needs and your expertise.</div>').slideDown();
+                    $('#why_interested, #experience_level').prop('required', false);
                 } else {
                     // Hide mentor-specific fields
                     $('#mentor_fields').slideUp();
-                    $('#mentor_experience, #mentor_availability, #mentor_workshop_preference').prop('required', false);
+                    $('#mentor_experience, #mentor_availability').prop('required', false);
                     
                     // Show student-specific sections
                     $('#school_section').slideDown();
                     $('#guardian_section').slideDown();
                     $('#workshop_preferences_section').slideDown();
-                    $('#workshop_note').slideUp();
                     
-                    // Re-add required attributes to student-specific fields
+                    // Add required attributes to student-specific fields
                     $('#school, #grade').prop('required', true);
                     $('#guardian_name, #guardian_relationship, #guardian_phone, #guardian_email').prop('required', true);
+                    $('#why_interested, #experience_level').prop('required', true);
                 }
             });
+            
+            // Check initial state of mentor checkbox
+            if ($('#mentor_registration').is(':checked')) {
+                $('#mentor_fields').show();
+                $('#mentor_experience, #mentor_availability').prop('required', true);
+                $('#school_section').hide();
+                $('#guardian_section').hide();
+                $('#workshop_preferences_section').hide();
+                $('#school, #grade').prop('required', false);
+                $('#guardian_name, #guardian_relationship, #guardian_phone, #guardian_email').prop('required', false);
+                $('#why_interested, #experience_level').prop('required', false);
+            }
+            
+            // Set minimum age for date of birth (typically 8 years old minimum)
+            const today = new Date();
+            const maxDate = new Date(today.getFullYear() - 8, today.getMonth(), today.getDate());
+            $('#dob').attr('max', maxDate.toISOString().split('T')[0]);
+            
+            // Password validation
+            $('#dashboard_password, #confirm_password').on('input', function() {
+                validatePasswords();
+            });
+            
+            // Real-time email checking for membership status
+            $('#email').on('blur', function() {
+                const email = $(this).val();
+                if (email && isValidEmail(email)) {
+                    checkMembershipStatus(email);
+                }
+            });
+        });
+        
+        // Function to handle membership status display
+        function handleMembershipStatus(userData) {
+            const memberStatusDisplay = $('#member_status_display');
+            const passwordCreationSection = $('#password_creation_section');
+            
+            if (userData && (userData.password || userData.id)) {
+                // User is an existing member
+                memberStatusDisplay.removeClass('hidden');
+                passwordCreationSection.hide();
+                
+                // Remove required attributes from password fields
+                $('#dashboard_password, #confirm_password').prop('required', false);
+            } else {
+                // User is not a member, show password creation
+                memberStatusDisplay.addClass('hidden');
+                passwordCreationSection.show();
+                
+                // Add required attributes to password fields
+                $('#dashboard_password, #confirm_password').prop('required', true);
+            }
+        }
+        
+        // Function to check membership status via email
+        function checkMembershipStatus(email) {
+            $.ajax({
+                url: window.location.href,
+                type: 'POST',
+                data: {
+                    check_email: true,
+                    email: email
+                },
+                dataType: 'json',
+                success: function(response) {
+                    handleMembershipStatus(response.exists ? response.data : null);
+                },
+                error: function() {
+                    // On error, assume new user
+                    handleMembershipStatus(null);
+                }
+            });
+        }
+        
+        // Function to validate email format
+        function isValidEmail(email) {
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return emailRegex.test(email);
+        }
+        
+        // Function to validate passwords
+        function validatePasswords() {
+            const password = $('#dashboard_password').val();
+            const confirmPassword = $('#confirm_password').val();
+            const feedback = $('#password_match_feedback');
+            
+            // Password strength validation
+            if (password.length > 0) {
+                let strength = '';
+                let strengthClass = '';
+                
+                if (password.length < 8) {
+                    strength = 'Password must be at least 8 characters';
+                    strengthClass = 'password-weak';
+                } else if (password.length >= 8 && /^(?=.*[a-zA-Z])(?=.*\d)/.test(password)) {
+                    strength = 'Strong password';
+                    strengthClass = 'password-strong';
+                } else if (password.length >= 8) {
+                    strength = 'Good password (consider adding numbers)';
+                    strengthClass = 'password-medium';
+                } else {
+                    strength = 'Weak password';
+                    strengthClass = 'password-weak';
+                }
+                
+                $('#dashboard_password').next('.help-text').find('small').html(
+                    `Password must be at least 8 characters long and contain letters and numbers<br>
+                    <span class="${strengthClass}">${strength}</span>`
+                );
+            }
+            
+            // Password match validation
+            if (confirmPassword.length > 0) {
+                if (password === confirmPassword) {
+                    feedback.html('<span class="password-match-success"><i class="fas fa-check"></i> Passwords match</span>');
+                } else {
+                    feedback.html('<span class="password-match-error"><i class="fas fa-times"></i> Passwords do not match</span>');
+                }
+            } else {
+                feedback.html('');
+            }
+        }
+        
+        // Cohort selection
+        function selectCohort(cohortId, element) {
+            // Remove selection from all cohorts
+            document.querySelectorAll('.cohort-option').forEach(option => {
+                option.classList.remove('selected');
+                const radio = option.querySelector('input[type="radio"]');
+                if (radio) radio.checked = false;
+            });
+            
+            // Select this cohort
+            if (element && !element.classList.contains('disabled')) {
+                element.classList.add('selected');
+                const radio = element.querySelector('input[type="radio"]');
+                if (radio) radio.checked = true;
+            }
+        }
+        
+        // Workshop selection
+        function selectWorkshop(workshopId, element) {
+            if (!element || element.classList.contains('disabled')) {
+                return;
+            }
+            
+            const isSelected = selectedWorkshops.includes(workshopId);
+            
+            if (isSelected) {
+                // Deselect workshop
+                selectedWorkshops = selectedWorkshops.filter(id => id !== workshopId);
+                element.classList.remove('selected', 'first-choice', 'second-choice');
+                const selectionNumber = element.querySelector('.selection-number');
+                if (selectionNumber) selectionNumber.style.display = 'none';
+            } else {
+                // Select workshop if under limit
+                if (selectedWorkshops.length < maxSelections) {
+                    selectedWorkshops.push(workshopId);
+                    element.classList.add('selected');
+                    
+                    // Add appropriate choice class
+                    const selectionNumber = element.querySelector('.selection-number');
+                    if (selectedWorkshops.length === 1) {
+                        element.classList.add('first-choice');
+                        if (selectionNumber) selectionNumber.textContent = '1st Choice';
+                    } else if (selectedWorkshops.length === 2) {
+                        element.classList.add('second-choice');
+                        if (selectionNumber) selectionNumber.textContent = '2nd Choice';
+                    }
+                    
+                    if (selectionNumber) selectionNumber.style.display = 'block';
+                } else {
+                    alert('You can only select up to ' + maxSelections + ' workshops. Please deselect one first.');
+                }
+            }
+            
+            updateWorkshopPreferences();
+            updateSelectionInfo();
+        }
+        
+        function updateWorkshopPreferences() {
+            const hiddenInput = document.getElementById('workshop_preferences');
+            if (hiddenInput) {
+                hiddenInput.value = JSON.stringify(selectedWorkshops);
+            }
+        }
+        
+        function updateSelectionInfo() {
+            const selectionInfo = document.getElementById('selection-info');
+            const reorderControls = document.querySelector('.reorder-controls');
+            
+            if (selectionInfo) {
+                if (selectedWorkshops.length > 0) {
+                    selectionInfo.style.display = 'block';
+                } else {
+                    selectionInfo.style.display = 'none';
+                }
+            }
+            
+            if (reorderControls) {
+                if (selectedWorkshops.length === 2) {
+                    reorderControls.style.display = 'block';
+                } else {
+                    reorderControls.style.display = 'none';
+                }
+            }
+        }
+        
+        // Swap preferences functionality
+        $('#swap-preferences').click(function() {
+            if (selectedWorkshops.length === 2) {
+                // Swap the order
+                selectedWorkshops.reverse();
+                
+                // Update the visual indicators
+                document.querySelectorAll('.workshop-card.selected').forEach((card, index) => {
+                    const workshopId = parseInt(card.dataset.workshopId);
+                    const orderIndex = selectedWorkshops.indexOf(workshopId);
+                    
+                    card.classList.remove('first-choice', 'second-choice');
+                    
+                    const selectionNumber = card.querySelector('.selection-number');
+                    if (orderIndex === 0) {
+                        card.classList.add('first-choice');
+                        if (selectionNumber) selectionNumber.textContent = '1st Choice';
+                    } else if (orderIndex === 1) {
+                        card.classList.add('second-choice');
+                        if (selectionNumber) selectionNumber.textContent = '2nd Choice';
+                    }
+                });
+                
+                updateWorkshopPreferences();
+            }
+        });
+        
+        // Form validation
+        $('#registration-form').submit(function(e) {
+            // Check if this is a mentor registration
+            const isMentor = $('#mentor_registration').is(':checked');
 
-            // Validate mentor fields if mentor registration
-            if (isMentor) {
-                if (!$('#mentor_experience').val().trim() || 
-                    !$('#mentor_availability').val() || 
-                    !$('#mentor_workshop_preference').val()) {
+            // Only validate workshop selection for non-mentors
+            if (!isMentor && selectedWorkshops.length === 0) {
+                e.preventDefault();
+                alert('Please select at least one workshop preference');
+                return false;
+            }
+            
+            // Check if cohort is required and selected
+            const cohortRequired = <?php echo $programConfig['has_cohorts'] ? 'true' : 'false'; ?>;
+            if (cohortRequired && !isMentor) {
+                const selectedCohort = document.querySelector('input[name="cohort_id"]:checked');
+                if (!selectedCohort) {
                     e.preventDefault();
-                    alert('Please complete all required mentor fields');
+                    alert('Please select a cohort for your program.');
                     return false;
                 }
             }
-
-            // Age validation - only apply to non-mentors
-            if (!isMentor) {
-                const dobValue = $('#dob').val();
-                if (dobValue) {
-                    const dob = new Date(dobValue);
-                    const today = new Date();
-                    
-                    // Calculate age
-                    let age = today.getFullYear() - dob.getFullYear();
-                    const monthDiff = today.getMonth() - dob.getMonth();
-                    
-                    // Adjust age if birthday hasn't occurred yet this year
-                    if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
-                        age--;
-                    }
-                    
-                    // Check program age restrictions
-                    const minAge = 13; // Minimum age
-                    const maxAge = 18; // Maximum age
-                    
-                    if (age < minAge || age > maxAge) {
+            
+            // Check required checkboxes
+            if (!$('#photo_permission').is(':checked') || !$('#data_permission').is(':checked')) {
+                e.preventDefault();
+                alert('Please agree to the required permissions');
+                return false;
+            }
+            
+            // Validate passwords for non-members
+            if ($('#password_creation_section').is(':visible')) {
+                const password = $('#dashboard_password').val();
+                const confirmPassword = $('#confirm_password').val();
+                
+                if (!password || password.length < 8) {
+                    e.preventDefault();
+                    alert('Please create a password that is at least 8 characters long.');
+                    $('#dashboard_password').focus();
+                    return false;
+                }
+                
+                if (password !== confirmPassword) {
+                    e.preventDefault();
+                    alert('Passwords do not match. Please check your password and try again.');
+                    $('#confirm_password').focus();
+                    return false;
+                }
+                
+                // Check password strength
+                if (!/^(?=.*[a-zA-Z])(?=.*\d)/.test(password)) {
+                    if (!confirm('Your password could be stronger by including both letters and numbers. Continue anyway?')) {
                         e.preventDefault();
-                        
-                        // Custom error message based on age
-                        let errorMessage = `You must be between ${minAge}-${maxAge} years old to register for this program.`;
-                        if (age < minAge) {
-                            errorMessage = `You must be at least ${minAge} years old to register for this program.`;
-                        } else if (age > maxAge) {
-                            errorMessage = `You must be ${maxAge} years old or younger to register for this program.`;
-                        }
-                        
-                        // Show error message
-                        $('.error-message').remove(); // Remove any existing error messages
-                        $('<div class="error-message"><p><i class="fas fa-exclamation-circle"></i> ' + errorMessage + '</p></div>')
-                            .insertBefore('#registration-form')
-                            .hide()
-                            .fadeIn(300);
-                        
-                        // Highlight the field and scroll to it
-                        $('#dob').addClass('error-input');
-                        $('html, body').animate({
-                            scrollTop: $('#dob').offset().top - 100
-                        }, 500);
-                        
+                        $('#dashboard_password').focus();
                         return false;
-                    } else {
-                        $('#dob').removeClass('error-input');
                     }
                 }
             }
-
-            return true;
         });
-        
-        // Password confirmation validation
-        $('#confirm_password').on('input', function() {
-            const password = $('#password').val();
-            const confirmPassword = $(this).val();
-            
-            if (confirmPassword && password !== confirmPassword) {
-                $(this).css('border-color', '#dc3545');
-            } else {
-                $(this).css('border-color', '#ced4da');
-            }
-        });
-    });
     </script>
 </body>
 </html>
