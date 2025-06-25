@@ -415,6 +415,28 @@ LEFT JOIN holiday_program_attendees a ON w.program_id = a.program_id
     AND JSON_CONTAINS(a.workshop_preference, CAST(w.id AS JSON))
 GROUP BY w.id, c.id;
 
+--or
+CREATE VIEW workshop_capacity_view AS
+SELECT 
+    w.id as workshop_id,
+    w.title,
+    w.max_participants,
+    w.prerequisites,
+    c.name as cohort_name,
+    c.id as cohort_id,
+    COUNT(DISTINCT a.id) as enrolled_count,
+    (w.max_participants - COUNT(DISTINCT a.id)) as available_spots,
+    CASE 
+        WHEN w.max_participants > 0 THEN ROUND((COUNT(DISTINCT a.id) / w.max_participants) * 100, 1)
+        ELSE 0 
+    END as capacity_percentage
+FROM holiday_program_workshops w
+LEFT JOIN holiday_program_cohorts c ON w.cohort_id = c.id
+LEFT JOIN holiday_program_attendees a ON w.program_id = a.program_id 
+    AND INSTR(a.workshop_preference, CONCAT('"', w.id, '"')) > 0
+GROUP BY w.id, c.id;
+
+
 -- Final verification queries (uncomment to run these manually)
 -- SELECT 'Schema update completed successfully!' AS status;
 -- SELECT COUNT(*) as total_cohorts FROM holiday_program_cohorts;
