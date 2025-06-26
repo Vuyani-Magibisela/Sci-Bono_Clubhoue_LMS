@@ -1,46 +1,16 @@
-
 <?php
-// Start session if not already started
+// Fixed holidayProgramIndex.php - Use manual queries instead of broken model
 if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Include database connection and required files
 require_once '../../../server.php';
 
-// Try to include the models - with error handling
-$holidayProgramModel = null;
-$activePrograms = [];
+// Force manual queries instead of using the broken model
 $allPrograms = [];
+$activePrograms = [];
 
-// First try HolidayProgramCreationModel
-if (file_exists('../../Models/HolidayProgramCreationModel.php')) {
-    require_once '../../Models/HolidayProgramCreationModel.php';
-    
-    if (class_exists('HolidayProgramCreationModel')) {
-        $holidayProgramModel = new HolidayProgramCreationModel($conn);
-        
-        // Check if getAllPrograms method exists
-        if (method_exists($holidayProgramModel, 'getAllPrograms')) {
-            try {
-                $allPrograms = $holidayProgramModel->getAllPrograms();
-                $activePrograms = $holidayProgramModel->getProgramsByStatus('active');
-            } catch (Exception $e) {
-                error_log("Error getting programs: " . $e->getMessage());
-            }
-        } else {
-            // Method doesn't exist, get programs manually
-            $allPrograms = getHolidayProgramsManually($conn);
-            $activePrograms = getActiveHolidayProgramsManually($conn);
-        }
-    }
-} else {
-    // Model file doesn't exist, get programs manually
-    $allPrograms = getHolidayProgramsManually($conn);
-    $activePrograms = getActiveHolidayProgramsManually($conn);
-}
-
-// Fallback functions to get programs directly from database
+// Function to get all programs manually (WORKING)
 function getHolidayProgramsManually($conn) {
     $programs = [];
     
@@ -54,6 +24,9 @@ function getHolidayProgramsManually($conn) {
                 end_date, 
                 registration_open,
                 max_participants,
+                location,
+                age_range,
+                time,
                 created_at,
                 updated_at,
                 (SELECT COUNT(*) FROM holiday_program_attendees WHERE program_id = holiday_programs.id) as registration_count
@@ -71,6 +44,7 @@ function getHolidayProgramsManually($conn) {
     return $programs;
 }
 
+// Function to get active programs manually (WORKING)
 function getActiveHolidayProgramsManually($conn) {
     $programs = [];
     
@@ -84,6 +58,9 @@ function getActiveHolidayProgramsManually($conn) {
                 end_date, 
                 registration_open,
                 max_participants,
+                location,
+                age_range,
+                time,
                 created_at,
                 updated_at,
                 (SELECT COUNT(*) FROM holiday_program_attendees WHERE program_id = holiday_programs.id) as registration_count
@@ -102,8 +79,24 @@ function getActiveHolidayProgramsManually($conn) {
     return $programs;
 }
 
+// Get programs using manual queries (bypassing broken model)
+try {
+    $allPrograms = getHolidayProgramsManually($conn);
+    $activePrograms = getActiveHolidayProgramsManually($conn);
+    
+    // Debug output (remove after testing)
+    error_log("holidayProgramIndex: Found " . count($allPrograms) . " total programs");
+    error_log("holidayProgramIndex: Found " . count($activePrograms) . " active programs");
+    
+} catch (Exception $e) {
+    error_log("Error getting programs manually: " . $e->getMessage());
+    $allPrograms = [];
+    $activePrograms = [];
+}
+
 // Determine current page for navigation
 $current_page = basename($_SERVER['PHP_SELF']);
+
 ?>
 
 <!DOCTYPE html>
@@ -114,27 +107,21 @@ $current_page = basename($_SERVER['PHP_SELF']);
     <title>Sci-Bono Clubhouse Holiday Programs</title>
     <link rel="stylesheet" href="../../../public/assets/css/holidayProgramIndex.css">
     <link rel="stylesheet" href="../../../public/assets/css/holidayProgramStyles.css">
-    <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-    <!--Google analytics
-	================================================-->
-	<!-- Global site tag (gtag.js) - Google Analytics -->
-	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-156064280-1"></script>
-	<script>
-	window.dataLayer = window.dataLayer || [];
-	function gtag(){dataLayer.push(arguments);}
-	gtag('js', new Date());
-
-	gtag('config', 'UA-156064280-1');
-	</script>
-
+    <!-- Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-156064280-1"></script>
+    <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'UA-156064280-1');
+    </script>
 </head>
 <body>
-    <!-- Header from main site -->
-   <?php include './holidayPrograms-header.php'; ?>
+    <!-- Header -->
+    <?php include './holidayPrograms-header.php'; ?>
     
     <!-- Hero Section -->
     <section class="hero">
@@ -192,164 +179,87 @@ $current_page = basename($_SERVER['PHP_SELF']);
                         $programIcon = "fas fa-laptop-code";
                         $programColor = "program-tech";
                         
-                        $title = $program['title'] ?? '';
-                        if (stripos($title, 'digital') !== false || stripos($title, 'design') !== false) {
-                            $programIcon = "fas fa-paint-brush";
-                            $programColor = "program-design";
-                        } elseif (stripos($title, 'robotics') !== false || stripos($title, 'electronics') !== false) {
+                        $title = $program['title'] ?? $program['term'] ?? 'Holiday Program';
+                        $titleLower = strtolower($title);
+                        
+                        if (strpos($titleLower, 'ai') !== false || strpos($titleLower, 'artificial') !== false) {
+                            $programIcon = "fas fa-brain";
+                            $programColor = "program-ai";
+                        } elseif (strpos($titleLower, 'robotics') !== false || strpos($titleLower, 'robot') !== false) {
                             $programIcon = "fas fa-robot";
                             $programColor = "program-robotics";
-                        } elseif (stripos($title, 'game') !== false || stripos($title, 'vr') !== false) {
+                        } elseif (strpos($titleLower, 'web') !== false || strpos($titleLower, 'website') !== false) {
+                            $programIcon = "fas fa-globe";
+                            $programColor = "program-web";
+                        } elseif (strpos($titleLower, 'game') !== false || strpos($titleLower, 'gaming') !== false) {
                             $programIcon = "fas fa-gamepad";
                             $programColor = "program-gaming";
-                        } elseif (stripos($title, 'web') !== false || stripos($title, 'app') !== false) {
-                            $programIcon = "fas fa-code";
-                            $programColor = "program-web";
+                        } elseif (strpos($titleLower, 'design') !== false || strpos($titleLower, 'graphics') !== false || strpos($titleLower, 'media') !== false) {
+                            $programIcon = "fas fa-paint-brush";
+                            $programColor = "program-design";
                         }
                         
-                        // Determine if registration is available and program status
+                        // Format registration button
                         $registrationButton = '';
-                        $detailsButton = '';
-                        $programStatus = '';
-                        
-                        $isRegistrationOpen = ($program['registration_open'] ?? 0) == 1;
-                        
-                        if ($isRegistrationOpen) {
-                            // Registration is open
-                            $registrationButton = "<a href='holidayProgramRegistration.php?program_id={$program['id']}' class='register-btn active'>Register Now</a>";
-                            $programStatus = "<span class='status-badge open'>Registration Open</span>";
+                        if ($program['registration_open']) {
+                            $registrationButton = "<a href='simple_registration.php?program_id={$program['id']}' class='register-btn'>Register Now</a>";
                         } else {
-                            // Registration is closed
-                            $registrationButton = "<span class='register-btn disabled'>Registration Closed</span>";
-                            $programStatus = "<span class='status-badge closed'>Registration Closed</span>";
+                            $registrationButton = "<span class='coming-soon'>Registration Closed</span>";
                         }
                         
-                        // Always show details button if program information is available
-                        if (!empty($program['title']) && !empty($program['term'])) {
-                            $detailsButton = "<a href='./holiday-program-details-term.php?id={$program['id']}' class='details-link'>View Details</a>";
-                        }
+                        // Safely get dates
+                        $dates = $program['dates'] ?? ($program['start_date'] . ' - ' . $program['end_date']);
                         
-                        // Calculate capacity if data is available
-                        $capacityHtml = '';
-                        if (isset($program['registration_count']) && isset($program['max_participants']) && $program['max_participants'] > 0) {
-                            $registrationCount = (int)$program['registration_count'];
-                            $maxCapacity = (int)$program['max_participants'];
-                            $capacityPercentage = min(($registrationCount / $maxCapacity) * 100, 100);
-                            
-                            if ($isRegistrationOpen) {
-                                $capacityHtml = "
-                                <div class='capacity-indicator'>
-                                    <div class='capacity-bar'>
-                                        <div class='capacity-fill' style='width: {$capacityPercentage}%'></div>
-                                    </div>
-                                    <span class='capacity-text'>{$registrationCount}/{$maxCapacity} participants</span>
-                                </div>";
-                            }
-                        }
+                        // Get registration count
+                        $registrationCount = $program['registration_count'] ?? 0;
+                        $maxParticipants = $program['max_participants'] ?? 30;
                         ?>
                         
-                        <div class="program-card <?php echo $programColor; ?>" data-program-id="<?php echo $program['id']; ?>">
-                            <div class="program-status-indicator">
-                                <?php echo $programStatus; ?>
-                            </div>
+                        <div class="program-card <?php echo $programColor; ?>">
                             <div class="program-icon">
                                 <i class="<?php echo $programIcon; ?>"></i>
                             </div>
                             <div class="program-info">
-                                <h3><?php echo htmlspecialchars($program['term'] ?? 'Holiday Program'); ?>: <?php echo htmlspecialchars($program['title'] ?? 'Program Title'); ?></h3>
+                                <h3><?php echo htmlspecialchars($program['term'] ?? 'Term'); ?>: <?php echo htmlspecialchars($program['title']); ?></h3>
                                 <div class="program-dates">
-                                    <i class="fas fa-calendar-alt"></i> 
-                                    <?php echo htmlspecialchars($program['dates'] ?? 'Dates TBA'); ?>
+                                    <i class="fas fa-calendar-alt"></i> <?php echo htmlspecialchars($dates); ?>
                                 </div>
-                                <p><?php echo htmlspecialchars($program['description'] ?? 'Program description coming soon...'); ?></p>
-                                
-                                <!-- Program capacity indicator -->
-                                <?php echo $capacityHtml; ?>
-                                
-                                <div class="program-action">
-                                    <?php echo $registrationButton; ?>
-                                    <?php if ($detailsButton): ?>
-                                        <?php echo $detailsButton; ?>
+                                <div class="program-meta">
+                                    <span class="meta-item">
+                                        <i class="fas fa-users"></i> 
+                                        <?php echo $registrationCount; ?>/<?php echo $maxParticipants; ?> registered
+                                    </span>
+                                    <?php if ($program['location']): ?>
+                                    <span class="meta-item">
+                                        <i class="fas fa-map-marker-alt"></i> 
+                                        <?php echo htmlspecialchars($program['location']); ?>
+                                    </span>
                                     <?php endif; ?>
                                 </div>
+                                <p><?php echo htmlspecialchars(substr($program['description'] ?? '', 0, 150)) . (strlen($program['description'] ?? '') > 150 ? '...' : ''); ?></p>
+                                <div class="program-action">
+                                    <?php echo $registrationButton; ?>
+                                    <a href="holiday-program-details-term.php?id=<?php echo $program['id']; ?>" class="details-link">View Details</a>
+                                </div>
                             </div>
                         </div>
+                        
                     <?php endforeach; ?>
+                    
                 <?php else: ?>
-                    <!-- Default/fallback programs if none in database -->
-                    <div class="program-card program-design">
-                        <div class="program-status-indicator">
-                            <span class="status-badge coming-soon">Coming Soon</span>
-                        </div>
-                        <div class="program-icon">
-                            <i class="fas fa-paint-brush"></i>
-                        </div>
-                        <div class="program-info">
-                            <h3>Term 1: Multi-Media - Digital Design</h3>
-                            <div class="program-dates">
-                                <i class="fas fa-calendar-alt"></i> March 31 - April 4, 2025
-                            </div>
-                            <p>Dive into the world of digital media creation, learning graphic design, video editing, and animation techniques.</p>
-                            <div class="program-action">
-                                <span class="register-btn disabled">Registration Opens Soon</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="program-card program-tech">
-                        <div class="program-status-indicator">
-                            <span class="status-badge coming-soon">Coming Soon</span>
-                        </div>
-                        <div class="program-icon">
-                            <i class="fas fa-laptop-code"></i>
-                        </div>
-                        <div class="program-info">
-                            <h3>Term 2: Programming & Web Development</h3>
-                            <div class="program-dates">
-                                <i class="fas fa-calendar-alt"></i> June 16 - June 20, 2025
-                            </div>
-                            <p>Learn programming fundamentals and create your own websites and web applications using modern technologies.</p>
-                            <div class="program-action">
-                                <span class="register-btn disabled">Registration Opens Soon</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="program-card program-robotics">
-                        <div class="program-status-indicator">
-                            <span class="status-badge coming-soon">Coming Soon</span>
-                        </div>
-                        <div class="program-icon">
-                            <i class="fas fa-robot"></i>
-                        </div>
-                        <div class="program-info">
-                            <h3>Term 3: Robotics & Electronics</h3>
-                            <div class="program-dates">
-                                <i class="fas fa-calendar-alt"></i> September 22 - September 26, 2025
-                            </div>
-                            <p>Build and program robots while learning about electronics, sensors, and automation technologies.</p>
-                            <div class="program-action">
-                                <span class="register-btn disabled">Registration Opens Soon</span>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="program-card program-gaming">
-                        <div class="program-status-indicator">
-                            <span class="status-badge coming-soon">Coming Soon</span>
-                        </div>
-                        <div class="program-icon">
-                            <i class="fas fa-gamepad"></i>
-                        </div>
-                        <div class="program-info">
-                            <h3>Term 4: Game Development & VR</h3>
-                            <div class="program-dates">
-                                <i class="fas fa-calendar-alt"></i> December 15 - December 19, 2025
-                            </div>
-                            <p>Create interactive games and explore virtual reality experiences using cutting-edge development tools.</p>
-                            <div class="program-action">
-                                <span class="register-btn disabled">Registration Opens Soon</span>
-                            </div>
+                    <!-- Fallback when no programs found -->
+                    <div class="no-programs-message">
+                        <div class="empty-state">
+                            <i class="fas fa-calendar-times" style="font-size: 4rem; color: #ccc; margin-bottom: 1rem;"></i>
+                            <h3>No Programs Available</h3>
+                            <p>There are currently no holiday programs scheduled. Please check back later!</p>
+                            <?php if (isset($_SESSION['user_type']) && $_SESSION['user_type'] === 'admin'): ?>
+                                <div style="margin-top: 20px;">
+                                    <a href="holidayProgramCreationForm.php" class="cta-button">
+                                        <i class="fas fa-plus"></i> Create First Program
+                                    </a>
+                                </div>
+                            <?php endif; ?>
                         </div>
                     </div>
                 <?php endif; ?>
@@ -381,47 +291,36 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">
-                        <i class="fas fa-users-cog"></i>
-                    </div>
-                    <h3>Collaborative Environment</h3>
-                    <p>Work alongside peers in a supportive clubhouse environment that encourages collaboration and creativity.</p>
-                </div>
-                <div class="feature-card">
-                    <div class="feature-icon">
                         <i class="fas fa-certificate"></i>
                     </div>
-                    <h3>Certificate of Completion</h3>
-                    <p>Receive recognition for your achievements and document your learning journey with official certificates.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-    
-    <!-- CTA Section -->
-    <section class="cta-section">
-        <div class="container">
-            <div class="cta-content">
-                <h2>Ready to Start Your Learning Journey?</h2>
-                <p>Join thousands of young innovators who have discovered their passion for technology through our holiday programs.</p>
-                <div class="cta-buttons">
-                    <a href="#programs" class="cta-button primary">View Programs</a>
-                    <a href="holidayProgramLogin.php" class="cta-button secondary">Login to Dashboard</a>
+                    <h3>Industry Recognition</h3>
+                    <p>Receive certificates of completion and gain recognition for your achievements in technology and innovation.</p>
                 </div>
             </div>
         </div>
     </section>
 
     <!-- Footer -->
-    <footer class="holiday-footer">
+    <footer class="footer">
         <div class="container">
             <div class="footer-content">
+                <div class="footer-section">
+                    <h3>Sci-Bono Clubhouse</h3>
+                    <p>Inspiring the next generation of innovators through hands-on learning and creative exploration.</p>
+                </div>
+                <div class="footer-section">
+                    <h3>Contact Info</h3>
+                    <p><i class="fas fa-map-marker-alt"></i> Sci-Bono Discovery Centre</p>
+                    <p><i class="fas fa-phone"></i> +27 11 639 8400</p>
+                    <p><i class="fas fa-envelope"></i> info@sci-bono.co.za</p>
+                </div>
                 <div class="footer-section">
                     <h3>Follow Us</h3>
                     <div class="social-links">
                         <a href="#"><i class="fab fa-facebook"></i></a>
                         <a href="#"><i class="fab fa-twitter"></i></a>
                         <a href="#"><i class="fab fa-instagram"></i></a>
-                        <a href="#"><i class="fab fa-youtube"></i></a>
+                        <a href="#"><i class="fab fa-linkedin"></i></a>
                     </div>
                 </div>
             </div>
@@ -431,32 +330,41 @@ $current_page = basename($_SERVER['PHP_SELF']);
         </div>
     </footer>
 
-    <!-- JavaScript -->
-    <script src="../../../public/assets/js/holidayProgramIndex.js"></script>
-    <script>
-        // Auto-refresh program status every 30 seconds
-        setInterval(function() {
-            // Only refresh if page is visible
-            if (!document.hidden) {
-                // Check for status updates without full page reload
-                checkForProgramUpdates();
-            }
-        }, 30000);
-        
-        function checkForProgramUpdates() {
-            // Simple AJAX call to check for updates
-            fetch('./api/get-all-program-status.php')
-                .then(response => response.json())
-                .then(data => {
-                    if (data.success && data.has_updates) {
-                        // Reload page if there are updates
-                        window.location.reload();
-                    }
-                })
-                .catch(error => {
-                    console.log('Update check failed:', error);
-                });
-        }
-    </script>
+    <style>
+    .no-programs-message {
+        grid-column: 1 / -1;
+        text-align: center;
+        padding: 3rem;
+    }
+
+    .empty-state {
+        background: white;
+        padding: 3rem;
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+
+    .program-meta {
+        margin: 10px 0;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1rem;
+    }
+
+    .meta-item {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        color: #666;
+        font-size: 0.85rem;
+    }
+
+    .program-ai { border-top: 4px solid #8B5CF6; }
+    .program-design { border-top: 4px solid #F59E0B; }
+    .program-tech { border-top: 4px solid #3B82F6; }
+    .program-robotics { border-top: 4px solid #EF4444; }
+    .program-web { border-top: 4px solid #10B981; }
+    .program-gaming { border-top: 4px solid #EC4899; }
+    </style>
 </body>
 </html>

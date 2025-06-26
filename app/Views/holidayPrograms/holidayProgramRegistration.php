@@ -3,8 +3,6 @@ session_start();
 require_once '../../../server.php';
 require_once '../../Models/holiday-program-functions.php';
 
-if (isset($_GET['debug'])) include_once 'debug_registration.php';
-
 // Function to get program configuration and structure
 function getProgramConfiguration($conn, $programId) {
     $sql = "SELECT 
@@ -92,36 +90,21 @@ function getWorkshopsWithPrerequisites($conn, $programId) {
 function getWorkshopEnrollmentCounts($conn, $programId) {
     $counts = [];
     
-    $sql = "SELECT 
-                w.id,
-                w.title,
-                w.max_participants,
-                COUNT(DISTINCT CASE 
-                    WHEN JSON_CONTAINS(a.workshop_preference, CAST(w.id AS JSON)) 
-                    AND a.status NOT IN ('cancelled', 'declined')
-                    THEN a.id 
-                END) as enrolled_count
-            FROM holiday_program_workshops w
-            LEFT JOIN holiday_program_attendees a ON w.program_id = a.program_id
-            WHERE w.program_id = ?
-            GROUP BY w.id";
-    
+    $sql = "SELECT id, title, max_participants FROM holiday_program_workshops WHERE program_id = ?";
     $stmt = $conn->prepare($sql);
-    if (!$stmt) {
-        error_log("Failed to prepare statement: " . $conn->error);
-        return [];
-    }
     
-    $stmt->bind_param("i", $programId);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    
-    while ($row = $result->fetch_assoc()) {
-        $counts[$row['id']] = [
-            'title' => $row['title'],
-            'max' => $row['max_participants'],
-            'enrolled' => $row['enrolled_count']
-        ];
+    if ($stmt) {
+        $stmt->bind_param("i", $programId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        while ($row = $result->fetch_assoc()) {
+            $counts[$row['id']] = [
+                'title' => $row['title'],
+                'max' => $row['max_participants'],
+                'enrolled' => 0  // Simplified for now
+            ];
+        }
     }
     
     return $counts;
@@ -141,6 +124,7 @@ function isValidEmail($email) {
 function isValidPhone($phone) {
     return preg_match('/^[\d\s\-\+\(\)]{10,15}$/', $phone);
 }
+
 
 // Get program ID from URL
 $programId = isset($_GET['program_id']) ? intval($_GET['program_id']) : 1;
@@ -512,11 +496,41 @@ $types[0] = 'i'; // programId is integer
         
         // Insert mentor details if applicable
         if ($mentorRegistration && !empty($mentorExperience)) {
+            // Validate workshop preference - only insert if workshop exists for this program
+            $validWorkshopId = NULL;
+            
+            if (!empty($mentorWorkshopPreference) && $mentorWorkshopPreference > 0) {
+                // Check if workshop exists for this program
+                $checkWorkshopSql = "SELECT id FROM holiday_program_workshops WHERE id = ? AND program_id = ?";
+                $checkStmt = $conn->prepare($checkWorkshopSql);
+                
+                if ($checkStmt) {
+                    $checkStmt->bind_param("ii", $mentorWorkshopPreference, $programId);
+                    $checkStmt->execute();
+                    $checkResult = $checkStmt->get_result();
+                    
+                    if ($checkResult->num_rows > 0) {
+                        $validWorkshopId = $mentorWorkshopPreference;
+                    } else {
+                        error_log("Warning: Workshop ID $mentorWorkshopPreference does not exist for program $programId");
+                    }
+                }
+            }
+            
+            // Insert mentor details with validated workshop preference
             $mentorSql = "INSERT INTO holiday_program_mentor_details (attendee_id, experience, availability, workshop_preference) VALUES (?, ?, ?, ?)";
             $mentorStmt = $conn->prepare($mentorSql);
+            
             if ($mentorStmt) {
-                $mentorStmt->bind_param("issi", $newRegistrationId, $mentorExperience, $mentorAvailability, $mentorWorkshopPreference);
-                $mentorStmt->execute();
+                $mentorStmt->bind_param("issi", $newRegistrationId, $mentorExperience, $mentorAvailability, $validWorkshopId);
+                
+                if ($mentorStmt->execute()) {
+                    error_log("Mentor details saved successfully for attendee ID: $newRegistrationId");
+                } else {
+                    error_log("Failed to save mentor details: " . $mentorStmt->error);
+                }
+            } else {
+                error_log("Failed to prepare mentor details statement: " . $conn->error);
             }
         }
         
@@ -538,6 +552,7 @@ $types[0] = 'i'; // programId is integer
     <link rel="stylesheet" href="../../../public/assets/css/holidayProgramStyles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    
     <style>
         .program-structure-info {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);

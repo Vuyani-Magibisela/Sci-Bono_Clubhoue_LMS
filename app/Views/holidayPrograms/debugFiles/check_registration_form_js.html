@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Form JavaScript Checker</title>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        .issue-box { padding: 15px; margin: 15px 0; border-radius: 8px; }
+        .error { background: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; }
+        .warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
+        .success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
+        .info { background: #e3f2fd; color: #0c5460; border: 1px solid #bee5eb; }
+        code { background: #f8f9fa; padding: 2px 6px; border-radius: 3px; }
+        .test-btn { background: #007cba; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; margin: 5px; }
+        .test-btn:hover { background: #005a8a; }
+    </style>
+</head>
+<body>
+    <h1>🔍 Registration Form JavaScript Checker</h1>
+    <p><strong>WARNING:</strong> This tool checks for common issues preventing form submission.</p>
+
+    <div id="js-status" class="issue-box info">
+        <h3>JavaScript Status</h3>
+        <p>Checking JavaScript functionality...</p>
+    </div>
+
+    <div id="jquery-status" class="issue-box warning">
+        <h3>jQuery Status</h3>
+        <p>Checking if jQuery is loaded...</p>
+    </div>
+
+    <div id="form-validation-status" class="issue-box warning">
+        <h3>Form Validation Status</h3>
+        <p>Checking for form validation issues...</p>
+    </div>
+
+    <div id="console-errors" class="issue-box error" style="display: none;">
+        <h3>JavaScript Errors Detected</h3>
+        <div id="error-list"></div>
+    </div>
+
+    <div class="issue-box info">
+        <h3>🧪 Quick Tests</h3>
+        <p>Run these tests to identify the issue:</p>
+        <button class="test-btn" onclick="testBasicJS()">Test Basic JavaScript</button>
+        <button class="test-btn" onclick="testFormElements()">Test Form Elements</button>
+        <button class="test-btn" onclick="testValidation()">Test Validation</button>
+        <button class="test-btn" onclick="openRegistrationForm()">Open Registration Form</button>
+    </div>
+
+    <div id="test-results" class="issue-box" style="display: none;">
+        <h3>Test Results</h3>
+        <div id="results-content"></div>
+    </div>
+
+    <div class="issue-box warning">
+        <h3>🔧 Common Issues & Solutions</h3>
+        
+        <h4>1. JavaScript Validation Preventing Submission</h4>
+        <p><strong>Symptoms:</strong> Form doesn't submit, no error messages</p>
+        <p><strong>Solution:</strong> Check browser console (F12) for JavaScript errors</p>
+        
+        <h4>2. Missing jQuery Dependency</h4>
+        <p><strong>Symptoms:</strong> Form works without JavaScript features</p>
+        <p><strong>Solution:</strong> Ensure jQuery is loaded before form scripts</p>
+        
+        <h4>3. Form Validation Errors</h4>
+        <p><strong>Symptoms:</strong> Required fields highlighted but form won't submit</p>
+        <p><strong>Solution:</strong> Check all required fields are properly filled</p>
+        
+        <h4>4. Button Event Handler Issues</h4>
+        <p><strong>Symptoms:</strong> Submit button clicks but nothing happens</p>
+        <p><strong>Solution:</strong> Check if JavaScript is preventing default form submission</p>
+    </div>
+
+    <div class="issue-box info">
+        <h3>📋 Manual Debugging Steps</h3>
+        <ol>
+            <li><strong>Open Registration Form:</strong> <a href="holidayProgramRegistration.php?program_id=2" target="_blank">holidayProgramRegistration.php?program_id=2</a></li>
+            <li><strong>Open Browser DevTools:</strong> Press F12 or right-click → Inspect</li>
+            <li><strong>Go to Console tab:</strong> Look for red error messages</li>
+            <li><strong>Go to Network tab:</strong> Try submitting form and see if any requests are made</li>
+            <li><strong>Check form elements:</strong> Make sure all required fields are filled</li>
+        </ol>
+    </div>
+
+    <script>
+        let errorCount = 0;
+        let testResults = [];
+
+        // Capture JavaScript errors
+        window.addEventListener('error', function(e) {
+            errorCount++;
+            const errorDiv = document.getElementById('console-errors');
+            const errorList = document.getElementById('error-list');
+            
+            errorDiv.style.display = 'block';
+            errorList.innerHTML += `<p><strong>Error ${errorCount}:</strong> ${e.message}<br>
+                                   <small>File: ${e.filename}, Line: ${e.lineno}</small></p>`;
+        });
+
+        // Check basic JavaScript functionality
+        function checkJavaScript() {
+            const jsStatus = document.getElementById('js-status');
+            try {
+                // Test basic JS operations
+                const testArray = [1, 2, 3];
+                const testObject = { test: true };
+                const testFunction = () => "working";
+                
+                if (testArray.length === 3 && testObject.test && testFunction() === "working") {
+                    jsStatus.className = 'issue-box success';
+                    jsStatus.innerHTML = '<h3>✅ JavaScript Status</h3><p>JavaScript is working correctly!</p>';
+                    return true;
+                } else {
+                    throw new Error("Basic JavaScript operations failed");
+                }
+            } catch (e) {
+                jsStatus.className = 'issue-box error';
+                jsStatus.innerHTML = `<h3>❌ JavaScript Status</h3><p>JavaScript error: ${e.message}</p>`;
+                return false;
+            }
+        }
+
+        // Check jQuery status
+        function checkJQuery() {
+            const jqueryStatus = document.getElementById('jquery-status');
+            
+            if (typeof jQuery !== 'undefined') {
+                jqueryStatus.className = 'issue-box success';
+                jqueryStatus.innerHTML = `<h3>✅ jQuery Status</h3><p>jQuery is loaded (version ${jQuery.fn.jquery})</p>`;
+                return true;
+            } else {
+                jqueryStatus.className = 'issue-box error';
+                jqueryStatus.innerHTML = '<h3>❌ jQuery Status</h3><p>jQuery is NOT loaded. The registration form requires jQuery!</p>';
+                return false;
+            }
+        }
+
+        // Check form validation
+        function checkFormValidation() {
+            const validationStatus = document.getElementById('form-validation-status');
+            
+            // Test HTML5 validation
+            const testInput = document.createElement('input');
+            testInput.type = 'email';
+            testInput.required = true;
+            testInput.value = 'invalid-email';
+            
+            if (typeof testInput.checkValidity === 'function') {
+                const isValid = testInput.checkValidity();
+                if (!isValid) {
+                    validationStatus.className = 'issue-box success';
+                    validationStatus.innerHTML = '<h3>✅ Form Validation</h3><p>HTML5 form validation is working</p>';
+                    return true;
+                } else {
+                    validationStatus.className = 'issue-box warning';
+                    validationStatus.innerHTML = '<h3>⚠️ Form Validation</h3><p>HTML5 validation may not be working properly</p>';
+                    return false;
+                }
+            } else {
+                validationStatus.className = 'issue-box error';
+                validationStatus.innerHTML = '<h3>❌ Form Validation</h3><p>HTML5 form validation not supported</p>';
+                return false;
+            }
+        }
+
+        // Test functions for buttons
+        function testBasicJS() {
+            const result = checkJavaScript();
+            addTestResult('Basic JavaScript', result, result ? 'JavaScript is working' : 'JavaScript has issues');
+        }
+
+        function testFormElements() {
+            try {
+                // Test if we can create and manipulate form elements
+                const form = document.createElement('form');
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.name = 'test';
+                input.value = 'test value';
+                form.appendChild(input);
+                
+                const formData = new FormData(form);
+                const hasData = formData.get('test') === 'test value';
+                
+                addTestResult('Form Elements', hasData, hasData ? 'Form elements working' : 'Form elements not working');
+            } catch (e) {
+                addTestResult('Form Elements', false, `Error: ${e.message}`);
+            }
+        }
+
+        function testValidation() {
+            const result = checkFormValidation();
+            addTestResult('Form Validation', result, result ? 'Validation working' : 'Validation issues detected');
+        }
+
+        function openRegistrationForm() {
+            window.open('holidayProgramRegistration.php?program_id=2', '_blank');
+            addTestResult('Open Form', true, 'Registration form opened in new tab');
+        }
+
+        function addTestResult(testName, success, message) {
+            testResults.push({ testName, success, message });
+            updateTestResults();
+        }
+
+        function updateTestResults() {
+            const resultsDiv = document.getElementById('test-results');
+            const resultsContent = document.getElementById('results-content');
+            
+            resultsDiv.style.display = 'block';
+            
+            let html = '<ul>';
+            testResults.forEach(result => {
+                const icon = result.success ? '✅' : '❌';
+                html += `<li>${icon} <strong>${result.testName}:</strong> ${result.message}</li>`;
+            });
+            html += '</ul>';
+            
+            resultsContent.innerHTML = html;
+        }
+
+        // Run initial checks when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Debug page loaded');
+            
+            setTimeout(() => {
+                checkJavaScript();
+                checkJQuery();
+                checkFormValidation();
+            }, 100);
+        });
+
+        // Provide debugging instructions
+        console.log(`
+🔍 DEBUGGING INSTRUCTIONS:
+
+1. Check this console for any red error messages
+2. If you see errors, they're likely preventing form submission
+3. Common issues:
+   - Missing jQuery (most likely cause)
+   - JavaScript validation errors
+   - Form field validation problems
+
+4. To test the registration form:
+   - Open: holidayProgramRegistration.php?program_id=2
+   - Fill out the form completely
+   - Open DevTools (F12) before submitting
+   - Click submit and watch for errors
+
+5. If form doesn't submit:
+   - Check Console tab for JavaScript errors
+   - Check Network tab to see if any requests are made
+   - Verify all required fields are filled correctly
+        `);
+    </script>
+</body>
+</html>
