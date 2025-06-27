@@ -241,10 +241,11 @@ class HolidayProgramAdminModel {
      */
     public function getWorkshops($programId) {
         $sql = "SELECT w.*, 
-                       (SELECT COUNT(*) FROM holiday_workshop_enrollment e WHERE e.workshop_id = w.id) as enrolled_count,
-                       (SELECT COUNT(*) FROM holiday_program_attendees a 
+                    COALESCE(wcv.enrolled_count, 0) as enrolled_count,
+                    (SELECT COUNT(*) FROM holiday_program_attendees a 
                         WHERE a.program_id = ? AND a.mentor_registration = 1 AND a.mentor_workshop_preference = w.id AND a.mentor_status = 'Approved') as assigned_mentors
                 FROM holiday_program_workshops w 
+                LEFT JOIN workshop_capacity_view wcv ON w.id = wcv.workshop_id
                 WHERE w.program_id = ? 
                 ORDER BY w.title";
         

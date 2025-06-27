@@ -2,6 +2,40 @@
 // ENHANCED REGISTRATION FORM v2.0 - Adding Emergency Contact
 session_start();
 
+function checkCohortCapacity($conn, $cohortId) {
+    $sql = "SELECT c.max_participants, c.current_participants, c.status,
+                   COUNT(a.id) as actual_registrations
+            FROM holiday_program_cohorts c
+            LEFT JOIN holiday_program_attendees a ON c.id = a.cohort_id
+            WHERE c.id = ?
+            GROUP BY c.id";
+    
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $cohortId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $cohort = $result->fetch_assoc();
+    $stmt->close();
+    
+    if (!$cohort) {
+        return ['available' => false, 'remaining' => 0];
+    }
+    
+    // Use actual registrations count (more reliable than current_participants)
+    $used = $cohort['actual_registrations'];
+    $max = $cohort['max_participants'];
+    $remaining = $max - $used;
+    
+    return [
+        'available' => ($cohort['status'] === 'active' && $remaining > 0),
+        'remaining' => max(0, $remaining),
+        'total' => $max,
+        'used' => $used
+    ];
+}
+
+
+
 // Get program ID
 $programId = isset($_GET['program_id']) ? (int)$_GET['program_id'] : 2;
 
@@ -68,6 +102,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
         $emergencyContactName = trim($_POST['emergency_contact_name']);
         $emergencyContactRelationship = trim($_POST['emergency_contact_relationship']);
         $emergencyContactPhone = trim($_POST['emergency_contact_phone']);
+
+        // NEW: Check if selected cohort is still available
+        if ($cohortId > 0) {
+            $selectedCohortCapacity = checkCohortCapacity($conn, $cohortId);
+            if (!$selectedCohortCapacity['available']) {
+                throw new Exception("Sorry, the selected week is now full. Please choose another week.");
+            }
+        }
         
         // Handle "same as guardian" option
         $sameAsGuardian = isset($_POST['same_as_guardian']);
@@ -161,6 +203,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
         $error = $e->getMessage();
     }
 }
+
+$cohort3Capacity = checkCohortCapacity($conn, 3);
+$cohort4Capacity = checkCohortCapacity($conn, 4);
 ?>
 
 <!DOCTYPE html>
@@ -328,6 +373,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
             opacity: 0.5;
             pointer-events: none;
         }
+
+        option:disabled {
+            color: #999;
+            background-color: #f5f5f5;
+            font-style: italic;
+        }
+
+        select option:disabled {
+            color: #999 !important;
+        }
         
         @media (max-width: 768px) {
             .form-row {
@@ -439,16 +494,63 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
                     <label for="cohort_id">Select Program Week <span class="required">*</span></label>
                     <select id="cohort_id" name="cohort_id" required>
                         <option value="">Choose your week</option>
-                        <option value="3" <?php echo ($_POST['cohort_id'] ?? '') == '3' ? 'selected' : ''; ?>>
+                        
+                        <!-- Week 1 Option -->
+                        <option value="3" 
+                                <?php echo ($_POST['cohort_id'] ?? '') == '3' ? 'selected' : ''; ?>
+                                <?php echo !$cohort3Capacity['available'] ? 'disabled' : ''; ?>>
                             Week 1: June 30 - July 4, 2025
+                            <?php if (!$cohort3Capacity['available']): ?>
+                                (FULL - <?php echo $cohort3Capacity['used']; ?>/<?php echo $cohort3Capacity['total']; ?>)
+                            <?php else: ?>
+                                (<?php echo $cohort3Capacity['remaining']; ?> spots left)
+                            <?php endif; ?>
                         </option>
-                        <option value="4" <?php echo ($_POST['cohort_id'] ?? '') == '4' ? 'selected' : ''; ?>>
+                        
+                        <!-- Week 2 Option -->
+                        <option value="4" 
+                                <?php echo ($_POST['cohort_id'] ?? '') == '4' ? 'selected' : ''; ?>
+                                <?php echo !$cohort4Capacity['available'] ? 'disabled' : ''; ?>>
                             Week 2: July 7 - July 11, 2025
+                            <?php if (!$cohort4Capacity['available']): ?>
+                                (FULL - <?php echo $cohort4Capacity['used']; ?>/<?php echo $cohort4Capacity['total']; ?>)
+                            <?php else: ?>
+                                (<?php echo $cohort4Capacity['remaining']; ?> spots left)
+                            <?php endif; ?>
                         </option>
                     </select>
+                    
                     <small style="color: #666; display: block; margin-top: 5px;">
                         Both weeks offer the same workshops. Choose based on your availability.
+                        <?php if (!$cohort3Capacity['available'] || !$cohort4Capacity['available']): ?>
+                            <br><strong style="color: #e74c3c;">⚠️ Some weeks are full. Please select an available week.</strong>
+                        <?php endif; ?>
                     </small>
+
+                    <div style="background: #f0f8ff; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #2196F3;">
+                        <h4 style="margin-top: 0;">📊 Program Capacity Status:</h4>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                            <div>
+                                <strong>Week 1 (June 30 - July 4):</strong><br>
+                                <?php if ($cohort3Capacity['available']): ?>
+                                    <span style="color: #4CAF50;">✅ Available - <?php echo $cohort3Capacity['remaining']; ?> spots left</span>
+                                <?php else: ?>
+                                    <span style="color: #e74c3c;">❌ Full (<?php echo $cohort3Capacity['used']; ?>/<?php echo $cohort3Capacity['total']; ?>)</span>
+                                <?php endif; ?>
+                            </div>
+                            
+                            <div>
+                                <strong>Week 2 (July 7 - July 11):</strong><br>
+                                <?php if ($cohort4Capacity['available']): ?>
+                                    <span style="color: #4CAF50;">✅ Available - <?php echo $cohort4Capacity['remaining']; ?> spots left</span>
+                                <?php else: ?>
+                                    <span style="color: #e74c3c;">❌ Full (<?php echo $cohort4Capacity['used']; ?>/<?php echo $cohort4Capacity['total']; ?>)</span>
+                                <?php endif; ?>
+                            </div>
+                        </div>
+                    </div>
+                    
                 </div>
                 
                 <!-- Workshop Selection -->
@@ -763,6 +865,24 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit'])) {
             
             // Initialize the emergency contact state
             toggleEmergencyFields();
+        });
+
+        // Auto-refresh capacity every 30 seconds (optional)
+        setTimeout(function() {
+            // Only refresh if user hasn't selected anything yet
+            const cohortSelect = document.getElementById('cohort_id');
+            if (cohortSelect && cohortSelect.value === '') {
+                window.location.reload();
+            }
+        }, 30000); // 30 seconds
+
+        // Show warning if trying to select disabled option
+        document.getElementById('cohort_id').addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            if (selectedOption.disabled) {
+                alert('This week is full. Please select an available week.');
+                this.value = '';
+            }
         });
     </script>
 </body>

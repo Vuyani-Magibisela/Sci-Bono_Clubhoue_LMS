@@ -36,6 +36,41 @@ require __DIR__ . '/../../../config/config.php'; // Include the config file
 
 $adminController = new HolidayProgramAdminController($conn);
 
+function checkCohortCapacity($conn, $cohortId) {
+    $sql = "SELECT c.max_participants, c.current_participants, c.status,
+                   COUNT(a.id) as actual_registrations
+            FROM holiday_program_cohorts c
+            LEFT JOIN holiday_program_attendees a ON c.id = a.cohort_id
+            WHERE c.id = ?
+            GROUP BY c.id";
+    
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("i", $cohortId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $cohort = $result->fetch_assoc();
+    $stmt->close();
+    
+    if (!$cohort) {
+        return ['available' => false, 'remaining' => 0];
+    }
+    
+    // Use actual registrations count (more reliable than current_participants)
+    $used = $cohort['actual_registrations'];
+    $max = $cohort['max_participants'];
+    $remaining = $max - $used;
+    
+    return [
+        'available' => ($cohort['status'] === 'active' && $remaining > 0),
+        'remaining' => max(0, $remaining),
+        'total' => $max,
+        'used' => $used
+    ];
+}
+
+// Get capacity info for both cohorts
+$cohort3Capacity = checkCohortCapacity($conn, 3);
+$cohort4Capacity = checkCohortCapacity($conn, 4);
 
 
 // Handle Schedule Manager form submissions
@@ -2616,310 +2651,6 @@ $cohorts = $current_program ? getProgramCohorts($conn, $current_program['id']) :
 
                 <?php endif; ?>
 
-
-
-                <!-- NEW: Holiday Programs Schedule Manager Section -->
-
-                <div class="schedule-manager">
-
-                    <h2><i class="fas fa-calendar-check"></i> Holiday Programs Schedule Manager</h2>
-
-                    
-
-                    <!-- Program Structure Configuration -->
-
-                    <div class="config-section">
-
-                        <h3><i class="fas fa-sitemap"></i> Program Structure</h3>
-
-                        <form method="POST" action="">
-
-                            <input type="hidden" name="action" value="update_program_structure">
-
-                            <input type="hidden" name="program_id" value="<?php echo $current_program['id']; ?>">
-
-                            
-
-                            <div class="two-column">
-
-                                <div class="form-group">
-
-                                    <label for="duration">Program Duration (weeks)</label>
-
-                                    <input type="number" id="duration" name="duration" class="form-control" 
-
-                                           value="<?php echo $programStructure['duration_weeks'] ?? 2; ?>" min="1" max="8" required>
-
-                                </div>
-
-                                
-
-                                <div class="form-group">
-
-                                    <label>Program Features</label>
-
-                                    <div class="checkbox-group">
-
-                                        <input type="checkbox" id="enable_cohorts" name="enable_cohorts" 
-
-                                               <?php echo ($programStructure['cohort_system'] ?? false) ? 'checked' : ''; ?>>
-
-                                        <label for="enable_cohorts">Enable Cohort System</label>
-
-                                    </div>
-
-                                    <div class="checkbox-group">
-
-                                        <input type="checkbox" id="enable_prerequisites" name="enable_prerequisites"
-
-                                               <?php echo ($programStructure['prerequisites_enabled'] ?? false) ? 'checked' : ''; ?>>
-
-                                        <label for="enable_prerequisites">Enable Prerequisites</label>
-
-                                    </div>
-
-                                </div>
-
-                            </div>
-
-                            
-
-                            <button type="submit" class="btn btn-primary">
-
-                                <i class="fas fa-save"></i> Update Program Structure
-
-                            </button>
-
-                        </form>
-
-                    </div>
-
-
-
-                    <!-- Cohorts Management -->
-
-                    <div class="config-section">
-
-                        <h3><i class="fas fa-users"></i> Cohorts Management</h3>
-
-                        
-
-                        <?php if (!empty($cohorts)): ?>
-
-                            <div class="cohorts-list">
-
-                                <?php foreach ($cohorts as $cohort): ?>
-
-                                    <div class="cohort-item">
-
-                                        <h4><?php echo htmlspecialchars($cohort['name']); ?></h4>
-
-                                        <p><strong>Duration:</strong> <?php echo date('M j', strtotime($cohort['start_date'])); ?> - <?php echo date('M j, Y', strtotime($cohort['end_date'])); ?></p>
-
-                                        <p><strong>Capacity:</strong> <?php echo $cohort['max_participants']; ?> participants</p>
-
-                                    </div>
-
-                                <?php endforeach; ?>
-
-                            </div>
-
-                        <?php endif; ?>
-
-                        
-
-                        <form method="POST" action="" class="add-cohort-form">
-
-                            <input type="hidden" name="action" value="add_cohort">
-
-                            <input type="hidden" name="program_id" value="<?php echo $current_program['id']; ?>">
-
-                            
-
-                            <div class="two-column">
-
-                                <div class="form-group">
-
-                                    <label for="cohort_name">Cohort Name</label>
-
-                                    <input type="text" id="cohort_name" name="cohort_name" class="form-control" 
-
-                                           placeholder="e.g., Week 1 Group, Advanced Cohort" required>
-
-                                </div>
-
-                                
-
-                                <div class="form-group">
-
-                                    <label for="cohort_capacity">Capacity</label>
-
-                                    <input type="number" id="cohort_capacity" name="cohort_capacity" class="form-control" 
-
-                                           value="20" min="5" max="50" required>
-
-                                </div>
-
-                            </div>
-
-                            
-
-                            <div class="two-column">
-
-                                <div class="form-group">
-
-                                    <label for="cohort_start_date">Start Date</label>
-
-                                    <input type="date" id="cohort_start_date" name="cohort_start_date" class="form-control" required>
-
-                                </div>
-
-                                
-
-                                <div class="form-group">
-
-                                    <label for="cohort_end_date">End Date</label>
-
-                                    <input type="date" id="cohort_end_date" name="cohort_end_date" class="form-control" required>
-
-                                </div>
-
-                            </div>
-
-                            
-
-                            <button type="submit" class="btn btn-success">
-
-                                <i class="fas fa-plus"></i> Add Cohort
-
-                            </button>
-
-                        </form>
-
-                    </div>
-
-
-
-                    <!-- Workshop Offerings Management -->
-
-                    <div class="config-section">
-
-                        <h3><i class="fas fa-laptop-code"></i> Workshop Offerings</h3>
-
-                        
-
-                        <?php if (!empty($workshops)): ?>
-
-                            <div class="workshops-list">
-
-                                <?php foreach ($workshops as $workshop): ?>
-
-                                    <div class="workshop-item">
-
-                                        <form method="POST" action="" class="workshop-form">
-
-                                            <input type="hidden" name="action" value="update_workshop">
-
-                                            <input type="hidden" name="workshop_id" value="<?php echo $workshop['id']; ?>">
-
-                                            
-
-                                            <div class="two-column">
-
-                                                <div class="form-group">
-
-                                                    <label>Workshop Title</label>
-
-                                                    <input type="text" name="workshop_title" class="form-control" 
-
-                                                           value="<?php echo htmlspecialchars($workshop['title']); ?>" required>
-
-                                                </div>
-
-                                                
-
-                                                <div class="form-group">
-
-                                                    <label>Instructor</label>
-
-                                                    <input type="text" name="workshop_instructor" class="form-control" 
-
-                                                           value="<?php echo htmlspecialchars($workshop['instructor'] ?? ''); ?>">
-
-                                                </div>
-
-                                            </div>
-
-                                            
-
-                                            <div class="form-group">
-
-                                                <label>Description</label>
-
-                                                <textarea name="workshop_description" class="form-control" rows="3"><?php echo htmlspecialchars($workshop['description'] ?? ''); ?></textarea>
-
-                                            </div>
-
-                                            
-
-                                            <div class="two-column">
-
-                                                <div class="form-group">
-
-                                                    <label>Capacity</label>
-
-                                                    <input type="number" name="workshop_capacity" class="form-control" 
-
-                                                           value="<?php echo $workshop['max_participants']; ?>" min="5" max="30" required>
-
-                                                </div>
-
-                                                
-
-                                                <div class="form-group">
-
-                                                    <label>Prerequisites</label>
-
-                                                    <input type="text" name="workshop_prerequisites" class="form-control" 
-
-                                                           value="<?php echo htmlspecialchars($workshop['prerequisites'] ?? ''); ?>" 
-
-                                                           placeholder="e.g., Basic computer skills, Age 13+">
-
-                                                </div>
-
-                                            </div>
-
-                                            
-
-                                            <button type="submit" class="btn btn-primary">
-
-                                                <i class="fas fa-save"></i> Update Workshop
-
-                                            </button>
-
-                                        </form>
-
-                                    </div>
-
-                                <?php endforeach; ?>
-
-                            </div>
-
-                        <?php else: ?>
-
-                            <p>No workshops configured for this program. <a href="holidayProgramCreationForm.php?program_id=<?php echo $current_program['id']; ?>">Add workshops here</a>.</p>
-
-                        <?php endif; ?>
-
-                    </div>
-
-                </div>
-
-                <!-- END: Schedule Manager Section -->
-
-                
-
                 <div class="dashboard-content">
 
                     <!-- Quick Stats -->
@@ -3585,6 +3316,331 @@ $cohorts = $current_program ? getProgramCohorts($conn, $current_program['id']) :
                     </div>
 
                 </div>
+
+                <!-- NEW: Holiday Programs Schedule Manager Section -->
+
+                <div class="schedule-manager">
+
+                    <h2><i class="fas fa-calendar-check"></i> Holiday Programs Schedule Manager</h2>
+
+                    
+
+                    <!-- Program Structure Configuration -->
+
+                    <div class="config-section">
+
+                        <h3><i class="fas fa-sitemap"></i> Program Structure</h3>
+
+                        <form method="POST" action="">
+
+                            <input type="hidden" name="action" value="update_program_structure">
+
+                            <input type="hidden" name="program_id" value="<?php echo $current_program['id']; ?>">
+
+                            
+
+                            <div class="two-column">
+
+                                <div class="form-group">
+
+                                    <label for="duration">Program Duration (weeks)</label>
+
+                                    <input type="number" id="duration" name="duration" class="form-control" 
+
+                                           value="<?php echo $programStructure['duration_weeks'] ?? 2; ?>" min="1" max="8" required>
+
+                                </div>
+
+                                
+
+                                <div class="form-group">
+
+                                    <label>Program Features</label>
+
+                                    <div class="checkbox-group">
+
+                                        <input type="checkbox" id="enable_cohorts" name="enable_cohorts" 
+
+                                               <?php echo ($programStructure['cohort_system'] ?? false) ? 'checked' : ''; ?>>
+
+                                        <label for="enable_cohorts">Enable Cohort System</label>
+
+                                    </div>
+
+                                    <div class="checkbox-group">
+
+                                        <input type="checkbox" id="enable_prerequisites" name="enable_prerequisites"
+
+                                               <?php echo ($programStructure['prerequisites_enabled'] ?? false) ? 'checked' : ''; ?>>
+
+                                        <label for="enable_prerequisites">Enable Prerequisites</label>
+
+                                    </div>
+
+                                </div>
+
+                            </div>
+
+                            
+
+                            <button type="submit" class="btn btn-primary">
+
+                                <i class="fas fa-save"></i> Update Program Structure
+
+                            </button>
+
+                        </form>
+
+                    </div>
+
+
+
+                    <!-- Cohorts Management -->
+
+                    <div class="config-section">
+
+                        <h3><i class="fas fa-users"></i> Cohorts Management</h3>
+                        <!-- Cohort Capacity Stats -->
+                        <div style="background: #f0f8ff; padding: 15px; border-radius: 8px; margin: 15px 0; border-left: 4px solid #2196F3;">
+                            <h4 style="margin-top: 0;">📊 Program Capacity Status:</h4>
+                            
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                                <div>
+                                    <strong>Week 1 (June 30 - July 4):</strong><br>
+                                    <?php if ($cohort3Capacity['available']): ?>
+                                        <span style="color: #4CAF50;">✅ Available - <?php echo $cohort3Capacity['remaining']; ?> spots left</span>
+                                    <?php else: ?>
+                                        <span style="color: #e74c3c;">❌ Full (<?php echo $cohort3Capacity['used']; ?>/<?php echo $cohort3Capacity['total']; ?>)</span>
+                                    <?php endif; ?>
+                                </div>
+                                
+                                <div>
+                                    <strong>Week 2 (July 7 - July 11):</strong><br>
+                                    <?php if ($cohort4Capacity['available']): ?>
+                                        <span style="color: #4CAF50;">✅ Available - <?php echo $cohort4Capacity['remaining']; ?> spots left</span>
+                                    <?php else: ?>
+                                        <span style="color: #e74c3c;">❌ Full (<?php echo $cohort4Capacity['used']; ?>/<?php echo $cohort4Capacity['total']; ?>)</span>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>                        
+                        
+
+                        <?php if (!empty($cohorts)): ?>
+
+                            <div class="cohorts-list">
+
+                                <?php foreach ($cohorts as $cohort): ?>
+
+                                    <div class="cohort-item">
+
+                                        <h4><?php echo htmlspecialchars($cohort['name']); ?></h4>
+
+                                        <p><strong>Duration:</strong> <?php echo date('M j', strtotime($cohort['start_date'])); ?> - <?php echo date('M j, Y', strtotime($cohort['end_date'])); ?></p>
+
+                                        <p><strong>Capacity:</strong> <?php echo $cohort['max_participants']; ?> participants</p>
+
+                                    </div>
+
+                                <?php endforeach; ?>
+
+                            </div>
+
+                        <?php endif; ?>
+
+                        
+
+                        <form method="POST" action="" class="add-cohort-form">
+
+                            <input type="hidden" name="action" value="add_cohort">
+
+                            <input type="hidden" name="program_id" value="<?php echo $current_program['id']; ?>">
+
+                            
+
+                            <div class="two-column">
+
+                                <div class="form-group">
+
+                                    <label for="cohort_name">Cohort Name</label>
+
+                                    <input type="text" id="cohort_name" name="cohort_name" class="form-control" 
+
+                                           placeholder="e.g., Week 1 Group, Advanced Cohort" required>
+
+                                </div>
+
+                                
+
+                                <div class="form-group">
+
+                                    <label for="cohort_capacity">Capacity</label>
+
+                                    <input type="number" id="cohort_capacity" name="cohort_capacity" class="form-control" 
+
+                                           value="20" min="5" max="50" required>
+
+                                </div>
+
+                            </div>
+
+                            
+
+                            <div class="two-column">
+
+                                <div class="form-group">
+
+                                    <label for="cohort_start_date">Start Date</label>
+
+                                    <input type="date" id="cohort_start_date" name="cohort_start_date" class="form-control" required>
+
+                                </div>
+
+                                
+
+                                <div class="form-group">
+
+                                    <label for="cohort_end_date">End Date</label>
+
+                                    <input type="date" id="cohort_end_date" name="cohort_end_date" class="form-control" required>
+
+                                </div>
+
+                            </div>
+
+                            
+
+                            <button type="submit" class="btn btn-success">
+
+                                <i class="fas fa-plus"></i> Add Cohort
+
+                            </button>
+
+                        </form>
+
+                    </div>
+
+
+
+                    <!-- Workshop Offerings Management -->
+
+                    <div class="config-section">
+
+                        <h3><i class="fas fa-laptop-code"></i> Workshop Offerings</h3>
+
+                        
+
+                        <?php if (!empty($workshops)): ?>
+
+                            <div class="workshops-list">
+
+                                <?php foreach ($workshops as $workshop): ?>
+
+                                    <div class="workshop-item">
+
+                                        <form method="POST" action="" class="workshop-form">
+
+                                            <input type="hidden" name="action" value="update_workshop">
+
+                                            <input type="hidden" name="workshop_id" value="<?php echo $workshop['id']; ?>">
+
+                                            
+
+                                            <div class="two-column">
+
+                                                <div class="form-group">
+
+                                                    <label>Workshop Title</label>
+
+                                                    <input type="text" name="workshop_title" class="form-control" 
+
+                                                           value="<?php echo htmlspecialchars($workshop['title']); ?>" required>
+
+                                                </div>
+
+                                                
+
+                                                <div class="form-group">
+
+                                                    <label>Instructor</label>
+
+                                                    <input type="text" name="workshop_instructor" class="form-control" 
+
+                                                           value="<?php echo htmlspecialchars($workshop['instructor'] ?? ''); ?>">
+
+                                                </div>
+
+                                            </div>
+
+                                            
+
+                                            <div class="form-group">
+
+                                                <label>Description</label>
+
+                                                <textarea name="workshop_description" class="form-control" rows="3"><?php echo htmlspecialchars($workshop['description'] ?? ''); ?></textarea>
+
+                                            </div>
+
+                                            
+
+                                            <div class="two-column">
+
+                                                <div class="form-group">
+
+                                                    <label>Capacity</label>
+
+                                                    <input type="number" name="workshop_capacity" class="form-control" 
+
+                                                           value="<?php echo $workshop['max_participants']; ?>" min="5" max="30" required>
+
+                                                </div>
+
+                                                
+
+                                                <div class="form-group">
+
+                                                    <label>Prerequisites</label>
+
+                                                    <input type="text" name="workshop_prerequisites" class="form-control" 
+
+                                                           value="<?php echo htmlspecialchars($workshop['prerequisites'] ?? ''); ?>" 
+
+                                                           placeholder="e.g., Basic computer skills, Age 13+">
+
+                                                </div>
+
+                                            </div>
+
+                                            
+
+                                            <button type="submit" class="btn btn-primary">
+
+                                                <i class="fas fa-save"></i> Update Workshop
+
+                                            </button>
+
+                                        </form>
+
+                                    </div>
+
+                                <?php endforeach; ?>
+
+                            </div>
+
+                        <?php else: ?>
+
+                            <p>No workshops configured for this program. <a href="holidayProgramCreationForm.php?program_id=<?php echo $current_program['id']; ?>">Add workshops here</a>.</p>
+
+                        <?php endif; ?>
+
+                    </div>
+
+                </div>
+
+                <!-- END: Schedule Manager Section -->
+
+                
 
             <?php endif; ?>
 
