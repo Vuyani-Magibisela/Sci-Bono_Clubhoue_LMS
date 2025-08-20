@@ -1,4 +1,4 @@
-<?php
+checkCohortCapacity(<?php
 // ENHANCED REGISTRATION FORM v2.0 - Adding Emergency Contact
 session_start();
 

@@ -3006,41 +3006,43 @@ $cohorts = $current_program ? getProgramCohorts($conn, $current_program['id']) :
                                                 <td style="padding: 12px;"><?php echo date('M j, Y', strtotime($registration['created_at'])); ?></td>
 
                                                 <td style="padding: 12px;">
-
                                                     <div style="display: flex; gap: 5px; flex-wrap: wrap;">
 
-                                                        <button class="action-btn" onclick="viewAttendee(<?php echo $registration['id']; ?>)" 
-
+                                                        <!-- View Attendee Button -->
+                                                        <button class="action-btn" onclick="viewAttendee(<?php echo $registration['id']; ?>)"
                                                                 style="background: #17a2b8; color: white; padding: 6px 10px; font-size: 0.8rem;">
-
                                                             <i class="fas fa-eye"></i>
-
                                                         </button>
 
-                                                        
+                                                        <!-- View/Edit Profile Link -->
+                                                        <a href="holiday-profile.php?user_id=<?php echo $registration['id']; ?>" 
+                                                        class="action-btn view-profile" 
+                                                        title="View/Edit Profile" 
+                                                        style="background: #6c757d; color: white; padding: 6px 10px; font-size: 0.8rem; display: flex; align-items: center;">
+                                                            <i class="fas fa-user-edit"></i>
+                                                        </a>
 
+                                                        <!-- Send Profile Email Button -->
+                                                        <button onclick="sendProfileEmail(<?php echo $registration['id']; ?>)" 
+                                                                class="action-btn send-email" 
+                                                                title="Send Profile Access Email" 
+                                                                style="background: #ffc107; color: black; padding: 6px 10px; font-size: 0.8rem;">
+                                                            <i class="fas fa-envelope"></i>
+                                                        </button>
+
+                                                        <!-- Conditional Buttons for Pending Status -->
                                                         <?php if ($registration['registration_status'] === 'pending'): ?>
-
                                                             <button class="action-btn success" onclick="updateStatus(<?php echo $registration['id']; ?>, 'confirmed')" 
-
                                                                     style="padding: 6px 10px; font-size: 0.8rem;">
-
                                                                 <i class="fas fa-check"></i>
-
                                                             </button>
-
                                                             <button class="action-btn danger" onclick="updateStatus(<?php echo $registration['id']; ?>, 'canceled')" 
-
                                                                     style="padding: 6px 10px; font-size: 0.8rem;">
-
                                                                 <i class="fas fa-times"></i>
-
                                                             </button>
-
                                                         <?php endif; ?>
 
                                                     </div>
-
                                                 </td>
 
                                             </tr>
@@ -4669,6 +4671,30 @@ document.head.appendChild(dashboardStyle);
 
 
 console.log('Enhanced Dashboard JavaScript fully initialized');
+
+    // Add to your existing admin dashboard JavaScript
+    function sendProfileEmail(attendeeId) {
+        if (confirm('Send profile access email to this attendee?')) {
+            fetch('../../Controllers/send-profile-email.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'attendee_id=' + attendeeId
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    showNotification('Profile access email sent successfully!', 'success');
+                } else {
+                    showNotification('Failed to send email: ' + data.message, 'error');
+                }
+            })
+            .catch(error => {
+                showNotification('Error sending email', 'error');
+            });
+        }
+    }
 
     </script>
 

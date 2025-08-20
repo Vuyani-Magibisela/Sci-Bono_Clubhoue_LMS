@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jun 26, 2025 at 10:22 AM
+-- Generation Time: Jun 30, 2025 at 04:34 AM
 -- Server version: 8.0.42-0ubuntu0.22.04.1
 -- PHP Version: 8.1.2-1ubuntu2.21
 
@@ -730,7 +730,7 @@ CREATE TABLE `holiday_programs` (
 
 INSERT INTO `holiday_programs` (`id`, `term`, `title`, `description`, `dates`, `time`, `start_date`, `end_date`, `location`, `age_range`, `lunch_included`, `program_goals`, `registration_deadline`, `max_participants`, `registration_open`, `status`, `created_at`, `updated_at`, `auto_close_on_capacity`, `auto_close_on_date`, `notification_settings`, `program_structure`) VALUES
 (1, 'Term 1', 'Multi-Media - Digital Design', 'Dive into the world of digital media creation, learning graphic design, video editing, and animation techniques.', 'March 31 - April 4, 2025', '9:00 AM - 4:00 PM', '2025-03-29', '2025-04-07', 'Sci-Bono Clubhouse', '13-18 years', 1, NULL, '2025-03-22 00:00:00', 35, 0, 'completed', '2025-03-26 19:24:06', '2025-06-24 14:24:49', 1, 0, NULL, '{\"updated_at\": \"2025-06-23 20:05:19.000000\", \"cohort_size\": 20, \"max_cohorts\": 2, \"cohort_system\": true, \"duration_weeks\": 2, \"prerequisites_enabled\": true}'),
-(2, 'Term 2', 'Sci-Bono Clubhouse Term 2 AI Festival ', 'The Term 2 AI Festival is designed to immerse participants in the exciting world of artificial intelligence through hands-on programming, web development, and electronics projects. This intensive program will explore AI through three distinct but interconnected tracks: Programming AI Projects, Web Projects, and Electronics Projects.', 'June 30 - July 18, 2025', '9:00 AM - 4:00 PM', '2025-06-30', '2025-07-18', 'Sci-Bono Clubhouse', '13-18 years', 1, 'Participants will gain practical experience with machine learning algorithms, web-based AI applications, and AI-powered hardware projects. The program emphasizes practical application of AI concepts through coding exercises, interactive workshops, and creative project development. All projects will incorporate real-world problem-solving scenarios that demonstrate how AI can be used to address challenges in education, healthcare, environment, and community development.', '27 June 2025', 30, 1, 'draft', '2025-06-09 14:36:41', '2025-06-23 18:14:57', 0, 0, NULL, '{\"updated_at\": \"2025-06-23 20:14:57.000000\", \"cohort_system\": false, \"duration_weeks\": 2, \"prerequisites_enabled\": false}');
+(2, 'Term 2', 'Sci-Bono Clubhouse Term 2 AI Festival ', 'The Term 2 AI Festival is designed to immerse participants in the exciting world of artificial intelligence through hands-on programming, web development, and electronics projects. This intensive program will explore AI through three distinct but interconnected tracks: Programming AI Projects, Web Projects, and Electronics Projects.', 'June 30 - July 18, 2025', '9:00 AM - 4:00 PM', '2025-06-30', '2025-07-18', 'Sci-Bono Clubhouse', '13-18 years', 1, 'Participants will gain practical experience with machine learning algorithms, web-based AI applications, and AI-powered hardware projects. The program emphasizes practical application of AI concepts through coding exercises, interactive workshops, and creative project development. All projects will incorporate real-world problem-solving scenarios that demonstrate how AI can be used to address challenges in education, healthcare, environment, and community development.', '27 June 2025', 30, 1, 'draft', '2025-06-09 14:36:41', '2025-06-26 20:46:11', 0, 0, NULL, '{\"duration_weeks\":2,\"cohort_system\":true,\"prerequisites_enabled\":true,\"updated_at\":\"2025-06-26 22:46:11\"}');
 
 --
 -- Triggers `holiday_programs`
@@ -764,30 +764,47 @@ DELIMITER ;
 -- (See below for the actual view)
 --
 CREATE TABLE `holiday_programs_with_status` (
-`age_range` varchar(50)
-,`created_at` timestamp
-,`dates` varchar(100)
+`id` int
+,`term` varchar(50)
+,`title` varchar(255)
 ,`description` text
-,`display_status` varchar(19)
+,`dates` varchar(100)
+,`time` varchar(50)
+,`start_date` date
 ,`end_date` date
-,`id` int
 ,`location` varchar(255)
+,`age_range` varchar(50)
 ,`lunch_included` tinyint(1)
-,`max_participants` int
-,`member_registrations` bigint
-,`mentor_registrations` bigint
 ,`program_goals` text
 ,`registration_deadline` varchar(100)
+,`max_participants` int
 ,`registration_open` tinyint(1)
-,`start_date` date
 ,`status` enum('draft','open','closing_soon','closed','completed','cancelled')
-,`term` varchar(50)
-,`time` varchar(50)
-,`title` varchar(255)
-,`total_registrations` bigint
+,`created_at` timestamp
 ,`updated_at` timestamp
+,`display_status` varchar(19)
+,`total_registrations` bigint
+,`member_registrations` bigint
+,`mentor_registrations` bigint
 ,`workshop_count` bigint
 );
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `holiday_program_access_tokens`
+--
+
+CREATE TABLE `holiday_program_access_tokens` (
+  `id` int NOT NULL,
+  `attendee_id` int NOT NULL,
+  `token` varchar(64) COLLATE utf8mb4_general_ci NOT NULL,
+  `expires_at` datetime NOT NULL,
+  `used_at` datetime DEFAULT NULL,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
+  `created_by` int DEFAULT NULL COMMENT 'Admin user who created the token',
+  `ip_address` varchar(45) COLLATE utf8mb4_general_ci DEFAULT NULL COMMENT 'IP address when token was created'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Secure tokens for holiday program profile access';
 
 -- --------------------------------------------------------
 
@@ -855,6 +872,8 @@ CREATE TABLE `holiday_program_attendees` (
   `mentor_workshop_preference` int DEFAULT NULL,
   `password` varchar(255) COLLATE utf8mb4_general_ci DEFAULT NULL,
   `last_login` datetime DEFAULT NULL,
+  `profile_completed` tinyint(1) DEFAULT '0',
+  `email_verified` tinyint(1) DEFAULT '0',
   `is_clubhouse_member` tinyint(1) DEFAULT '0',
   `status` varchar(20) COLLATE utf8mb4_general_ci NOT NULL DEFAULT 'pending',
   `cohort_id` int DEFAULT NULL COMMENT 'Assigned cohort for this attendee',
@@ -865,26 +884,27 @@ CREATE TABLE `holiday_program_attendees` (
 -- Dumping data for table `holiday_program_attendees`
 --
 
-INSERT INTO `holiday_program_attendees` (`id`, `program_id`, `user_id`, `first_name`, `last_name`, `email`, `phone`, `date_of_birth`, `gender`, `school`, `grade`, `address`, `city`, `province`, `postal_code`, `guardian_name`, `guardian_relationship`, `guardian_phone`, `guardian_email`, `emergency_contact_name`, `emergency_contact_relationship`, `emergency_contact_phone`, `workshop_preference`, `why_interested`, `experience_level`, `needs_equipment`, `medical_conditions`, `allergies`, `photo_permission`, `data_permission`, `dietary_restrictions`, `additional_notes`, `registration_status`, `created_at`, `updated_at`, `mentor_registration`, `mentor_status`, `mentor_workshop_preference`, `password`, `last_login`, `is_clubhouse_member`, `status`, `cohort_id`, `prerequisites_met`) VALUES
-(1, 1, 1, 'Vuyani', 'Magibisela', 'vuyani.magibisela@sci-bono.co.za', '638393157', '2010-08-23', 'Male', '0', 12, '123 Gull Street', 'Johannesburg', 'Gauteng', '2021', 'Mandisa', 'Mother', '0721166543', 'mandi@gmail.com', '', '', '', '[\"3\",\"4\"]', 'Learn', '0', 1, 'No', '0', 1, 1, 'No', 'Learn', 'confirmed', '2025-03-28 16:40:40', '2025-06-06 14:45:48', 0, NULL, NULL, NULL, NULL, 0, 'pending', NULL, NULL),
-(2, 1, 7, 'Sam', 'Kabanga', 'sam@example.com', '688965565', '2025-02-21', 'Male', NULL, NULL, '123 Good Street', 'Johannesburg', '', '1920', NULL, NULL, NULL, NULL, 'Thabo', 'Uncle', '0832342342', '[]', 'sdf', 'Advanced', 0, 'dssdf', 'sd', 1, 1, 'dssd', 'sd', 'confirmed', '2025-03-30 14:48:38', '2025-06-06 14:46:01', 1, 'Approved', 4, NULL, NULL, 0, 'pending', NULL, NULL),
-(3, 1, 2, 'Itumeleng', 'Kgakane', 'itum@gmail.com', '0', '2012-01-12', 'Male', 'Fernadale High School', 12, '123 Good Street', 'Johannesburg', 'Gauteng', '1920', 'Mandi', 'Mother', '736933940', 'mandi@gmail.com', '', '', '', '[\"3\",\"4\"]', 'df', 'Beginner', 0, 'fsd', 'sdf', 1, 1, 'sd', 'sdf', 'pending', '2025-03-30 15:31:51', '2025-03-30 15:31:51', 0, NULL, NULL, NULL, NULL, 0, 'pending', NULL, NULL),
-(4, 1, 8, 'Jabu', 'Khumalo', 'jabut@example.com', '0', '2012-02-21', 'Male', 'Fernadale High School', 12, '123 Main St', 'Johannesburg', 'Gauteng', '2021', 'Mandisa', 'Mother', '0721166543', 'mandi@gmail.com', '', '', '', '[\"1\",\"2\"]', 'ds', 'Basic', 0, 'sd', 'fds', 1, 1, 'ds', 'sda', 'confirmed', '2025-03-30 16:35:22', '2025-06-06 14:46:44', 0, NULL, NULL, NULL, NULL, 0, 'pending', NULL, NULL),
-(5, 1, NULL, 'Noma', 'Mabasa', 'noma@gmail.com', '0012000', '2012-02-16', 'Male', 'Fernadale High School', 10, '123 Main St', 'Johannesburg', 'Gauteng', '2021', 'Vuyani', 'Father', '0638393157', 'vuyani@gmail.com', '', '', '', '[\"4\",\"1\"]', 'Love 3D animations', 'Intermediate', 0, 'No', 'No', 1, 1, 'No', 'Want to have fun and learn.', 'confirmed', '2025-03-30 17:09:01', '2025-06-09 14:25:54', 0, NULL, NULL, NULL, NULL, 0, 'pending', NULL, NULL),
-(6, 2, NULL, 'Kgotso', 'Maponya', 'kgotso.maponya@live.com', '0658975346', '2010-05-19', 'Male', 'Fernadale High School', 9, '123 Main St', 'Johannesburg', 'Gauteng', '2021', 'John', 'Futher', '0788945689', 'john.maponya@live.com', '', '', '', '[\"7\"]', 'I love building things', 'Basic', 0, 'Discovery', 'None', 1, 1, 'None', 'None', 'confirmed', '2025-06-17 19:18:10', '2025-06-24 08:09:15', 0, NULL, NULL, NULL, NULL, 0, 'confirmed', NULL, NULL),
-(7, 2, 7, 'Sam', 'Kabanga', 'sam@example.com', '0817851714', '2017-02-21', 'Male', 'Fernadale High School', 9, '123 Main St', 'Johannesburg', 'Gauteng', '2021', 'Tshepo Kabanga', 'Father', '0868965623', 'tshepo.kabanga@live.com', '', '', '', '[7,6]', 'I love coding and electronics', 'Beginner', 1, 'Discovery', 'No', 1, 1, 'No', 'I would like this to work please!', 'confirmed', '2025-06-24 07:46:45', '2025-06-24 08:09:06', 0, NULL, NULL, NULL, NULL, 0, 'confirmed', NULL, NULL),
-(8, 2, NULL, 'Thato', 'Banda', 'thato.banda@live.com', '0817851714', '2015-07-22', 'Male', 'Fordsburg Primary School', 7, '123 Dodo Street', 'Johannesburg', 'Gauteng', '2021', 'Themba', 'Banda', '0868972514', 'thameba.banda@live.com', '', '', '', '[5,7]', 'Love of tech', 'Intermediate', 0, 'No', 'Yes', 1, 1, 'No Pork', 'I would like to have fun.', 'confirmed', '2025-06-24 08:13:20', '2025-06-24 15:17:38', 0, NULL, NULL, NULL, NULL, 0, 'confirmed', NULL, NULL),
-(9, 2, NULL, 'dsaf', 'dsfa', 'sdfa@g.df', '0865368965', '2005-05-09', 'Female', 'sdfa', 7, 'sdaf', 'sdaf', 'KwaZulu-Natal', '2032', 'dsfa', 'sdaf', '0608658975', 'sdaf@dsf.hgf', '', '', '', '[7,6]', 'sdf', 'Beginner', 1, '', '', 1, 1, '', '', 'canceled', '2025-06-24 10:54:20', '2025-06-24 15:17:51', 0, NULL, NULL, '$2y$10$jz8MVCL2IIRjLSIpBTEvkOs0bH2Ol48noGuv2ZVkv.8uIsyFTe9OG', NULL, 0, 'pending', 3, NULL),
-(10, 2, 4, 'Themba', 'Magibisela', 'themba@example.co.za', '08638658921', '2005-02-05', 'Female', '', NULL, '123 Main St', 'Johannesburg', 'Gauteng', '2121', '', '', '', '', 'Vuyani', 'Brother', '0865698741', '[]', 'sdf', 'Beginner', 1, 'No', 'No', 1, 1, 'No', 'No', 'pending', '2025-06-24 11:15:40', '2025-06-24 11:15:40', 1, 'Pending', 7, NULL, NULL, 0, 'pending', 3, NULL),
-(11, 2, 2, 'Itumeleng', 'Kgakane', 'itum@gmail.com', '0856974589', '2000-01-12', 'Male', 'Fernadale High School', 12, '123 Main St', 'Johannesburg', 'Gauteng', '2021', 'Vuyani', 'Father', '0864789578', 'vuyani.magibisela@live.com', 'Itumeleng', 'Brother', '0768954825', '[7,5]', 'Coding and electronics', 'Novice', 1, 'Discovery', 'No', 1, 1, 'No Pork', 'No', 'pending', '2025-06-24 15:23:00', '2025-06-24 15:23:00', 0, NULL, NULL, NULL, NULL, 0, 'pending', 4, NULL),
-(12, 2, NULL, 'Tumelo', 'Motsho', 'tumelo.Motsho@live.com', '0856974589', '1999-08-05', 'Male', '', NULL, '123 Main St', 'Johannesburg', 'Gauteng', '2021', '', '', '', '', 'Vuyani', 'Brother', '0638393157', '[]', 'Want to show the kids really exciting technology.', 'Advanced', 1, 'Discovery', 'No', 1, 1, 'No', 'Thanks for the consideration.', 'pending', '2025-06-24 15:27:23', '2025-06-24 15:27:23', 1, 'Pending', 6, '$2y$10$lhfuxKqv4MKFYlXR6UJu0.GdwKr4TYUVoqGXUqoebMPhYa3S7e6Xq', NULL, 0, 'pending', 3, NULL),
-(13, 2, NULL, 'dsfa', 'dsfa', 'fdsa@dfds.d', '0856478965', '1999-08-08', 'Female', '', NULL, '123 Main St', 'Johannesburg', 'Gauteng', '2121', '', '', '', '', 'Vuyani', 'Brother', '0846579689', '[]', 'sdfa', 'Intermediate', 1, 'sdfa', 'fdsa', 1, 1, 'sdaf', 'dsa', 'canceled', '2025-06-24 15:52:26', '2025-06-24 16:07:28', 1, 'Pending', 6, '$2y$10$XEYWRAqeBpCrtGwJ58ILiuUBVKFm2/6kNF.kJndpCJVLYqzxI.5ya', NULL, 0, 'pending', 3, NULL),
-(14, 2, NULL, 'Tshepiso', 'Mabele', 'tshepiso.mabele@live.com', '0617895438', '1999-08-07', 'Male', '', NULL, '123 Gull Street', 'Johannesburg', 'Gauteng', '1819', '', '', '', '', 'Vuyani', 'Magibisela', '0678954289', '[]', 'I am interested in web development, hence it&#039;s my profession.', 'Advanced', 1, 'Discovery', 'Pork', 1, 1, 'No Pork', 'Excited to share with others.', 'confirmed', '2025-06-24 16:05:42', '2025-06-24 16:06:14', 1, 'Pending', 6, '$2y$10$GegMPzav3skKhTQyImJFVOhyWvEVkVNg1e8SBe9V4Mcbrt.h6lK6O', NULL, 0, 'pending', 3, NULL),
-(15, 2, NULL, 'qwer', 'fds', 'this@that.com', '0862547893', '2000-02-03', 'Female', '', NULL, 'sdaf', 'asdf', 'Northern Cape', '1234', '', '', '', '', '', '', '', '[]', 'sdaf', 'Novice', 1, 'sadf', 'afd', 1, 1, 'fa', 'af', 'pending', '2025-06-25 11:24:28', '2025-06-25 11:24:28', 1, 'Pending', 5, '$2y$10$SEkIOpGvVIR8JhEhr6PSFulzYJHPqZCqPMWITzliyF79644S13QWy', NULL, 0, 'pending', 4, NULL),
-(16, 2, NULL, 'Jabu', 'Letsatsi', 'jabu.letsatsi@live.com', '082345678985', '2012-08-05', 'Male', 'General Primary', 7, '123 Gull Street', 'Johannesburg', '0', '2120', 'Mbali Letsatsi', NULL, '087564892', 'mbali.letsatsi@live.com', NULL, NULL, NULL, '[7,5]', 'I want to be the best', NULL, 0, NULL, NULL, 1, 1, NULL, NULL, 'pending', '2025-06-25 20:11:44', '2025-06-25 20:11:44', 0, NULL, NULL, NULL, NULL, 0, 'pending', NULL, NULL),
-(17, 2, NULL, 'Kagiso', 'Letsatsi', 'kagiso.letsatsi@live.com', '0784567898', '2010-08-06', 'Male', 'Gloden High School', 8, '123 Main St', 'Johannesburg', '0', '2021', 'James Letsatsi', NULL, '06278945878', 'james.letsatsi@live.com', 'James Letsatsi', 'Father', '06278945878', '[6,7]', 'Very interested', NULL, 0, NULL, NULL, 1, 1, NULL, NULL, 'pending', '2025-06-25 20:49:17', '2025-06-25 20:49:17', 0, NULL, NULL, NULL, NULL, 0, 'pending', NULL, NULL),
-(18, 2, NULL, 'Matome', 'Mabele', 'matome.mabele@live.com', '0834567823', '2012-08-05', 'Female', 'Fernadale High School', 10, '123 Gull Street', 'Johannesburg', '0', '2356', 'James Mabele', NULL, '0627895243', 'james.mabele@live.com', 'James Mabele', 'Father', '0627895243', '[7,5]', 'Greate', NULL, 0, NULL, NULL, 1, 1, NULL, NULL, 'pending', '2025-06-25 22:22:02', '2025-06-25 22:22:02', 0, NULL, NULL, NULL, NULL, 0, 'pending', 3, NULL),
-(19, 2, NULL, 'Matome', 'Letsatsi', 'matome.letsatsi@live.com', '0835648978', '2012-08-05', 'Male', 'Fernadale High School', 10, '123 Gull Street', 'Johannesburg', '0', '2120', 'Thembi Letsatsi', NULL, '0817851714', 'thembi.letsatsi@live.com', 'Thembi Letsatsi', 'Mother', '0817851714', '[7,6]', 'Best', NULL, 0, NULL, NULL, 1, 1, NULL, NULL, 'pending', '2025-06-25 22:31:04', '2025-06-25 22:31:04', 0, NULL, NULL, NULL, NULL, 0, 'pending', 3, NULL);
+INSERT INTO `holiday_program_attendees` (`id`, `program_id`, `user_id`, `first_name`, `last_name`, `email`, `phone`, `date_of_birth`, `gender`, `school`, `grade`, `address`, `city`, `province`, `postal_code`, `guardian_name`, `guardian_relationship`, `guardian_phone`, `guardian_email`, `emergency_contact_name`, `emergency_contact_relationship`, `emergency_contact_phone`, `workshop_preference`, `why_interested`, `experience_level`, `needs_equipment`, `medical_conditions`, `allergies`, `photo_permission`, `data_permission`, `dietary_restrictions`, `additional_notes`, `registration_status`, `created_at`, `updated_at`, `mentor_registration`, `mentor_status`, `mentor_workshop_preference`, `password`, `last_login`, `profile_completed`, `email_verified`, `is_clubhouse_member`, `status`, `cohort_id`, `prerequisites_met`) VALUES
+(1, 1, 1, 'Vuyani', 'Magibisela', 'vuyani.magibisela@sci-bono.co.za', '638393157', '2010-08-23', 'Male', '0', 12, '123 Gull Street', 'Johannesburg', 'Gauteng', '2021', 'Mandisa', 'Mother', '0721166543', 'mandi@gmail.com', '', '', '', '[\"3\",\"4\"]', 'Learn', '0', 1, 'No', '0', 1, 1, 'No', 'Learn', 'confirmed', '2025-03-28 16:40:40', '2025-06-06 14:45:48', 0, NULL, NULL, NULL, NULL, 0, 0, 0, 'pending', NULL, NULL),
+(2, 1, 7, 'Sam', 'Kabanga', 'sam@example.com', '688965565', '2025-02-21', 'Male', NULL, NULL, '123 Good Street', 'Johannesburg', '', '1920', NULL, NULL, NULL, NULL, 'Thabo', 'Uncle', '0832342342', '[]', 'sdf', 'Advanced', 0, 'dssdf', 'sd', 1, 1, 'dssd', 'sd', 'confirmed', '2025-03-30 14:48:38', '2025-06-06 14:46:01', 1, 'Approved', 4, NULL, NULL, 0, 0, 0, 'pending', NULL, NULL),
+(3, 1, 2, 'Itumeleng', 'Kgakane', 'itum@gmail.com', '0', '2012-01-12', 'Male', 'Fernadale High School', 12, '123 Good Street', 'Johannesburg', 'Gauteng', '1920', 'Mandi', 'Mother', '736933940', 'mandi@gmail.com', '', '', '', '[\"3\",\"4\"]', 'df', 'Beginner', 0, 'fsd', 'sdf', 1, 1, 'sd', 'sdf', 'pending', '2025-03-30 15:31:51', '2025-03-30 15:31:51', 0, NULL, NULL, NULL, NULL, 0, 0, 0, 'pending', NULL, NULL),
+(4, 1, 8, 'Jabu', 'Khumalo', 'jabut@example.com', '0', '2012-02-21', 'Male', 'Fernadale High School', 12, '123 Main St', 'Johannesburg', 'Gauteng', '2021', 'Mandisa', 'Mother', '0721166543', 'mandi@gmail.com', '', '', '', '[\"1\",\"2\"]', 'ds', 'Basic', 0, 'sd', 'fds', 1, 1, 'ds', 'sda', 'confirmed', '2025-03-30 16:35:22', '2025-06-06 14:46:44', 0, NULL, NULL, NULL, NULL, 0, 0, 0, 'pending', NULL, NULL),
+(5, 1, NULL, 'Noma', 'Mabasa', 'noma@gmail.com', '0012000', '2012-02-16', 'Male', 'Fernadale High School', 10, '123 Main St', 'Johannesburg', 'Gauteng', '2021', 'Vuyani', 'Father', '0638393157', 'vuyani@gmail.com', '', '', '', '[\"4\",\"1\"]', 'Love 3D animations', 'Intermediate', 0, 'No', 'No', 1, 1, 'No', 'Want to have fun and learn.', 'confirmed', '2025-03-30 17:09:01', '2025-06-09 14:25:54', 0, NULL, NULL, NULL, NULL, 0, 0, 0, 'pending', NULL, NULL),
+(6, 2, NULL, 'Kgotso', 'Maponya', 'kgotso.maponya@live.com', '0658975346', '2010-05-19', 'Male', 'Fernadale High School', 9, '123 Main St', 'Johannesburg', 'Gauteng', '2021', 'John', 'Futher', '0788945689', 'john.maponya@live.com', '', '', '', '[\"7\"]', 'I love building things', 'Basic', 0, 'Discovery', 'None', 1, 1, 'None', 'None', 'confirmed', '2025-06-17 19:18:10', '2025-06-24 08:09:15', 0, NULL, NULL, NULL, NULL, 0, 0, 0, 'confirmed', NULL, NULL),
+(7, 2, 7, 'Sam', 'Kabanga', 'sam@example.com', '0817851714', '2017-02-21', 'Male', 'Fernadale High School', 9, '123 Main St', 'Johannesburg', 'Gauteng', '2021', 'Tshepo Kabanga', 'Father', '0868965623', 'tshepo.kabanga@live.com', '', '', '', '[7,6]', 'I love coding and electronics', 'Beginner', 1, 'Discovery', 'No', 1, 1, 'No', 'I would like this to work please!', 'confirmed', '2025-06-24 07:46:45', '2025-06-24 08:09:06', 0, NULL, NULL, NULL, NULL, 0, 0, 0, 'confirmed', NULL, NULL),
+(8, 2, NULL, 'Thato', 'Banda', 'thato.banda@live.com', '0817851714', '2015-07-22', 'Male', 'Fordsburg Primary School', 7, '123 Dodo Street', 'Johannesburg', 'Gauteng', '2021', 'Themba', 'Banda', '0868972514', 'thameba.banda@live.com', '', '', '', '[5,7]', 'Love of tech', 'Intermediate', 0, 'No', 'Yes', 1, 1, 'No Pork', 'I would like to have fun.', 'confirmed', '2025-06-24 08:13:20', '2025-06-24 15:17:38', 0, NULL, NULL, NULL, NULL, 0, 0, 0, 'confirmed', NULL, NULL),
+(9, 2, NULL, 'dsaf', 'dsfa', 'sdfa@g.df', '0865368965', '2005-05-09', 'Female', 'sdfa', 7, 'sdaf', 'sdaf', 'KwaZulu-Natal', '2032', 'dsfa', 'sdaf', '0608658975', 'sdaf@dsf.hgf', '', '', '', '[7,6]', 'sdf', 'Beginner', 1, '', '', 1, 1, '', '', 'canceled', '2025-06-24 10:54:20', '2025-06-24 15:17:51', 0, NULL, NULL, '$2y$10$jz8MVCL2IIRjLSIpBTEvkOs0bH2Ol48noGuv2ZVkv.8uIsyFTe9OG', NULL, 0, 0, 0, 'pending', 3, NULL),
+(10, 2, 4, 'Themba', 'Magibisela', 'themba@example.co.za', '08638658921', '2005-02-05', 'Female', '', NULL, '123 Main St', 'Johannesburg', 'Gauteng', '2121', '', '', '', '', 'Vuyani', 'Brother', '0865698741', '[]', 'sdf', 'Beginner', 1, 'No', 'No', 1, 1, 'No', 'No', 'pending', '2025-06-24 11:15:40', '2025-06-24 11:15:40', 1, 'Pending', 7, NULL, NULL, 0, 0, 0, 'pending', 3, NULL),
+(11, 2, 2, 'Itumeleng', 'Kgakane', 'itum@gmail.com', '0856974589', '2000-01-12', 'Male', 'Fernadale High School', 12, '123 Main St', 'Johannesburg', 'Gauteng', '2021', 'Vuyani', 'Father', '0864789578', 'vuyani.magibisela@live.com', 'Itumeleng', 'Brother', '0768954825', '[7,5]', 'Coding and electronics', 'Novice', 1, 'Discovery', 'No', 1, 1, 'No Pork', 'No', 'pending', '2025-06-24 15:23:00', '2025-06-24 15:23:00', 0, NULL, NULL, NULL, NULL, 0, 0, 0, 'pending', 4, NULL),
+(12, 2, NULL, 'Tumelo', 'Motsho', 'tumelo.Motsho@live.com', '0856974589', '1999-08-05', 'Male', '', NULL, '123 Main St', 'Johannesburg', 'Gauteng', '2021', '', '', '', '', 'Vuyani', 'Brother', '0638393157', '[]', 'Want to show the kids really exciting technology.', 'Advanced', 1, 'Discovery', 'No', 1, 1, 'No', 'Thanks for the consideration.', 'pending', '2025-06-24 15:27:23', '2025-06-24 15:27:23', 1, 'Pending', 6, '$2y$10$lhfuxKqv4MKFYlXR6UJu0.GdwKr4TYUVoqGXUqoebMPhYa3S7e6Xq', NULL, 0, 0, 0, 'pending', 3, NULL),
+(13, 2, NULL, 'dsfa', 'dsfa', 'fdsa@dfds.d', '0856478965', '1999-08-08', 'Female', '', NULL, '123 Main St', 'Johannesburg', 'Gauteng', '2121', '', '', '', '', 'Vuyani', 'Brother', '0846579689', '[]', 'sdfa', 'Intermediate', 1, 'sdfa', 'fdsa', 1, 1, 'sdaf', 'dsa', 'canceled', '2025-06-24 15:52:26', '2025-06-24 16:07:28', 1, 'Pending', 6, '$2y$10$XEYWRAqeBpCrtGwJ58ILiuUBVKFm2/6kNF.kJndpCJVLYqzxI.5ya', NULL, 0, 0, 0, 'pending', 3, NULL),
+(14, 2, NULL, 'Tshepiso', 'Mabele', 'tshepiso.mabele@live.com', '0617895438', '1999-08-07', 'Male', '', NULL, '123 Gull Street', 'Johannesburg', 'Gauteng', '1819', '', '', '', '', 'Vuyani', 'Magibisela', '0678954289', '[]', 'I am interested in web development, hence it&#039;s my profession.', 'Advanced', 1, 'Discovery', 'Pork', 1, 1, 'No Pork', 'Excited to share with others.', 'confirmed', '2025-06-24 16:05:42', '2025-06-24 16:06:14', 1, 'Pending', 6, '$2y$10$GegMPzav3skKhTQyImJFVOhyWvEVkVNg1e8SBe9V4Mcbrt.h6lK6O', NULL, 0, 0, 0, 'pending', 3, NULL),
+(15, 2, NULL, 'qwer', 'fds', 'this@that.com', '0862547893', '2000-02-03', 'Female', '', NULL, 'sdaf', 'asdf', 'Northern Cape', '1234', '', '', '', '', '', '', '', '[]', 'sdaf', 'Novice', 1, 'sadf', 'afd', 1, 1, 'fa', 'af', 'pending', '2025-06-25 11:24:28', '2025-06-25 11:24:28', 1, 'Pending', 5, '$2y$10$SEkIOpGvVIR8JhEhr6PSFulzYJHPqZCqPMWITzliyF79644S13QWy', NULL, 0, 0, 0, 'pending', 4, NULL),
+(16, 2, NULL, 'Jabu', 'Letsatsi', 'jabu.letsatsi@live.com', '082345678985', '2012-08-05', 'Male', 'General Primary', 7, '123 Gull Street', 'Johannesburg', '0', '2120', 'Mbali Letsatsi', NULL, '087564892', 'mbali.letsatsi@live.com', NULL, NULL, NULL, '[7,5]', 'I want to be the best', NULL, 0, NULL, NULL, 1, 1, NULL, NULL, 'pending', '2025-06-25 20:11:44', '2025-06-25 20:11:44', 0, NULL, NULL, NULL, NULL, 0, 0, 0, 'pending', NULL, NULL),
+(17, 2, NULL, 'Kagiso', 'Letsatsi', 'kagiso.letsatsi@live.com', '0784567898', '2010-08-06', 'Male', 'Gloden High School', 8, '123 Main St', 'Johannesburg', '0', '2021', 'James Letsatsi', NULL, '06278945878', 'james.letsatsi@live.com', 'James Letsatsi', 'Father', '06278945878', '[6,7]', 'Very interested', NULL, 0, NULL, NULL, 1, 1, NULL, NULL, 'pending', '2025-06-25 20:49:17', '2025-06-25 20:49:17', 0, NULL, NULL, NULL, NULL, 0, 0, 0, 'pending', NULL, NULL),
+(18, 2, NULL, 'Matome', 'Mabele', 'matome.mabele@live.com', '0834567823', '2012-08-05', 'Female', 'Fernadale High School', 10, '123 Gull Street', 'Johannesburg', '0', '2356', 'James Mabele', NULL, '0627895243', 'james.mabele@live.com', 'James Mabele', 'Father', '0627895243', '[7,5]', 'Greate', NULL, 0, NULL, NULL, 1, 1, NULL, NULL, 'pending', '2025-06-25 22:22:02', '2025-06-25 22:22:02', 0, NULL, NULL, NULL, NULL, 0, 0, 0, 'pending', 3, NULL),
+(19, 2, NULL, 'Matome', 'Letsatsi', 'matome.letsatsi@live.com', '0835648978', '2012-08-05', 'Male', 'Fernadale High School', 10, '123 Gull Street', 'Johannesburg', '0', '2120', 'Thembi Letsatsi', 'Father', '0817851714', 'thembi.letsatsi@live.com', 'Thembi Letsatsi', 'Mother', '0817851714', '[7,6]', 'Best', NULL, 0, 'Discovery', 'Pork', 1, 1, 'No Pork', '', 'confirmed', '2025-06-25 22:31:04', '2025-06-30 02:19:43', 0, NULL, NULL, NULL, NULL, 0, 0, 0, 'confirmed', 3, NULL),
+(20, 2, NULL, 'Tshepiso', 'Ngwano', 'tshepiso.ngwano@live.com', '0834567878', '2005-02-08', 'Male', 'Jubulani High School', 10, '123 Main St', 'Johannesburg', '0', '2311', 'Jabu Ngwano', '', '0837897382', 'jabu.ngwano@live.com', 'Jabu Ngwano', 'Father', '0837897382', '[7,5]', 'Coding', NULL, 0, '', '', 1, 1, '', '', 'confirmed', '2025-06-26 08:31:03', '2025-06-30 02:18:20', 0, NULL, NULL, NULL, NULL, 0, 0, 0, 'confirmed', 3, NULL);
 
 --
 -- Triggers `holiday_program_attendees`
@@ -975,6 +995,14 @@ CREATE TABLE `holiday_program_audit_trail` (
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ;
 
+--
+-- Dumping data for table `holiday_program_audit_trail`
+--
+
+INSERT INTO `holiday_program_audit_trail` (`id`, `program_id`, `user_id`, `action`, `old_values`, `new_values`, `ip_address`, `user_agent`, `created_at`) VALUES
+(1, 2, 1, 'profile_update', NULL, '{\"first_name\":\"Tshepiso\",\"last_name\":\"Ngwano\",\"email\":\"tshepiso.ngwano@live.com\",\"phone\":\"0834567878\",\"date_of_birth\":\"2005-02-08\",\"gender\":\"Male\",\"school\":\"Jubulani High School\",\"grade\":10,\"address\":\"123 Main St\",\"city\":\"Johannesburg\",\"province\":\"0\",\"postal_code\":\"2311\",\"guardian_name\":\"Jabu Ngwano\",\"guardian_relationship\":\"\",\"guardian_phone\":\"0837897382\",\"guardian_email\":\"jabu.ngwano@live.com\",\"emergency_contact_name\":\"Jabu Ngwano\",\"emergency_contact_relationship\":\"Father\",\"emergency_contact_phone\":\"0837897382\",\"why_interested\":\"Coding\",\"experience_level\":null,\"needs_equipment\":0,\"medical_conditions\":\"\",\"allergies\":\"\",\"dietary_restrictions\":\"\",\"photo_permission\":1,\"data_permission\":1,\"updated_at\":\"2025-06-30 04:18:20\",\"registration_status\":\"confirmed\",\"status\":\"confirmed\",\"mentor_status\":null,\"is_clubhouse_member\":0,\"additional_notes\":\"\"}', '::1', NULL, '2025-06-30 02:18:20'),
+(2, 2, 1, 'profile_update', NULL, '{\"first_name\":\"Matome\",\"last_name\":\"Letsatsi\",\"email\":\"matome.letsatsi@live.com\",\"phone\":\"0835648978\",\"date_of_birth\":\"2012-08-05\",\"gender\":\"Male\",\"school\":\"Fernadale High School\",\"grade\":10,\"address\":\"123 Gull Street\",\"city\":\"Johannesburg\",\"province\":\"0\",\"postal_code\":\"2120\",\"guardian_name\":\"Thembi Letsatsi\",\"guardian_relationship\":\"Father\",\"guardian_phone\":\"0817851714\",\"guardian_email\":\"thembi.letsatsi@live.com\",\"emergency_contact_name\":\"Thembi Letsatsi\",\"emergency_contact_relationship\":\"Mother\",\"emergency_contact_phone\":\"0817851714\",\"why_interested\":\"Best\",\"experience_level\":null,\"needs_equipment\":0,\"medical_conditions\":\"Discovery\",\"allergies\":\"Pork\",\"dietary_restrictions\":\"No Pork\",\"photo_permission\":1,\"data_permission\":1,\"updated_at\":\"2025-06-30 04:19:43\",\"registration_status\":\"confirmed\",\"status\":\"confirmed\",\"mentor_status\":null,\"is_clubhouse_member\":0,\"additional_notes\":\"\"}', '::1', NULL, '2025-06-30 02:19:43');
+
 -- --------------------------------------------------------
 
 --
@@ -1037,23 +1065,23 @@ INSERT INTO `holiday_program_criteria` (`id`, `program_id`, `criterion`, `descri
 -- (See below for the actual view)
 --
 CREATE TABLE `holiday_program_dashboard_stats` (
-`auto_close_on_capacity` tinyint(1)
-,`auto_close_on_date` tinyint(1)
-,`capacity_percentage` decimal(25,1)
-,`capacity_status` varchar(11)
-,`confirmed_registrations` bigint
-,`created_at` timestamp
-,`max_participants` int
-,`member_registrations` bigint
-,`mentor_applications` bigint
-,`pending_registrations` bigint
-,`program_id` int
-,`registration_deadline` varchar(100)
-,`registration_open` tinyint(1)
+`program_id` int
 ,`term` varchar(50)
 ,`title` varchar(255)
-,`total_registrations` bigint
+,`registration_open` tinyint(1)
+,`max_participants` int
+,`auto_close_on_capacity` tinyint(1)
+,`auto_close_on_date` tinyint(1)
+,`registration_deadline` varchar(100)
+,`created_at` timestamp
 ,`updated_at` timestamp
+,`total_registrations` bigint
+,`confirmed_registrations` bigint
+,`pending_registrations` bigint
+,`mentor_applications` bigint
+,`member_registrations` bigint
+,`capacity_percentage` decimal(25,1)
+,`capacity_status` varchar(11)
 );
 
 -- --------------------------------------------------------
@@ -1192,6 +1220,25 @@ INSERT INTO `holiday_program_prerequisites` (`id`, `workshop_id`, `prerequisite_
 (2, 1, 'skill', 'basic_computer', 'Basic computer navigation and file management', 1, '2025-06-23 18:06:35'),
 (3, 2, 'age', '15', 'Minimum age for video editing due to software complexity', 1, '2025-06-23 18:06:35'),
 (4, 3, 'age', '12', 'Minimum age for animation workshop', 1, '2025-06-23 18:06:35');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `holiday_program_profile_audit`
+--
+
+CREATE TABLE `holiday_program_profile_audit` (
+  `id` int NOT NULL,
+  `attendee_id` int NOT NULL,
+  `admin_user_id` int DEFAULT NULL,
+  `action` varchar(50) COLLATE utf8mb4_general_ci NOT NULL,
+  `field_name` varchar(100) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `old_value` text COLLATE utf8mb4_general_ci,
+  `new_value` text COLLATE utf8mb4_general_ci,
+  `ip_address` varchar(45) COLLATE utf8mb4_general_ci DEFAULT NULL,
+  `user_agent` text COLLATE utf8mb4_general_ci,
+  `created_at` timestamp NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci COMMENT='Audit trail for holiday program profile changes';
 
 -- --------------------------------------------------------
 
@@ -1348,20 +1395,20 @@ INSERT INTO `holiday_program_schedule_items` (`id`, `schedule_id`, `time_slot`, 
 -- (See below for the actual view)
 --
 CREATE TABLE `holiday_program_stats` (
-`capacity_percentage` decimal(25,1)
-,`confirmed_count` bigint
-,`dates` varchar(100)
-,`id` int
-,`max_participants` int
-,`member_count` bigint
-,`mentor_count` bigint
-,`pending_count` bigint
-,`registration_open` tinyint(1)
-,`status` enum('draft','open','closing_soon','closed','completed','cancelled')
+`id` int
 ,`term` varchar(50)
 ,`title` varchar(255)
+,`dates` varchar(100)
+,`registration_open` tinyint(1)
+,`status` enum('draft','open','closing_soon','closed','completed','cancelled')
+,`max_participants` int
 ,`total_registrations` bigint
+,`member_count` bigint
+,`mentor_count` bigint
+,`confirmed_count` bigint
+,`pending_count` bigint
 ,`workshop_count` bigint
+,`capacity_percentage` decimal(25,1)
 );
 
 -- --------------------------------------------------------
@@ -1583,16 +1630,16 @@ INSERT INTO `monthly_report_images` (`id`, `activity_id`, `image_path`, `created
 -- (See below for the actual view)
 --
 CREATE TABLE `program_structure_view` (
-`duration_weeks` json
+`id` int
+,`title` varchar(255)
+,`start_date` date
 ,`end_date` date
+,`duration_weeks` json
 ,`has_cohorts` json
 ,`has_prerequisites` json
-,`id` int
-,`start_date` date
-,`title` varchar(255)
-,`total_attendees` bigint
 ,`total_cohorts` bigint
 ,`total_workshops` bigint
+,`total_attendees` bigint
 );
 
 -- --------------------------------------------------------
@@ -1916,15 +1963,15 @@ INSERT INTO `visits` (`id`, `visitor_id`, `sign_in_time`, `sign_out_time`, `comm
 -- (See below for the actual view)
 --
 CREATE TABLE `workshop_capacity_view` (
-`available_spots` bigint
-,`capacity_percentage` decimal(25,1)
-,`cohort_id` int
-,`cohort_name` varchar(100)
-,`enrolled_count` bigint
+`workshop_id` int
+,`title` varchar(255)
 ,`max_participants` int
 ,`prerequisites` text
-,`title` varchar(255)
-,`workshop_id` int
+,`cohort_name` varchar(100)
+,`cohort_id` int
+,`enrolled_count` bigint
+,`available_spots` bigint
+,`capacity_percentage` decimal(25,1)
 );
 
 -- --------------------------------------------------------
@@ -2134,6 +2181,16 @@ ALTER TABLE `holiday_programs`
   ADD KEY `idx_program_dates` (`start_date`,`end_date`);
 
 --
+-- Indexes for table `holiday_program_access_tokens`
+--
+ALTER TABLE `holiday_program_access_tokens`
+  ADD PRIMARY KEY (`id`),
+  ADD UNIQUE KEY `token` (`token`),
+  ADD KEY `attendee_id` (`attendee_id`),
+  ADD KEY `expires_at` (`expires_at`),
+  ADD KEY `idx_token_valid` (`token`,`expires_at`,`used_at`);
+
+--
 -- Indexes for table `holiday_program_attendance`
 --
 ALTER TABLE `holiday_program_attendance`
@@ -2228,6 +2285,16 @@ ALTER TABLE `holiday_program_offerings`
 ALTER TABLE `holiday_program_prerequisites`
   ADD PRIMARY KEY (`id`),
   ADD KEY `idx_workshop_prereqs` (`workshop_id`,`prerequisite_type`);
+
+--
+-- Indexes for table `holiday_program_profile_audit`
+--
+ALTER TABLE `holiday_program_profile_audit`
+  ADD PRIMARY KEY (`id`),
+  ADD KEY `attendee_id` (`attendee_id`),
+  ADD KEY `admin_user_id` (`admin_user_id`),
+  ADD KEY `action` (`action`),
+  ADD KEY `created_at` (`created_at`);
 
 --
 -- Indexes for table `holiday_program_projects`
@@ -2557,6 +2624,12 @@ ALTER TABLE `holiday_programs`
   MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
+-- AUTO_INCREMENT for table `holiday_program_access_tokens`
+--
+ALTER TABLE `holiday_program_access_tokens`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+
+--
 -- AUTO_INCREMENT for table `holiday_program_attendance`
 --
 ALTER TABLE `holiday_program_attendance`
@@ -2621,6 +2694,12 @@ ALTER TABLE `holiday_program_offerings`
 --
 ALTER TABLE `holiday_program_prerequisites`
   MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+
+--
+-- AUTO_INCREMENT for table `holiday_program_profile_audit`
+--
+ALTER TABLE `holiday_program_profile_audit`
+  MODIFY `id` int NOT NULL AUTO_INCREMENT;
 
 --
 -- AUTO_INCREMENT for table `holiday_program_projects`
