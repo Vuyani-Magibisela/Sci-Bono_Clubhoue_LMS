@@ -50,13 +50,21 @@
                         <span id="error-text">Incorrect password. Please try again.</span>
                     </div>
                     <form id="signin-form" class="signin-form">
-                        <div class="form-group">
-                            <label for="userId" class="form-label">User ID</label>
-                            <input type="text" id="userId" name="userId" class="form-input" required readonly>
+                        <div class="user-display">
+                            <div class="selected-user-info">
+                                <div class="user-avatar-modal">
+                                    <img src="<?php echo BASE_URL?>public/assets/images/ui-user-profile-negative.svg" alt="User Avatar" id="modal-user-avatar">
+                                </div>
+                                <div class="user-details-modal">
+                                    <h4 id="modal-user-name" class="modal-user-name">Loading...</h4>
+                                    <span id="modal-user-role" class="modal-user-role member">MEMBER</span>
+                                </div>
+                            </div>
                         </div>
                         <div class="form-group">
                             <label for="password" class="form-label">Password</label>
                             <input type="password" id="password" name="password" class="form-input" required autocomplete="current-password">
+                            <input type="hidden" id="userId" name="userId" required>
                         </div>
                         <button type="submit" class="submit-btn">
                             <span class="btn-text">Sign In</span>
@@ -119,18 +127,19 @@
                                         <div class="user-avatar">
                                             <img src="<?php BASE_URL?>public/assets/images/ui-user-profile-negative.svg" alt="<?php echo htmlspecialchars($user['name'] . ' ' . $user['surname']); ?> Avatar" loading="lazy">
                                         </div>
-                                        <div class="user-info">
-                                            <h3 class="user-name"><?php echo htmlspecialchars($user['username']); ?></h3>
-                                            <p class="user-fullname"><?php echo htmlspecialchars($user['name'] . ' ' . $user['surname']); ?></p>
-                                            <span class="user-role <?php echo $user['role_class']; ?>"><?php echo htmlspecialchars($user['user_type']); ?></span>
+                                        <div class="user-content">
+                                            <div class="user-info">
+                                                <h3 class="user-name"><?php echo htmlspecialchars($user['name'] . ' ' . $user['surname']); ?></h3>
+                                                <span class="user-role <?php echo $user['role_class']; ?>"><?php echo htmlspecialchars($user['user_type']); ?></span>
+                                            </div>
+                                            <button class="action-btn signin-btn" onclick="signIn(<?php echo $user['id']; ?>)" aria-label="Sign in <?php echo htmlspecialchars($user['name'] . ' ' . $user['surname']); ?>">
+                                                <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M6 2L14 2V14L6 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                                    <path d="M10 8H2M2 8L5 5M2 8L5 11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                                </svg>
+                                                Sign In
+                                            </button>
                                         </div>
-                                        <button class="action-btn signin-btn" onclick="signIn(<?php echo $user['id']; ?>)" aria-label="Sign in <?php echo htmlspecialchars($user['name'] . ' ' . $user['surname']); ?>">
-                                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M6 2L14 2V14L6 14" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                                <path d="M10 8H2M2 8L5 5M2 8L5 11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                            </svg>
-                                            Sign In
-                                        </button>
                                     </div>
                                 <?php endforeach; ?>
                             <?php else: ?>
@@ -175,26 +184,27 @@
                                         <img src="<?php echo BASE_URL?>public/assets/images/ui-user-profile-negative.svg" alt="<?php echo htmlspecialchars($user['name'] . ' ' . $user['surname']); ?> Avatar" loading="lazy">
                                         <div class="online-indicator"></div>
                                     </div>
-                                    <div class="user-info">
-                                        <h3 class="user-name"><?php echo htmlspecialchars($user['username']); ?></h3>
-                                        <p class="user-fullname"><?php echo htmlspecialchars($user['name'] . ' ' . $user['surname']); ?></p>
-                                        <span class="user-role <?php echo $user['role_class']; ?>"><?php echo htmlspecialchars($user['user_type']); ?></span>
-                                        <div class="signin-time">
-                                            <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                                <path d="M6 1V6L8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                                                <circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="1.5"/>
-                                            </svg>
-                                            Signed in at <?php echo date('H:i', strtotime($user['checked_in'])); ?>
+                                    <div class="user-content">
+                                        <div class="user-info">
+                                            <h3 class="user-name"><?php echo htmlspecialchars($user['name'] . ' ' . $user['surname']); ?></h3>
+                                            <span class="user-role <?php echo $user['role_class']; ?>"><?php echo htmlspecialchars($user['user_type']); ?></span>
+                                            <div class="signin-time">
+                                                <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                    <path d="M6 1V6L8 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                                                    <circle cx="6" cy="6" r="5" stroke="currentColor" stroke-width="1.5"/>
+                                                </svg>
+                                                Signed in at <?php echo date('H:i', strtotime($user['checked_in'])); ?>
+                                            </div>
                                         </div>
+                                        <button class="action-btn signout-btn" onclick="signOut(<?php echo $user['id']; ?>)" aria-label="Sign out <?php echo htmlspecialchars($user['name'] . ' ' . $user['surname']); ?>">
+                                            <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                                <path d="M6 14H2V2H6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                                <path d="M10 8H6M10 8L7 5M10 8L7 11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                                <path d="M10 2H14V14H10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                            </svg>
+                                            Sign Out
+                                        </button>
                                     </div>
-                                    <button class="action-btn signout-btn" onclick="signOut(<?php echo $user['id']; ?>)" aria-label="Sign out <?php echo htmlspecialchars($user['name'] . ' ' . $user['surname']); ?>">
-                                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                                            <path d="M6 14H2V2H6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                            <path d="M10 8H6M10 8L7 5M10 8L7 11" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                            <path d="M10 2H14V14H10" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                                        </svg>
-                                        Sign Out
-                                    </button>
                                 </div>
                             <?php endforeach; ?>
                         <?php else: ?>
@@ -214,6 +224,10 @@
     </main>
 
     <!-- JavaScript -->
+    <script>
+        // Pass BASE_URL to JavaScript
+        window.BASE_URL = '<?php echo BASE_URL; ?>';
+    </script>
     <script src="<?php echo BASE_URL?>public/assets/js/script.js"></script>
 
 </body>

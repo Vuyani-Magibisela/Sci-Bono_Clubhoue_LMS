@@ -5,19 +5,16 @@
 
 require_once __DIR__ . '/../Models/AttendanceModel.php';
 require_once __DIR__ . '/../Models/UserModel.php';
-require_once __DIR__ . '/../Models/ActivityLogModel.php';
 
 class AttendanceController {
     private $conn;
     private $attendanceModel;
     private $userModel;
-    private $activityLogModel;
     
     public function __construct($conn) {
         $this->conn = $conn;
         $this->attendanceModel = new AttendanceModel($conn);
         $this->userModel = new UserModel($conn);
-        $this->activityLogModel = new ActivityLogModel($conn);
     }
     
     /**
@@ -68,19 +65,8 @@ class AttendanceController {
             error_log("Found user: " . $user['username']);
             error_log("User password hash: " . substr($user['password'], 0, 20) . "...");
             
-            // Check for too many failed attempts
-            $failedAttempts = $this->activityLogModel->getFailedLoginAttempts($userId, 30);
-            error_log("Failed attempts for user $userId: $failedAttempts");
-            
-            if ($failedAttempts >= 5) {
-                $this->activityLogModel->logSigninAttempt($userId, false, 'Too many failed attempts');
-                echo json_encode([
-                    'success' => false, 
-                    'message' => 'Too many failed attempts. Please try again later.',
-                    'code' => 'TOO_MANY_ATTEMPTS'
-                ]);
-                return;
-            }
+            // Skip failed attempts check for now (simplified version)
+            error_log("Skipping failed attempts check (simplified version)");
             
             // Debug password validation
             error_log("Starting password validation...");
@@ -123,17 +109,10 @@ class AttendanceController {
             
             if (!$isValid) {
                 error_log("Password validation FAILED for user $userId");
-                $this->activityLogModel->logSigninAttempt($userId, false, 'Invalid credentials');
                 echo json_encode([
                     'success' => false, 
                     'message' => 'Invalid credentials',
-                    'code' => 'INVALID_CREDENTIALS',
-                    'debug' => [
-                        'user_exists' => true,
-                        'password_length' => strlen($password),
-                        'stored_password_length' => strlen($user['password']),
-                        'validation_attempts' => $validationResults
-                    ]
+                    'code' => 'INVALID_CREDENTIALS'
                 ]);
                 return;
             }
@@ -144,12 +123,6 @@ class AttendanceController {
             $result = $this->attendanceModel->signInUser($userId);
             
             if ($result['success']) {
-                // Log successful signin
-                $this->activityLogModel->logSigninAttempt($userId, true);
-                
-                // Update last login
-                $this->userModel->updateLastLogin($userId);
-                
                 error_log("Signin successful for user $userId");
                 
                 echo json_encode([
@@ -165,8 +138,6 @@ class AttendanceController {
                 ]);
             } else {
                 error_log("Signin failed for user $userId: " . $result['message']);
-                // Log failed signin
-                $this->activityLogModel->logSigninAttempt($userId, false, $result['message']);
                 echo json_encode($result);
             }
             
@@ -249,7 +220,6 @@ class AttendanceController {
             }
             
             $result = $this->attendanceModel->signOutUser($userId);
-            $this->activityLogModel->logSignoutAttempt($userId, $result['success']);
             
             echo json_encode($result);
             

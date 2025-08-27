@@ -1,12 +1,12 @@
 // Fixed JavaScript for MVC Architecture
-// Configuration with CORRECT endpoints for localhost
+// Configuration with dynamic BASE_URL
 const CONFIG = {
     endpoints: {
-        // Fixed paths for your localhost setup
-        signin: 'Sci-Bono_Clubhoue_LMS/app/Controllers/attendance_routes.php?action=signin',
-        signout: 'Sci-Bono_Clubhoue_LMS/app/Controllers/attendance_routes.php?action=signout',
-        search: 'Sci-Bono_Clubhoue_LMS/app/Controllers/attendance_routes.php?action=search',
-        stats: 'Sci-Bono_Clubhoue_LMS/app/Controllers/attendance_routes.php?action=stats'
+        // Dynamic paths using BASE_URL from PHP
+        signin: (window.BASE_URL || '') + 'app/Controllers/attendance_routes.php?action=signin',
+        signout: (window.BASE_URL || '') + 'app/Controllers/attendance_routes.php?action=signout',
+        search: (window.BASE_URL || '') + 'app/Controllers/attendance_routes.php?action=search',
+        stats: (window.BASE_URL || '') + 'app/Controllers/attendance_routes.php?action=stats'
     },
     autoRefreshInterval: 5 * 60 * 1000, // 5 minutes
     maxFailedAttempts: 5,
@@ -122,6 +122,20 @@ function closeSigninModal() {
     }
     
     if (signinForm) signinForm.reset();
+    
+    // Reset modal user display to default
+    const modalUserName = document.getElementById('modal-user-name');
+    const modalUserRole = document.getElementById('modal-user-role');
+    
+    if (modalUserName) {
+        modalUserName.textContent = 'Loading...';
+    }
+    
+    if (modalUserRole) {
+        modalUserRole.textContent = 'MEMBER';
+        modalUserRole.className = 'modal-user-role member';
+    }
+    
     resetSubmitButton();
     currentUserId = null;
 }
@@ -130,6 +144,34 @@ function showSigninModal(userId) {
     if (!modal) return;
     
     currentUserId = userId;
+    
+    // Find the user card that was clicked
+    const userCard = document.querySelector(`[data-user-id="${userId}"]`);
+    
+    if (userCard) {
+        // Extract user information from the clicked card
+        const userName = userCard.querySelector('.user-name')?.textContent || 'Unknown User';
+        const userRole = userCard.querySelector('.user-role')?.textContent || 'Member';
+        const roleClass = userCard.querySelector('.user-role')?.className || '';
+        
+        // Update modal with user information
+        const modalUserName = document.getElementById('modal-user-name');
+        const modalUserRole = document.getElementById('modal-user-role');
+        
+        if (modalUserName) {
+            modalUserName.textContent = userName;
+        }
+        
+        if (modalUserRole) {
+            modalUserRole.textContent = userRole;
+            // Apply the same role class for color coding
+            modalUserRole.className = 'modal-user-role';
+            if (roleClass.includes('admin')) modalUserRole.classList.add('admin');
+            else if (roleClass.includes('mentor')) modalUserRole.classList.add('mentor');
+            else if (roleClass.includes('member')) modalUserRole.classList.add('member');
+        }
+    }
+    
     modal.style.display = "block";
     modal.classList.add('active');
     document.body.style.overflow = 'hidden';
