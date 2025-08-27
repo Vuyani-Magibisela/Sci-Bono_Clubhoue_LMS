@@ -36,6 +36,7 @@ This is a custom PHP MVC framework with the following structure:
 - Custom routing implemented in `core/Router.php`
 - Entry points are individual PHP files (not centralized routing)
 - Each major feature has its own controller entry point
+- **New API Router**: `attendance_routes.php` provides RESTful API routing for attendance system with CORS support
 
 #### Session Management
 - PHP sessions used for authentication
@@ -61,9 +62,11 @@ This is a custom PHP MVC framework with the following structure:
 - **Features**: Login/logout, user CRUD, role-based access, password recovery, user profiles, progress tracking
 
 #### Attendance System
-- **Controllers**: `AttendanceController.php`, `AttendanceRegisterController.php`
+- **Controllers**: `AttendanceController.php`, `AttendanceRegisterController.php`, `attendance_routes.php` (API router)
 - **Models**: `AttendanceModel.php`, `AttendanceRegisterModel.php`
-- **Features**: Digital attendance tracking, reporting, check-in system
+- **Views**: `app/Views/attendance/signin.php` (enhanced modal system)
+- **Features**: Digital attendance tracking, reporting, check-in system, real-time sign-in/sign-out with modal interface
+- **API**: RESTful endpoints for AJAX operations (signin, signout, search, stats)
 
 #### Visitor Management System
 - **Handler**: `handlers/visitors-handler.php`
@@ -112,6 +115,7 @@ This is a custom PHP MVC framework with the following structure:
   - `visitors-script.js` - Form validation, AJAX submission, error handling
   - `workshopSelection.js` - Dynamic workshop listing, filter/search, booking workflow
   - `homedashboard.js` - Widget management, data refresh, interactive charts
+  - `script.js` - Enhanced attendance system with dynamic API endpoints, modal management, and real-time updates
 
 #### CSS Architecture
 - **Methodology**: BEM (Block Element Modifier)
@@ -120,6 +124,7 @@ This is a custom PHP MVC framework with the following structure:
 - Custom CSS in `public/assets/css/`
 - Responsive design with mobile-specific styles
 - Component-based approach for holiday program forms
+- **Enhanced Attendance UI**: `modern-signin.css` with improved modal system, card layouts, and responsive grids
 
 ### API Endpoints & Request Flow
 
@@ -134,6 +139,11 @@ This is a custom PHP MVC framework with the following structure:
 8. View → Client (response)
 
 #### Key Endpoints
+- **Attendance Management**:
+  - `POST /app/Controllers/attendance_routes.php?action=signin` - User sign-in with authentication
+  - `POST /app/Controllers/attendance_routes.php?action=signout` - User sign-out
+  - `GET /app/Controllers/attendance_routes.php?action=search` - Search attendance records
+  - `GET /app/Controllers/attendance_routes.php?action=stats` - Get attendance statistics
 - **Visitor Management**:
   - `POST /visitors/register` - New visitor registration
   - `GET /visitors/list` - Retrieve visitor list
@@ -190,6 +200,7 @@ This is a custom PHP MVC framework with the following structure:
 - Create views in appropriate subfolder within `app/Views/`
 - Update database schema files in `Database/` folder
 - Follow existing naming conventions (e.g., `HolidayProgramController` -> `HolidayProgramModel`)
+- **For API endpoints**: Create route files following `attendance_routes.php` pattern with action-based routing and CORS headers
 
 ## Server Requirements & Environment
 
@@ -207,9 +218,10 @@ This is a custom PHP MVC framework with the following structure:
 
 ### Environment Configuration
 - **Timezone**: Africa/Johannesburg
-- **Base URL**: Configured dynamically in `config/config.php`
+- **Base URL**: Configured dynamically in `config/config.php`, passed to JavaScript via PHP injection
 - **Development Environment**: XAMPP recommended for local development
 - **Database Name**: `accounts` (primary database)
+- **API Configuration**: Dynamic endpoint resolution using BASE_URL for AJAX requests
 
 ### Maintenance Tasks
 - **Regular Database Optimization**: Weekly database optimization recommended
@@ -236,3 +248,33 @@ The system handles multiple user types with different access levels and provides
 - **Gamification**: Achievement system, leaderboards, virtual rewards
 
 These planned features should be considered when making architectural decisions to ensure forward compatibility.
+
+## Recent Enhancements (August 2025)
+
+### Enhanced Attendance System
+The attendance system has been significantly improved with modern UI/UX and robust backend functionality:
+
+#### Frontend Improvements
+- **Modal System**: Dynamic user selection modal that displays clicked user's information (name, surname, role)
+- **Responsive Design**: Improved card layouts with proper alignment and stacking
+- **Real-time Updates**: Immediate visual feedback and page refresh after sign-in/sign-out
+- **Role-based Styling**: Color-coded role badges (admin=red, mentor=orange, member=green)
+- **Enhanced UX**: Better error handling, loading states, and user feedback
+
+#### Backend Architecture
+- **API Router**: New `attendance_routes.php` provides RESTful endpoints with action-based routing
+- **CORS Support**: Cross-origin request handling for AJAX operations
+- **Enhanced Authentication**: Multiple password validation methods including development passwords
+- **Simplified Dependencies**: Removed ActivityLog dependency to prevent errors
+- **Database Integration**: Proper attendance table operations with status tracking
+
+#### Development Features
+- **Development Passwords**: Multiple authentication methods for testing (user ID, "test123", "clubhouse", username)
+- **Enhanced Debugging**: Comprehensive error logging and status reporting
+- **Dynamic Configuration**: BASE_URL injection from PHP to JavaScript for flexible endpoint resolution
+
+#### Security Considerations
+- **Password Hashing**: Production-ready bcrypt implementation with legacy support
+- **Input Validation**: Server-side validation with proper error handling
+- **SQL Injection Prevention**: Prepared statements throughout the system
+- **Development Safety**: Clear separation of development and production authentication methods
