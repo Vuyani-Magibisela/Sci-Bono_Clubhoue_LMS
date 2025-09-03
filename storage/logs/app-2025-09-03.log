@@ -3,3 +3,8 @@
 [2025-09-03 10:40:27] ERROR: Class "SecureFileUploader" not found Context: {"type":"Exception","class":"Error","message":"Class \"SecureFileUploader\" not found","file":"/var/www/html/Sci-Bono_Clubhoue_LMS/test_security.php","line":42,"trace":[],"timestamp":"2025-09-03 10:40:27","url":"CLI","session_id":"tr1s6812uvflhpudg601pd8709","user_id":null,"memory_usage":2097152}
 [2025-09-03 10:40:38] WARNING: Validation failed Context: {"fields":["email_field"],"ip":"unknown","user_agent":"unknown","url":"unknown"}
 [2025-09-03 10:40:38] INFO: Security test completed successfully
+[2025-09-03 17:12:12] INFO: Service action: authenticate_attempt Context: {"identifier":"nonexistent@test.com","service":"UserService"}
+[2025-09-03 17:12:12] ERROR: Account lock check failed Context: {"error":"Table 'accounts.login_attempts' doesn't exist"}
+[2025-09-03 17:12:12] ERROR: Record failed attempt error Context: {"error":"Table 'accounts.login_attempts' doesn't exist"}
+[2025-09-03 17:12:12] INFO: Service action: user_creation_attempt Context: {"email":"test@example.com","service":"UserService"}
+[2025-09-03 17:12:12] ERROR: User creation error: Unknown column 'status' in 'field list' Context: {"email":"test@example.com","service":"UserService"}

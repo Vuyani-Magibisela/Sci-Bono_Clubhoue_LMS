@@ -1,18 +1,200 @@
 <?php
 /**
- * Enhanced UserModel - Handles all user-related database operations
- * Enhanced for the new MVC attendance system
- * 
- * @package Models
- * @author Sci-Bono Clubhouse LMS
- * @version 2.0
+ * User Model - Extends BaseModel with user-specific functionality
+ * Phase 4 Implementation - Refactored to use new MVC architecture
  */
 
-class UserModel {
-    private $conn;
+require_once __DIR__ . '/BaseModel.php';
+require_once __DIR__ . '/../Traits/HasTimestamps.php';
+require_once __DIR__ . '/../Traits/ValidatesData.php';
+require_once __DIR__ . '/../Traits/LogsActivity.php';
+
+class UserModel extends BaseModel {
+    use HasTimestamps, ValidatesData, LogsActivity;
+    
+    protected $table = 'users';
+    protected $primaryKey = 'id';
+    protected $fillable = [
+        'username', 'email', 'password', 'name', 'surname', 'user_type', 'status',
+        'phone', 'profile_image', 'last_login', 'session_token', 'email_verified',
+        'verification_token', 'password_changed_at', 'nationality', 'Gender',
+        'date_of_birth', 'id_number', 'home_language', 'address_street', 
+        'address_suburb', 'address_city', 'address_province', 'address_postal_code',
+        'school', 'grade', 'parent', 'parent_email', 'Relationship', 'parent_number',
+        'leaner_number', 'Center', 'emergency_contact_name', 'emergency_contact_relationship',
+        'emergency_contact_phone', 'emergency_contact_email', 'emergency_contact_address',
+        'interests', 'role_models', 'goals', 'has_computer', 'computer_skills',
+        'computer_skills_source'
+    ];
+    protected $guarded = ['id', 'created_at', 'updated_at'];
+    protected $timestamps = true;
+    
+    /**
+     * User types/roles available
+     */
+    const USER_TYPES = [
+        'admin' => 'Administrator',
+        'mentor' => 'Mentor', 
+        'member' => 'Member',
+        'student' => 'Student',
+        'alumni' => 'Alumni'
+    ];
+    
+    /**
+     * User statuses available
+     */
+    const USER_STATUSES = [
+        'active' => 'Active',
+        'inactive' => 'Inactive',
+        'suspended' => 'Suspended',
+        'pending' => 'Pending Verification'
+    ];
     
     public function __construct($conn) {
-        $this->conn = $conn;
+        parent::__construct($conn);
+        
+        // Set up activity logging
+        $this->setLoggedActivities(['create', 'update', 'delete', 'login', 'logout']);
+    }
+    
+    /**
+     * Create user with automatic timestamp and validation
+     */
+    public function create($data) {
+        // Add timestamps
+        $data = $this->addCreateTimestamps($data);
+        
+        // Set defaults
+        $data['status'] = $data['status'] ?? 'active';
+        $data['user_type'] = $data['user_type'] ?? 'student';
+        $data['email_verified'] = $data['email_verified'] ?? false;
+        
+        // Hash password if provided
+        if (isset($data['password'])) {
+            $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
+        }
+        
+        // Log activity
+        $this->logActivity('user_create_attempt', ['username' => $data['username'] ?? 'unknown']);
+        
+        try {
+            $id = parent::create($data);
+            
+            if ($id) {
+                $this->logSuccess('user_created', ['user_id' => $id, 'username' => $data['username']]);
+            }
+            
+            return $id;
+            
+        } catch (Exception $e) {
+            $this->logFailure('user_create', ['username' => $data['username'] ?? 'unknown'], $e->getMessage());
+            throw $e;
+        }
+    }
+    
+    /**
+     * Update user with automatic timestamp
+     */
+    public function update($id, $data) {
+        // Add update timestamp
+        $data = $this->addUpdateTimestamps($data);
+        
+        // Hash password if being updated
+        if (isset($data['password'])) {
+            $data['password'] = password_hash($data['password'], PASSWORD_DEFAULT);
+            $data['password_changed_at'] = $this->getCurrentTimestamp();
+        }
+        
+        // Log activity
+        $this->logActivity('user_update_attempt', ['user_id' => $id]);
+        
+        try {
+            $result = parent::update($id, $data);
+            
+            if ($result) {
+                $this->logSuccess('user_updated', ['user_id' => $id]);
+            }
+            
+            return $result;
+            
+        } catch (Exception $e) {
+            $this->logFailure('user_update', ['user_id' => $id], $e->getMessage());
+            throw $e;
+        }
+    }
+    
+    /**
+     * Find user by email or username
+     */
+    public function findByIdentifier($identifier) {
+        $sql = "SELECT * FROM {$this->table} WHERE email = ? OR username = ? LIMIT 1";
+        $result = $this->query($sql, [$identifier, $identifier]);
+        
+        if ($result && $result->num_rows > 0) {
+            return $result->fetch_assoc();
+        }
+        
+        return null;
+    }
+    
+    /**
+     * Find user by email
+     */
+    public function findByEmail($email) {
+        return $this->findFirst(['email' => $email]);
+    }
+    
+    /**
+     * Find user by username
+     */
+    public function findByUsername($username) {
+        return $this->findFirst(['username' => $username]);
+    }
+    
+    /**
+     * Authenticate user with enhanced password verification
+     */
+    public function authenticate($identifier, $password) {
+        $user = $this->findByIdentifier($identifier);
+        
+        if (!$user) {
+            $this->logAuthAttempt($identifier, false, ['reason' => 'user_not_found']);
+            return null;
+        }
+        
+        // Verify password (support both bcrypt and legacy MD5)
+        $passwordValid = $this->verifyPassword($password, $user['password']);
+        
+        if (!$passwordValid) {
+            $this->logAuthAttempt($identifier, false, ['reason' => 'invalid_password', 'user_id' => $user['id']]);
+            return null;
+        }
+        
+        // Check if user is active
+        if (($user['status'] ?? 'active') !== 'active') {
+            $this->logAuthAttempt($identifier, false, ['reason' => 'inactive_user', 'user_id' => $user['id']]);
+            return null;
+        }
+        
+        // Update last login
+        $this->update($user['id'], ['last_login' => $this->getCurrentTimestamp()]);
+        
+        $this->logAuthAttempt($identifier, true, ['user_id' => $user['id']]);
+        
+        return $user;
+    }
+    
+    /**
+     * Verify password (supports both bcrypt and legacy MD5)
+     */
+    private function verifyPassword($password, $hash) {
+        // Check if it's a legacy MD5 hash (32 characters, all hex)
+        if (strlen($hash) === 32 && ctype_xdigit($hash)) {
+            return md5($password) === $hash;
+        }
+        
+        // Modern bcrypt verification
+        return password_verify($password, $hash);
     }
     
     /**

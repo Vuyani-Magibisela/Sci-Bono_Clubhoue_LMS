@@ -1,4 +1,23 @@
 <?php
+/**
+ * Legacy login.php - Redirect to new routing system
+ * Phase 3 Implementation - Backward compatibility
+ */
+
+// Check if this is being accessed directly
+if (basename($_SERVER['SCRIPT_NAME']) === 'login.php') {
+    // Redirect to new route
+    $newUrl = '/login';
+    
+    // Preserve query parameters
+    if (!empty($_SERVER['QUERY_STRING'])) {
+        $newUrl .= '?' . $_SERVER['QUERY_STRING'];
+    }
+    
+    header('Location: ' . $newUrl, true, 301);
+    exit;
+}
+
 require_once __DIR__ . '/bootstrap.php';
 require_once __DIR__ . '/app/Middleware/RateLimitMiddleware.php';
 
