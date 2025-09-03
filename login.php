@@ -1,9 +1,17 @@
 <?php
-	session_start();
+require_once __DIR__ . '/bootstrap.php';
+require_once __DIR__ . '/app/Middleware/RateLimitMiddleware.php';
 
-	if (isset($_GET['timeout']) && $_GET['timeout'] == 1) {
-		echo '<p class="error">You have been logged out due to inactivity.</p>';
-	}
+// Rate limiting check
+require_once __DIR__ . '/server.php'; // Get database connection
+$rateLimiter = new RateLimitMiddleware($conn);
+if (!$rateLimiter->handle('login')) {
+    exit; // Rate limit exceeded
+}
+
+if (isset($_GET['timeout']) && $_GET['timeout'] == 1) {
+    echo '<p class="error">You have been logged out due to inactivity.</p>';
+}
 ?>
 
 <!DOCTYPE html>
@@ -13,6 +21,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<title>Login Page</title>
+	<?php echo CSRF::metaTag(); ?>
 	<link rel="stylesheet" href="style.css">
 	<link rel="stylesheet" href="public/assets/css/screenSizes.css">
 	<link rel="stylesheet" href="public/assets/css/style">
@@ -49,6 +58,7 @@
 			<div>
 			<h2>Log In</h2>
 			<form name="loginForm" action="login_process.php" method="post" onsubmit="return validateForm()">
+				<?php echo CSRF::field(); ?>
 				<label for="username">Username:</label>
 				<input class="input_field" type="text" id="username" name="username"><br>
 				<label for="password">Password:</label>

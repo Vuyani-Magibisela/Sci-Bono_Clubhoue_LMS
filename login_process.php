@@ -1,12 +1,33 @@
 <?php
-session_start();
-require 'server.php';
+require_once __DIR__ . '/bootstrap.php';
+require_once __DIR__ . '/server.php';
+
+// Validate CSRF token
+if (!CSRF::validateToken()) {
+    $_SESSION['login_error'] = 'Invalid security token. Please try again.';
+    header('Location: login.php');
+    exit;
+}
 
 // If the form is submitted
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Get the form data
-    $username = $_POST['username'];
-    $password = $_POST['password'];
+    // Validate input using our new Validator
+    $validator = new Validator($_POST);
+    $isValid = $validator->validate([
+        'username' => 'required|alpha_dash|min:3|max:50|no_script',
+        'password' => 'required|min:1|max:255'
+    ]);
+
+    if (!$isValid) {
+        $_SESSION['login_error'] = $validator->firstError() ?: 'Invalid input provided';
+        $_SESSION['errors'] = $validator->errors();
+        header('Location: login.php');
+        exit;
+    }
+
+    $validatedData = $validator->getValidatedData();
+    $username = $validatedData['username'];
+    $password = $validatedData['password'];
 
     // Check if the user exists in the database
     $sql = "SELECT * FROM users WHERE username=?";
@@ -30,6 +51,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $_SESSION['username'] = $username;
             $_SESSION['user_type'] = $row['user_type'];
             $_SESSION['user_id'] = $row['id']; 
+            
+            // Regenerate CSRF token after successful login
+            CSRF::regenerateToken();
 
             header("Location: home.php");
             exit;
