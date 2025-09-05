@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>API Explorer - Sci-Bono LMS</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Monaco', 'Menlo', monospace; background: #1e1e1e; color: #d4d4d4; }
+        .container { max-width: 1400px; margin: 0 auto; padding: 20px; }
+        header { text-align: center; margin-bottom: 2rem; }
+        h1 { color: #4fc3f7; font-size: 2rem; margin-bottom: 0.5rem; }
+        .explorer { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; height: 80vh; }
+        .panel { background: #252526; border-radius: 8px; padding: 1rem; overflow-y: auto; }
+        .request-panel { border-top: 3px solid #4caf50; }
+        .response-panel { border-top: 3px solid #ff9800; }
+        .form-group { margin-bottom: 1rem; }
+        label { display: block; margin-bottom: 0.5rem; color: #569cd6; }
+        input, select, textarea { width: 100%; padding: 0.5rem; background: #3c3c3c; border: 1px solid #555; color: #d4d4d4; border-radius: 4px; }
+        button { background: #007acc; color: white; padding: 0.75rem 1.5rem; border: none; border-radius: 4px; cursor: pointer; margin-right: 0.5rem; }
+        button:hover { background: #005a9e; }
+        .response { background: #1e1e1e; padding: 1rem; border-radius: 4px; white-space: pre-wrap; font-family: 'Monaco', monospace; font-size: 0.9rem; }
+        .endpoint { background: #2d2d30; padding: 1rem; margin-bottom: 1rem; border-radius: 4px; cursor: pointer; }
+        .endpoint:hover { background: #3e3e42; }
+        .method { padding: 0.25rem 0.5rem; border-radius: 3px; font-weight: bold; margin-right: 0.5rem; }
+        .get { background: #4caf50; }
+        .post { background: #2196f3; }
+        .put { background: #ff9800; }
+        .delete { background: #f44336; }
+        .auth-section { background: #2d2d30; padding: 1rem; border-radius: 4px; margin-bottom: 1rem; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🔍 API Explorer</h1>
+            <p>Interactive tool for testing Sci-Bono LMS API endpoints</p>
+        </header>
+        
+        <div class="explorer">
+            <div class="panel request-panel">
+                <h2>🚀 Request</h2>
+                
+                <div class="auth-section">
+                    <h3>Authentication</h3>
+                    <div class="form-group">
+                        <input type="text" id="token" placeholder="JWT Token (optional for login)" />
+                        <button onclick="login()">Login</button>
+                        <button onclick="clearAuth()">Clear</button>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label>HTTP Method:</label>
+                    <select id="method">
+                        <option value="GET">GET</option>
+                        <option value="POST">POST</option>
+                        <option value="PUT">PUT</option>
+                        <option value="DELETE">DELETE</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>Endpoint URL:</label>
+                    <input type="text" id="url" value="/users" />
+                </div>
+                
+                <div class="form-group">
+                    <label>Request Body (JSON):</label>
+                    <textarea id="body" rows="8" placeholder='{"key": "value"}'></textarea>
+                </div>
+                
+                <div class="form-group">
+                    <button onclick="sendRequest()">Send Request</button>
+                    <button onclick="clearRequest()">Clear</button>
+                </div>
+                
+                <h3>Quick Endpoints</h3>
+                <div class="endpoint" onclick="setEndpoint('POST', '/auth/login', '{\"identifier\": \"user@example.com\", \"password\": \"password\"}')">
+                    <span class="method post">POST</span>/auth/login
+                </div>
+                <div class="endpoint" onclick="setEndpoint('GET', '/users', '')">
+                    <span class="method get">GET</span>/users
+                </div>
+                <div class="endpoint" onclick="setEndpoint('POST', '/users', '{\"name\": \"John\", \"surname\": \"Doe\", \"email\": \"john@example.com\", \"password\": \"password123\"}')">
+                    <span class="method post">POST</span>/users
+                </div>
+                <div class="endpoint" onclick="setEndpoint('GET', '/users/1', '')">
+                    <span class="method get">GET</span>/users/:id
+                </div>
+                <div class="endpoint" onclick="setEndpoint('PUT', '/users/1', '{\"name\": \"John Updated\"}')">
+                    <span class="method put">PUT</span>/users/:id
+                </div>
+            </div>
+            
+            <div class="panel response-panel">
+                <h2>📄 Response</h2>
+                <div id="response" class="response">Click "Send Request" to see response...</div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        const baseUrl = 'http://localhost/Sci-Bono_Clubhoue_LMS/app/API';
+        let authToken = '';
+        
+        function setEndpoint(method, url, body) {
+            document.getElementById('method').value = method;
+            document.getElementById('url').value = url;
+            document.getElementById('body').value = body;
+        }
+        
+        function login() {
+            const identifier = prompt('Enter email/username:');
+            const password = prompt('Enter password:');
+            
+            if (identifier && password) {
+                setEndpoint('POST', '/auth/login', JSON.stringify({identifier, password}));
+                sendRequest().then(data => {
+                    if (data && data.success && data.data.token) {
+                        authToken = data.data.token;
+                        document.getElementById('token').value = authToken;
+                        alert('Login successful! Token saved.');
+                    }
+                });
+            }
+        }
+        
+        function clearAuth() {
+            authToken = '';
+            document.getElementById('token').value = '';
+        }
+        
+        function clearRequest() {
+            document.getElementById('url').value = '';
+            document.getElementById('body').value = '';
+            document.getElementById('response').textContent = 'Request cleared...';
+        }
+        
+        async function sendRequest() {
+            const method = document.getElementById('method').value;
+            const url = document.getElementById('url').value;
+            const body = document.getElementById('body').value;
+            const token = document.getElementById('token').value || authToken;
+            
+            const headers = {
+                'Content-Type': 'application/json'
+            };
+            
+            if (token) {
+                headers['Authorization'] = `Bearer ${token}`;
+            }
+            
+            const options = {
+                method: method,
+                headers: headers
+            };
+            
+            if (body && (method === 'POST' || method === 'PUT')) {
+                options.body = body;
+            }
+            
+            const responseDiv = document.getElementById('response');
+            responseDiv.textContent = 'Sending request...';
+            
+            try {
+                const response = await fetch(baseUrl + url, options);
+                const data = await response.json();
+                
+                const formattedResponse = {
+                    status: response.status,
+                    statusText: response.statusText,
+                    headers: Object.fromEntries(response.headers.entries()),
+                    body: data
+                };
+                
+                responseDiv.textContent = JSON.stringify(formattedResponse, null, 2);
+                
+                // Update auth token if login was successful
+                if (data && data.success && data.data && data.data.token) {
+                    authToken = data.data.token;
+                    document.getElementById('token').value = authToken;
+                }
+                
+                return data;
+            } catch (error) {
+                responseDiv.textContent = `Error: ${error.message}`;
+                throw error;
+            }
+        }
+        
+        // Set initial token from input
+        document.getElementById('token').addEventListener('input', (e) => {
+            authToken = e.target.value;
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,255 @@
+# Sci-Bono LMS GitLab CI/CD Configuration
+# Phase 7: API Development & Testing
+
+stages:
+  - build
+  - test
+  - security
+  - quality
+  - deploy
+
+variables:
+  MYSQL_ROOT_PASSWORD: root_password
+  MYSQL_DATABASE: sci_bono_lms_test
+  MYSQL_USER: test_user
+  MYSQL_PASSWORD: test_password
+  TEST_DB_HOST: mysql
+  TEST_DB_PORT: 3306
+  TEST_DB_USERNAME: test_user
+  TEST_DB_PASSWORD: test_password
+  TEST_DB_NAME: sci_bono_lms_test
+  APP_ENV: testing
+
+# Build stage
+build:
+  stage: build
+  image: php:8.1-cli
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq git curl libzip-dev zip unzip
+    - docker-php-ext-install mysqli pdo pdo_mysql zip
+    - curl -sS https://getcomposer.org/installer | php
+    - mv composer.phar /usr/local/bin/composer
+  script:
+    - echo "Building application..."
+    - if [ -f composer.json ]; then composer install --prefer-dist --no-progress --no-dev; fi
+    - echo "Build completed successfully"
+  artifacts:
+    paths:
+      - vendor/
+    expire_in: 1 hour
+
+# Test stages
+.test_template: &test_definition
+  stage: test
+  services:
+    - mysql:8.0
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq libzip-dev zip unzip mysql-client
+    - docker-php-ext-install mysqli pdo pdo_mysql
+    - if [ -f composer.json ]; then composer install --prefer-dist --no-progress; fi
+    - mysql -h mysql -u root -p$MYSQL_ROOT_PASSWORD -e "CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE;"
+    - mysql -h mysql -u root -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON $MYSQL_DATABASE.* TO '$MYSQL_USER'@'%';"
+    - mysql -h mysql -u root -p$MYSQL_ROOT_PASSWORD -e "FLUSH PRIVILEGES;"
+    - mkdir -p tests/reports tests/coverage tests/logs
+  artifacts:
+    when: always
+    paths:
+      - tests/reports/
+      - tests/coverage/
+      - tests/logs/
+    reports:
+      junit: tests/reports/*.xml
+    expire_in: 1 week
+
+test:php74:
+  <<: *test_definition
+  image: php:7.4-cli
+  script:
+    - echo "Running tests with PHP 7.4..."
+    - php tests/run-tests.php --suite=all --verbose --output=tests/reports/php74-results.json
+
+test:php80:
+  <<: *test_definition
+  image: php:8.0-cli
+  script:
+    - echo "Running tests with PHP 8.0..."
+    - php tests/run-tests.php --suite=all --verbose --output=tests/reports/php80-results.json
+
+test:php81:
+  <<: *test_definition
+  image: php:8.1-cli
+  script:
+    - echo "Running tests with PHP 8.1..."
+    - php tests/run-tests.php --suite=all --coverage --verbose --output=tests/reports/php81-results.json
+  coverage: '/Coverage: \d+\.\d+%/'
+
+test:models:
+  <<: *test_definition
+  image: php:8.1-cli
+  script:
+    - echo "Running model tests..."
+    - php tests/run-tests.php --suite=models --verbose --output=tests/reports/model-tests.json
+
+test:api:
+  <<: *test_definition
+  image: php:8.1-cli
+  script:
+    - echo "Running API tests..."
+    - php tests/run-tests.php --suite=api --verbose --output=tests/reports/api-tests.json
+
+test:integration:
+  <<: *test_definition
+  image: php:8.1-cli
+  script:
+    - echo "Running integration tests..."
+    - php tests/run-tests.php --suite=integration --verbose --output=tests/reports/integration-tests.json
+  allow_failure: true
+
+# Security stage
+security_scan:
+  stage: security
+  image: php:8.1-cli
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq git curl
+  script:
+    - echo "Running security scan..."
+    
+    # Install composer if composer.json exists
+    - if [ -f composer.json ]; then
+        curl -sS https://getcomposer.org/installer | php &&
+        mv composer.phar /usr/local/bin/composer &&
+        composer install --no-dev;
+      fi
+    
+    # Check for security vulnerabilities in dependencies
+    - if [ -f composer.lock ]; then composer audit || echo "Composer audit not available"; fi
+    
+    # Check for hardcoded secrets
+    - echo "Checking for hardcoded secrets..."
+    - grep -r "password.*=" app/ --include="*.php" | grep -v "\$_POST\|hash\|password_" | head -10 || echo "No hardcoded passwords found"
+    
+    # Check for SQL injection patterns
+    - echo "Checking for SQL injection vulnerabilities..."
+    - grep -r "query.*\$" app/ --include="*.php" | grep -v "prepare\|bind_param" | head -10 || echo "No SQL injection patterns found"
+    
+    # Check file permissions
+    - echo "Checking file permissions..."
+    - find . -type f -perm /o+w -not -path "./tests/*" -not -path "./.git/*" | head -10 || echo "No world-writable files found"
+    
+    - echo "Security scan completed"
+  allow_failure: true
+
+# Code quality stage
+code_quality:
+  stage: quality
+  image: php:8.1-cli
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq git
+  script:
+    - echo "Running code quality checks..."
+    
+    # PHP syntax check
+    - echo "Checking PHP syntax..."
+    - find app/ -name "*.php" -exec php -l {} \;
+    
+    # Check for TODO/FIXME comments
+    - echo "Checking for TODO/FIXME comments..."
+    - grep -r "TODO\|FIXME\|XXX" app/ --include="*.php" | head -20 || echo "No TODO/FIXME comments found"
+    
+    # Basic code complexity check
+    - echo "Basic complexity analysis..."
+    - find app/ -name "*.php" -exec wc -l {} \; | sort -nr | head -10
+    
+    # Check for PHP warnings/errors
+    - echo "Checking for potential PHP issues..."
+    - grep -r "error_reporting\|ini_set.*error" app/ --include="*.php" || echo "No error reporting modifications found"
+    
+    - echo "Code quality check completed"
+  artifacts:
+    paths:
+      - quality-report.txt
+    expire_in: 1 week
+
+# Performance test (optional)
+performance_test:
+  stage: quality
+  image: php:8.1-cli
+  services:
+    - mysql:8.0
+  before_script:
+    - apt-get update -qq && apt-get install -y -qq libzip-dev zip unzip mysql-client curl
+    - docker-php-ext-install mysqli pdo pdo_mysql
+    - mysql -h mysql -u root -p$MYSQL_ROOT_PASSWORD -e "CREATE DATABASE IF NOT EXISTS $MYSQL_DATABASE;"
+  script:
+    - echo "Running basic performance tests..."
+    - php tests/run-tests.php --suite=models --filter=Performance --verbose || echo "No performance tests found"
+    - echo "Performance test completed"
+  allow_failure: true
+
+# Deploy to staging (on develop branch)
+deploy_staging:
+  stage: deploy
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache rsync openssh
+  script:
+    - echo "Deploying to staging environment..."
+    - echo "This is a placeholder for staging deployment"
+    - echo "Deployment would typically involve:"
+    - echo "- Copying files to staging server"
+    - echo "- Running database migrations"
+    - echo "- Clearing caches"
+    - echo "- Restarting services"
+  only:
+    - develop
+  when: manual
+  environment:
+    name: staging
+    url: https://staging.sci-bono-lms.example.com
+
+# Deploy to production (on main branch)
+deploy_production:
+  stage: deploy
+  image: alpine:latest
+  before_script:
+    - apk add --no-cache rsync openssh tar gzip
+  script:
+    - echo "Creating deployment package..."
+    - tar -czf sci-bono-lms-${CI_COMMIT_SHA::7}.tar.gz 
+      --exclude='.git' 
+      --exclude='tests' 
+      --exclude='node_modules' 
+      --exclude='.gitlab-ci.yml' 
+      .
+    - echo "Deployment package created: sci-bono-lms-${CI_COMMIT_SHA::7}.tar.gz"
+    - echo "Ready for production deployment"
+  artifacts:
+    paths:
+      - sci-bono-lms-*.tar.gz
+    expire_in: 1 month
+  only:
+    - main
+  when: manual
+  environment:
+    name: production
+    url: https://sci-bono-lms.example.com
+
+# Cleanup job
+cleanup:
+  stage: .post
+  image: alpine:latest
+  script:
+    - echo "Performing cleanup tasks..."
+    - echo "Cleanup completed"
+  when: always
+
+# Schedule for nightly tests
+nightly_tests:
+  extends: test:php81
+  only:
+    variables:
+      - $CI_PIPELINE_SOURCE == "schedule"
+  script:
+    - echo "Running comprehensive nightly tests..."
+    - php tests/run-tests.php --suite=all --coverage --verbose --output=tests/reports/nightly-results.json
+    - echo "Nightly tests completed"

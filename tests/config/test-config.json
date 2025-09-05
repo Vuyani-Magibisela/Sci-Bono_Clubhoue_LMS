@@ -1,0 +1,210 @@
+{
+  "name": "Sci-Bono LMS Test Configuration",
+  "version": "1.0.0",
+  "description": "Test configuration for Phase 7: API Development & Testing",
+  
+  "environments": {
+    "local": {
+      "database": {
+        "host": "localhost",
+        "port": 3306,
+        "username": "root",
+        "password": "",
+        "database": "sci_bono_lms_test",
+        "charset": "utf8mb4"
+      },
+      "options": {
+        "verbose": true,
+        "stop_on_failure": false,
+        "coverage": false,
+        "parallel": false
+      },
+      "paths": {
+        "reports": "./tests/reports",
+        "coverage": "./tests/coverage",
+        "logs": "./tests/logs"
+      }
+    },
+    
+    "ci": {
+      "database": {
+        "host": "127.0.0.1",
+        "port": 3306,
+        "username": "test_user",
+        "password": "test_password",
+        "database": "sci_bono_lms_test",
+        "charset": "utf8mb4"
+      },
+      "options": {
+        "verbose": true,
+        "stop_on_failure": true,
+        "coverage": true,
+        "parallel": false
+      },
+      "paths": {
+        "reports": "./tests/reports",
+        "coverage": "./tests/coverage",
+        "logs": "./tests/logs"
+      },
+      "timeouts": {
+        "test_timeout": 30,
+        "suite_timeout": 600
+      }
+    },
+    
+    "docker": {
+      "database": {
+        "host": "mysql",
+        "port": 3306,
+        "username": "test_user",
+        "password": "test_password",
+        "database": "sci_bono_lms_test",
+        "charset": "utf8mb4"
+      },
+      "options": {
+        "verbose": false,
+        "stop_on_failure": false,
+        "coverage": true,
+        "parallel": true
+      },
+      "paths": {
+        "reports": "./tests/reports",
+        "coverage": "./tests/coverage",
+        "logs": "./tests/logs"
+      }
+    }
+  },
+  
+  "test_suites": {
+    "unit": {
+      "description": "Unit tests for individual components",
+      "patterns": ["*Test.php"],
+      "directories": ["tests/Models", "tests/Services", "tests/Utils"],
+      "exclude": ["*IntegrationTest.php", "*ApiTest.php"]
+    },
+    
+    "integration": {
+      "description": "Integration tests for component interactions",
+      "patterns": ["*IntegrationTest.php"],
+      "directories": ["tests/Integration"],
+      "setup": ["database_transactions"]
+    },
+    
+    "api": {
+      "description": "API endpoint tests",
+      "patterns": ["*ApiTest.php"],
+      "directories": ["tests/API"],
+      "setup": ["database_transactions", "api_authentication"]
+    },
+    
+    "models": {
+      "description": "Database model tests",
+      "patterns": ["*ModelTest.php"],
+      "directories": ["tests/Models"],
+      "setup": ["database_transactions"]
+    },
+    
+    "performance": {
+      "description": "Performance and load tests",
+      "patterns": ["*PerformanceTest.php"],
+      "directories": ["tests/Performance"],
+      "options": {
+        "timeout": 120
+      }
+    }
+  },
+  
+  "coverage": {
+    "include": [
+      "app/Models/**/*.php",
+      "app/API/**/*.php",
+      "app/Services/**/*.php",
+      "app/Controllers/**/*.php",
+      "app/Utils/**/*.php",
+      "app/Middleware/**/*.php"
+    ],
+    "exclude": [
+      "app/Views/**/*.php",
+      "app/Config/**/*.php",
+      "tests/**/*.php",
+      "vendor/**/*.php"
+    ],
+    "formats": ["html", "text", "xml"],
+    "thresholds": {
+      "line": 70,
+      "function": 75,
+      "class": 80,
+      "method": 75
+    }
+  },
+  
+  "reporting": {
+    "formats": ["json", "xml", "html", "junit"],
+    "include_performance_metrics": true,
+    "include_memory_usage": true,
+    "include_environment_info": true,
+    "retention_days": 30
+  },
+  
+  "database": {
+    "cleanup_strategy": "rollback",
+    "seed_data": false,
+    "foreign_key_checks": false,
+    "fixtures": {
+      "users": "tests/fixtures/users.json",
+      "roles": "tests/fixtures/roles.json"
+    }
+  },
+  
+  "api_testing": {
+    "base_url": "http://localhost",
+    "timeout": 30,
+    "authentication": {
+      "type": "jwt",
+      "token_endpoint": "/api/auth/token",
+      "refresh_endpoint": "/api/auth/refresh"
+    },
+    "rate_limiting": {
+      "enabled": true,
+      "max_requests": 100,
+      "time_window": 60
+    }
+  },
+  
+  "parallel_execution": {
+    "enabled": false,
+    "max_processes": 4,
+    "chunk_size": 10,
+    "memory_limit": "256M"
+  },
+  
+  "notifications": {
+    "enabled": false,
+    "channels": ["email", "slack"],
+    "on_failure": true,
+    "on_success": false,
+    "recipients": []
+  },
+  
+  "debug": {
+    "enabled": true,
+    "log_level": "info",
+    "sql_queries": false,
+    "memory_tracking": true,
+    "execution_time": true
+  },
+  
+  "security": {
+    "sanitize_output": true,
+    "mask_sensitive_data": true,
+    "allowed_functions": ["password_hash", "password_verify"],
+    "blocked_functions": ["eval", "exec", "system", "shell_exec"]
+  },
+  
+  "compatibility": {
+    "php_version": ">=7.4",
+    "mysql_version": ">=5.7",
+    "required_extensions": ["mysqli", "json", "mbstring", "openssl"],
+    "optional_extensions": ["xdebug", "curl"]
+  }
+}

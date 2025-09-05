@@ -1,0 +1,563 @@
+/**
+ * Button Component Library - BEM Methodology
+ * Phase 6: Frontend Improvements
+ * Sci-Bono Clubhouse LMS
+ */
+
+/* ========================================
+   BUTTON BLOCK - Base Component
+   ======================================== */
+
+.button {
+  /* Layout */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  
+  /* Typography */
+  font-family: var(--font-family-primary);
+  font-size: var(--font-size-base);
+  font-weight: var(--button-font-weight);
+  line-height: var(--line-height-none);
+  text-align: center;
+  text-decoration: none;
+  white-space: nowrap;
+  
+  /* Sizing */
+  height: var(--button-height-md);
+  padding: 0 var(--button-padding-x-md);
+  min-width: auto;
+  
+  /* Visual */
+  border: 1px solid transparent;
+  border-radius: var(--button-border-radius);
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  box-shadow: var(--shadow-sm);
+  
+  /* Interaction */
+  cursor: pointer;
+  user-select: none;
+  transition: all var(--transition-fast);
+  
+  /* Focus */
+  outline: none;
+}
+
+/* Button hover state */
+.button:hover {
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+  background-color: var(--color-primary-dark);
+}
+
+/* Button focus state */
+.button:focus,
+.button:focus-visible {
+  outline: none;
+  box-shadow: 
+    var(--shadow-md),
+    0 0 0 var(--form-control-focus-ring-width) rgba(37, 99, 235, var(--form-control-focus-ring-opacity));
+}
+
+/* Button active state */
+.button:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}
+
+/* Button disabled state */
+.button:disabled,
+.button[disabled] {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  background-color: var(--color-gray-400);
+  color: var(--color-white);
+}
+
+.button:disabled:hover,
+.button[disabled]:hover {
+  transform: none;
+  box-shadow: none;
+  background-color: var(--color-gray-400);
+}
+
+/* ========================================
+   BUTTON SIZE MODIFIERS
+   ======================================== */
+
+/* Small button */
+.button--sm {
+  height: var(--button-height-sm);
+  padding: 0 var(--button-padding-x-sm);
+  font-size: var(--font-size-sm);
+  gap: var(--space-1);
+}
+
+/* Large button */
+.button--lg {
+  height: var(--button-height-lg);
+  padding: 0 var(--button-padding-x-lg);
+  font-size: var(--font-size-lg);
+  gap: var(--space-3);
+}
+
+/* Full width button */
+.button--full {
+  width: 100%;
+  display: flex;
+}
+
+/* ========================================
+   BUTTON VARIANT MODIFIERS
+   ======================================== */
+
+/* Secondary button */
+.button--secondary {
+  background-color: var(--color-secondary);
+  color: var(--color-white);
+}
+
+.button--secondary:hover {
+  background-color: var(--color-secondary-dark);
+}
+
+.button--secondary:disabled,
+.button--secondary[disabled] {
+  background-color: var(--color-gray-400);
+}
+
+/* Accent button */
+.button--accent {
+  background-color: var(--color-accent);
+  color: var(--color-white);
+}
+
+.button--accent:hover {
+  background-color: var(--color-accent-dark);
+}
+
+.button--accent:disabled,
+.button--accent[disabled] {
+  background-color: var(--color-gray-400);
+}
+
+/* Success button */
+.button--success {
+  background-color: var(--color-success);
+  color: var(--color-white);
+}
+
+.button--success:hover {
+  background-color: var(--color-success-dark);
+}
+
+.button--success:disabled,
+.button--success[disabled] {
+  background-color: var(--color-gray-400);
+}
+
+/* Warning button */
+.button--warning {
+  background-color: var(--color-warning);
+  color: var(--color-white);
+}
+
+.button--warning:hover {
+  background-color: var(--color-warning-dark);
+}
+
+.button--warning:disabled,
+.button--warning[disabled] {
+  background-color: var(--color-gray-400);
+}
+
+/* Error/Danger button */
+.button--error,
+.button--danger {
+  background-color: var(--color-error);
+  color: var(--color-white);
+}
+
+.button--error:hover,
+.button--danger:hover {
+  background-color: var(--color-error-dark);
+}
+
+.button--error:disabled,
+.button--error[disabled],
+.button--danger:disabled,
+.button--danger[disabled] {
+  background-color: var(--color-gray-400);
+}
+
+/* ========================================
+   BUTTON STYLE MODIFIERS
+   ======================================== */
+
+/* Outline button */
+.button--outline {
+  background-color: transparent;
+  color: var(--color-primary);
+  border-color: var(--color-primary);
+  box-shadow: none;
+}
+
+.button--outline:hover {
+  background-color: var(--color-primary);
+  color: var(--color-white);
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.button--outline:active {
+  transform: translateY(0);
+  box-shadow: var(--shadow-sm);
+}
+
+.button--outline:disabled,
+.button--outline[disabled] {
+  color: var(--color-gray-400);
+  border-color: var(--color-gray-400);
+  background-color: transparent;
+}
+
+/* Outline variants */
+.button--outline.button--secondary {
+  color: var(--color-secondary);
+  border-color: var(--color-secondary);
+}
+
+.button--outline.button--secondary:hover {
+  background-color: var(--color-secondary);
+  color: var(--color-white);
+}
+
+.button--outline.button--accent {
+  color: var(--color-accent);
+  border-color: var(--color-accent);
+}
+
+.button--outline.button--accent:hover {
+  background-color: var(--color-accent);
+  color: var(--color-white);
+}
+
+.button--outline.button--success {
+  color: var(--color-success);
+  border-color: var(--color-success);
+}
+
+.button--outline.button--success:hover {
+  background-color: var(--color-success);
+  color: var(--color-white);
+}
+
+.button--outline.button--warning {
+  color: var(--color-warning);
+  border-color: var(--color-warning);
+}
+
+.button--outline.button--warning:hover {
+  background-color: var(--color-warning);
+  color: var(--color-white);
+}
+
+.button--outline.button--error,
+.button--outline.button--danger {
+  color: var(--color-error);
+  border-color: var(--color-error);
+}
+
+.button--outline.button--error:hover,
+.button--outline.button--danger:hover {
+  background-color: var(--color-error);
+  color: var(--color-white);
+}
+
+/* Ghost/Text button */
+.button--ghost {
+  background-color: transparent;
+  color: var(--color-primary);
+  border-color: transparent;
+  box-shadow: none;
+}
+
+.button--ghost:hover {
+  background-color: var(--color-primary-50);
+  transform: none;
+  box-shadow: none;
+}
+
+.button--ghost:active {
+  background-color: var(--color-primary-100);
+}
+
+.button--ghost:disabled,
+.button--ghost[disabled] {
+  color: var(--color-gray-400);
+  background-color: transparent;
+}
+
+/* Ghost variants */
+.button--ghost.button--secondary {
+  color: var(--color-secondary);
+}
+
+.button--ghost.button--secondary:hover {
+  background-color: var(--color-secondary-50);
+}
+
+.button--ghost.button--accent {
+  color: var(--color-accent);
+}
+
+.button--ghost.button--accent:hover {
+  background-color: var(--color-warning-bg);
+}
+
+.button--ghost.button--success {
+  color: var(--color-success);
+}
+
+.button--ghost.button--success:hover {
+  background-color: var(--color-success-bg);
+}
+
+.button--ghost.button--warning {
+  color: var(--color-warning);
+}
+
+.button--ghost.button--warning:hover {
+  background-color: var(--color-warning-bg);
+}
+
+.button--ghost.button--error,
+.button--ghost.button--danger {
+  color: var(--color-error);
+}
+
+.button--ghost.button--error:hover,
+.button--ghost.button--danger:hover {
+  background-color: var(--color-error-bg);
+}
+
+/* ========================================
+   BUTTON SHAPE MODIFIERS
+   ======================================== */
+
+/* Rounded button */
+.button--rounded {
+  border-radius: var(--radius-full);
+}
+
+/* Square button (icon button) */
+.button--square {
+  width: var(--button-height-md);
+  padding: 0;
+  aspect-ratio: 1;
+}
+
+.button--square.button--sm {
+  width: var(--button-height-sm);
+}
+
+.button--square.button--lg {
+  width: var(--button-height-lg);
+}
+
+/* ========================================
+   BUTTON ICON ELEMENTS
+   ======================================== */
+
+/* Icon in button */
+.button__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1em;
+  height: 1em;
+  flex-shrink: 0;
+}
+
+.button__icon svg {
+  width: 100%;
+  height: 100%;
+  fill: currentColor;
+}
+
+/* Icon only button */
+.button--icon-only {
+  padding: 0;
+  width: var(--button-height-md);
+  aspect-ratio: 1;
+}
+
+.button--icon-only.button--sm {
+  width: var(--button-height-sm);
+}
+
+.button--icon-only.button--lg {
+  width: var(--button-height-lg);
+}
+
+/* ========================================
+   BUTTON LOADING STATE
+   ======================================== */
+
+.button--loading {
+  position: relative;
+  color: transparent;
+  pointer-events: none;
+}
+
+.button--loading::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 1em;
+  height: 1em;
+  margin-top: -0.5em;
+  margin-left: -0.5em;
+  border: 2px solid transparent;
+  border-top-color: currentColor;
+  border-radius: 50%;
+  animation: button-spin 1s linear infinite;
+}
+
+@keyframes button-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Loading state for different button sizes */
+.button--loading.button--sm::before {
+  width: 0.875em;
+  height: 0.875em;
+  margin-top: -0.4375em;
+  margin-left: -0.4375em;
+}
+
+.button--loading.button--lg::before {
+  width: 1.125em;
+  height: 1.125em;
+  margin-top: -0.5625em;
+  margin-left: -0.5625em;
+}
+
+/* ========================================
+   BUTTON GROUP BLOCK
+   ======================================== */
+
+.button-group {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+/* Connected button group */
+.button-group--connected {
+  gap: 0;
+}
+
+.button-group--connected .button {
+  border-radius: 0;
+  border-right-width: 0;
+}
+
+.button-group--connected .button:first-child {
+  border-top-left-radius: var(--button-border-radius);
+  border-bottom-left-radius: var(--button-border-radius);
+}
+
+.button-group--connected .button:last-child {
+  border-top-right-radius: var(--button-border-radius);
+  border-bottom-right-radius: var(--button-border-radius);
+  border-right-width: 1px;
+}
+
+.button-group--connected .button:only-child {
+  border-radius: var(--button-border-radius);
+  border-right-width: 1px;
+}
+
+/* Vertical button group */
+.button-group--vertical {
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.button-group--vertical.button-group--connected {
+  gap: 0;
+}
+
+.button-group--vertical.button-group--connected .button {
+  border-radius: 0;
+  border-bottom-width: 0;
+  border-right-width: 1px;
+}
+
+.button-group--vertical.button-group--connected .button:first-child {
+  border-top-left-radius: var(--button-border-radius);
+  border-top-right-radius: var(--button-border-radius);
+}
+
+.button-group--vertical.button-group--connected .button:last-child {
+  border-bottom-left-radius: var(--button-border-radius);
+  border-bottom-right-radius: var(--button-border-radius);
+  border-bottom-width: 1px;
+}
+
+.button-group--vertical.button-group--connected .button:only-child {
+  border-radius: var(--button-border-radius);
+  border-bottom-width: 1px;
+}
+
+/* ========================================
+   RESPONSIVE BUTTON BEHAVIOR
+   ======================================== */
+
+@media (max-width: 639px) {
+  /* Stack button groups on mobile */
+  .button-group--mobile-stack {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .button-group--mobile-stack .button {
+    width: 100%;
+  }
+  
+  /* Full width buttons on mobile */
+  .button--mobile-full {
+    width: 100%;
+    display: flex;
+  }
+}
+
+/* ========================================
+   HIGH CONTRAST MODE SUPPORT
+   ======================================== */
+
+@media (prefers-contrast: high) {
+  .button {
+    border-width: 2px;
+  }
+  
+  .button--outline {
+    border-width: 2px;
+  }
+  
+  .button--ghost {
+    border: 2px solid transparent;
+  }
+  
+  .button--ghost:hover {
+    border-color: currentColor;
+  }
+}

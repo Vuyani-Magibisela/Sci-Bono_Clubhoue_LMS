@@ -1,0 +1,84 @@
+# Prometheus Configuration for Sci-Bono LMS Monitoring
+# Production monitoring and alerting configuration
+
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+  external_labels:
+    monitor: 'sci-bono-lms-monitor'
+
+# Alertmanager configuration
+alerting:
+  alertmanagers:
+    - static_configs:
+        - targets:
+          # - alertmanager:9093
+
+# Load rules and send alerts to Alertmanager
+rule_files:
+  # - "first_rules.yml"
+  # - "second_rules.yml"
+
+# Scrape configuration
+scrape_configs:
+  # Prometheus itself
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # Sci-Bono LMS Application
+  - job_name: 'sci-bono-lms-app'
+    static_configs:
+      - targets: ['sci-bono-lms-app:80']
+    metrics_path: '/app/Controllers/PerformanceDashboardController.php'
+    params:
+      action: ['metrics']
+    scrape_interval: 30s
+    scrape_timeout: 10s
+
+  # MySQL Database
+  - job_name: 'mysql'
+    static_configs:
+      - targets: ['database:3306']
+    # Requires mysql_exporter sidecar container
+
+  # Redis Cache
+  - job_name: 'redis'
+    static_configs:
+      - targets: ['redis:6379']
+    # Requires redis_exporter sidecar container
+
+  # Nginx Proxy
+  - job_name: 'nginx'
+    static_configs:
+      - targets: ['nginx-proxy:8080']
+    metrics_path: '/nginx_status'
+    scrape_interval: 15s
+
+  # Node Exporter (System Metrics)
+  - job_name: 'node-exporter'
+    static_configs:
+      - targets: ['node-exporter:9100']
+    # Requires node_exporter sidecar container
+
+# Storage configuration
+storage:
+  tsdb:
+    path: /prometheus/
+    retention:
+      time: 15d
+      size: 10GB
+
+# Remote write configuration (for external systems)
+# remote_write:
+#   - url: "https://prometheus-remote-write-endpoint.com/api/prom/push"
+#     basic_auth:
+#       username: "username"
+#       password: "password"
+
+# Remote read configuration (for external systems)
+# remote_read:
+#   - url: "https://prometheus-remote-read-endpoint.com/api/prom/read"
+#     basic_auth:
+#       username: "username"
+#       password: "password"

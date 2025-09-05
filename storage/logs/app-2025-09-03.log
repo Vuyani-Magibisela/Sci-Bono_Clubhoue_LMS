@@ -8,3 +8,4 @@
 [2025-09-03 17:12:12] ERROR: Record failed attempt error Context: {"error":"Table 'accounts.login_attempts' doesn't exist"}
 [2025-09-03 17:12:12] INFO: Service action: user_creation_attempt Context: {"email":"test@example.com","service":"UserService"}
 [2025-09-03 17:12:12] ERROR: User creation error: Unknown column 'status' in 'field list' Context: {"email":"test@example.com","service":"UserService"}
+[2025-09-03 21:36:27] WARNING: require_once(/var/www/html/Sci-Bono_Clubhoue_LMS/core/ConfigLoader.php): Failed to open stream: No such file or directory Context: {"type":"PHP Error","severity":2,"message":"require_once(/var/www/html/Sci-Bono_Clubhoue_LMS/core/ConfigLoader.php): Failed to open stream: No such file or directory","file":"/var/www/html/Sci-Bono_Clubhoue_LMS/core/Database.php","line":7,"timestamp":"2025-09-03 21:36:27","url":"CLI","user_agent":"CLI","ip":"CLI","session_id":"3osc9lr2e75igb31s0q55r4dd2","user_id":null,"memory_usage":2097152}

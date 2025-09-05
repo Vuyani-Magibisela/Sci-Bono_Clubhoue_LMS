@@ -1839,200 +1839,619 @@ class PerformanceMonitor
 
 ## Task 7: Deployment and Production Setup
 
-### 7.1 Create Deployment Script
-**File**: `deploy/deploy.sh`
+### 7.1 Manual Deployment for Shared Hosting
+
+**Important**: The production environment is a shared hosting environment without CLI access or superuser permissions. The following instructions provide manual deployment procedures suitable for these limitations.
+
+#### 7.1.1 Pre-Deployment Preparation
+**File**: `deploy/shared-hosting-checklist.md`
+
+**Shared Hosting Limitations:**
+- No CLI access (no bash, composer, git commands)
+- No superuser permissions (no chmod, chown)
+- No system service restart capabilities
+- File uploads limited to web-based file managers or FTP/SFTP
+- Database management through web interfaces (phpMyAdmin, etc.)
+
+**Prerequisites:**
+1. **FTP/SFTP Client**: FileZilla, WinSCP, or similar
+2. **Web-based File Manager**: cPanel File Manager or hosting provider equivalent
+3. **Database Management Tool**: phpMyAdmin or hosting provider database interface
+4. **Local Development Environment**: For testing before deployment
+
+#### 7.1.2 Manual Deployment Steps
+
+**Step 1: Local Preparation**
 ```bash
-#!/bin/bash
+# On your local development machine:
 
-# Deployment script for Sci-Bono LMS
-# Usage: ./deploy.sh [environment]
+# 1. Create a clean deployment package
+mkdir deployment_package
+cd deployment_package
 
-ENVIRONMENT=${1:-production}
-PROJECT_DIR="/var/www/html/Sci-Bono_Clubhoue_LMS"
-BACKUP_DIR="/var/backups/sci-bono-lms"
-DATE=$(date +"%Y%m%d_%H%M%S")
+# 2. Copy all necessary files (excluding development files)
+rsync -av --exclude='node_modules' \
+         --exclude='.git' \
+         --exclude='storage/logs/*' \
+         --exclude='storage/cache/*' \
+         --exclude='tests' \
+         --exclude='.env' \
+         /path/to/your/project/ ./
 
-# Colors
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-NC='\033[0m'
+# 3. Install production dependencies locally
+composer install --no-dev --optimize-autoloader
 
-echo -e "${YELLOW}Sci-Bono LMS Deployment${NC}"
-echo "Environment: $ENVIRONMENT"
-echo "Date: $(date)"
-echo "=============================="
-
-# Function to log messages
-log() {
-    echo -e "${GREEN}[$(date +'%Y-%m-%d %H:%M:%S')] $1${NC}"
-}
-
-error() {
-    echo -e "${RED}[$(date +'%Y-%m-%d %H:%M:%S')] ERROR: $1${NC}"
-    exit 1
-}
-
-# Check if we're in the correct directory
-if [ ! -f "index.php" ] || [ ! -d "app" ]; then
-    error "Not in project directory. Please run from project root."
-fi
-
-# Create backup directory
-mkdir -p "$BACKUP_DIR"
-
-# Step 1: Backup current application
-log "Creating backup..."
-tar -czf "$BACKUP_DIR/backup_$DATE.tar.gz" \
-    --exclude='storage/logs/*' \
-    --exclude='storage/cache/*' \
-    --exclude='node_modules' \
-    --exclude='.git' \
-    . || error "Backup failed"
-
-log "Backup created: $BACKUP_DIR/backup_$DATE.tar.gz"
-
-# Step 2: Put application in maintenance mode
-log "Enabling maintenance mode..."
-touch storage/maintenance.lock
-
-# Step 3: Pull latest code (if using git)
-if [ -d ".git" ]; then
-    log "Pulling latest code..."
-    git pull origin main || error "Git pull failed"
-fi
-
-# Step 4: Install/update dependencies
-log "Installing Composer dependencies..."
-composer install --no-dev --optimize-autoloader || error "Composer install failed"
-
-# Step 5: Run database migrations
-log "Running database migrations..."
-if [ -f "bin/migrate.php" ]; then
-    php bin/migrate.php || error "Database migration failed"
-fi
-
-# Step 6: Clear caches
-log "Clearing caches..."
-rm -rf storage/cache/*
-rm -rf storage/logs/*.log
-
-# Step 7: Set proper permissions
-log "Setting file permissions..."
-chmod -R 755 storage
-chmod -R 755 public/assets/uploads
-chown -R www-data:www-data storage
-chown -R www-data:www-data public/assets/uploads
-
-# Step 8: Optimize for production
-if [ "$ENVIRONMENT" = "production" ]; then
-    log "Optimizing for production..."
-    
-    # Generate optimized autoloader
-    composer dump-autoload --optimize
-    
-    # Minify CSS/JS if tools are available
-    if command -v terser &> /dev/null; then
-        find public/assets/js -name "*.js" -not -name "*.min.js" -exec terser {} -o {}.min.js \;
-    fi
-    
-    if command -v uglifycss &> /dev/null; then
-        find public/assets/css -name "*.css" -not -name "*.min.css" -exec uglifycss {} --output {}.min.css \;
-    fi
-fi
-
-# Step 9: Run tests
-if [ -f "bin/run-tests.sh" ] && [ "$ENVIRONMENT" != "production" ]; then
-    log "Running tests..."
-    ./bin/run-tests.sh || error "Tests failed"
-fi
-
-# Step 10: Disable maintenance mode
-log "Disabling maintenance mode..."
-rm -f storage/maintenance.lock
-
-# Step 11: Restart web server (optional)
-if [ "$ENVIRONMENT" = "production" ] && command -v systemctl &> /dev/null; then
-    log "Restarting web server..."
-    sudo systemctl reload apache2 2>/dev/null || sudo systemctl reload nginx 2>/dev/null || true
-fi
-
-log "Deployment completed successfully!"
-echo ""
-echo "Post-deployment checklist:"
-echo "1. Verify application is accessible"
-echo "2. Check error logs for any issues"
-echo "3. Test critical functionality"
-echo "4. Monitor performance metrics"
+# 4. Create production environment file
+cp .env.example .env.production
+# Edit .env.production with production settings
 ```
 
-### 7.2 Create Environment-Specific Configuration
-**File**: `.env.production.example`
+**Step 2: Create Backup via Hosting Control Panel**
+1. Log into your hosting control panel
+2. Access File Manager
+3. Navigate to your domain's public folder
+4. Select all files and folders
+5. Create backup archive (usually "Compress" option)
+6. Download backup to local machine
+7. Store with timestamp: `backup_YYYYMMDD_HHMMSS.zip`
+
+**Step 3: Upload Files via FTP/SFTP**
+```
+# Directory structure for upload:
+public_html/                    # Your domain's web root
+├── app/                       # Upload entire app directory
+├── config/                    # Upload config files
+├── core/                      # Upload core framework files
+├── Database/                  # Upload database files
+├── public/                    # Upload public assets
+│   ├── assets/
+│   ├── index.php
+│   └── .htaccess
+├── storage/                   # Create/upload storage structure
+│   ├── cache/                # Ensure writable (755)
+│   ├── logs/                 # Ensure writable (755)
+│   └── maintenance.lock      # Create for maintenance mode
+├── vendor/                    # Upload composer dependencies
+├── .env                      # Upload production environment file
+├── .htaccess                 # Upload main .htaccess
+└── server.php                # Upload if needed
+```
+
+**Step 4: Manual File Permission Setup**
+```
+# Using hosting File Manager:
+1. Right-click on 'storage' folder → Properties/Permissions
+2. Set permissions to 755 (rwxr-xr-x)
+3. Apply recursively to all subfolders
+4. Right-click on 'public/assets/uploads' folder
+5. Set permissions to 755 (rwxr-xr-x)
+6. Apply recursively
+
+# Alternative for cPanel:
+1. Select folders in File Manager
+2. Click "Permissions" button
+3. Check: Owner (Read, Write, Execute)
+4. Check: Group (Read, Execute)
+5. Check: World (Read, Execute)
+6. Click "Change Permissions"
+```
+
+**Step 5: Database Migration (Manual)**
+```sql
+-- Using phpMyAdmin or hosting database interface:
+
+-- 1. Export current database (backup)
+-- 2. Run migration SQL files in order:
+--    Database/migrations/001_create_tables.sql
+--    Database/migrations/002_add_indexes.sql
+--    Database/migrations/003_update_schema.sql
+--    (etc.)
+
+-- 3. Update database connection settings in server.php:
+UPDATE your_config_table SET 
+db_host = 'your_shared_host_db_server',
+db_name = 'your_production_db_name',
+db_user = 'your_db_username',
+db_pass = 'your_db_password'
+WHERE config_key = 'database';
+```
+
+**Step 6: Enable Maintenance Mode**
+```
+# Create maintenance.lock file via File Manager:
+1. Navigate to storage/ folder
+2. Create new file named 'maintenance.lock'
+3. Add content: "Maintenance in progress - [current timestamp]"
+```
+
+**Step 7: Clear Caches Manually**
+```
+# Using File Manager:
+1. Navigate to storage/cache/
+2. Select all files and folders
+3. Delete selected items
+4. Navigate to storage/logs/
+5. Delete all .log files (keep folder structure)
+```
+
+**Step 8: Configuration Update**
+```php
+// Update config/config.php with production URLs:
+define('BASE_URL', 'https://yourdomain.com');
+define('ASSET_URL', 'https://yourdomain.com/assets');
+define('UPLOAD_URL', 'https://yourdomain.com/assets/uploads');
+
+// Ensure server.php has correct database credentials
+```
+
+**Step 9: Disable Maintenance Mode**
+```
+# Delete maintenance.lock file via File Manager:
+1. Navigate to storage/ folder
+2. Select maintenance.lock file
+3. Delete file
+```
+
+**Step 10: Verification**
+1. Visit your website URL
+2. Check that homepage loads correctly
+3. Test user login functionality
+4. Verify file uploads work
+5. Check database connections
+6. Test API endpoints with browser dev tools
+
+#### 7.1.3 Rollback Procedure (Shared Hosting)
+```
+# If deployment fails:
+1. Re-enable maintenance mode (create maintenance.lock)
+2. Delete current files via File Manager
+3. Upload backup files from Step 2
+4. Restore database from backup via phpMyAdmin
+5. Update configuration if needed
+6. Remove maintenance mode
+7. Test functionality
+```
+
+#### 7.1.4 Shared Hosting Optimization Script
+**File**: `deploy/optimize-shared-hosting.php`
+```php
+<?php
+/**
+ * Shared Hosting Optimization Script
+ * Run this via web browser after manual deployment
+ * URL: https://yourdomain.com/deploy/optimize-shared-hosting.php
+ */
+
+// Security check
+$allowed_ips = ['your.dev.ip.address', '127.0.0.1'];
+if (!in_array($_SERVER['REMOTE_ADDR'], $allowed_ips)) {
+    die('Access denied');
+}
+
+echo "<h1>Shared Hosting Optimization</h1>";
+
+// 1. Clear opcache if available
+if (function_exists('opcache_reset')) {
+    opcache_reset();
+    echo "<p>✓ OpCache cleared</p>";
+}
+
+// 2. Generate optimized autoloader (if composer is somehow available)
+$autoloadPath = '../vendor/autoload.php';
+if (file_exists($autoloadPath)) {
+    echo "<p>✓ Autoloader found</p>";
+} else {
+    echo "<p>⚠ Autoloader not found - ensure vendor folder is uploaded</p>";
+}
+
+// 3. Test database connection
+require_once '../server.php';
+if ($db && $db->ping()) {
+    echo "<p>✓ Database connection successful</p>";
+} else {
+    echo "<p>✗ Database connection failed</p>";
+}
+
+// 4. Check file permissions (approximation)
+$testDirs = ['../storage/cache', '../storage/logs', '../public/assets/uploads'];
+foreach ($testDirs as $dir) {
+    if (is_writable($dir)) {
+        echo "<p>✓ $dir is writable</p>";
+    } else {
+        echo "<p>⚠ $dir may not be writable - check permissions</p>";
+    }
+}
+
+// 5. Test critical functionality
+try {
+    session_start();
+    echo "<p>✓ Sessions working</p>";
+} catch (Exception $e) {
+    echo "<p>✗ Session error: " . $e->getMessage() . "</p>";
+}
+
+// 6. Environment check
+if (file_exists('../.env')) {
+    echo "<p>✓ Environment file found</p>";
+} else {
+    echo "<p>⚠ Environment file missing</p>";
+}
+
+echo "<h2>Manual Tasks Remaining:</h2>";
+echo "<ul>";
+echo "<li>Delete this optimization script after use</li>";
+echo "<li>Test user registration/login</li>";
+echo "<li>Verify file uploads work</li>";
+echo "<li>Check API endpoints</li>";
+echo "<li>Monitor error logs</li>";
+echo "</ul>";
+
+// Remove this script after use for security
+echo "<p><strong>Security Note:</strong> Delete this script after optimization is complete.</p>";
+?>
+```
+
+### 7.2 Shared Hosting Production Configuration
+
+#### 7.2.1 Production Environment Configuration
+**File**: `.env.production.shared-hosting`
 ```bash
-# Production Environment Configuration
+# Shared Hosting Production Configuration
+# Adapted for typical shared hosting environments
 
 # Application Configuration
 APP_NAME="Sci-Bono Clubhouse LMS"
 APP_ENV=production
 APP_DEBUG=false
-APP_URL=https://lms.scibono.ac.za
+APP_URL=https://yourdomain.com
 APP_SECRET_KEY=your-super-secret-production-key-here
 
-# Database Configuration
+# Database Configuration (Typical Shared Hosting Format)
 DB_HOST=localhost
-DB_NAME=sci_bono_lms_prod
-DB_USERNAME=lms_user
+# Alternative: DB_HOST=yourdomain.mysql.database.azure.com (if using cloud DB)
+DB_NAME=yourusername_lms_prod
+DB_USERNAME=yourusername_lms
 DB_PASSWORD=secure-database-password
 DB_CHARSET=utf8mb4
+DB_PORT=3306
 
-# Session Configuration
+# Session Configuration (Shared Hosting Compatible)
 SESSION_LIFETIME=120
 SESSION_SECURE=true
 SESSION_HTTP_ONLY=true
 SESSION_SAME_SITE=strict
+SESSION_SAVE_PATH=storage/sessions  # Custom path due to shared hosting
 
-# Mail Configuration
+# Mail Configuration (Shared Hosting SMTP)
 MAIL_DRIVER=smtp
-MAIL_HOST=smtp.scibono.ac.za
+MAIL_HOST=mail.yourdomain.com
 MAIL_PORT=587
-MAIL_USERNAME=noreply@scibono.ac.za
+MAIL_ENCRYPTION=tls
+MAIL_USERNAME=noreply@yourdomain.com
 MAIL_PASSWORD=mail-account-password
-MAIL_FROM_ADDRESS=noreply@scibono.ac.za
+MAIL_FROM_ADDRESS=noreply@yourdomain.com
 MAIL_FROM_NAME="Sci-Bono Clubhouse"
 
-# Logging Configuration
-LOG_LEVEL=warning
-LOG_MAX_FILES=7
-LOG_MAX_SIZE=10MB
+# Logging Configuration (Limited for Shared Hosting)
+LOG_LEVEL=error  # Only errors due to disk space limitations
+LOG_MAX_FILES=3  # Reduced for shared hosting
+LOG_MAX_SIZE=5MB # Smaller files for shared hosting
+LOG_DAILY=true   # Daily rotation to manage space
 
-# Cache Configuration
+# Cache Configuration (File-based for Shared Hosting)
 CACHE_DRIVER=file
 CACHE_LIFETIME=3600
+CACHE_PATH=storage/cache/app
 
-# Security Configuration
+# Security Configuration (Shared Hosting Optimized)
 RATE_LIMIT_ENABLED=true
-RATE_LIMIT_REQUESTS=100
+RATE_LIMIT_REQUESTS=50   # Lower limit for shared resources
 RATE_LIMIT_WINDOW=3600
 CSRF_PROTECTION=true
+FORCE_HTTPS=true         # Important for shared hosting
 
-# File Upload Configuration
-UPLOAD_MAX_SIZE=10MB
+# File Upload Configuration (Shared Hosting Limits)
+UPLOAD_MAX_SIZE=5MB      # Conservative for shared hosting
 UPLOAD_ALLOWED_TYPES=jpg,jpeg,png,gif,pdf,doc,docx
 UPLOAD_PATH=public/assets/uploads
+MAX_UPLOAD_FILES=10      # Limit concurrent uploads
 
-# Performance Configuration
-PERFORMANCE_MONITORING=true
-SLOW_QUERY_THRESHOLD=0.1
-MEMORY_LIMIT=256M
+# Performance Configuration (Shared Hosting Optimized)
+PERFORMANCE_MONITORING=false  # Disabled to reduce overhead
+SLOW_QUERY_THRESHOLD=0.2     # Higher threshold for shared DB
+MEMORY_LIMIT=128M            # Conservative for shared hosting
 
-# External Services
-BACKUP_ENABLED=true
-BACKUP_SCHEDULE=daily
-BACKUP_RETENTION=30
-
-# Monitoring
+# Shared Hosting Specific Settings
+SHARED_HOSTING=true
+DISABLE_FUNCTIONS=exec,shell_exec,system,passthru  # Typically disabled
+AUTO_BACKUP_ENABLED=false    # Manual backup due to cron limitations
 ERROR_REPORTING=false
 DISPLAY_ERRORS=false
+
+# Timezone Configuration
+DEFAULT_TIMEZONE=Africa/Johannesburg
+
+# API Configuration (Shared Hosting)
+API_RATE_LIMIT=30           # Lower API limits
+API_TIMEOUT=10              # Shorter timeout for shared resources
+API_MAX_REQUESTS_PER_HOUR=500
+
+# Database Connection Limits (Shared Hosting)
+DB_CONNECTION_LIMIT=10      # Conservative connection pooling
+DB_TIMEOUT=30               # Connection timeout
+DB_CHARSET=utf8mb4
+DB_COLLATION=utf8mb4_unicode_ci
+```
+
+#### 7.2.2 Shared Hosting Configuration Files
+
+**File**: `config/shared-hosting-config.php`
+```php
+<?php
+/**
+ * Shared Hosting Specific Configuration
+ * Override settings for shared hosting environment
+ */
+
+// Shared hosting detection
+if (getenv('SHARED_HOSTING') || 
+    isset($_SERVER['SHARED']) || 
+    strpos($_SERVER['DOCUMENT_ROOT'], 'public_html') !== false) {
+    
+    // Adjust PHP settings for shared hosting
+    @ini_set('memory_limit', '128M');
+    @ini_set('max_execution_time', 30);
+    @ini_set('upload_max_filesize', '5M');
+    @ini_set('post_max_size', '6M');
+    
+    // Session configuration for shared hosting
+    @ini_set('session.save_path', realpath(dirname(__FILE__) . '/../storage/sessions'));
+    @ini_set('session.cookie_secure', '1');
+    @ini_set('session.cookie_httponly', '1');
+    
+    // Error handling for shared hosting
+    @ini_set('display_errors', '0');
+    @ini_set('log_errors', '1');
+    @ini_set('error_log', realpath(dirname(__FILE__) . '/../storage/logs/php_errors.log'));
+    
+    // Disable dangerous functions typically blocked on shared hosting
+    $disabled_functions = [
+        'exec', 'shell_exec', 'system', 'passthru', 
+        'proc_open', 'proc_close', 'popen', 'pclose'
+    ];
+    
+    // Cache configuration
+    define('CACHE_ENABLED', true);
+    define('CACHE_LIFETIME', 3600);
+    define('CACHE_PATH', realpath(dirname(__FILE__) . '/../storage/cache'));
+    
+    // Database connection limits
+    define('DB_CONNECTION_LIMIT', 10);
+    define('DB_PERSISTENT', false); // Avoid persistent connections on shared hosting
+    
+    // File upload restrictions
+    define('MAX_UPLOAD_SIZE', 5 * 1024 * 1024); // 5MB
+    define('ALLOWED_EXTENSIONS', ['jpg', 'jpeg', 'png', 'gif', 'pdf', 'doc', 'docx']);
+    
+    // Performance optimizations for shared hosting
+    define('GZIP_COMPRESSION', true);
+    define('BROWSER_CACHE_HEADERS', true);
+    define('MINIFY_HTML', true);
+}
+```
+
+**File**: `deploy/shared-hosting-htaccess.txt`
+```apache
+# Shared Hosting .htaccess Configuration
+# Copy this content to your .htaccess file
+
+# Enable Rewrite Engine
+RewriteEngine On
+
+# Force HTTPS (if SSL is available)
+RewriteCond %{HTTPS} off
+RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Directory Index
+DirectoryIndex index.php
+
+# Protect sensitive files
+<FilesMatch "\.(env|md|json|lock|log)$">
+    Order allow,deny
+    Deny from all
+</FilesMatch>
+
+# Protect configuration files
+<Files "server.php">
+    Order allow,deny
+    Deny from all
+</Files>
+
+<Files "config.php">
+    Order allow,deny  
+    Deny from all
+</Files>
+
+# Block access to directories
+<IfModule mod_rewrite.c>
+    RewriteRule ^(app|config|core|storage|vendor|Database)/ - [F,L]
+</IfModule>
+
+# Security Headers
+<IfModule mod_headers.c>
+    Header always set X-Content-Type-Options nosniff
+    Header always set X-Frame-Options DENY
+    Header always set X-XSS-Protection "1; mode=block"
+    Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains"
+</IfModule>
+
+# Enable compression (if mod_deflate is available)
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/plain
+    AddOutputFilterByType DEFLATE text/html
+    AddOutputFilterByType DEFLATE text/xml
+    AddOutputFilterByType DEFLATE text/css
+    AddOutputFilterByType DEFLATE application/xml
+    AddOutputFilterByType DEFLATE application/xhtml+xml
+    AddOutputFilterByType DEFLATE application/rss+xml
+    AddOutputFilterByType DEFLATE application/javascript
+    AddOutputFilterByType DEFLATE application/x-javascript
+</IfModule>
+
+# Browser Caching (if mod_expires is available)
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresByType text/css "access plus 1 month"
+    ExpiresByType application/javascript "access plus 1 month"
+    ExpiresByType image/png "access plus 1 month"
+    ExpiresByType image/jpg "access plus 1 month"
+    ExpiresByType image/jpeg "access plus 1 month"
+    ExpiresByType image/gif "access plus 1 month"
+    ExpiresByType image/ico "access plus 1 month"
+    ExpiresByType image/icon "access plus 1 month"
+    ExpiresByType text/plain "access plus 1 month"
+    ExpiresByType application/pdf "access plus 1 month"
+</IfModule>
+
+# File upload limits (if allowed by hosting provider)
+php_value upload_max_filesize 5M
+php_value post_max_size 6M
+php_value memory_limit 128M
+php_value max_execution_time 30
+
+# Custom error pages
+ErrorDocument 403 /error/403.php
+ErrorDocument 404 /error/404.php
+ErrorDocument 500 /error/500.php
+
+# Main application routing
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^(.*)$ index.php?url=$1 [QSA,L]
+```
+
+#### 7.2.3 Manual Database Configuration
+**File**: `deploy/shared-hosting-database-setup.sql`
+```sql
+-- Manual Database Setup for Shared Hosting
+-- Run these commands in phpMyAdmin or hosting database interface
+
+-- 1. Create database (if not already created by hosting provider)
+-- CREATE DATABASE yourusername_lms_prod CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+
+-- 2. Create dedicated database user (if not already created)
+-- CREATE USER 'yourusername_lms'@'localhost' IDENTIFIED BY 'secure-database-password';
+-- GRANT ALL PRIVILEGES ON yourusername_lms_prod.* TO 'yourusername_lms'@'localhost';
+-- FLUSH PRIVILEGES;
+
+-- 3. Optimize for shared hosting
+SET SESSION sql_mode = 'STRICT_TRANS_TABLES,NO_ZERO_DATE,NO_ZERO_IN_DATE,ERROR_FOR_DIVISION_BY_ZERO';
+
+-- 4. Configure connection limits
+SET SESSION max_connections = 10;
+SET SESSION wait_timeout = 300;
+SET SESSION interactive_timeout = 300;
+
+-- 5. Enable query cache (if available)
+-- SET GLOBAL query_cache_size = 16777216;  -- 16MB
+-- SET GLOBAL query_cache_type = ON;
+
+-- 6. Database maintenance settings for shared hosting
+-- Run these periodically via cron job (if available) or manual execution
+
+-- Optimize tables monthly
+-- OPTIMIZE TABLE users, courses, holiday_programs, attendance, visitors;
+
+-- Analyze tables for query optimization
+-- ANALYZE TABLE users, courses, holiday_programs, attendance, visitors;
+
+-- Clean up old log entries (run weekly)
+-- DELETE FROM activity_logs WHERE created_at < DATE_SUB(NOW(), INTERVAL 30 DAY);
+-- DELETE FROM session_logs WHERE created_at < DATE_SUB(NOW(), INTERVAL 7 DAY);
+
+-- 7. Index optimization for shared hosting performance
+-- Add indexes for frequently queried columns
+CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_users_role ON users(role);
+CREATE INDEX idx_attendance_date ON attendance(date);
+CREATE INDEX idx_courses_status ON courses(status);
+CREATE INDEX idx_holiday_programs_status ON holiday_programs(status);
+```
+
+#### 7.2.4 Troubleshooting Guide for Shared Hosting
+**File**: `deploy/shared-hosting-troubleshooting.md`
+```markdown
+# Shared Hosting Troubleshooting Guide
+
+## Common Issues and Solutions
+
+### 1. File Permission Errors
+**Problem**: "Permission denied" errors for storage directories
+**Solution**: 
+- Use hosting File Manager to set 755 permissions on storage/, public/assets/uploads/
+- Ensure all PHP files have 644 permissions
+- Check with hosting provider if specific permission requirements exist
+
+### 2. Database Connection Errors
+**Problem**: "Connection refused" or "Access denied" database errors
+**Solution**:
+- Verify database credentials in server.php
+- Check if database server name is 'localhost' or specific hostname
+- Confirm database user has correct privileges
+- Test connection using hosting phpMyAdmin
+
+### 3. File Upload Issues  
+**Problem**: File uploads fail or timeout
+**Solution**:
+- Check hosting upload limits (often 2-10MB)
+- Verify upload directory permissions (755)
+- Update .htaccess with hosting-specific upload limits
+- Check available disk space
+
+### 4. Session Problems
+**Problem**: Users can't stay logged in
+**Solution**:
+- Create storage/sessions directory with 755 permissions
+- Update session.save_path in configuration
+- Check if hosting provider blocks session functions
+- Verify session cookies work with HTTPS
+
+### 5. Performance Issues
+**Problem**: Slow page loads or timeouts
+**Solution**:
+- Enable caching in configuration
+- Optimize database queries
+- Compress CSS/JS files
+- Check hosting resource limits (CPU, memory)
+- Remove debug code and logging
+
+### 6. Email/SMTP Issues
+**Problem**: Emails not sending
+**Solution**:
+- Verify SMTP settings with hosting provider
+- Use hosting provider's mail server
+- Check if port 587 or 465 is required
+- Test with simple mail() function first
+
+### 7. .htaccess Errors
+**Problem**: 500 Internal Server Error
+**Solution**:
+- Remove .htaccess temporarily to isolate issue
+- Check hosting Apache version and available modules
+- Simplify rewrite rules
+- Contact hosting support for module availability
+
+## Hosting Provider Checklist
+
+Before deployment, confirm with your hosting provider:
+- [ ] PHP version 7.4+ available
+- [ ] MySQL 5.7+ or MariaDB available  
+- [ ] mod_rewrite enabled
+- [ ] HTTPS/SSL certificate available
+- [ ] File upload limits and restrictions
+- [ ] Email/SMTP configuration
+- [ ] Cron job availability (for maintenance)
+- [ ] Backup policies and procedures
 ```
 
 ---

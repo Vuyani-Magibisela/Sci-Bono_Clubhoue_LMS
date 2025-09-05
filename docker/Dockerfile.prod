@@ -1,0 +1,128 @@
+# Production Dockerfile for Sci-Bono LMS
+# Multi-stage build for optimized production image
+
+# Build stage
+FROM php:8.1-apache AS builder
+
+# Install system dependencies
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    libpng-dev \
+    libonig-dev \
+    libxml2-dev \
+    libzip-dev \
+    zip \
+    unzip \
+    libfreetype6-dev \
+    libjpeg62-turbo-dev \
+    libmcrypt-dev \
+    libicu-dev \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install PHP extensions
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) \
+        pdo \
+        pdo_mysql \
+        mbstring \
+        exif \
+        pcntl \
+        bcmath \
+        gd \
+        zip \
+        intl \
+        opcache \
+        mysqli
+
+# Install Composer
+COPY --from=composer:latest /usr/bin/composer /usr/bin/composer
+
+# Copy application files
+WORKDIR /var/www/html
+COPY . .
+
+# Install PHP dependencies (production only)
+RUN composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+
+# Production stage
+FROM php:8.1-apache AS production
+
+# Install system dependencies (minimal for production)
+RUN apt-get update && apt-get install -y \
+    libpng16-16 \
+    libonig5 \
+    libxml2 \
+    libzip4 \
+    libfreetype6 \
+    libjpeg62-turbo \
+    libicu67 \
+    curl \
+    && apt-get clean \
+    && rm -rf /var/lib/apt/lists/*
+
+# Install PHP extensions (same as builder stage)
+RUN docker-php-ext-configure gd --with-freetype --with-jpeg \
+    && docker-php-ext-install -j$(nproc) \
+        pdo \
+        pdo_mysql \
+        mbstring \
+        exif \
+        pcntl \
+        bcmath \
+        gd \
+        zip \
+        intl \
+        opcache \
+        mysqli
+
+# Enable Apache modules
+RUN a2enmod rewrite ssl headers deflate expires
+
+# Copy application files from builder stage
+COPY --from=builder /var/www/html /var/www/html
+
+# Copy configuration files
+COPY docker/apache/000-default.conf /etc/apache2/sites-available/000-default.conf
+COPY docker/apache/default-ssl.conf /etc/apache2/sites-available/default-ssl.conf
+COPY docker/php/php.ini /usr/local/etc/php/php.ini
+COPY docker/php/opcache.ini /usr/local/etc/php/conf.d/opcache.ini
+
+# Enable SSL site
+RUN a2ensite default-ssl
+
+# Create necessary directories and set permissions
+RUN mkdir -p /var/www/html/storage/cache \
+    && mkdir -p /var/www/html/storage/sessions \
+    && mkdir -p /var/www/html/storage/logs \
+    && mkdir -p /var/www/html/logs \
+    && chown -R www-data:www-data /var/www/html/storage \
+    && chown -R www-data:www-data /var/www/html/public/assets/uploads \
+    && chown -R www-data:www-data /var/www/html/logs \
+    && chmod -R 755 /var/www/html/storage \
+    && chmod -R 755 /var/www/html/public/assets/uploads \
+    && chmod -R 755 /var/www/html/logs
+
+# Security: Remove sensitive files
+RUN rm -rf /var/www/html/.git \
+    && rm -rf /var/www/html/tests \
+    && rm -rf /var/www/html/docker \
+    && rm -f /var/www/html/.env.example \
+    && rm -f /var/www/html/README.md
+
+# Set working directory
+WORKDIR /var/www/html
+
+# Expose ports
+EXPOSE 80 443
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+    CMD curl -f http://localhost/health || exit 1
+
+# Set user to www-data for security
+USER www-data
+
+# Start Apache in foreground
+CMD ["apache2-foreground"]

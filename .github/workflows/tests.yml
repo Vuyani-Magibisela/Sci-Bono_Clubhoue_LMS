@@ -1,0 +1,271 @@
+name: Sci-Bono LMS Test Suite
+
+on:
+  push:
+    branches: [ main, develop, feature/* ]
+  pull_request:
+    branches: [ main, develop ]
+  schedule:
+    # Run tests daily at 2 AM UTC
+    - cron: '0 2 * * *'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    strategy:
+      matrix:
+        php-version: [7.4, 8.0, 8.1, 8.2]
+        mysql-version: [5.7, 8.0]
+      fail-fast: false
+    
+    services:
+      mysql:
+        image: mysql:${{ matrix.mysql-version }}
+        env:
+          MYSQL_ROOT_PASSWORD: root_password
+          MYSQL_DATABASE: sci_bono_lms_test
+          MYSQL_USER: test_user
+          MYSQL_PASSWORD: test_password
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=5
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: ${{ matrix.php-version }}
+        extensions: mysqli, mbstring, json, xml, tokenizer, openssl
+        coverage: xdebug
+        tools: composer:v2
+
+    - name: Get composer cache directory
+      id: composer-cache
+      run: echo "dir=$(composer config cache-files-dir)" >> $GITHUB_OUTPUT
+
+    - name: Cache composer dependencies
+      uses: actions/cache@v3
+      with:
+        path: ${{ steps.composer-cache.outputs.dir }}
+        key: ${{ runner.os }}-composer-${{ hashFiles('**/composer.lock') }}
+        restore-keys: ${{ runner.os }}-composer-
+
+    - name: Install dependencies
+      run: |
+        if [ -f composer.json ]; then
+          composer install --prefer-dist --no-progress --no-interaction
+        else
+          echo "No composer.json found, skipping composer install"
+        fi
+
+    - name: Wait for MySQL
+      run: |
+        while ! mysqladmin ping -h"127.0.0.1" -P3306 -uroot -proot_password --silent; do
+          echo "Waiting for MySQL..."
+          sleep 2
+        done
+        echo "MySQL is ready!"
+
+    - name: Create test database
+      run: |
+        mysql -h 127.0.0.1 -P 3306 -u root -proot_password -e "CREATE DATABASE IF NOT EXISTS sci_bono_lms_test;"
+        mysql -h 127.0.0.1 -P 3306 -u root -proot_password -e "GRANT ALL PRIVILEGES ON sci_bono_lms_test.* TO 'test_user'@'%';"
+        mysql -h 127.0.0.1 -P 3306 -u root -proot_password -e "FLUSH PRIVILEGES;"
+
+    - name: Set up environment variables
+      run: |
+        echo "TEST_DB_HOST=127.0.0.1" >> $GITHUB_ENV
+        echo "TEST_DB_PORT=3306" >> $GITHUB_ENV
+        echo "TEST_DB_USERNAME=test_user" >> $GITHUB_ENV
+        echo "TEST_DB_PASSWORD=test_password" >> $GITHUB_ENV
+        echo "TEST_DB_NAME=sci_bono_lms_test" >> $GITHUB_ENV
+        echo "APP_ENV=testing" >> $GITHUB_ENV
+
+    - name: Run model tests
+      run: php tests/run-tests.php --suite=models --verbose --output=reports/model-tests.json
+
+    - name: Run API tests
+      run: php tests/run-tests.php --suite=api --verbose --output=reports/api-tests.json
+
+    - name: Run all tests with coverage
+      run: php tests/run-tests.php --coverage --verbose --output=reports/full-results.json
+
+    - name: Upload test results
+      uses: actions/upload-artifact@v3
+      if: always()
+      with:
+        name: test-results-php${{ matrix.php-version }}-mysql${{ matrix.mysql-version }}
+        path: |
+          tests/reports/
+          tests/coverage/
+          tests/logs/
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      if: matrix.php-version == '8.1' && matrix.mysql-version == '8.0'
+      with:
+        files: tests/coverage/coverage.xml
+        fail_ci_if_error: false
+
+  security-scan:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: 8.1
+        extensions: mysqli, mbstring, json
+
+    - name: Install dependencies
+      run: |
+        if [ -f composer.json ]; then
+          composer install --prefer-dist --no-dev
+        fi
+
+    - name: Run security scan
+      run: |
+        # Check for known vulnerabilities in dependencies
+        if [ -f composer.lock ]; then
+          composer audit
+        fi
+        
+        # Basic security checks
+        echo "Running basic security checks..."
+        
+        # Check for hardcoded passwords/secrets
+        if grep -r "password.*=" app/ --include="*.php" | grep -v "\$_POST\|hash\|password_" | head -5; then
+          echo "WARNING: Potential hardcoded passwords found"
+        fi
+        
+        # Check for SQL injection vulnerabilities
+        if grep -r "query.*\$" app/ --include="*.php" | grep -v "prepare\|bind_param" | head -5; then
+          echo "WARNING: Potential SQL injection vulnerabilities found"
+        fi
+
+    - name: Check file permissions
+      run: |
+        echo "Checking file permissions..."
+        find . -type f -perm /o+w -not -path "./tests/*" -not -path "./.git/*" | head -10
+
+  code-quality:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup PHP
+      uses: shivammathur/setup-php@v2
+      with:
+        php-version: 8.1
+        extensions: mysqli, mbstring, json
+        tools: composer:v2, phpcs, phpmd
+
+    - name: Install dependencies
+      run: |
+        if [ -f composer.json ]; then
+          composer install --prefer-dist --no-dev
+        fi
+
+    - name: PHP Lint
+      run: |
+        echo "Running PHP syntax check..."
+        find app/ -name "*.php" -exec php -l {} \;
+
+    - name: Code style check (if phpcs available)
+      run: |
+        if command -v phpcs &> /dev/null; then
+          phpcs --standard=PSR12 --extensions=php app/
+        else
+          echo "PHPCS not available, skipping code style check"
+        fi
+
+    - name: Check for TODO/FIXME comments
+      run: |
+        echo "Checking for TODO/FIXME comments..."
+        grep -r "TODO\|FIXME\|XXX" app/ --include="*.php" || echo "No TODO/FIXME comments found"
+
+  deployment-readiness:
+    runs-on: ubuntu-latest
+    needs: [test, security-scan, code-quality]
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Check deployment readiness
+      run: |
+        echo "Deployment readiness check..."
+        
+        # Check if critical files exist
+        critical_files=(
+          "app/Models/UserModel.php"
+          "app/API/UserApiController.php"
+          "app/Services/ApiTokenService.php"
+          "tests/BaseTestCase.php"
+        )
+        
+        for file in "${critical_files[@]}"; do
+          if [ ! -f "$file" ]; then
+            echo "ERROR: Critical file missing: $file"
+            exit 1
+          else
+            echo "✓ $file exists"
+          fi
+        done
+        
+        # Check configuration files
+        if [ ! -f "config/database.php" ] && [ ! -f "server.php" ]; then
+          echo "ERROR: No database configuration found"
+          exit 1
+        fi
+        
+        echo "✓ Deployment readiness check passed"
+
+    - name: Generate deployment artifact
+      run: |
+        mkdir -p deployment
+        tar -czf deployment/sci-bono-lms-${GITHUB_SHA::7}.tar.gz \
+          --exclude='.git' \
+          --exclude='tests' \
+          --exclude='node_modules' \
+          --exclude='.github' \
+          .
+
+    - name: Upload deployment artifact
+      uses: actions/upload-artifact@v3
+      with:
+        name: deployment-package
+        path: deployment/sci-bono-lms-*.tar.gz
+
+  notification:
+    runs-on: ubuntu-latest
+    needs: [test, security-scan, code-quality]
+    if: always()
+    
+    steps:
+    - name: Notify on success
+      if: needs.test.result == 'success' && needs.security-scan.result == 'success' && needs.code-quality.result == 'success'
+      run: |
+        echo "🎉 All tests passed successfully!"
+        echo "Build: $GITHUB_RUN_NUMBER"
+        echo "Commit: $GITHUB_SHA"
+
+    - name: Notify on failure
+      if: needs.test.result == 'failure' || needs.security-scan.result == 'failure' || needs.code-quality.result == 'failure'
+      run: |
+        echo "❌ Tests failed!"
+        echo "Test result: ${{ needs.test.result }}"
+        echo "Security scan result: ${{ needs.security-scan.result }}"
+        echo "Code quality result: ${{ needs.code-quality.result }}"
