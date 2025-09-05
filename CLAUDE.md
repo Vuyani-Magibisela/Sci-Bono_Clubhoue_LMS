@@ -41,7 +41,7 @@ This is a custom PHP MVC framework with the following structure:
 #### Session Management
 - PHP sessions used for authentication
 - Session checks implemented across controllers
-- User roles: admin, mentor, member, student
+- User roles: admin, mentor, member, parent, project officer, manger
 
 ### Major Feature Modules
 
