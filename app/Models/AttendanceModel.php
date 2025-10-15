@@ -1,17 +1,23 @@
 <?php
 /**
  * AttendanceModel - Handles all attendance-related database operations
- * 
+ *
  * @package Models
  * @author Sci-Bono Clubhouse LMS
  * @version 1.0
  */
 
-class AttendanceModel {
-    private $conn;
-    
+require_once __DIR__ . '/BaseModel.php';
+
+class AttendanceModel extends BaseModel {
+    protected $table = 'attendance';
+    protected $fillable = [
+        'user_id', 'checked_in', 'checked_out', 'sign_in_status'
+    ];
+    protected $timestamps = false; // This table doesn't have created_at/updated_at
+
     public function __construct($conn) {
-        $this->conn = $conn;
+        parent::__construct($conn);
     }
     
     /**

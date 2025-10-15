@@ -53,7 +53,7 @@ class AuthController extends BaseController {
     /**
      * Process login attempt
      */
-    public function processLogin() {
+    public function login() {
         try {
             // Validate CSRF token
             $this->validateCsrfToken();
@@ -143,7 +143,7 @@ class AuthController extends BaseController {
     /**
      * Show registration form
      */
-    public function showRegister() {
+    public function showSignup() {
         // Check if registration is enabled
         if (!($this->config['registration_enabled'] ?? true)) {
             if ($this->isAjaxRequest()) {
@@ -176,11 +176,11 @@ class AuthController extends BaseController {
         
         $this->view('auth/register', $data);
     }
-    
+
     /**
      * Process registration
      */
-    public function processRegister() {
+    public function signup() {
         try {
             // Check if registration is enabled
             if (!($this->config['registration_enabled'] ?? true)) {

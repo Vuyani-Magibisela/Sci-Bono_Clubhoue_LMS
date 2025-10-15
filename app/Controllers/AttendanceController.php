@@ -94,9 +94,15 @@ class AttendanceController extends BaseController {
             return $this->jsonError('An error occurred during sign-in. Please try again.');
         }
     }
-    
-    // ... rest of your existing methods remain the same ...
-    
+
+    /**
+     * Main attendance page - Route handler for /attendance
+     * This is the default index method called by the router
+     */
+    public function index() {
+        return $this->showAttendancePage();
+    }
+
     /**
      * Display the main attendance page
      */
