@@ -44,6 +44,16 @@ if ($user_id === $_SESSION['id']) {
     exit;
 }
 
+// Validate CSRF token
+require_once '../../core/CSRF.php';
+if (!CSRF::validateToken()) {
+    error_log("CSRF validation failed in user_delete.php - IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown') . ", User ID: " . $user_id);
+    $_SESSION['message'] = "Security validation failed. Please try again.";
+    $_SESSION['message_type'] = "danger";
+    header("Location: ./user_list.php");
+    exit();
+}
+
 // Process the deletion
 $success = $userController->deleteUser($user_id);
 

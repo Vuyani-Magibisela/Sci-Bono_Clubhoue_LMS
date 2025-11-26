@@ -18,6 +18,14 @@ function sanitize_input($data) {
 
 // Process form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    require_once '../../core/CSRF.php';
+
+    if (!CSRF::validateToken()) {
+        $_SESSION['error'] = "Security validation failed. Please try again.";
+        header("Location: ../views/statsdashboard.php");
+        exit();
+    }
+
     $programs = $_POST['programs'];
     $participants = $_POST['participants'];
     $narratives = $_POST['narratives'];

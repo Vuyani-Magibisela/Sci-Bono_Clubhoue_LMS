@@ -24,6 +24,9 @@ if (file_exists($sessionTimerPath)) {
 // Include database connection
 require_once '../../../server.php';
 
+// Include CSRF protection
+require_once __DIR__ . '/../../../core/CSRF.php';
+
 // Include controllers
 require_once '../../Controllers/Admin/AdminCourseController.php';
 require_once '../../Models/LMSUtilities.php';
@@ -199,6 +202,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <?php echo CSRF::metaTag(); ?>
     <title>Create <?php echo $contentLabel; ?> - Sci-Bono Clubhouse</title>
     <link rel="stylesheet" href="../../../public/assets/css/manage-courses.css">
     <!-- Font Awesome for icons -->
@@ -227,6 +231,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         
         <div class="admin-card">
             <form method="post" enctype="multipart/form-data">
+                <?php echo CSRF::field(); ?>
                 <div class="form-section">
                     <h3 class="form-section-title">Basic Information</h3>
                     

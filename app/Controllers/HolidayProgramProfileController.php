@@ -14,6 +14,17 @@ class HolidayProgramProfileController {
      * Handle email verification
      */
     public function verifyEmail($email) {
+        // Validate CSRF token
+        require_once __DIR__ . '/../../core/CSRF.php';
+        if (!CSRF::validateToken()) {
+            error_log("CSRF validation failed in HolidayProgramProfileController::verifyEmail - IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+            return [
+                'success' => false,
+                'message' => 'Security validation failed. Please refresh the page and try again.',
+                'code' => 'CSRF_ERROR'
+            ];
+        }
+
         if (empty($email)) {
             return [
                 'success' => false,
@@ -54,6 +65,17 @@ class HolidayProgramProfileController {
      * Handle password creation
      */
     public function createPassword($password, $confirmPassword) {
+        // Validate CSRF token
+        require_once __DIR__ . '/../../core/CSRF.php';
+        if (!CSRF::validateToken()) {
+            error_log("CSRF validation failed in HolidayProgramProfileController::createPassword - IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+            return [
+                'success' => false,
+                'message' => 'Security validation failed. Please refresh the page and try again.',
+                'code' => 'CSRF_ERROR'
+            ];
+        }
+
         // Check if user came from email verification
         if (!isset($_SESSION['profile_setup_attendee_id']) || !isset($_SESSION['profile_setup_email'])) {
             return [
@@ -134,6 +156,17 @@ class HolidayProgramProfileController {
      * Update profile data
      */
     public function updateProfile($attendeeId, $formData, $isAdmin = false) {
+        // Validate CSRF token
+        require_once __DIR__ . '/../../core/CSRF.php';
+        if (!CSRF::validateToken()) {
+            error_log("CSRF validation failed in HolidayProgramProfileController::updateProfile - IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+            return [
+                'success' => false,
+                'message' => 'Security validation failed. Please refresh the page and try again.',
+                'code' => 'CSRF_ERROR'
+            ];
+        }
+
         try {
             // Prepare update data
             $updateData = $this->prepareUpdateData($formData, $isAdmin);

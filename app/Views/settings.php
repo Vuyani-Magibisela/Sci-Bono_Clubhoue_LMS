@@ -4,6 +4,7 @@ session_start(); // Start the session first
 // Include database connection
 require_once '../../server.php'; // Updated path to server.php from app/views/
 require __DIR__ . '/../../config/config.php'; // Updated path to config.php
+require_once __DIR__ . '/../../core/CSRF.php';
 
 // Check if user is logged in
 if (!isset($_SESSION['loggedin'])) {
@@ -50,6 +51,7 @@ if (!$can_edit) {
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <?php echo CSRF::metaTag(); ?>
     <title>Settings | Profile</title>
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -178,6 +180,7 @@ if (!$can_edit) {
                     
                     <!-- Edit Profile Form -->
                     <form id="settings-form" action="<?php echo BASE_URL; ?>app/Models/Admin/update_user.php" method="post">
+                        <?php echo CSRF::field(); ?>
                         <input type="hidden" name="id" value="<?php echo $user['id']; ?>">
                         
                         <!-- Personal Details Section -->

@@ -50,6 +50,13 @@ class CourseController {
      * @return bool Success status
      */
     public function enrollUser($userId, $courseId) {
+        // Validate CSRF token
+        require_once __DIR__ . '/../core/CSRF.php';
+        if (!CSRF::validateToken()) {
+            error_log("CSRF validation failed in CourseController::enrollUser - IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+            return false;
+        }
+
         if (!$userId || !$courseId) {
             return false;
         }

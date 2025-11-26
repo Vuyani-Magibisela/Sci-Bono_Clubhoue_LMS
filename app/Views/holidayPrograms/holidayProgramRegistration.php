@@ -1,7 +1,9 @@
 <?php
 session_start();
-require_once '../../../server.php';
-require_once '../../Models/holiday-program-functions.php';
+require_once __DIR__ . '/../../../bootstrap.php';
+require_once __DIR__ . '/../../../core/CSRF.php';
+require_once __DIR__ . '/../../../server.php';
+require_once __DIR__ . '/../../Models/holiday-program-functions.php';
 
 // Function to get program configuration and structure
 function getProgramConfiguration($conn, $programId) {
@@ -253,6 +255,15 @@ $registrationClosed = !$programDetails['registration_open'];
 
 // Process form submission for registration
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['submit_registration'])) {
+    // Validate CSRF token
+    if (!CSRF::validateToken()) {
+        $errorMessage = 'Invalid security token. Please refresh the page and try again.';
+        $formSubmitted = true;
+        $registrationSuccess = false;
+        error_log("CSRF validation failed for program registration: IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+        goto end_processing;
+    }
+
     $formSubmitted = true;
     
     // Collect and sanitize form data
@@ -549,6 +560,7 @@ $types[0] = 'i'; // programId is integer
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Register for <?php echo htmlspecialchars($programDetails['title']); ?> - Sci-Bono Clubhouse</title>
+    <?php echo CSRF::metaTag(); ?>
     <link rel="stylesheet" href="../../../public/assets/css/holidayProgramStyles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -1095,6 +1107,7 @@ $types[0] = 'i'; // programId is integer
             <?php endif; ?>
             
             <form id="registration-form" method="POST" action="">
+                <?php echo CSRF::field(); ?>
                 <input type="hidden" name="program_id" value="<?php echo $programId; ?>">
                 
                 <!-- Email Check Section -->

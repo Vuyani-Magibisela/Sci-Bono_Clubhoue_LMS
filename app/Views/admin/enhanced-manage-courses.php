@@ -1,7 +1,7 @@
 <?php
 session_start();
 // Check if user is logged in and is an admin or mentor
-if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true || 
+if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true ||
     ($_SESSION['user_type'] != 'admin' && $_SESSION['user_type'] != 'mentor')) {
     header("Location: ../../login.php");
     exit;
@@ -12,6 +12,9 @@ include '../../Controllers/sessionTimer.php';
 
 // Include database connection
 require_once '../../../server.php';
+
+// Include CSRF protection
+require_once __DIR__ . '/../../../core/CSRF.php';
 
 // Include controllers
 require_once '../../Controllers/Admin/CourseController.php';
@@ -194,6 +197,7 @@ $stats = [
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <?php echo CSRF::metaTag(); ?>
     <title> Course Management - Sci-Bono Clubhouse</title>
     <link rel="stylesheet" href="../../../public/assets/css/manage-courses.css">
     <!-- Font Awesome for icons -->
@@ -433,6 +437,7 @@ $stats = [
         <!-- Advanced Filters -->
         <div class="filters-section">
             <form method="GET" action="">
+                <?php echo CSRF::field(); ?>
                 <div class="filters-grid">
                     <div class="filter-group">
                         <label for="search">Search Content</label>
@@ -576,6 +581,7 @@ $stats = [
                 </button>
             </div>
             <form id="create-course-form" enctype="multipart/form-data">
+                <?php echo CSRF::field(); ?>
                 <div class="form-row">
                     <div class="form-group">
                         <label for="title">Title *</label>

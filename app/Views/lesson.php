@@ -11,6 +11,7 @@ include '../Controllers/sessionTimer.php';
 
 // Include database connection
 require_once '../../server.php';
+require_once __DIR__ . '/../../core/CSRF.php';
 
 // Include controllers
 require_once '../Controllers/CourseController.php';
@@ -54,6 +55,7 @@ $progress = $isEnrolled ? $courseController->getUserProgress($userId, $courseId)
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <?php echo CSRF::metaTag(); ?>
     <title><?php echo htmlspecialchars($lesson['title']); ?> - Sci-Bono Clubhouse</title>
     <link rel="stylesheet" href="../../public/assets/css/lesson.css">
     <!-- Font Awesome for icons -->
@@ -162,6 +164,7 @@ $progress = $isEnrolled ? $courseController->getUserProgress($userId, $courseId)
                             <div class="assignment-submission">
                                 <h3>Submit Your Assignment</h3>
                                 <form id="assignment-form" enctype="multipart/form-data">
+                                    <?php echo CSRF::field(); ?>
                                     <div style="margin-bottom: 1rem;">
                                         <label for="assignment-file" style="display: block; margin-bottom: 0.5rem;">Upload File:</label>
                                         <input type="file" id="assignment-file" name="assignment_file" required>

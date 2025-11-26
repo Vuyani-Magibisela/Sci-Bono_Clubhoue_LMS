@@ -349,13 +349,17 @@ class Router {
      * Execute controller method
      */
     private function executeControllerMethod($controllerName, $methodName, $params) {
+        // Convert namespace to file path
+        $controllerPath = str_replace('\\', '/', $controllerName);
+
         // Try different controller paths
         $controllerPaths = [
+            __DIR__ . "/../app/Controllers/{$controllerPath}.php",
             __DIR__ . "/../app/Controllers/{$controllerName}.php",
             __DIR__ . "/../app/Controllers/Web/{$controllerName}.php",
             __DIR__ . "/../app/Controllers/Api/{$controllerName}.php",
         ];
-        
+
         $controllerFile = null;
         foreach ($controllerPaths as $path) {
             if (file_exists($path)) {
@@ -363,26 +367,43 @@ class Router {
                 break;
             }
         }
-        
+
         if (!$controllerFile) {
-            throw new Exception("Controller not found: {$controllerName}");
+            throw new Exception("Controller not found: {$controllerName} (searched paths: " . implode(', ', $controllerPaths) . ")");
         }
-        
+
         require_once $controllerFile;
-        
-        if (!class_exists($controllerName)) {
-            throw new Exception("Controller class not found: {$controllerName}");
+
+        // Get the class name without namespace for instantiation
+        $className = basename(str_replace('\\', '/', $controllerName));
+
+        if (!class_exists($className) && !class_exists($controllerName)) {
+            throw new Exception("Controller class not found: {$controllerName} or {$className}");
         }
-        
+
+        // Try with and without namespace
+        $classToUse = class_exists($controllerName) ? $controllerName : $className;
+
         // Instantiate controller with dependencies
         global $conn;
         $config = ConfigLoader::load();
-        $controller = new $controllerName($conn, $config);
-        
-        if (!method_exists($controller, $methodName)) {
-            throw new Exception("Method not found: {$controllerName}::{$methodName}");
+
+        // Check if constructor requires parameters
+        try {
+            $reflection = new ReflectionClass($classToUse);
+            if ($reflection->getConstructor() && $reflection->getConstructor()->getNumberOfRequiredParameters() > 0) {
+                $controller = new $classToUse($conn, $config);
+            } else {
+                $controller = new $classToUse();
+            }
+        } catch (Exception $e) {
+            $controller = new $classToUse();
         }
-        
+
+        if (!method_exists($controller, $methodName)) {
+            throw new Exception("Method not found: {$classToUse}::{$methodName}");
+        }
+
         return call_user_func_array([$controller, $methodName], $params);
     }
     

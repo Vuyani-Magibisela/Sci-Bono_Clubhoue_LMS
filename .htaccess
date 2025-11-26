@@ -43,6 +43,12 @@ RedirectMatch 404 /config/
 RedirectMatch 404 /core/
 RedirectMatch 404 /storage/logs/
 
+# Prevent direct access to application directories (Force routing)
+# Added as part of Phase 3: Modern Routing System migration
+RedirectMatch 404 /app/
+RedirectMatch 404 /handlers/
+RedirectMatch 404 /Database/
+
 # Enable compression
 <IfModule mod_deflate.c>
     AddOutputFilterByType DEFLATE text/plain

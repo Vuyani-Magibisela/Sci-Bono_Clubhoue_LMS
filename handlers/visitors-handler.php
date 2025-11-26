@@ -19,6 +19,17 @@ $visitorController = new VisitorController($visitorModel);
 
 // Handle requests based on HTTP method and parameters
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    require_once '../core/CSRF.php';
+
+    if (!CSRF::validateToken()) {
+        http_response_code(403);
+        echo json_encode([
+            'success' => false,
+            'message' => 'Security validation failed'
+        ]);
+        exit;
+    }
+
     // Handle POST requests (registration, sign-in, sign-out)
     if (isset($_POST['name']) && isset($_POST['email'])) {
         // Process registration

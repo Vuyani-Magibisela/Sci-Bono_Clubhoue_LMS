@@ -1,7 +1,7 @@
 <?php
 session_start();
 // Check if user is logged in and is an admin or mentor
-if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true || 
+if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true ||
     ($_SESSION['user_type'] != 'admin' && $_SESSION['user_type'] != 'mentor')) {
     header("Location: ../../../login.php");
     exit;
@@ -12,6 +12,9 @@ include '../../Controllers/sessionTimer.php';
 
 // Include database connection
 require_once '../../../server.php';
+
+// Include CSRF protection
+require_once __DIR__ . '/../../../core/CSRF.php';
 
 // Include controllers
 require_once '../../Controllers/Admin/CourseController.php';
@@ -105,6 +108,7 @@ $activities = []; // This would be populated by the getActivities method
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <?php echo CSRF::metaTag(); ?>
     <title>Activity Management - Sci-Bono Clubhouse</title>
     <link rel="stylesheet" href="../../../public/assets/css/manage-courses.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -367,6 +371,7 @@ $activities = []; // This would be populated by the getActivities method
         <!-- Filter Section -->
         <div class="filter-section">
             <form method="GET" id="filter-form">
+                <?php echo CSRF::field(); ?>
                 <div class="filter-grid">
                     <div class="form-group">
                         <label for="course_id">Course</label>
@@ -455,6 +460,7 @@ $activities = []; // This would be populated by the getActivities method
                 </button>
             </div>
             <form id="add-activity-form">
+                <?php echo CSRF::field(); ?>
                 <div class="form-row">
                     <div class="form-group">
                         <label for="activity-course">Course *</label>

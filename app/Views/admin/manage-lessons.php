@@ -1,7 +1,7 @@
 <?php
 session_start();
 // Check if user is logged in and is an admin or mentor
-if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true || 
+if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true ||
     ($_SESSION['user_type'] != 'admin' && $_SESSION['user_type'] != 'mentor')) {
     header("Location: ../../login.php");
     exit;
@@ -12,6 +12,9 @@ include '../../Controllers/sessionTimer.php';
 
 // Include database connection
 require_once '../../../server.php';
+
+// Include CSRF protection
+require_once __DIR__ . '/../../../core/CSRF.php';
 
 // Include controllers
 require_once '../../Controllers/Admin/AdminCourseController.php';
@@ -156,6 +159,7 @@ $lessons = $lessonController->getSectionLessons($sectionId);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <?php echo CSRF::metaTag(); ?>
     <title>Manage Lessons - <?php echo htmlspecialchars($section['title']); ?></title>
     <link rel="stylesheet" href="../../../public/assets/css/manage-courses.css">
     <!-- Font Awesome for icons -->
@@ -318,6 +322,7 @@ $lessons = $lessonController->getSectionLessons($sectionId);
             </div>
             <div class="modal-body">
                 <form id="add-lesson-form" method="post">
+                    <?php echo CSRF::field(); ?>
                     <input type="hidden" name="action" value="create_lesson">
                     
                     <div class="form-row">
@@ -390,6 +395,7 @@ $lessons = $lessonController->getSectionLessons($sectionId);
             </div>
             <div class="modal-body">
                 <form id="edit-lesson-form" method="post">
+                    <?php echo CSRF::field(); ?>
                     <input type="hidden" name="action" value="update_lesson">
                     <input type="hidden" name="lesson_id" id="edit-lesson-id">
                     

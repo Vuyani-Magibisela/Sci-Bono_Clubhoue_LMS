@@ -10,6 +10,12 @@ require_once __DIR__ . '/bootstrap.php';
 // Load database connection
 require_once __DIR__ . '/server.php';
 
+// Load middleware classes
+require_once __DIR__ . '/app/Middleware/ApiMiddleware.php';
+require_once __DIR__ . '/app/Middleware/AuthMiddleware.php';
+require_once __DIR__ . '/app/Middleware/RoleMiddleware.php';
+require_once __DIR__ . '/app/Middleware/RateLimitMiddleware.php';
+
 try {
     // Load API routes
     $router = require_once __DIR__ . '/routes/api.php';

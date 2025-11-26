@@ -1,14 +1,17 @@
+<?php require_once __DIR__ . '/../../core/CSRF.php'; ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <?php echo CSRF::metaTag(); ?>
     <title>Add New Clubhouse Program</title>
     <link rel="stylesheet" href="../../public/assets/css/statsDashboardStyle.css">
 </head>
 <body id="addPrograms">
     <h1>Add New Clubhouse Program</h1>
     <form action="../Controllers/addPrograms.php" method="post">
+        <?php echo CSRF::field(); ?>
         <label for="title">Program Title:</label>
         <input type="text" id="title" name="title" required>
 

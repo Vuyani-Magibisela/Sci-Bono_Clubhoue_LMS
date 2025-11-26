@@ -50,6 +50,16 @@ if (!$can_edit) {
     exit;
 }
 
+// Validate CSRF token
+require_once '../../core/CSRF.php';
+if (!CSRF::validateToken()) {
+    error_log("CSRF validation failed in user_update.php - IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+    $_SESSION['message'] = "Security validation failed. Please try again.";
+    $_SESSION['message_type'] = "danger";
+    header("Location: ./user_list.php");
+    exit();
+}
+
 // Process the update
 $success = $userController->updateUser($_POST);
 

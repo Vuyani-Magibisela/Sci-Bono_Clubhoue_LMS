@@ -8,6 +8,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true) {
 
 // Database connection
 require '../../server.php';
+require_once __DIR__ . '/../../core/CSRF.php';
 
 // Get current month and year for default selection
 $currentMonth = date('m');
@@ -23,6 +24,7 @@ $reportYear = isset($_GET['year']) ? $_GET['year'] : $currentYear;
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <?php echo CSRF::metaTag(); ?>
     <title>Monthly Report Form</title>
     <link rel="Stylesheet" href="../../public/assets/css/statsDashboardStyle.css">
     <style>
@@ -198,6 +200,7 @@ $reportYear = isset($_GET['year']) ? $_GET['year'] : $currentYear;
     <div class="container">
         <h1>Monthly Report</h1>
         <form id="monthlyReportForm" action="../Controllers/submit_monthly_report.php" method="post" enctype="multipart/form-data">
+            <?php echo CSRF::field(); ?>
             <!-- Month and Year Selection -->
             <div class="form-section">
                 <div class="form-group">

@@ -14,10 +14,21 @@ class HolidayProgramCreationController {
      * Create a new holiday program
      */
     public function createProgram($data) {
+        // Validate CSRF token
+        require_once __DIR__ . '/../../core/CSRF.php';
+        if (!CSRF::validateToken()) {
+            error_log("CSRF validation failed in HolidayProgramCreationController::createProgram - IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+            return [
+                'success' => false,
+                'message' => 'Security validation failed. Please refresh the page and try again.',
+                'code' => 'CSRF_ERROR'
+            ];
+        }
+
         try {
             // Check if this is an edit operation
             $isEdit = isset($data['edit_mode']) && isset($data['program_id']);
-            
+
             // Validate required fields
             $validation = $this->validateProgramData($data);
             if (!$validation['valid']) {
@@ -219,6 +230,17 @@ class HolidayProgramCreationController {
      * Delete a program
      */
     public function deleteProgram($programId) {
+        // Validate CSRF token
+        require_once __DIR__ . '/../../core/CSRF.php';
+        if (!CSRF::validateToken()) {
+            error_log("CSRF validation failed in HolidayProgramCreationController::deleteProgram - IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+            return [
+                'success' => false,
+                'message' => 'Security validation failed. Please refresh the page and try again.',
+                'code' => 'CSRF_ERROR'
+            ];
+        }
+
         try {
             // Check if program has registrations
             $registrationCount = $this->model->getProgramRegistrationCount($programId);
@@ -257,6 +279,17 @@ class HolidayProgramCreationController {
      * Duplicate a program
      */
     public function duplicateProgram($programId) {
+        // Validate CSRF token
+        require_once __DIR__ . '/../../core/CSRF.php';
+        if (!CSRF::validateToken()) {
+            error_log("CSRF validation failed in HolidayProgramCreationController::duplicateProgram - IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+            return [
+                'success' => false,
+                'message' => 'Security validation failed. Please refresh the page and try again.',
+                'code' => 'CSRF_ERROR'
+            ];
+        }
+
         try {
             $originalProgram = $this->getProgramForEdit($programId);
             

@@ -1,7 +1,7 @@
 <?php
 session_start();
 // Check if user is logged in and is an admin or mentor
-if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true || 
+if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true ||
     ($_SESSION['user_type'] != 'admin' && $_SESSION['user_type'] != 'mentor')) {
     header("Location: ../../../login.php");
     exit;
@@ -12,6 +12,9 @@ include '../../Controllers/sessionTimer.php';
 
 // Include database connection
 require_once '../../../server.php';
+
+// Include CSRF protection
+require_once __DIR__ . '/../../../core/CSRF.php';
 
 // Include controllers
 require_once '../../Controllers/Admin/CourseController.php';
@@ -98,6 +101,7 @@ $modules = $courseController->getCourseModules($courseId);
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <?php echo CSRF::metaTag(); ?>
     <title>Manage Modules - <?php echo htmlspecialchars($course['title']); ?></title>
     <link rel="stylesheet" href="../../../public/assets/css/manage-courses.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -405,6 +409,7 @@ $modules = $courseController->getCourseModules($courseId);
                 </button>
             </div>
             <form id="add-module-form">
+                <?php echo CSRF::field(); ?>
                 <div class="form-row">
                     <div class="form-group">
                         <label for="module-title">Module Title *</label>
@@ -463,6 +468,7 @@ $modules = $courseController->getCourseModules($courseId);
                 </button>
             </div>
             <form id="edit-module-form">
+                <?php echo CSRF::field(); ?>
                 <input type="hidden" id="edit-module-id" name="module_id">
                 
                 <div class="form-row">

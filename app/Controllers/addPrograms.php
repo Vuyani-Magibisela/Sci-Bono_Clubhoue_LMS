@@ -18,6 +18,14 @@ function sanitize_input($data) {
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    require_once '../../core/CSRF.php';
+
+    if (!CSRF::validateToken()) {
+        $_SESSION['error'] = "Security validation failed. Please try again.";
+        header("Location: ../views/addClubhouseProgram.php");
+        exit();
+    }
+
     $title = sanitize_input($_POST['title']);
     $description = sanitize_input($_POST['description']);
     $learning_outcomes = sanitize_input($_POST['learning_outcomes']);

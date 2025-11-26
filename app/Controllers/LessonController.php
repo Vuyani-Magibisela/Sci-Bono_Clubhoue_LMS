@@ -24,10 +24,24 @@ class LessonController {
     }
     
     public function updateLessonProgress($userId, $lessonId, $status, $progress, $completed) {
+        // Validate CSRF token
+        require_once __DIR__ . '/../core/CSRF.php';
+        if (!CSRF::validateToken()) {
+            error_log("CSRF validation failed in LessonController::updateLessonProgress - IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+            return false;
+        }
+
         return $this->progressModel->updateLessonProgress($userId, $lessonId, $status, $progress, $completed);
     }
     
     public function markLessonComplete($userId, $lessonId) {
+        // Validate CSRF token
+        require_once __DIR__ . '/../core/CSRF.php';
+        if (!CSRF::validateToken()) {
+            error_log("CSRF validation failed in LessonController::markLessonComplete - IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+            return false;
+        }
+
         return $this->progressModel->updateLessonProgress($userId, $lessonId, 'completed', 100, true);
     }
     

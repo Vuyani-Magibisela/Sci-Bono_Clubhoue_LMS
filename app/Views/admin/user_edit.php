@@ -3,6 +3,8 @@
 // Variables available: $user (array of user data to edit), $pageTitle (string)
 // $_SESSION is also available for user_type checks.
 
+require_once __DIR__ . '/../../../core/CSRF.php';
+
 // Base path for assets, assuming this view is in app/Views/
 $basePath = '../../../'; // Points from app/Views/ to the project root
 
@@ -15,8 +17,9 @@ $is_mentor = isset($_SESSION['user_type']) && $_SESSION['user_type'] === 'mentor
 <head>
     <meta charset="UTF-8">
     <title><?php echo htmlspecialchars($pageTitle ?? 'Edit User'); ?> | Sci-Bono Clubhouse</title>
+    <?php echo CSRF::metaTag(); ?>
     <link rel="stylesheet" href="<?php echo $basePath; ?>public/assets/css/settingsStyle.css">
-    <link rel="stylesheet" href="<?php echo $basePath; ?>public/assets/css/header.css"> 
+    <link rel="stylesheet" href="<?php echo $basePath; ?>public/assets/css/header.css">
     <link rel="stylesheet" href="<?php echo $basePath; ?>public/assets/css/screenSizes.css"> 
 
     <style>
@@ -105,6 +108,7 @@ $is_mentor = isset($_SESSION['user_type']) && $_SESSION['user_type'] === 'mentor
 
                         <div class="edit-user-form-container">
                             <form action="<?php echo $basePath; ?>users.php?action=update&id=<?php echo $user['id']; ?>" method="POST">
+                                <?php echo CSRF::field(); ?>
                                 <div class="form-section">
                                     <div class="form-section-header">
                                         <h3 class="form-section-title">Personal Information</h3>

@@ -48,11 +48,18 @@ class AdminLessonController {
      * @return int|bool New lesson ID or false on failure
      */
     public function createLesson($sectionId, $lessonData) {
+        // Validate CSRF token
+        require_once __DIR__ . '/../../core/CSRF.php';
+        if (!CSRF::validateToken()) {
+            error_log("CSRF validation failed in AdminLessonController::createLesson - IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+            return false;
+        }
+
         // Validate required fields
         if (empty($lessonData['title'])) {
             return false;
         }
-        
+
         return $this->adminLessonModel->createLesson($sectionId, $lessonData);
     }
     
@@ -64,16 +71,23 @@ class AdminLessonController {
      * @return bool Success status
      */
     public function updateLesson($lessonId, $lessonData) {
+        // Validate CSRF token
+        require_once __DIR__ . '/../../core/CSRF.php';
+        if (!CSRF::validateToken()) {
+            error_log("CSRF validation failed in AdminLessonController::updateLesson - IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+            return false;
+        }
+
         // Validate lesson ID
         if ($lessonId <= 0) {
             return false;
         }
-        
+
         // Validate required fields
         if (empty($lessonData['title'])) {
             return false;
         }
-        
+
         return $this->adminLessonModel->updateLesson($lessonId, $lessonData);
     }
     
@@ -84,11 +98,18 @@ class AdminLessonController {
      * @return bool Success status
      */
     public function deleteLesson($lessonId) {
+        // Validate CSRF token
+        require_once __DIR__ . '/../../core/CSRF.php';
+        if (!CSRF::validateToken()) {
+            error_log("CSRF validation failed in AdminLessonController::deleteLesson - IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+            return false;
+        }
+
         // Validate lesson ID
         if ($lessonId <= 0) {
             return false;
         }
-        
+
         return $this->adminLessonModel->deleteLesson($lessonId);
     }
     
@@ -99,10 +120,17 @@ class AdminLessonController {
      * @return bool Success status
      */
     public function updateLessonOrder($lessonOrders) {
+        // Validate CSRF token
+        require_once __DIR__ . '/../../core/CSRF.php';
+        if (!CSRF::validateToken()) {
+            error_log("CSRF validation failed in AdminLessonController::updateLessonOrder - IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+            return false;
+        }
+
         if (empty($lessonOrders) || !is_array($lessonOrders)) {
             return false;
         }
-        
+
         return $this->adminLessonModel->updateLessonOrder($lessonOrders);
     }
     

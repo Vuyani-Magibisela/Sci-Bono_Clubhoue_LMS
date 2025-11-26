@@ -11,6 +11,7 @@ include '../Controllers/sessionTimer.php';
 
 // Include database connection
 require_once '../../server.php';
+require_once __DIR__ . '/../../core/CSRF.php';
 
 // Include controllers
 require_once '../Controllers/CourseController.php';
@@ -67,6 +68,7 @@ $completedLessons = $coursePageData['completedLessons']; // This is calculated i
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <?php echo CSRF::metaTag(); ?>
     <title><?php echo htmlspecialchars($course['title']); ?> - Sci-Bono Clubhouse</title>
     <link rel="stylesheet" href="../../public/assets/css/course.css">
     <!-- Font Awesome for icons -->

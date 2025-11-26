@@ -1,12 +1,19 @@
 <?php
 session_start();
-require_once '../../../server.php';
-require_once '../../Controllers/HolidayProgramProfileController.php';
+require_once __DIR__ . '/../../../bootstrap.php';
+require_once __DIR__ . '/../../../core/CSRF.php';
+require_once __DIR__ . '/../../../server.php';
+require_once __DIR__ . '/../../Controllers/HolidayProgramProfileController.php';
 
 $profileController = new HolidayProgramProfileController($conn);
 $error = '';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Validate CSRF token
+    if (!CSRF::validateToken()) {
+        $error = 'Invalid security token. Please refresh the page and try again.';
+        error_log("CSRF validation failed for holiday profile password creation: IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+    } else {
     $password = $_POST['password'] ?? '';
     $confirmPassword = $_POST['confirm_password'] ?? '';
     
@@ -24,6 +31,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             exit();
         }
     }
+    } // Close CSRF validation else block
 }
 ?>
 
@@ -33,6 +41,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Password - Holiday Program Profile</title>
+    <?php echo CSRF::metaTag(); ?>
     <link rel="stylesheet" href="../../../public/assets/css/holiday-profile.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
@@ -62,9 +71,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         </div>
         
         <form method="POST">
+            <?php echo CSRF::field(); ?>
             <div class="form-group">
                 <label for="password">Password</label>
-                <input type="password" id="password" name="password" required 
+                <input type="password" id="password" name="password" required
                        placeholder="Enter password (min 8 characters)">
             </div>
             

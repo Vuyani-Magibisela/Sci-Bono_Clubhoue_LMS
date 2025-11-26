@@ -18,6 +18,14 @@ function sanitize_input($data) {
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    require_once '../../core/CSRF.php';
+
+    if (!CSRF::validateToken()) {
+        $_SESSION['error'] = "Security validation failed. Please try again.";
+        header("Location: ../views/monthlyReportForm.php");
+        exit();
+    }
+
     // Retrieve basic report data
     $reportMonth = sanitize_input($_POST['reportMonth'] ?? '');
     $reportYear = sanitize_input($_POST['reportYear'] ?? '');

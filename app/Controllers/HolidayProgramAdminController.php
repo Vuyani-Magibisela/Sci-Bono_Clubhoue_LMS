@@ -121,10 +121,24 @@ class HolidayProgramAdminController {
             echo json_encode(['error' => 'Method not allowed']);
             return;
         }
-        
+
+        // Validate CSRF token
+        require_once __DIR__ . '/../../core/CSRF.php';
+        if (!CSRF::validateToken()) {
+            error_log("CSRF validation failed in HolidayProgramAdminController::handleAjaxRequest - IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+            http_response_code(403);
+            echo json_encode([
+                'success' => false,
+                'error' => true,
+                'message' => 'Security validation failed. Please refresh the page and try again.',
+                'code' => 'CSRF_ERROR'
+            ]);
+            return;
+        }
+
         $action = $_POST['action'] ?? '';
         $response = ['success' => false, 'message' => 'Unknown action'];
-        
+
         try {
             switch ($action) {
                 case 'update_program_status':

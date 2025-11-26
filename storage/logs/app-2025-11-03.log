@@ -1,0 +1,6 @@
+[2025-11-03 22:10:38] INFO: Route not found Context: {"method":"GET","path":"/login.php","ip":"::1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:144.0) Gecko/20100101 Firefox/144.0"}
+[2025-11-03 22:10:45] INFO: Route not found Context: {"method":"GET","path":"/login.php","ip":"::1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:144.0) Gecko/20100101 Firefox/144.0"}
+[2025-11-03 22:10:53] INFO: Route not found Context: {"method":"GET","path":"/signin.php","ip":"::1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:144.0) Gecko/20100101 Firefox/144.0"}
+[2025-11-03 22:11:03] INFO: Route not found Context: {"method":"GET","path":"/signin.php","ip":"::1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:144.0) Gecko/20100101 Firefox/144.0"}
+[2025-11-03 22:11:26] WARNING: CSRF token validation failed Context: {"ip":"::1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:144.0) Gecko/20100101 Firefox/144.0","url":"/Sci-Bono_Clubhoue_LMS/login","method":"POST","referer":"http://localhost/Sci-Bono_Clubhoue_LMS/login"}
+[2025-11-03 22:11:51] INFO: Route not found Context: {"method":"GET","path":"/login.php","ip":"::1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:144.0) Gecko/20100101 Firefox/144.0"}

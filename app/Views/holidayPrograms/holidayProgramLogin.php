@@ -1,6 +1,8 @@
 <?php
 session_start();
-require_once '../../../server.php';
+require_once __DIR__ . '/../../../bootstrap.php';
+require_once __DIR__ . '/../../../core/CSRF.php';
+require_once __DIR__ . '/../../../server.php';
 
 // Initialize variables
 $error = '';
@@ -14,6 +16,11 @@ if (isset($_SESSION['holiday_logged_in']) && $_SESSION['holiday_logged_in'] === 
 
 // Process login form submission
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
+    // Validate CSRF token
+    if (!CSRF::validateToken()) {
+        $error = 'Invalid security token. Please refresh the page and try again.';
+        error_log("CSRF validation failed for holiday program login: IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown') . ", Email: " . ($_POST['email'] ?? 'unknown'));
+    } else {
     $email = trim($_POST['email']);
     $password = $_POST['password'];
     
@@ -97,6 +104,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
             }
         }
     }
+    } // Close CSRF validation else block
 }
 ?>
 
@@ -106,6 +114,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Sci-Bono Clubhouse Holiday Programs</title>
+    <?php echo CSRF::metaTag(); ?>
     <link rel="stylesheet" href="../../../public/assets/css/holidayProgramStyles.css">
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -323,9 +332,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
         <?php endif; ?>
         
         <form method="POST" action="">
+            <?php echo CSRF::field(); ?>
             <div class="form-group">
                 <label for="email">Email Address</label>
-                <input type="email" id="email" name="email" class="form-input" 
+                <input type="email" id="email" name="email" class="form-input"
                        value="<?php echo htmlspecialchars($email); ?>" required>
             </div>
             

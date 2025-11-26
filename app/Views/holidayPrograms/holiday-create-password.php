@@ -1,11 +1,18 @@
 <?php
 session_start();
-require_once '../../../server.php';
+require_once __DIR__ . '/../../../bootstrap.php';
+require_once __DIR__ . '/../../../core/CSRF.php';
+require_once __DIR__ . '/../../../server.php';
 
 $error = '';
 $success = false;
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Validate CSRF token
+    if (!CSRF::validateToken()) {
+        $error = 'Invalid security token. Please refresh the page and try again.';
+        error_log("CSRF validation failed for holiday password creation: IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown') . ", Email: " . ($_POST['email'] ?? 'unknown'));
+    } else {
     $email = trim($_POST['email']);
     $password = $_POST['password'];
     $confirmPassword = $_POST['confirm_password'];
@@ -62,6 +69,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $error = "Failed to create password. Please try again.";
         }
     }
+    } // Close CSRF validation else block
 }
 
 // If we reach here, there was an error or it's a GET request
@@ -73,6 +81,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Create Password - Sci-Bono Clubhouse Holiday Programs</title>
+    <?php echo CSRF::metaTag(); ?>
     <link rel="stylesheet" href="../../../public/assets/css/holidayProgramStyles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -162,6 +171,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <?php endif; ?>
         
         <form method="POST" action="">
+            <?php echo CSRF::field(); ?>
             <?php if (isset($_POST['email'])): ?>
                 <input type="hidden" name="email" value="<?php echo htmlspecialchars($_POST['email']); ?>">
             <?php endif; ?>

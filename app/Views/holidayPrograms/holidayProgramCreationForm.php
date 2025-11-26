@@ -11,8 +11,10 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true || $_SESSION[
 }
 
 // Include required files
-require_once '../../../server.php';
-require_once '../../Controllers/HolidayProgramCreationController.php';
+require_once __DIR__ . '/../../../bootstrap.php';
+require_once __DIR__ . '/../../../core/CSRF.php';
+require_once __DIR__ . '/../../../server.php';
+require_once __DIR__ . '/../../Controllers/HolidayProgramCreationController.php';
 
 // Initialize controller
 $creationController = new HolidayProgramCreationController($conn);
@@ -25,15 +27,23 @@ $successMessage = '';
 $newProgramId = null;
 
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['create_program'])) {
-    $formSubmitted = true;
-    $result = $creationController->createProgram($_POST);
+    // Validate CSRF token
+    if (!CSRF::validateToken()) {
+        $errorMessage = 'Invalid security token. Please refresh the page and try again.';
+        $formSubmitted = true;
+        $programCreated = false;
+        error_log("CSRF validation failed for holiday program creation: IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown') . ", User: " . ($_SESSION['user_id'] ?? 'unknown'));
+    } else {
+        $formSubmitted = true;
+        $result = $creationController->createProgram($_POST);
     
     if ($result['success']) {
         $programCreated = true;
         $newProgramId = $result['program_id'];
         $successMessage = $result['message'];
-    } else {
-        $errorMessage = $result['message'];
+        } else {
+            $errorMessage = $result['message'];
+        }
     }
 }
 
@@ -55,6 +65,7 @@ if ($editMode) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $editMode ? 'Edit' : 'Create New'; ?> Holiday Program - Sci-Bono Clubhouse</title>
+    <?php echo CSRF::metaTag(); ?>
     <link rel="stylesheet" href="../../../public/assets/css/holidayProgramStyles.css">
     <link rel="stylesheet" href="../../../public/assets/css/holidayProgramAdmin.css">
     <!-- Font Awesome for icons -->
@@ -283,6 +294,7 @@ if ($editMode) {
             <?php if (!$programCreated): ?>
                 <!-- Creation Form -->
                 <form method="POST" action="" class="creation-form" id="program-form">
+                    <?php echo CSRF::field(); ?>
                     <?php if ($editMode): ?>
                         <input type="hidden" name="program_id" value="<?php echo $editProgram['id']; ?>">
                         <input type="hidden" name="edit_mode" value="1">

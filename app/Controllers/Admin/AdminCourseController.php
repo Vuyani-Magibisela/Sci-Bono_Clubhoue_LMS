@@ -36,6 +36,13 @@ class AdminCourseController {
      * @return int|bool New course ID or false on failure
      */
     public function createCourse($courseData) {
+        // Validate CSRF token
+        require_once __DIR__ . '/../../core/CSRF.php';
+        if (!CSRF::validateToken()) {
+            error_log("CSRF validation failed in AdminCourseController::createCourse - IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+            return false;
+        }
+
         // Validate required fields
         if (empty($courseData['title'])) {
             error_log("Course creation failed: Missing title");
@@ -62,6 +69,13 @@ class AdminCourseController {
      * @return bool Success status
      */
     public function updateCourse($courseId, $courseData) {
+        // Validate CSRF token
+        require_once __DIR__ . '/../../core/CSRF.php';
+        if (!CSRF::validateToken()) {
+            error_log("CSRF validation failed in AdminCourseController::updateCourse - IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+            return false;
+        }
+
         // Validate course ID
         if ($courseId <= 0) {
             return false;
@@ -80,10 +94,17 @@ class AdminCourseController {
      * @return bool Success status
      */
     public function deleteCourse($courseId) {
+        // Validate CSRF token
+        require_once __DIR__ . '/../../core/CSRF.php';
+        if (!CSRF::validateToken()) {
+            error_log("CSRF validation failed in AdminCourseController::deleteCourse - IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+            return false;
+        }
+
         if ($courseId <= 0) {
             return false;
         }
-        
+
         return $this->courseModel->deleteCourse($courseId);
     }
     
@@ -95,12 +116,19 @@ class AdminCourseController {
      * @return bool Success status
      */
     public function updateCourseStatus($courseId, $status) {
+        // Validate CSRF token
+        require_once __DIR__ . '/../../core/CSRF.php';
+        if (!CSRF::validateToken()) {
+            error_log("CSRF validation failed in AdminCourseController::updateCourseStatus - IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+            return false;
+        }
+
         $validStatuses = ['draft', 'active', 'archived'];
-        
+
         if ($courseId <= 0 || !in_array($status, $validStatuses)) {
             return false;
         }
-        
+
         return $this->courseModel->updateCourseStatus($courseId, $status);
     }
     
@@ -141,14 +169,21 @@ class AdminCourseController {
      * @return int|bool New section ID or false on failure
      */
     public function createSection($courseId, $sectionData) {
+        // Validate CSRF token
+        require_once __DIR__ . '/../../core/CSRF.php';
+        if (!CSRF::validateToken()) {
+            error_log("CSRF validation failed in AdminCourseController::createSection - IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+            return false;
+        }
+
         if ($courseId <= 0 || empty($sectionData['title'])) {
             return false;
         }
-        
+
         // Sanitize section data
         $sectionData['title'] = trim($sectionData['title']);
         $sectionData['description'] = trim($sectionData['description'] ?? '');
-        
+
         return $this->courseModel->createSection($courseId, $sectionData);
     }
     
@@ -160,14 +195,21 @@ class AdminCourseController {
      * @return bool Success status
      */
     public function updateSection($sectionId, $sectionData) {
+        // Validate CSRF token
+        require_once __DIR__ . '/../../core/CSRF.php';
+        if (!CSRF::validateToken()) {
+            error_log("CSRF validation failed in AdminCourseController::updateSection - IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+            return false;
+        }
+
         if ($sectionId <= 0 || empty($sectionData['title'])) {
             return false;
         }
-        
+
         // Sanitize section data
         $sectionData['title'] = trim($sectionData['title']);
         $sectionData['description'] = trim($sectionData['description'] ?? '');
-        
+
         return $this->courseModel->updateSection($sectionId, $sectionData);
     }
     
@@ -178,10 +220,17 @@ class AdminCourseController {
      * @return bool Success status
      */
     public function deleteSection($sectionId) {
+        // Validate CSRF token
+        require_once __DIR__ . '/../../core/CSRF.php';
+        if (!CSRF::validateToken()) {
+            error_log("CSRF validation failed in AdminCourseController::deleteSection - IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+            return false;
+        }
+
         if ($sectionId <= 0) {
             return false;
         }
-        
+
         return $this->courseModel->deleteSection($sectionId);
     }
     

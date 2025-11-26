@@ -1,0 +1,2 @@
+[2025-11-04 14:21:29] INFO: Route not found Context: {"method":"GET","path":"/login.php","ip":"::1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:144.0) Gecko/20100101 Firefox/144.0"}
+[2025-11-04 14:21:55] INFO: Route not found Context: {"method":"GET","path":"/login.php","ip":"::1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:144.0) Gecko/20100101 Firefox/144.0"}

@@ -1,5 +1,6 @@
-<?php 
+<?php
     require __DIR__ . '/../../../config/config.php'; // Include the config file
+    require_once __DIR__ . '/../../../core/CSRF.php';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -7,6 +8,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <?php echo CSRF::metaTag(); ?>
     <title>Daily Register - Sci-Bono Clubhouse</title>
     <link rel="stylesheet" href="<?php echo BASE_URL?>/public/assets/css/modern-signin.css">
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -50,6 +52,7 @@
                         <span id="error-text">Incorrect password. Please try again.</span>
                     </div>
                     <form id="signin-form" class="signin-form">
+                        <?php echo CSRF::field(); ?>
                         <div class="user-display">
                             <div class="selected-user-info">
                                 <div class="user-avatar-modal">

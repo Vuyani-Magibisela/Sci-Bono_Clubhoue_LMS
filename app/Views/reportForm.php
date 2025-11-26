@@ -5,6 +5,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true) {
 	header("Location: ../../login.php");
 	exit;
 }
+require_once __DIR__ . '/../../core/CSRF.php';
 ?>
 
 <!DOCTYPE html>
@@ -12,6 +13,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <?php echo CSRF::metaTag(); ?>
     <title>Program Data Input</title>
     <link rel="Stylesheet" href="../../public/assets/css/statsDashboardStyle.css">
 
@@ -19,6 +21,7 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] != true) {
 <body id="reportForm">
     <h1>Program Data Input</h1>
     <form id="programForm" action="../Controllers/submit_report_data.php" method="post" enctype="multipart/form-data">
+        <?php echo CSRF::field(); ?>
         <div id="programForms">
             <div class="program-form">
             <label for="program0">Program:</label>

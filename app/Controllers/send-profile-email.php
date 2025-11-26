@@ -11,8 +11,22 @@ if (!isset($_SESSION['loggedin']) || $_SESSION['user_type'] !== 'admin') {
 }
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['attendee_id'])) {
+    // Validate CSRF token
+    require_once __DIR__ . '/../../core/CSRF.php';
+    if (!CSRF::validateToken()) {
+        error_log("CSRF validation failed in send-profile-email.php - IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+        http_response_code(403);
+        header('Content-Type: application/json');
+        echo json_encode([
+            'success' => false,
+            'message' => 'Security validation failed. Please refresh the page and try again.',
+            'code' => 'CSRF_ERROR'
+        ]);
+        exit();
+    }
+
     $attendeeId = intval($_POST['attendee_id']);
-    
+
     $emailController = new HolidayProgramEmailController($conn);
     $result = $emailController->sendProfileAccessEmail($attendeeId);
     
