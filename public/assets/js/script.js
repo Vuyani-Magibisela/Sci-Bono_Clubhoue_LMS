@@ -1,17 +1,36 @@
 // Fixed JavaScript for MVC Architecture
 // Configuration with dynamic BASE_URL
 const CONFIG = {
+    // Feature flag for routing migration (set via PHP or default to modern routing)
+    useModernRouting: window.USE_MODERN_ROUTING !== undefined ? window.USE_MODERN_ROUTING : true,
+
     endpoints: {
-        // Dynamic paths using BASE_URL from PHP
-        signin: (window.BASE_URL || '') + 'app/Controllers/attendance_routes.php?action=signin',
-        signout: (window.BASE_URL || '') + 'app/Controllers/attendance_routes.php?action=signout',
-        search: (window.BASE_URL || '') + 'app/Controllers/attendance_routes.php?action=search',
-        stats: (window.BASE_URL || '') + 'app/Controllers/attendance_routes.php?action=stats'
+        // Modern ModernRouter endpoints (RESTful API)
+        modern: {
+            signin: (window.BASE_URL || '/Sci-Bono_Clubhoue_LMS/') + 'api/v1/attendance/signin',
+            signout: (window.BASE_URL || '/Sci-Bono_Clubhoue_LMS/') + 'api/v1/attendance/signout',
+            search: (window.BASE_URL || '/Sci-Bono_Clubhoue_LMS/') + 'api/v1/attendance/search',
+            stats: (window.BASE_URL || '/Sci-Bono_Clubhoue_LMS/') + 'api/v1/attendance/stats'
+        },
+
+        // Legacy direct-file endpoints (backward compatibility)
+        legacy: {
+            signin: (window.BASE_URL || '') + 'app/Controllers/attendance_routes.php?action=signin',
+            signout: (window.BASE_URL || '') + 'app/Controllers/attendance_routes.php?action=signout',
+            search: (window.BASE_URL || '') + 'app/Controllers/attendance_routes.php?action=search',
+            stats: (window.BASE_URL || '') + 'app/Controllers/attendance_routes.php?action=stats'
+        }
     },
+
     autoRefreshInterval: 5 * 60 * 1000, // 5 minutes
     maxFailedAttempts: 5,
     searchDelay: 300 // milliseconds
 };
+
+// Helper function to get active endpoints based on feature flag
+function getEndpoints() {
+    return CONFIG.useModernRouting ? CONFIG.endpoints.modern : CONFIG.endpoints.legacy;
+}
 
 // State management
 let currentUserId = null;
@@ -263,14 +282,17 @@ function sendSignInRequest(userId, password) {
     if (loadingSpinner) loadingSpinner.style.display = 'inline-block';
     if (errorMessage) errorMessage.style.display = 'none';
 
+    const endpoints = getEndpoints();
+
     console.log('Attempting signin for user:', userId);
-    console.log('Using endpoint:', CONFIG.endpoints.signin);
+    console.log('Using endpoint:', endpoints.signin);
+    console.log('Modern routing:', CONFIG.useModernRouting);
 
     const formData = new FormData();
     formData.append('user_id', userId);
     formData.append('password', password);
 
-    fetch(CONFIG.endpoints.signin, {
+    fetch(endpoints.signin, {
         method: 'POST',
         body: formData
     })
@@ -339,12 +361,16 @@ function signOut(userId) {
         return;
     }
 
+    const endpoints = getEndpoints();
+
     console.log('Attempting signout for user:', userId);
+    console.log('Using endpoint:', endpoints.signout);
+    console.log('Modern routing:', CONFIG.useModernRouting);
 
     const formData = new FormData();
     formData.append('user_id', userId);
 
-    fetch(CONFIG.endpoints.signout, {
+    fetch(endpoints.signout, {
         method: 'POST',
         body: formData
     })

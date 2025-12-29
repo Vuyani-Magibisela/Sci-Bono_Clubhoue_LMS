@@ -1,4 +1,30 @@
-<?php require_once __DIR__ . '/../../core/CSRF.php'; ?>
+<?php
+/**
+ * ====================================================================
+ * DEPRECATED FILE - DO NOT USE
+ * ====================================================================
+ *
+ * This file has been deprecated as of Phase 3 Week 6-7 implementation.
+ *
+ * **Replacement:** Use VisitorController views instead
+ * **Routes:**
+ *   - GET /visitor/register (public registration form)
+ *   - GET /visitors (admin management page)
+ *   - GET /visitors/{id} (visitor details)
+ * **Location:** app/Controllers/VisitorController.php
+ * **Views:**
+ *   - app/Views/visitors/register.php (public)
+ *   - app/Views/admin/visitors/index.php (admin)
+ *
+ * This file will be removed in a future release.
+ * Please update all references to use the new routing system.
+ *
+ * @deprecated Since Phase 3 Week 6-7
+ * @see app/Controllers/VisitorController
+ * ====================================================================
+ */
+
+require_once __DIR__ . '/../../core/CSRF.php'; ?>
 <!DOCTYPE html>
 <html lang="en">
 <head>

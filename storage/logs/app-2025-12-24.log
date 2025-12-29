@@ -1,0 +1,55 @@
+[2025-12-24 09:10:23] INFO: Service action: authenticate_attempt Context: {"identifier":"testuser@example.com","service":"UserService"}
+[2025-12-24 09:10:24] INFO: Service action: authenticate_attempt Context: {"identifier":"testuser@example.com","service":"UserService"}
+[2025-12-24 09:10:24] INFO: Service action: authenticate_attempt Context: {"identifier":"nonexistent@example.com","service":"UserService"}
+[2025-12-24 09:10:24] INFO: Service action: authenticate_attempt Context: {"identifier":"lockouttest@example.com","service":"UserService"}
+[2025-12-24 09:10:24] INFO: Service action: authenticate_attempt Context: {"identifier":"sessiontest@example.com","service":"UserService"}
+[2025-12-24 09:10:24] INFO: Service action: authenticate_attempt Context: {"identifier":"inactive@example.com","service":"UserService"}
+[2025-12-24 09:36:29] INFO: Service action: authenticate_attempt Context: {"identifier":"testuser@example.com","service":"UserService"}
+[2025-12-24 09:36:56] INFO: Service action: authenticate_attempt Context: {"identifier":"testuser@example.com","service":"UserService"}
+[2025-12-24 09:36:56] ERROR: Account lock check failed Context: {"error":"Table 'accounts_test.login_attempts' doesn't exist"}
+[2025-12-24 09:36:56] ERROR: Clear failed attempts error Context: {"error":"Table 'accounts_test.login_attempts' doesn't exist"}
+[2025-12-24 09:36:56] INFO: Model action: update Context: {"id":1,"data":{"last_login":"2025-12-24 09:36:56","updated_at":"2025-12-24 09:36:56"},"model":"UserModel","table":"users"}
+[2025-12-24 09:36:56] INFO: Service action: authenticate_success Context: {"user_id":1,"service":"UserService"}
+[2025-12-24 09:36:57] INFO: Service action: authenticate_attempt Context: {"identifier":"testuser@example.com","service":"UserService"}
+[2025-12-24 09:36:57] ERROR: Account lock check failed Context: {"error":"Table 'accounts_test.login_attempts' doesn't exist"}
+[2025-12-24 09:36:57] ERROR: Record failed attempt error Context: {"error":"Table 'accounts_test.login_attempts' doesn't exist"}
+[2025-12-24 09:36:57] INFO: Service action: authenticate_failed Context: {"user_id":1,"reason":"invalid_password","service":"UserService"}
+[2025-12-24 09:36:57] INFO: Service action: authenticate_attempt Context: {"identifier":"nonexistent@example.com","service":"UserService"}
+[2025-12-24 09:36:57] ERROR: Account lock check failed Context: {"error":"Table 'accounts_test.login_attempts' doesn't exist"}
+[2025-12-24 09:36:57] ERROR: Record failed attempt error Context: {"error":"Table 'accounts_test.login_attempts' doesn't exist"}
+[2025-12-24 09:36:57] INFO: Service action: authenticate_attempt Context: {"identifier":"lockouttest@example.com","service":"UserService"}
+[2025-12-24 09:36:57] ERROR: Account lock check failed Context: {"error":"Table 'accounts_test.login_attempts' doesn't exist"}
+[2025-12-24 09:36:57] ERROR: Record failed attempt error Context: {"error":"Table 'accounts_test.login_attempts' doesn't exist"}
+[2025-12-24 09:36:57] INFO: Service action: authenticate_failed Context: {"user_id":1,"reason":"invalid_password","service":"UserService"}
+[2025-12-24 09:36:57] INFO: Service action: authenticate_attempt Context: {"identifier":"lockouttest@example.com","service":"UserService"}
+[2025-12-24 09:36:57] ERROR: Account lock check failed Context: {"error":"Table 'accounts_test.login_attempts' doesn't exist"}
+[2025-12-24 09:36:57] ERROR: Record failed attempt error Context: {"error":"Table 'accounts_test.login_attempts' doesn't exist"}
+[2025-12-24 09:36:57] INFO: Service action: authenticate_failed Context: {"user_id":1,"reason":"invalid_password","service":"UserService"}
+[2025-12-24 09:36:57] INFO: Service action: authenticate_attempt Context: {"identifier":"lockouttest@example.com","service":"UserService"}
+[2025-12-24 09:36:57] ERROR: Account lock check failed Context: {"error":"Table 'accounts_test.login_attempts' doesn't exist"}
+[2025-12-24 09:36:57] ERROR: Record failed attempt error Context: {"error":"Table 'accounts_test.login_attempts' doesn't exist"}
+[2025-12-24 09:36:57] INFO: Service action: authenticate_failed Context: {"user_id":1,"reason":"invalid_password","service":"UserService"}
+[2025-12-24 09:36:57] INFO: Service action: authenticate_attempt Context: {"identifier":"lockouttest@example.com","service":"UserService"}
+[2025-12-24 09:36:57] ERROR: Account lock check failed Context: {"error":"Table 'accounts_test.login_attempts' doesn't exist"}
+[2025-12-24 09:36:57] ERROR: Record failed attempt error Context: {"error":"Table 'accounts_test.login_attempts' doesn't exist"}
+[2025-12-24 09:36:57] INFO: Service action: authenticate_failed Context: {"user_id":1,"reason":"invalid_password","service":"UserService"}
+[2025-12-24 09:36:57] INFO: Service action: authenticate_attempt Context: {"identifier":"lockouttest@example.com","service":"UserService"}
+[2025-12-24 09:36:57] ERROR: Account lock check failed Context: {"error":"Table 'accounts_test.login_attempts' doesn't exist"}
+[2025-12-24 09:36:58] ERROR: Record failed attempt error Context: {"error":"Table 'accounts_test.login_attempts' doesn't exist"}
+[2025-12-24 09:36:58] INFO: Service action: authenticate_failed Context: {"user_id":1,"reason":"invalid_password","service":"UserService"}
+[2025-12-24 09:36:58] INFO: Service action: authenticate_attempt Context: {"identifier":"lockouttest@example.com","service":"UserService"}
+[2025-12-24 09:36:58] ERROR: Account lock check failed Context: {"error":"Table 'accounts_test.login_attempts' doesn't exist"}
+[2025-12-24 09:36:58] ERROR: Clear failed attempts error Context: {"error":"Table 'accounts_test.login_attempts' doesn't exist"}
+[2025-12-24 09:36:58] INFO: Model action: update Context: {"id":1,"data":{"last_login":"2025-12-24 09:36:58","updated_at":"2025-12-24 09:36:58"},"model":"UserModel","table":"users"}
+[2025-12-24 09:36:58] INFO: Service action: authenticate_success Context: {"user_id":1,"service":"UserService"}
+[2025-12-24 09:36:58] INFO: Service action: authenticate_attempt Context: {"identifier":"sessiontest@example.com","service":"UserService"}
+[2025-12-24 09:36:58] ERROR: Account lock check failed Context: {"error":"Table 'accounts_test.login_attempts' doesn't exist"}
+[2025-12-24 09:36:58] ERROR: Clear failed attempts error Context: {"error":"Table 'accounts_test.login_attempts' doesn't exist"}
+[2025-12-24 09:36:58] INFO: Model action: update Context: {"id":1,"data":{"last_login":"2025-12-24 09:36:58","updated_at":"2025-12-24 09:36:58"},"model":"UserModel","table":"users"}
+[2025-12-24 09:36:58] INFO: Service action: authenticate_success Context: {"user_id":1,"service":"UserService"}
+[2025-12-24 09:36:58] ERROR: Session creation error: session_regenerate_id(): Session ID cannot be regenerated after headers have already been sent Context: {"user_id":1,"service":"UserService"}
+[2025-12-24 09:36:59] INFO: Model action: update Context: {"id":1,"data":{"session_token":null,"updated_at":"2025-12-24 09:36:59"},"model":"UserModel","table":"users"}
+[2025-12-24 09:36:59] INFO: Service action: session_destroyed Context: {"user_id":1,"service":"UserService"}
+[2025-12-24 09:36:59] INFO: Service action: authenticate_attempt Context: {"identifier":"inactive@example.com","service":"UserService"}
+[2025-12-24 09:36:59] ERROR: Account lock check failed Context: {"error":"Table 'accounts_test.login_attempts' doesn't exist"}
+[2025-12-24 09:41:37] WARNING: Authorization failed Context: {"user_id":1,"user_role":"member","required_roles":["admin"],"reason":"insufficient_permissions","ip":"127.0.0.1","url":"/"}

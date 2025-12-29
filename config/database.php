@@ -124,9 +124,10 @@ return [
     ],
     
     // Cache settings for query results
+    // Phase 3 Week 9 - Performance: Enabled query result caching
     'cache' => [
-        'enabled' => ConfigLoader::env('DB_CACHE_ENABLED', false),
-        'default_ttl' => ConfigLoader::env('DB_CACHE_TTL', 3600), // 1 hour
+        'enabled' => ConfigLoader::env('DB_CACHE_ENABLED', true),  // Changed from false
+        'default_ttl' => ConfigLoader::env('DB_CACHE_TTL', 300),   // Changed to 5 minutes
         'key_prefix' => ConfigLoader::env('DB_CACHE_PREFIX', 'db_'),
         'driver' => ConfigLoader::env('CACHE_DRIVER', 'file') // file, redis, memcached
     ]

@@ -1,78 +1,48 @@
 <?php
 /**
- * Visitor Management System - Request Handler
- * 
- * This file acts as the entry point for all AJAX requests and uses the MVC pattern
+ * ====================================================================
+ * DEPRECATED FILE - AUTOMATIC REDIRECT
+ * ====================================================================
+ *
+ * This file has been deprecated as of Phase 3 Week 8 implementation.
+ * All visitor operations are now handled by the modern routing system.
+ *
+ * **Public Routes:**
+ * - GET /visitor/register - Registration form
+ * - POST /visitor/register - Process registration
+ * - GET /visitor/success - Registration confirmation
+ *
+ * **Admin Routes:**
+ * - GET /admin/visitors - Visitor management
+ * - POST /admin/visitors/{id}/checkin - Check-in
+ * - POST /admin/visitors/{id}/checkout - Check-out
+ *
+ * **Modern Controller:** app/Controllers/VisitorController
+ *
+ * @deprecated Since Phase 3 Week 8
+ * @see app/Controllers/VisitorController
+ * ====================================================================
  */
 
-// Include required files
-require_once '../server.php'; // Database connection
-require_once '../app/models/VisitorModel.php';
-require_once '../app/controllers/VisitorController.php';
+// Determine action from request
+$action = $_GET['action'] ?? $_POST['action'] ?? 'index';
 
-// Set headers for JSON response
-header('Content-Type: application/json');
-
-// Initialize model and controller
-$visitorModel = new VisitorModel($conn);
-$visitorController = new VisitorController($visitorModel);
-
-// Handle requests based on HTTP method and parameters
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    require_once '../core/CSRF.php';
-
-    if (!CSRF::validateToken()) {
-        http_response_code(403);
-        echo json_encode([
-            'success' => false,
-            'message' => 'Security validation failed'
-        ]);
-        exit;
-    }
-
-    // Handle POST requests (registration, sign-in, sign-out)
-    if (isset($_POST['name']) && isset($_POST['email'])) {
-        // Process registration
-        $response = $visitorController->processRegistration($_POST);
-        echo json_encode($response);
-    } 
-    elseif (isset($_POST['action']) && $_POST['action'] === 'signin') {
-        // Process sign-in
-        $response = $visitorController->processSignIn($_POST);
-        echo json_encode($response);
-    } 
-    elseif (isset($_POST['action']) && $_POST['action'] === 'signout') {
-        // Process sign-out
-        $response = $visitorController->processSignOut($_POST);
-        echo json_encode($response);
-    } 
-    else {
-        // Invalid request
-        echo json_encode([
-            'success' => false,
-            'message' => 'Invalid request'
-        ]);
-    }
-} 
-elseif ($_SERVER['REQUEST_METHOD'] === 'GET') {
-    // Handle GET requests (listing visitors)
-    if (isset($_GET['action']) && $_GET['action'] === 'list') {
-        $response = $visitorController->processVisitorsList($_GET);
-        echo json_encode($response);
-    } 
-    else {
-        // Invalid request
-        echo json_encode([
-            'success' => false,
-            'message' => 'Invalid request'
-        ]);
-    }
-} 
-else {
-    // Method not allowed
-    http_response_code(405);
-    echo json_encode([
-        'success' => false,
-        'message' => 'Method not allowed'
-    ]);
+switch ($action) {
+    case 'register':
+        header('Location: /Sci-Bono_Clubhoue_LMS/visitor/register');
+        break;
+    case 'checkin':
+    case 'checkout':
+        $visitorId = $_GET['id'] ?? $_POST['id'] ?? null;
+        if ($visitorId) {
+            header('Location: /Sci-Bono_Clubhoue_LMS/admin/visitors/' . urlencode($visitorId));
+        } else {
+            header('Location: /Sci-Bono_Clubhoue_LMS/admin/visitors');
+        }
+        break;
+    default:
+        header('Location: /Sci-Bono_Clubhoue_LMS/admin/visitors');
+        break;
 }
+exit;
+?>

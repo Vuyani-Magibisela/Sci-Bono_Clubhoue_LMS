@@ -1,0 +1,10 @@
+
+##teamcity[testCount count='10' flowId='45816']
+
+##teamcity[testSuiteStarted name='Tests\Security\AuthorizationTest' locationHint='php_qn:///var/www/html/Sci-Bono_Clubhoue_LMS/tests/Security/AuthorizationTest.php::\Tests\Security\AuthorizationTest' flowId='45816']
+
+##teamcity[testStarted name='test_admin_role_can_access_admin_routes' locationHint='php_qn:///var/www/html/Sci-Bono_Clubhoue_LMS/tests/Security/AuthorizationTest.php::\Tests\Security\AuthorizationTest::test_admin_role_can_access_admin_routes' flowId='45816']
+
+##teamcity[testFinished name='test_admin_role_can_access_admin_routes' duration='228' flowId='45816']
+
+##teamcity[testStarted name='test_non_admin_cannot_access_admin_routes' locationHint='php_qn:///var/www/html/Sci-Bono_Clubhoue_LMS/tests/Security/AuthorizationTest.php::\Tests\Security\AuthorizationTest::test_non_admin_cannot_access_admin_routes' flowId='45816']

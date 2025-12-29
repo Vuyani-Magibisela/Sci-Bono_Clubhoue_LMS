@@ -156,8 +156,127 @@ class EnrollmentModel {
             $row = $result->fetch_assoc();
             return (bool)$row['completed'];
         }
-        
+
         return false;
+    }
+
+    // ========== PHASE 3 WEEK 9 - PERFORMANCE OPTIMIZATIONS (N+1 Query Fixes) ==========
+
+    /**
+     * Get enrollment status and progress for multiple courses (batch operation)
+     * Eliminates N+1 query problem in CourseService.getAllCourses()
+     *
+     * @param int $userId User ID
+     * @param array $courseIds Array of course IDs
+     * @return array [course_id => ['is_enrolled' => bool, 'progress' => int]]
+     */
+    public function getUserEnrollmentsBatch($userId, $courseIds) {
+        if (empty($courseIds) || !$userId) {
+            return [];
+        }
+
+        // Create placeholders for IN clause
+        $placeholders = implode(',', array_fill(0, count($courseIds), '?'));
+
+        $sql = "SELECT course_id, id, progress_percentage
+                FROM user_enrollments
+                WHERE user_id = ? AND course_id IN ($placeholders)";
+
+        // Prepare parameters: user_id first, then all course_ids
+        $params = array_merge([$userId], $courseIds);
+        $types = 'i' . str_repeat('i', count($courseIds)); // 'i' for user_id + 'i' for each course_id
+
+        $stmt = $this->conn->prepare($sql);
+
+        if (!$stmt) {
+            return [];
+        }
+
+        $stmt->bind_param($types, ...$params);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        $enrollments = [];
+        while ($row = $result->fetch_assoc()) {
+            $enrollments[$row['course_id']] = [
+                'is_enrolled' => true,
+                'progress' => $row['progress_percentage'] ?? 0
+            ];
+        }
+
+        return $enrollments;
+    }
+
+    /**
+     * Get user enrollments with course details in single query (JOIN optimization)
+     * Eliminates N+1 query problem in DashboardService.getUserLearningProgress()
+     *
+     * @param int $userId User ID
+     * @return array Enrollments with course data
+     */
+    public function getUserEnrollmentsWithCourses($userId) {
+        if (!$userId) {
+            return [];
+        }
+
+        $sql = "SELECT e.*, c.title, c.thumbnail, c.difficulty_level
+                FROM user_enrollments e
+                JOIN courses c ON e.course_id = c.id
+                WHERE e.user_id = ?
+                ORDER BY e.last_accessed_at DESC";
+
+        $stmt = $this->conn->prepare($sql);
+
+        if (!$stmt) {
+            return [];
+        }
+
+        $stmt->bind_param('i', $userId);
+        $stmt->execute();
+
+        return $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+    }
+
+    /**
+     * Get completion status for multiple lessons (batch operation)
+     * Eliminates N+1 query problem in LessonService.getSectionLessons()
+     *
+     * @param int $userId User ID
+     * @param array $lessonIds Array of lesson IDs
+     * @return array [lesson_id => bool] Completion status
+     */
+    public function getLessonsCompletionBatch($userId, $lessonIds) {
+        if (empty($lessonIds) || !$userId) {
+            return [];
+        }
+
+        // Create placeholders for IN clause
+        $placeholders = implode(',', array_fill(0, count($lessonIds), '?'));
+
+        $sql = "SELECT lesson_id, completed
+                FROM lesson_progress
+                WHERE user_id = ? AND lesson_id IN ($placeholders)";
+
+        // Prepare parameters: user_id first, then all lesson_ids
+        $params = array_merge([$userId], $lessonIds);
+        $types = 'i' . str_repeat('i', count($lessonIds));
+
+        $stmt = $this->conn->prepare($sql);
+
+        if (!$stmt) {
+            return [];
+        }
+
+        $stmt->bind_param($types, ...$params);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        $completion = [];
+        while ($row = $result->fetch_assoc()) {
+            $completion[$row['lesson_id']] = (bool)$row['completed'];
+        }
+
+        return $completion;
     }
 }
 ?>

@@ -271,34 +271,75 @@ class Router {
     }
     
     /**
+     * Parse middleware string to extract class name and parameters
+     * Handles formats like:
+     * - 'AuthMiddleware' (no parameters)
+     * - 'RoleMiddleware:admin' (single parameter)
+     * - 'RoleMiddleware:mentor,admin' (multiple parameters)
+     *
+     * @param mixed $middleware The middleware definition
+     * @return array [className, parameters]
+     */
+    private function parseMiddleware($middleware) {
+        if (!is_string($middleware)) {
+            return [$middleware, []];
+        }
+
+        // Check for parameter separator
+        if (strpos($middleware, ':') === false) {
+            return [$middleware, []];
+        }
+
+        // Split into class and parameters
+        list($className, $paramString) = explode(':', $middleware, 2);
+
+        // Parse parameters (comma-separated)
+        $parameters = array_map('trim', explode(',', $paramString));
+
+        return [$className, $parameters];
+    }
+
+    /**
      * Execute single middleware
      */
     private function executeMiddleware($middleware) {
-        if (is_string($middleware)) {
+        // Parse middleware string for parameters
+        list($className, $parameters) = $this->parseMiddleware($middleware);
+
+        if (is_string($className)) {
             // Class-based middleware
-            if (class_exists($middleware)) {
-                $instance = new $middleware();
+            if (class_exists($className)) {
+                // Pass parameters to constructor
+                $instance = !empty($parameters) ? new $className(...$parameters) : new $className();
                 return $instance->handle();
             }
-            
+
             // File-based middleware
-            $middlewareFile = __DIR__ . "/../app/Middleware/{$middleware}.php";
+            $middlewareFile = __DIR__ . "/../app/Middleware/{$className}.php";
             if (file_exists($middlewareFile)) {
                 require_once $middlewareFile;
-                $className = basename($middleware);
+                $baseClassName = basename($className);
+
+                if (class_exists($baseClassName)) {
+                    // Pass parameters to constructor
+                    $instance = !empty($parameters) ? new $baseClassName(...$parameters) : new $baseClassName();
+                    return $instance->handle();
+                }
+
                 if (class_exists($className)) {
-                    $instance = new $className();
+                    // Try with full class name
+                    $instance = !empty($parameters) ? new $className(...$parameters) : new $className();
                     return $instance->handle();
                 }
             }
-            
-            throw new Exception("Middleware not found: {$middleware}");
+
+            throw new Exception("Middleware not found: {$className}");
         }
-        
-        if (is_callable($middleware)) {
-            return call_user_func($middleware);
+
+        if (is_callable($className)) {
+            return call_user_func($className);
         }
-        
+
         throw new Exception("Invalid middleware type");
     }
     

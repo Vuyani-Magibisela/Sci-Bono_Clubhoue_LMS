@@ -1,0 +1,1 @@
+[2025-11-26 22:43:55] WARNING: CSRF token validation failed Context: {"ip":"::1","user_agent":"Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:145.0) Gecko/20100101 Firefox/145.0","url":"/Sci-Bono_Clubhoue_LMS/login","method":"POST","referer":"http://localhost/Sci-Bono_Clubhoue_LMS/login"}

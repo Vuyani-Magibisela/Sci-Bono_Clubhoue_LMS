@@ -8,8 +8,26 @@ class RoleMiddleware {
     private $requiredRoles;
     private $logger;
     
-    public function __construct($roles = null) {
-        $this->requiredRoles = is_string($roles) ? explode(',', $roles) : (array) $roles;
+    public function __construct(...$roles) {
+        // Handle array parameter (backward compatibility)
+        if (count($roles) === 1 && is_array($roles[0])) {
+            $roles = $roles[0];
+        }
+
+        // Handle single string parameter (backward compatibility)
+        if (count($roles) === 1 && is_string($roles[0])) {
+            // Check if it's a comma-separated string
+            if (strpos($roles[0], ',') !== false) {
+                $roles = explode(',', $roles[0]);
+            }
+        }
+
+        // Convert to array and trim whitespace
+        $this->requiredRoles = array_map('trim', (array) $roles);
+
+        // Remove empty strings
+        $this->requiredRoles = array_filter($this->requiredRoles);
+
         $this->logger = new Logger();
     }
     

@@ -1,63 +1,15 @@
 <?php
-session_start();
-require_once '../../../server.php';
-
-// Check if registration was successful
-if (!isset($_SESSION['registration_success']) || !$_SESSION['registration_success']) {
-    header('Location: holidayProgramRegistration.php');
-    exit();
-}
-
-$confirmationCode = $_SESSION['confirmation_code'] ?? '';
-$attendeeName = $_SESSION['attendee_name'] ?? '';
-$workshopAssignments = $_SESSION['workshop_assignments'] ?? [];
-
-// Clear session variables
-unset($_SESSION['registration_success']);
-unset($_SESSION['confirmation_code']);
-unset($_SESSION['attendee_name']);
-unset($_SESSION['workshop_assignments']);
-
-// Get full registration details from database
-$sql = "SELECT 
-            a.*,
-            p.title as program_title,
-            p.dates as program_dates,
-            c.name as cohort_name,
-            c.start_date as cohort_start_date,
-            c.end_date as cohort_end_date
-        FROM holiday_program_attendees a
-        JOIN holiday_programs p ON a.program_id = p.id
-        LEFT JOIN holiday_program_cohorts c ON a.cohort_id = c.id
-        WHERE a.confirmation_code = ?";
-
-$stmt = $conn->prepare($sql);
-$stmt->bind_param("s", $confirmationCode);
-$stmt->execute();
-$result = $stmt->get_result();
-$registration = $result->fetch_assoc();
-
-if (!$registration) {
-    header('Location: holidayProgramRegistration.php');
-    exit();
-}
-
-// Get selected workshops
-$workshopPreferences = json_decode($registration['workshop_preference'], true) ?? [];
-$selectedWorkshops = [];
-
-if (!empty($workshopPreferences)) {
-    $placeholders = str_repeat('?,', count($workshopPreferences) - 1) . '?';
-    $workshopSql = "SELECT * FROM holiday_program_workshops WHERE id IN ($placeholders)";
-    $workshopStmt = $conn->prepare($workshopSql);
-    $workshopStmt->bind_param(str_repeat('i', count($workshopPreferences)), ...$workshopPreferences);
-    $workshopStmt->execute();
-    $workshopResult = $workshopStmt->get_result();
-    
-    while ($workshop = $workshopResult->fetch_assoc()) {
-        $selectedWorkshops[] = $workshop;
-    }
-}
+/**
+ * Registration Confirmation View
+ *
+ * Displays confirmation after successful registration
+ * Data passed from ProgramController@registrationConfirmation():
+ * - $program: Program details
+ * - $email: Registered email address
+ * - $verificationToken: Email verification token
+ *
+ * Phase 3 Week 3: Updated to use ProgramController
+ */
 ?>
 
 <!DOCTYPE html>
@@ -66,7 +18,7 @@ if (!empty($workshopPreferences)) {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Registration Confirmed - Sci-Bono Clubhouse</title>
-    <link rel="stylesheet" href="../../../public/assets/css/holidayProgramStyles.css">
+    <link rel="stylesheet" href="/Sci-Bono_Clubhoue_LMS/public/assets/css/holidayProgramStyles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
         .confirmation-container {
@@ -77,7 +29,7 @@ if (!empty($workshopPreferences)) {
             border-radius: 12px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.1);
         }
-        
+
         .success-header {
             text-align: center;
             margin-bottom: 40px;
@@ -86,335 +38,279 @@ if (!empty($workshopPreferences)) {
             color: white;
             border-radius: 12px;
         }
-        
+
         .success-header i {
             font-size: 4rem;
             margin-bottom: 20px;
             display: block;
         }
-        
+
         .success-header h1 {
             margin: 0 0 10px 0;
             font-size: 2.5rem;
         }
-        
-        .confirmation-details {
-            display: grid;
-            gap: 25px;
+
+        .success-header p {
+            margin: 0;
+            font-size: 1.2rem;
+            opacity: 0.95;
         }
-        
-        .detail-section {
+
+        .info-section {
             background: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-            border-left: 4px solid #6c63ff;
-        }
-        
-        .detail-section h3 {
-            margin-top: 0;
-            color: #2c3e50;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-        
-        .detail-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-            gap: 15px;
-            margin-top: 15px;
-        }
-        
-        .detail-item {
-            background: white;
-            padding: 15px;
-            border-radius: 6px;
-            border: 1px solid #e1e8ed;
-        }
-        
-        .detail-label {
-            font-weight: 600;
-            color: #666;
-            font-size: 0.9rem;
-            margin-bottom: 5px;
-        }
-        
-        .detail-value {
-            color: #333;
-            font-size: 1rem;
-        }
-        
-        .workshop-list {
-            list-style: none;
-            padding: 0;
-            margin: 15px 0 0 0;
-        }
-        
-        .workshop-item {
-            background: white;
-            padding: 15px;
-            margin: 10px 0;
-            border-radius: 8px;
-            border: 1px solid #e1e8ed;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .preference-badge {
-            background: #6c63ff;
-            color: white;
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 0.8rem;
-            font-weight: 600;
-        }
-        
-        .preference-badge.second {
-            background: #8e8af7;
-        }
-        
-        .next-steps {
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            color: white;
             padding: 25px;
-            border-radius: 12px;
-            margin-top: 30px;
+            border-radius: 8px;
+            margin-bottom: 25px;
         }
-        
+
+        .info-section h2 {
+            color: #2c3e50;
+            margin-top: 0;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            border-bottom: 2px solid #28a745;
+            padding-bottom: 10px;
+        }
+
+        .info-item {
+            display: flex;
+            margin-bottom: 15px;
+            align-items: flex-start;
+        }
+
+        .info-item i {
+            color: #28a745;
+            margin-right: 15px;
+            margin-top: 3px;
+            min-width: 20px;
+        }
+
+        .info-item-content {
+            flex: 1;
+        }
+
+        .info-item-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 3px;
+        }
+
+        .info-item-value {
+            color: #6c757d;
+        }
+
+        .next-steps {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 20px;
+            margin-bottom: 25px;
+            border-radius: 4px;
+        }
+
         .next-steps h3 {
             margin-top: 0;
-            display: flex;
-            align-items: center;
-            gap: 10px;
+            color: #856404;
         }
-        
-        .next-steps ul {
-            margin: 15px 0;
-            padding-left: 20px;
+
+        .next-steps ol {
+            margin: 15px 0 0 20px;
+            color: #856404;
         }
-        
+
         .next-steps li {
-            margin: 10px 0;
+            margin-bottom: 10px;
             line-height: 1.6;
         }
-        
+
         .action-buttons {
             display: flex;
             gap: 15px;
             justify-content: center;
-            margin-top: 30px;
             flex-wrap: wrap;
+            margin-top: 30px;
         }
-        
+
         .btn {
-            padding: 12px 25px;
-            border: none;
+            padding: 12px 30px;
             border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
             text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            transition: all 0.3s;
+            font-weight: 600;
+            transition: all 0.3s ease;
+            display: inline-block;
         }
-        
+
         .btn-primary {
-            background: #6c63ff;
+            background: #28a745;
             color: white;
         }
-        
+
         .btn-primary:hover {
-            background: #5a52d5;
-            transform: translateY(-1px);
+            background: #218838;
+            transform: translateY(-2px);
         }
-        
+
         .btn-secondary {
             background: #6c757d;
             color: white;
         }
-        
+
         .btn-secondary:hover {
-            background: #545b62;
+            background: #5a6268;
+            transform: translateY(-2px);
         }
-        
-        .alert {
-            background: #fff3cd;
-            border: 1px solid #ffeaa7;
+
+        .btn-outline {
+            background: white;
+            color: #28a745;
+            border: 2px solid #28a745;
+        }
+
+        .btn-outline:hover {
+            background: #28a745;
+            color: white;
+        }
+
+        .verification-notice {
+            background: #d1ecf1;
+            border: 1px solid #bee5eb;
+            padding: 15px 20px;
             border-radius: 6px;
-            padding: 15px;
-            margin: 20px 0;
-            border-left: 4px solid #ffc107;
+            margin-bottom: 20px;
         }
-        
-        .alert-icon {
-            color: #856404;
+
+        .verification-notice i {
+            color: #0c5460;
             margin-right: 10px;
         }
-        
+
+        .verification-notice p {
+            margin: 0;
+            color: #0c5460;
+        }
+
         @media (max-width: 768px) {
             .confirmation-container {
                 margin: 20px;
                 padding: 20px;
             }
-            
+
             .success-header h1 {
-                font-size: 2rem;
+                font-size: 1.8rem;
             }
-            
-            .detail-grid {
-                grid-template-columns: 1fr;
-            }
-            
+
             .action-buttons {
                 flex-direction: column;
-                align-items: center;
+            }
+
+            .btn {
+                width: 100%;
+                text-align: center;
             }
         }
     </style>
 </head>
 <body>
-    <?php include './holidayPrograms-header.php'; ?>
-    
     <div class="confirmation-container">
+        <!-- Success Header -->
         <div class="success-header">
             <i class="fas fa-check-circle"></i>
-            <h1>Registration Confirmed!</h1>
-            <p>Thank you for registering for our holiday program</p>
+            <h1>Registration Successful!</h1>
+            <p>You're all set for <?php echo htmlspecialchars($program['title']); ?></p>
         </div>
-        
-        <div class="confirmation-details">
-            <!-- Confirmation Information -->
-            <div class="detail-section">
-                <h3><i class="fas fa-ticket-alt"></i> Confirmation Details</h3>
-                <div class="detail-grid">
-                    <div class="detail-item">
-                        <div class="detail-label">Confirmation Code</div>
-                        <div class="detail-value"><strong><?php echo htmlspecialchars($confirmationCode); ?></strong></div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Registration Status</div>
-                        <div class="detail-value">
-                            <span style="color: #ffc107;">
-                                <i class="fas fa-clock"></i> Pending Review
-                            </span>
-                        </div>
-                    </div>
+
+        <!-- Verification Notice -->
+        <?php if (!empty($verificationToken)): ?>
+        <div class="verification-notice">
+            <i class="fas fa-envelope"></i>
+            <p><strong>Email Verification Required:</strong> We've sent a verification email to <strong><?php echo htmlspecialchars($email); ?></strong>. Please check your inbox and click the verification link to complete your registration.</p>
+        </div>
+        <?php endif; ?>
+
+        <!-- Program Information -->
+        <div class="info-section">
+            <h2><i class="fas fa-calendar-check"></i> Program Details</h2>
+            <div class="info-item">
+                <i class="fas fa-bookmark"></i>
+                <div class="info-item-content">
+                    <div class="info-item-label">Program</div>
+                    <div class="info-item-value"><?php echo htmlspecialchars($program['term']); ?>: <?php echo htmlspecialchars($program['title']); ?></div>
                 </div>
             </div>
-            
-            <!-- Program Information -->
-            <div class="detail-section">
-                <h3><i class="fas fa-calendar-alt"></i> Program Information</h3>
-                <div class="detail-grid">
-                    <div class="detail-item">
-                        <div class="detail-label">Program</div>
-                        <div class="detail-value"><?php echo htmlspecialchars($registration['program_title']); ?></div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Dates</div>
-                        <div class="detail-value"><?php echo htmlspecialchars($registration['program_dates']); ?></div>
-                    </div>
-                    <?php if (!empty($registration['cohort_name'])): ?>
-                    <div class="detail-item">
-                        <div class="detail-label">Cohort</div>
-                        <div class="detail-value"><?php echo htmlspecialchars($registration['cohort_name']); ?></div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Cohort Dates</div>
-                        <div class="detail-value">
-                            <?php echo date('M j', strtotime($registration['cohort_start_date'])); ?> - 
-                            <?php echo date('M j, Y', strtotime($registration['cohort_end_date'])); ?>
-                        </div>
-                    </div>
-                    <?php endif; ?>
+            <div class="info-item">
+                <i class="fas fa-calendar-alt"></i>
+                <div class="info-item-content">
+                    <div class="info-item-label">Dates</div>
+                    <div class="info-item-value"><?php echo htmlspecialchars($program['dates'] ?? ($program['start_date'] . ' - ' . $program['end_date'])); ?></div>
                 </div>
             </div>
-            
-            <!-- Personal Information -->
-            <div class="detail-section">
-                <h3><i class="fas fa-user"></i> Personal Information</h3>
-                <div class="detail-grid">
-                    <div class="detail-item">
-                        <div class="detail-label">Name</div>
-                        <div class="detail-value"><?php echo htmlspecialchars($registration['name'] . ' ' . $registration['surname']); ?></div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Email</div>
-                        <div class="detail-value"><?php echo htmlspecialchars($registration['email']); ?></div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Phone</div>
-                        <div class="detail-value"><?php echo htmlspecialchars($registration['phone']); ?></div>
-                    </div>
-                    <div class="detail-item">
-                        <div class="detail-label">Date of Birth</div>
-                        <div class="detail-value"><?php echo date('F j, Y', strtotime($registration['date_of_birth'])); ?></div>
-                    </div>
+            <div class="info-item">
+                <i class="fas fa-clock"></i>
+                <div class="info-item-content">
+                    <div class="info-item-label">Time</div>
+                    <div class="info-item-value"><?php echo htmlspecialchars($program['time'] ?? 'TBA'); ?></div>
                 </div>
             </div>
-            
-            <!-- Workshop Preferences -->
-            <div class="detail-section">
-                <h3><i class="fas fa-laptop-code"></i> Workshop Preferences</h3>
-                <?php if (!empty($selectedWorkshops)): ?>
-                <ul class="workshop-list">
-                    <?php foreach ($selectedWorkshops as $index => $workshop): ?>
-                    <li class="workshop-item">
-                        <div class="preference-badge <?php echo $index > 0 ? 'second' : ''; ?>">
-                            <?php echo $index === 0 ? '1st Choice' : '2nd Choice'; ?>
-                        </div>
-                        <div class="workshop-details">
-                            <h4 style="margin: 0 0 5px 0;"><?php echo htmlspecialchars($workshop['title']); ?></h4>
-                            <p style="margin: 0; color: #666; font-size: 0.9rem;">
-                                <?php echo htmlspecialchars($workshop['description']); ?>
-                            </p>
-                        </div>
-                    </li>
-                    <?php endforeach; ?>
-                </ul>
-                <?php else: ?>
-                <p>No workshop preferences selected.</p>
-                <?php endif; ?>
+            <div class="info-item">
+                <i class="fas fa-map-marker-alt"></i>
+                <div class="info-item-content">
+                    <div class="info-item-label">Location</div>
+                    <div class="info-item-value"><?php echo htmlspecialchars($program['location'] ?? 'Sci-Bono Clubhouse'); ?></div>
+                </div>
+            </div>
+            <div class="info-item">
+                <i class="fas fa-envelope"></i>
+                <div class="info-item-content">
+                    <div class="info-item-label">Your Email</div>
+                    <div class="info-item-value"><?php echo htmlspecialchars($email); ?></div>
+                </div>
             </div>
         </div>
-        
-        <div class="alert">
-            <i class="fas fa-info-circle alert-icon"></i>
-            <strong>Important:</strong> Your registration is currently pending review. You will receive an email confirmation within 24-48 hours with further instructions and program details.
-        </div>
-        
+
+        <!-- Next Steps -->
         <div class="next-steps">
-            <h3><i class="fas fa-route"></i> What Happens Next?</h3>
-            <ul>
-                <li><strong>Review Process:</strong> Our team will review your registration and workshop preferences</li>
-                <li><strong>Workshop Assignment:</strong> You'll be assigned to workshops based on availability and prerequisites</li>
-                <li><strong>Email Confirmation:</strong> You'll receive detailed program information via email</li>
-                <li><strong>Preparation Materials:</strong> Any required materials or preparation instructions will be provided</li>
-                <li><strong>Program Start:</strong> Arrive on time for your first session as specified in your cohort schedule</li>
-            </ul>
+            <h3><i class="fas fa-list-check"></i> What Happens Next?</h3>
+            <ol>
+                <li><strong>Verify Your Email:</strong> Check your inbox for a verification email and click the link to activate your account.</li>
+                <li><strong>Create Your Password:</strong> After verification, you'll be able to create a password for your account.</li>
+                <li><strong>Check Your Confirmation Email:</strong> You'll receive an email with all program details and important information.</li>
+                <li><strong>Login to Your Dashboard:</strong> Once verified, login to view your program details, workshop selections, and important updates.</li>
+                <li><strong>Prepare for the Program:</strong> Review any pre-program materials that may be sent to you via email.</li>
+            </ol>
         </div>
-        
+
+        <!-- Contact Information -->
+        <div class="info-section">
+            <h2><i class="fas fa-question-circle"></i> Need Help?</h2>
+            <div class="info-item">
+                <i class="fas fa-phone"></i>
+                <div class="info-item-content">
+                    <div class="info-item-label">Phone</div>
+                    <div class="info-item-value">+27 11 639 8400</div>
+                </div>
+            </div>
+            <div class="info-item">
+                <i class="fas fa-envelope"></i>
+                <div class="info-item-content">
+                    <div class="info-item-label">Email</div>
+                    <div class="info-item-value">info@sci-bono.co.za</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
         <div class="action-buttons">
-            <a href="holiday-dashboard.php" class="btn btn-primary">
-                <i class="fas fa-tachometer-alt"></i> Go to Dashboard
+            <a href="/Sci-Bono_Clubhoue_LMS/programs" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Programs
             </a>
-            <a href="holidayProgramRegistration.php" class="btn btn-secondary">
-                <i class="fas fa-plus"></i> Register for Another Program
+            <a href="/Sci-Bono_Clubhoue_LMS/holiday-login" class="btn btn-primary">
+                <i class="fas fa-sign-in-alt"></i> Login to Dashboard
             </a>
-            <button onclick="window.print()" class="btn btn-secondary">
-                <i class="fas fa-print"></i> Print Confirmation
-            </button>
+        </div>
+
+        <!-- Important Notice -->
+        <div style="margin-top: 30px; padding: 15px; background: #f8f9fa; border-radius: 6px; text-align: center; color: #6c757d;">
+            <p style="margin: 0;"><i class="fas fa-info-circle"></i> Please save this page or take a screenshot for your records. You can also check your email for the confirmation message.</p>
         </div>
     </div>
-    
-    <script>
-        // Auto-save confirmation code to localStorage for reference
-        localStorage.setItem('last_confirmation_code', '<?php echo htmlspecialchars($confirmationCode); ?>');
-        
-        // Show success message
-        console.log('Registration successful! Confirmation code: <?php echo htmlspecialchars($confirmationCode); ?>');
-    </script>
 </body>
 </html>

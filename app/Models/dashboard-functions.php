@@ -1,13 +1,38 @@
 <?php
 /**
+ * ====================================================================
+ * DEPRECATED FILE - DO NOT USE
+ * ====================================================================
+ *
+ * This file has been deprecated as of Phase 3 Week 6-7 implementation.
+ *
+ * **Replacement:** Use DashboardService instead
+ * **Methods:**
+ *   - DashboardService::getStats() (statistics)
+ *   - DashboardService::getActivityFeed() (activity feed)
+ *   - DashboardService::getProgress() (progress tracking)
+ *   - DashboardService::getCourses() (user courses)
+ *   - DashboardService::getEvents() (upcoming events)
+ *   - DashboardService::getPrograms() (clubhouse programs)
+ * **Location:** app/Services/DashboardService.php
+ *
+ * This file will be removed in a future release.
+ * Please update all function calls to use DashboardService methods.
+ *
+ * @deprecated Since Phase 3 Week 6-7
+ * @see app/Services/DashboardService
+ * ====================================================================
+ */
+
+/**
  * Dashboard Functions for Clubhouse LMS
- * 
+ *
  * This file contains functions to fetch dynamic content for the Clubhouse LMS Dashboard
  * including member posts, announcements, events, and attendance data.
  */
 
-// Include database connection
-require_once 'server.php';
+// Include bootstrap (database connection as of Phase 3 Week 8)
+require_once __DIR__ . '/../../bootstrap.php';
 
 /**
  * Fetch latest member posts/projects

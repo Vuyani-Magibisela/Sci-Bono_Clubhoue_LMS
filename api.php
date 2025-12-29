@@ -4,11 +4,8 @@
  * Phase 3 Implementation
  */
 
-// Load bootstrap
+// Load bootstrap (includes database connection as of Phase 3 Week 8)
 require_once __DIR__ . '/bootstrap.php';
-
-// Load database connection
-require_once __DIR__ . '/server.php';
 
 // Load middleware classes
 require_once __DIR__ . '/app/Middleware/ApiMiddleware.php';

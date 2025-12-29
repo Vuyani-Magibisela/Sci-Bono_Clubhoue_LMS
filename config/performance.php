@@ -9,7 +9,8 @@
 return [
     // General settings
     'enabled' => env('PERFORMANCE_MONITORING_ENABLED', true),
-    'sample_rate' => env('PERFORMANCE_SAMPLE_RATE', 1.0), // 1.0 = 100% sampling
+    // Phase 3 Week 9 - Performance: Reduced sampling from 100% to 10% (90% overhead reduction)
+    'sample_rate' => env('PERFORMANCE_SAMPLE_RATE', 0.1), // 0.1 = 10% sampling
     'debug_mode' => env('PERFORMANCE_DEBUG_MODE', false),
     
     // Data retention settings

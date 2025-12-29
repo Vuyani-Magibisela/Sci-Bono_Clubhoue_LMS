@@ -1,111 +1,14 @@
 <?php
-session_start();
-require_once __DIR__ . '/../../../bootstrap.php';
-require_once __DIR__ . '/../../../core/CSRF.php';
-require_once __DIR__ . '/../../../server.php';
-
-// Initialize variables
-$error = '';
-$email = '';
-
-// Check if already logged in
-if (isset($_SESSION['holiday_logged_in']) && $_SESSION['holiday_logged_in'] === true) {
-    header('Location: holiday-dashboard.php');
-    exit();
-}
-
-// Process login form submission
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
-    // Validate CSRF token
-    if (!CSRF::validateToken()) {
-        $error = 'Invalid security token. Please refresh the page and try again.';
-        error_log("CSRF validation failed for holiday program login: IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown') . ", Email: " . ($_POST['email'] ?? 'unknown'));
-    } else {
-    $email = trim($_POST['email']);
-    $password = $_POST['password'];
-    
-    if (empty($email) || empty($password)) {
-        $error = "Please enter both email and password.";
-    } else {
-        // Check in holiday_program_attendees table first (for holiday program participants)
-        $sql = "SELECT id, first_name, last_name, email, password, mentor_registration, mentor_status, program_id 
-                FROM holiday_program_attendees 
-                WHERE email = ? AND password IS NOT NULL";
-        
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("s", $email);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        
-        if ($result->num_rows > 0) {
-            $user = $result->fetch_assoc();
-            
-            // Verify password
-            if (password_verify($password, $user['password'])) {
-                // Set session variables
-                $_SESSION['holiday_logged_in'] = true;
-                $_SESSION['holiday_user_id'] = $user['id'];
-                $_SESSION['holiday_email'] = $user['email'];
-                $_SESSION['holiday_name'] = $user['first_name'];
-                $_SESSION['holiday_surname'] = $user['last_name'];
-                $_SESSION['holiday_is_mentor'] = $user['mentor_registration'];
-                $_SESSION['holiday_mentor_status'] = $user['mentor_status'];
-                $_SESSION['holiday_program_id'] = $user['program_id'];
-                $_SESSION['holiday_user_type'] = $user['mentor_registration'] ? 'mentor' : 'member';
-                
-                // Update last login
-                $update_sql = "UPDATE holiday_program_attendees SET last_login = NOW() WHERE id = ?";
-                $update_stmt = $conn->prepare($update_sql);
-                $update_stmt->bind_param("i", $user['id']);
-                $update_stmt->execute();
-                
-                // Redirect to dashboard
-                header('Location: holiday-dashboard.php');
-                exit();
-            } else {
-                $error = "Invalid email or password.";
-            }
-        } else {
-            // Check in main users table (for admin/staff access)
-            $sql = "SELECT id, username, email, password, name, surname, user_type 
-                    FROM users 
-                    WHERE email = ? AND user_type IN ('admin', 'mentor')";
-            
-            $stmt = $conn->prepare($sql);
-            $stmt->bind_param("s", $email);
-            $stmt->execute();
-            $result = $stmt->get_result();
-            
-            if ($result->num_rows > 0) {
-                $user = $result->fetch_assoc();
-                
-                // Verify password
-                if (password_verify($password, $user['password'])) {
-                    // Set session variables for admin/staff
-                    $_SESSION['holiday_logged_in'] = true;
-                    $_SESSION['holiday_user_id'] = $user['id'];
-                    $_SESSION['holiday_email'] = $user['email'];
-                    $_SESSION['holiday_name'] = $user['name'];
-                    $_SESSION['holiday_surname'] = $user['surname'];
-                    $_SESSION['holiday_is_mentor'] = false;
-                    $_SESSION['holiday_mentor_status'] = null;
-                    $_SESSION['holiday_program_id'] = null;
-                    $_SESSION['holiday_user_type'] = $user['user_type'];
-                    $_SESSION['holiday_is_admin'] = ($user['user_type'] === 'admin');
-                    
-                    // Redirect to dashboard
-                    header('Location: holiday-dashboard.php');
-                    exit();
-                } else {
-                    $error = "Invalid email or password.";
-                }
-            } else {
-                $error = "No account found with this email address. Please register first.";
-            }
-        }
-    }
-    } // Close CSRF validation else block
-}
+/**
+ * Holiday Program Login View
+ *
+ * Login form for holiday program attendees
+ * Data passed from ProfileController@login():
+ * - $csrfToken: CSRF protection token
+ * - $error: Error message if any
+ *
+ * Phase 3 Week 3: Updated to use ProfileController
+ */
 ?>
 
 <!DOCTYPE html>
@@ -113,345 +16,327 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['login'])) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Login - Sci-Bono Clubhouse Holiday Programs</title>
-    <?php echo CSRF::metaTag(); ?>
-    <link rel="stylesheet" href="../../../public/assets/css/holidayProgramStyles.css">
-    <!-- Font Awesome for icons -->
+    <title>Holiday Program Login - Sci-Bono Clubhouse</title>
+    <link rel="stylesheet" href="/Sci-Bono_Clubhoue_LMS/public/assets/css/holidayProgramStyles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
     <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
         .login-container {
-            max-width: 500px;
-            margin: 60px auto;
-            padding: 40px;
-            background-color: #fff;
-            border-radius: 12px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1);
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            width: 100%;
+            max-width: 450px;
         }
-        
+
         .login-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px 30px;
             text-align: center;
-            margin-bottom: 30px;
         }
-        
-        .login-header img {
-            height: 60px;
-            margin-bottom: 20px;
+
+        .login-header i {
+            font-size: 3rem;
+            margin-bottom: 15px;
         }
-        
+
         .login-header h1 {
-            font-size: 1.8rem;
-            color: var(--dark);
+            font-size: 2rem;
             margin-bottom: 10px;
         }
-        
+
         .login-header p {
-            color: var(--text-light);
+            opacity: 0.9;
+            font-size: 0.95rem;
         }
-        
-        .form-group {
+
+        .login-body {
+            padding: 40px 30px;
+        }
+
+        .alert {
+            padding: 12px 15px;
+            border-radius: 8px;
             margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
-        
+
+        .alert-error {
+            background: #fee;
+            color: #c33;
+            border: 1px solid #fcc;
+        }
+
+        .alert-success {
+            background: #efe;
+            color: #3c3;
+            border: 1px solid #cfc;
+        }
+
+        .alert i {
+            font-size: 1.2rem;
+        }
+
+        .form-group {
+            margin-bottom: 25px;
+        }
+
         .form-group label {
             display: block;
             margin-bottom: 8px;
+            color: #333;
             font-weight: 500;
         }
-        
-        .form-input {
+
+        .input-with-icon {
+            position: relative;
+        }
+
+        .input-with-icon i {
+            position: absolute;
+            left: 15px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+
+        .form-control {
             width: 100%;
-            padding: 12px 15px;
-            border: 1px solid #ddd;
-            border-radius: 6px;
-            font-family: 'Poppins', sans-serif;
-            font-size: 1rem;
-            transition: border-color 0.3s ease, box-shadow 0.3s ease;
-        }
-        
-        .form-input:focus {
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px rgba(108, 99, 255, 0.1);
-            outline: none;
-        }
-        
-        .login-options {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        
-        .remember-me {
-            display: flex;
-            align-items: center;
-        }
-        
-        .remember-me input {
-            margin-right: 8px;
-        }
-        
-        .forgot-password {
-            color: var(--primary);
-            text-decoration: none;
-            font-size: 0.9rem;
-        }
-        
-        .login-button {
-            width: 100%;
-            padding: 12px;
-            background-color: var(--primary);
-            color: white;
-            border: none;
-            border-radius: 6px;
-            font-family: 'Poppins', sans-serif;
-            font-size: 1rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-        
-        .login-button:hover {
-            background-color: var(--purple-dark);
-        }
-        
-        .login-footer {
-            text-align: center;
-            margin-top: 25px;
-            font-size: 0.95rem;
-        }
-        
-        .register-link {
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 500;
-        }
-        
-        .error-message {
-            background-color: rgba(244, 67, 54, 0.1);
-            color: var(--danger);
-            padding: 12px 15px;
-            border-radius: 6px;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-        }
-        
-        .error-message i {
-            margin-right: 10px;
-            font-size: 1.2rem;
-        }
-        
-        .user-options {
-            margin-top: 30px;
-            background-color: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
-        }
-        
-        .option-label {
-            font-weight: 600;
-            margin-bottom: 10px;
-            color: var(--text-dark);
-            text-align: center;
-        }
-        
-        .option-description {
-            font-size: 0.9rem;
-            color: var(--text-light);
-            margin-bottom: 20px;
-            text-align: center;
-        }
-        
-        .option-buttons {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-        
-        .option-button {
-            flex: 1;
-            min-width: 150px;
-            text-align: center;
-            padding: 15px 10px;
-            background-color: var(--white);
+            padding: 12px 15px 12px 45px;
             border: 2px solid #e0e0e0;
-            border-radius: 8px;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+        }
+
+        .form-control:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
-            text-decoration: none;
-            color: var(--text-dark);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
-        
-        .option-button:hover {
-            background-color: rgba(108, 99, 255, 0.05);
-            border-color: var(--primary);
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
             transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
         }
-        
-        .option-icon {
-            display: block;
-            font-size: 2rem;
-            margin-bottom: 8px;
-            color: var(--primary);
+
+        .btn-primary:active {
+            transform: translateY(0);
         }
-        
-        .option-text {
+
+        .divider {
+            display: flex;
+            align-items: center;
+            text-align: center;
+            margin: 25px 0;
+        }
+
+        .divider::before,
+        .divider::after {
+            content: '';
+            flex: 1;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .divider span {
+            padding: 0 15px;
+            color: #999;
             font-size: 0.9rem;
-            font-weight: 500;
-            color: var(--text-dark);
         }
-        
-        :root {
-            --primary: #6c63ff;
-            --purple-dark: #5a52d5;
-            --dark: #333;
-            --text-light: #666;
-            --text-dark: #333;
-            --white: #fff;
-            --danger: #f44336;
+
+        .links {
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .links a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s ease;
+        }
+
+        .links a:hover {
+            color: #764ba2;
+            text-decoration: underline;
+        }
+
+        .additional-links {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+            display: flex;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .additional-links a {
+            color: #666;
+            font-size: 0.9rem;
+            text-decoration: none;
+        }
+
+        .additional-links a:hover {
+            color: #667eea;
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                border-radius: 0;
+            }
+
+            .login-header {
+                padding: 30px 20px;
+            }
+
+            .login-header h1 {
+                font-size: 1.5rem;
+            }
+
+            .login-body {
+                padding: 30px 20px;
+            }
+
+            .additional-links {
+                flex-direction: column;
+                text-align: center;
+            }
         }
     </style>
 </head>
 <body>
-    <?php include './holidayPrograms-header.php'; ?>
-    
     <div class="login-container">
+        <!-- Header -->
         <div class="login-header">
-            <img src="../../../public/assets/images/Sci-Bono logo White.png" alt="Sci-Bono Clubhouse" style="filter: invert(1);">
-            <h1>Welcome Back</h1>
-            <p>Sign in to access your holiday programs</p>
+            <i class="fas fa-graduation-cap"></i>
+            <h1>Holiday Program Login</h1>
+            <p>Access your holiday program dashboard</p>
         </div>
-        
-        <?php if (!empty($error)): ?>
-        <div class="error-message">
-            <i class="fas fa-exclamation-circle"></i>
-            <span><?php echo htmlspecialchars($error); ?></span>
-        </div>
-        <?php endif; ?>
-        
-        <form method="POST" action="">
-            <?php echo CSRF::field(); ?>
-            <div class="form-group">
-                <label for="email">Email Address</label>
-                <input type="email" id="email" name="email" class="form-input"
-                       value="<?php echo htmlspecialchars($email); ?>" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" name="password" class="form-input" required>
-            </div>
-            
-            <div class="login-options">
-                <div class="remember-me">
-                    <input type="checkbox" id="remember" name="remember">
-                    <label for="remember">Remember me</label>
+
+        <!-- Login Form -->
+        <div class="login-body">
+            <!-- Error Message -->
+            <?php if (!empty($error)): ?>
+                <div class="alert alert-error">
+                    <i class="fas fa-exclamation-circle"></i>
+                    <span><?php echo htmlspecialchars($error); ?></span>
                 </div>
-                
-                <a href="forgot-password.php" class="forgot-password">Forgot password?</a>
+            <?php endif; ?>
+
+            <!-- Success Message -->
+            <?php if (isset($_SESSION['logout_success'])): ?>
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle"></i>
+                    <span><?php echo htmlspecialchars($_SESSION['logout_success']); unset($_SESSION['logout_success']); ?></span>
+                </div>
+            <?php endif; ?>
+
+            <?php if (isset($_SESSION['login_success'])): ?>
+                <div class="alert alert-success">
+                    <i class="fas fa-check-circle"></i>
+                    <span><?php echo htmlspecialchars($_SESSION['login_success']); unset($_SESSION['login_success']); ?></span>
+                </div>
+            <?php endif; ?>
+
+            <!-- Login Form -->
+            <form action="/Sci-Bono_Clubhoue_LMS/holiday-login" method="POST">
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
+
+                <div class="form-group">
+                    <label for="email">Email Address</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-envelope"></i>
+                        <input type="email"
+                               id="email"
+                               name="email"
+                               class="form-control"
+                               placeholder="Enter your email"
+                               required
+                               autofocus>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <div class="input-with-icon">
+                        <i class="fas fa-lock"></i>
+                        <input type="password"
+                               id="password"
+                               name="password"
+                               class="form-control"
+                               placeholder="Enter your password"
+                               required>
+                    </div>
+                </div>
+
+                <button type="submit" class="btn btn-primary">
+                    <i class="fas fa-sign-in-alt"></i>
+                    <span>Login</span>
+                </button>
+            </form>
+
+            <!-- Divider -->
+            <div class="divider">
+                <span>OR</span>
             </div>
-            
-            <button type="submit" name="login" class="login-button">Sign In</button>
-            
-            <div class="login-footer">
-                Don't have an account? <a href="holidayProgramRegistration.php?program_id=1" class="register-link">Register Now</a>
+
+            <!-- Register Link -->
+            <div class="links">
+                <p>Don't have an account?</p>
+                <a href="/Sci-Bono_Clubhoue_LMS/programs"><i class="fas fa-user-plus"></i> Register for a Program</a>
             </div>
-        </form>
-        
-        <div class="user-options">
-            <div class="option-label">New User? Choose Your Path:</div>
-            <div class="option-description">Select the option that best describes you to get started:</div>
-            
-            <div class="option-buttons">
-                <a href="holidayProgramRegistration.php?program_id=1" class="option-button">
-                    <span class="option-icon"><i class="fas fa-user-plus"></i></span>
-                    <span class="option-text">New to Sci-Bono</span>
+
+            <!-- Additional Links -->
+            <div class="additional-links">
+                <a href="/Sci-Bono_Clubhoue_LMS/programs">
+                    <i class="fas fa-arrow-left"></i> Back to Programs
                 </a>
-                
-                <a href="holidayProgramRegistration.php?program_id=1&member=1" class="option-button">
-                    <span class="option-icon"><i class="fas fa-users"></i></span>
-                    <span class="option-text">Clubhouse Member</span>
-                </a>
-                
-                <a href="holidayProgramRegistration.php?program_id=1&mentor=1" class="option-button">
-                    <span class="option-icon"><i class="fas fa-chalkboard-teacher"></i></span>
-                    <span class="option-text">Become a Mentor</span>
+                <a href="mailto:info@sci-bono.co.za">
+                    <i class="fas fa-question-circle"></i> Need Help?
                 </a>
             </div>
         </div>
     </div>
-
-    <!-- Mobile Navigation (visible on mobile only) -->
-    <nav class="mobile-nav">
-        <a href="../../home.php" class="mobile-menu-item">
-            <div class="mobile-menu-icon">
-                <i class="fas fa-home"></i>
-            </div>
-            <span>Home</span>
-        </a>
-        <a href="holidayProgramIndex.php" class="mobile-menu-item">
-            <div class="mobile-menu-icon">
-                <i class="fas fa-calendar-alt"></i>
-            </div>
-            <span>Programs</span>
-        </a>
-        <a href="../../app/Views/learn.php" class="mobile-menu-item">
-            <div class="mobile-menu-icon">
-                <i class="fas fa-book"></i>
-            </div>
-            <span>Learn</span>
-        </a>
-        <a href="holiday-dashboard.php" class="mobile-menu-item">
-            <div class="mobile-menu-icon">
-                <i class="fas fa-user"></i>
-            </div>
-            <span>Account</span>
-        </a>
-    </nav>
-
-    <script>
-        // Add smooth transitions and form validation
-        document.addEventListener('DOMContentLoaded', function() {
-            const form = document.querySelector('form');
-            const emailInput = document.getElementById('email');
-            const passwordInput = document.getElementById('password');
-            
-            // Add real-time validation
-            emailInput.addEventListener('blur', function() {
-                if (this.value && !isValidEmail(this.value)) {
-                    this.style.borderColor = '#f44336';
-                } else {
-                    this.style.borderColor = '#ddd';
-                }
-            });
-            
-            function isValidEmail(email) {
-                const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-                return emailRegex.test(email);
-            }
-            
-            // Form submission validation
-            form.addEventListener('submit', function(e) {
-                let isValid = true;
-                
-                if (!emailInput.value.trim()) {
-                    emailInput.style.borderColor = '#f44336';
-                    isValid = false;
-                }
-                
-                if (!passwordInput.value.trim()) {
-                    passwordInput.style.borderColor = '#f44336';
-                    isValid = false;
-                }
-                
-                if (!isValid) {
-                    e.preventDefault();
-                    alert('Please fill in all required fields correctly.');
-                }
-            });
-        });
-    </script>
 </body>
 </html>

@@ -1,13 +1,41 @@
 <?php
 /**
+ * ====================================================================
+ * DEPRECATED FILE - DO NOT USE
+ * ====================================================================
+ *
+ * This file has been deprecated as of Phase 3 Week 6-7 implementation.
+ *
+ * **Replacement:** Use DashboardService and DashboardController instead
+ * **API Routes:**
+ *   - GET /api/dashboard/stats (statistics)
+ *   - GET /api/dashboard/activity (activity feed)
+ *   - GET /api/dashboard/progress (progress data)
+ *   - GET /api/dashboard/courses (user courses)
+ *   - GET /api/dashboard/events (upcoming events)
+ * **Location:**
+ *   - app/Services/DashboardService.php (business logic)
+ *   - app/Controllers/DashboardController.php (controller)
+ *
+ * This file will be removed in a future release.
+ * Please update all references to use the new service layer.
+ *
+ * @deprecated Since Phase 3 Week 6-7
+ * @see app/Services/DashboardService
+ * @see app/Controllers/DashboardController
+ * ====================================================================
+ */
+
+/**
  * Clubhouse Social Data Loader
- * 
+ *
  * This file is responsible for loading data into the social-style dashboard
  * Place this in app/Models/ directory and include it at the top of your home.php
  */
 
 // Include database connection
-require_once 'server.php';
+// Include bootstrap (database connection as of Phase 3 Week 8)
+require_once __DIR__ . '/../../bootstrap.php';
 
 /**
  * Fetch clubhouse programs for sidebar display

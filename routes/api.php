@@ -99,6 +99,16 @@ $router->group(['prefix' => 'api/v1/admin', 'middleware' => ['ApiMiddleware', 'A
     $router->get('/courses/{id}', 'Api\\Admin\\CourseController@show', 'api.admin.courses.show');
     $router->put('/courses/{id}', 'Api\\Admin\\CourseController@update', 'api.admin.courses.update');
     $router->delete('/courses/{id}', 'Api\\Admin\\CourseController@destroy', 'api.admin.courses.destroy');
+
+    // Course management actions (AJAX)
+    $router->post('/courses/{id}/status', 'Api\\Admin\\CourseController@updateStatus', 'api.admin.courses.status.update');
+    $router->post('/courses/{id}/featured', 'Api\\Admin\\CourseController@toggleFeatured', 'api.admin.courses.featured.toggle');
+
+    // Course hierarchy management (AJAX)
+    $router->get('/courses/{id}/modules', 'Api\\Admin\\CourseController@getModules', 'api.admin.courses.modules.get');
+    $router->post('/courses/{id}/modules', 'Api\\Admin\\CourseController@createModule', 'api.admin.courses.modules.create');
+    $router->get('/courses/{id}/sections', 'Api\\Admin\\CourseController@getSections', 'api.admin.courses.sections.get');
+    $router->post('/courses/{id}/sections', 'Api\\Admin\\CourseController@createSection', 'api.admin.courses.sections.create');
     
     // Program management
     $router->get('/programs', 'Api\\Admin\\ProgramController@index', 'api.admin.programs.index');

@@ -13,8 +13,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit(0);
 }
 
+/**
+ * ⚠️ DEPRECATION WARNING ⚠️
+ *
+ * This file is DEPRECATED and maintained only for backward compatibility.
+ *
+ * Migration Status: Phase 3 Week 4 - Attendance System Migration
+ * Deprecated: November 26, 2025
+ * Removal Date: TBD (after complete migration to ModernRouter)
+ *
+ * New Endpoint Locations (ModernRouter):
+ * - Sign In:  POST /api/v1/attendance/signin  → Api\AttendanceController@signin
+ * - Sign Out: POST /api/v1/attendance/signout → Api\AttendanceController@signout
+ * - Search:   GET  /api/v1/attendance/search  → Api\AttendanceController@searchUsers
+ * - Stats:    GET  /api/v1/attendance/stats   → Api\AttendanceController@stats
+ *
+ * Please update your code to use the new ModernRouter endpoints.
+ *
+ * Frontend Migration:
+ * Set window.USE_MODERN_ROUTING = true in your views to use new endpoints
+ * Or configure via config/feature_flags.php
+ *
+ * For more information, see: projectDocs/ATTENDANCE_MIGRATION.md
+ */
+
+// Log deprecation warning
+if (function_exists('error_log')) {
+    error_log('[DEPRECATED] attendance_routes.php accessed - Please migrate to ModernRouter API endpoints');
+}
+
 // Include required files
-require_once __DIR__ . '/../../server.php'; // Database connection
+require_once __DIR__ . '/../../bootstrap.php'; // Bootstrap (includes database connection)
 require_once __DIR__ . '/AttendanceController.php';
 
 try {
