@@ -100,10 +100,12 @@ class UserService extends BaseService {
             if (session_status() === PHP_SESSION_NONE) {
                 session_start();
             }
-            
-            // Regenerate session ID for security
-            session_regenerate_id(true);
-            
+
+            // Regenerate session ID for security (only if headers not sent)
+            if (!headers_sent()) {
+                session_regenerate_id(true);
+            }
+
             $_SESSION['user_id'] = $user['id'];
             $_SESSION['username'] = $user['username'];
             $_SESSION['name'] = $user['name'];
@@ -422,11 +424,12 @@ class UserService extends BaseService {
             'name' => $user['name'],
             'surname' => $user['surname'],
             'user_type' => $user['user_type'],
+            'role' => $user['user_type'], // Alias for backward compatibility
             'status' => $user['status'] ?? 'active',
             'created_at' => $user['created_at'] ?? null,
             'last_login' => $user['last_login'] ?? null
         ];
-        
+
         return $safe;
     }
     

@@ -5,7 +5,7 @@
  */
 
 require_once __DIR__ . '/RepositoryInterface.php';
-require_once __DIR__ . '/../Core/Logger.php';
+require_once __DIR__ . '/../../core/Logger.php';
 
 abstract class BaseRepository implements RepositoryInterface {
     protected $conn;

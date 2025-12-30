@@ -1,0 +1,287 @@
+[2025-12-29 13:10:35] INFO: Service action: authenticate_attempt Context: {"identifier":"testuser@example.com","service":"UserService"}
+[2025-12-29 13:10:35] ERROR: Account lock check failed Context: {"error":"Table 'accounts_test.login_attempts' doesn't exist"}
+[2025-12-29 13:10:35] ERROR: Clear failed attempts error Context: {"error":"Table 'accounts_test.login_attempts' doesn't exist"}
+[2025-12-29 13:10:35] INFO: Model action: update Context: {"id":1,"data":{"last_login":"2025-12-29 13:10:35","updated_at":"2025-12-29 13:10:35"},"model":"UserModel","table":"users"}
+[2025-12-29 13:10:35] INFO: Service action: authenticate_success Context: {"user_id":1,"service":"UserService"}
+[2025-12-29 13:10:36] INFO: Service action: authenticate_attempt Context: {"identifier":"testuser@example.com","service":"UserService"}
+[2025-12-29 13:10:36] ERROR: Account lock check failed Context: {"error":"Table 'accounts_test.login_attempts' doesn't exist"}
+[2025-12-29 13:10:36] ERROR: Record failed attempt error Context: {"error":"Table 'accounts_test.login_attempts' doesn't exist"}
+[2025-12-29 13:10:36] INFO: Service action: authenticate_failed Context: {"user_id":1,"reason":"invalid_password","service":"UserService"}
+[2025-12-29 13:10:36] INFO: Service action: authenticate_attempt Context: {"identifier":"nonexistent@example.com","service":"UserService"}
+[2025-12-29 13:10:36] ERROR: Account lock check failed Context: {"error":"Table 'accounts_test.login_attempts' doesn't exist"}
+[2025-12-29 13:10:36] ERROR: Record failed attempt error Context: {"error":"Table 'accounts_test.login_attempts' doesn't exist"}
+[2025-12-29 13:10:36] INFO: Service action: authenticate_attempt Context: {"identifier":"lockouttest@example.com","service":"UserService"}
+[2025-12-29 13:10:36] ERROR: Account lock check failed Context: {"error":"Table 'accounts_test.login_attempts' doesn't exist"}
+[2025-12-29 13:10:36] ERROR: Record failed attempt error Context: {"error":"Table 'accounts_test.login_attempts' doesn't exist"}
+[2025-12-29 13:10:36] INFO: Service action: authenticate_failed Context: {"user_id":1,"reason":"invalid_password","service":"UserService"}
+[2025-12-29 13:10:36] INFO: Service action: authenticate_attempt Context: {"identifier":"lockouttest@example.com","service":"UserService"}
+[2025-12-29 13:10:36] ERROR: Account lock check failed Context: {"error":"Table 'accounts_test.login_attempts' doesn't exist"}
+[2025-12-29 13:10:37] ERROR: Record failed attempt error Context: {"error":"Table 'accounts_test.login_attempts' doesn't exist"}
+[2025-12-29 13:10:37] INFO: Service action: authenticate_failed Context: {"user_id":1,"reason":"invalid_password","service":"UserService"}
+[2025-12-29 13:10:37] INFO: Service action: authenticate_attempt Context: {"identifier":"lockouttest@example.com","service":"UserService"}
+[2025-12-29 13:10:37] ERROR: Account lock check failed Context: {"error":"Table 'accounts_test.login_attempts' doesn't exist"}
+[2025-12-29 13:10:37] ERROR: Record failed attempt error Context: {"error":"Table 'accounts_test.login_attempts' doesn't exist"}
+[2025-12-29 13:10:37] INFO: Service action: authenticate_failed Context: {"user_id":1,"reason":"invalid_password","service":"UserService"}
+[2025-12-29 13:10:37] INFO: Service action: authenticate_attempt Context: {"identifier":"lockouttest@example.com","service":"UserService"}
+[2025-12-29 13:10:37] ERROR: Account lock check failed Context: {"error":"Table 'accounts_test.login_attempts' doesn't exist"}
+[2025-12-29 13:10:37] ERROR: Record failed attempt error Context: {"error":"Table 'accounts_test.login_attempts' doesn't exist"}
+[2025-12-29 13:10:37] INFO: Service action: authenticate_failed Context: {"user_id":1,"reason":"invalid_password","service":"UserService"}
+[2025-12-29 13:10:37] INFO: Service action: authenticate_attempt Context: {"identifier":"lockouttest@example.com","service":"UserService"}
+[2025-12-29 13:10:37] ERROR: Account lock check failed Context: {"error":"Table 'accounts_test.login_attempts' doesn't exist"}
+[2025-12-29 13:10:37] ERROR: Record failed attempt error Context: {"error":"Table 'accounts_test.login_attempts' doesn't exist"}
+[2025-12-29 13:10:37] INFO: Service action: authenticate_failed Context: {"user_id":1,"reason":"invalid_password","service":"UserService"}
+[2025-12-29 13:10:37] INFO: Service action: authenticate_attempt Context: {"identifier":"lockouttest@example.com","service":"UserService"}
+[2025-12-29 13:10:37] ERROR: Account lock check failed Context: {"error":"Table 'accounts_test.login_attempts' doesn't exist"}
+[2025-12-29 13:10:37] ERROR: Clear failed attempts error Context: {"error":"Table 'accounts_test.login_attempts' doesn't exist"}
+[2025-12-29 13:10:37] INFO: Model action: update Context: {"id":1,"data":{"last_login":"2025-12-29 13:10:37","updated_at":"2025-12-29 13:10:37"},"model":"UserModel","table":"users"}
+[2025-12-29 13:10:37] INFO: Service action: authenticate_success Context: {"user_id":1,"service":"UserService"}
+[2025-12-29 13:10:38] INFO: Service action: authenticate_attempt Context: {"identifier":"sessiontest@example.com","service":"UserService"}
+[2025-12-29 13:10:38] ERROR: Account lock check failed Context: {"error":"Table 'accounts_test.login_attempts' doesn't exist"}
+[2025-12-29 13:10:38] ERROR: Clear failed attempts error Context: {"error":"Table 'accounts_test.login_attempts' doesn't exist"}
+[2025-12-29 13:10:38] INFO: Model action: update Context: {"id":1,"data":{"last_login":"2025-12-29 13:10:38","updated_at":"2025-12-29 13:10:38"},"model":"UserModel","table":"users"}
+[2025-12-29 13:10:38] INFO: Service action: authenticate_success Context: {"user_id":1,"service":"UserService"}
+[2025-12-29 13:10:38] INFO: Model action: update Context: {"id":1,"data":{"session_token":"bd410d09247dda0eabd43c9eabdc3aec85365f191ccc97d8d8c6516abfe56412","last_login":"2025-12-29 13:10:38","updated_at":"2025-12-29 13:10:38"},"model":"UserModel","table":"users"}
+[2025-12-29 13:10:38] INFO: Service action: session_created Context: {"user_id":1,"session_token":"bd410d09...","service":"UserService"}
+[2025-12-29 13:10:38] INFO: Model action: update Context: {"id":1,"data":{"session_token":null,"updated_at":"2025-12-29 13:10:38"},"model":"UserModel","table":"users"}
+[2025-12-29 13:10:38] INFO: Service action: session_destroyed Context: {"user_id":1,"service":"UserService"}
+[2025-12-29 13:10:39] INFO: Service action: authenticate_attempt Context: {"identifier":"inactive@example.com","service":"UserService"}
+[2025-12-29 13:10:39] ERROR: Account lock check failed Context: {"error":"Table 'accounts_test.login_attempts' doesn't exist"}
+[2025-12-29 13:14:21] INFO: Service action: authenticate_attempt Context: {"identifier":"testuser@example.com","service":"UserService"}
+[2025-12-29 13:14:21] INFO: Model action: update Context: {"id":1,"data":{"last_login":"2025-12-29 13:14:21","updated_at":"2025-12-29 13:14:21"},"model":"UserModel","table":"users"}
+[2025-12-29 13:14:21] INFO: Service action: authenticate_success Context: {"user_id":1,"service":"UserService"}
+[2025-12-29 13:14:22] INFO: Service action: authenticate_attempt Context: {"identifier":"testuser@example.com","service":"UserService"}
+[2025-12-29 13:14:22] INFO: Service action: authenticate_failed Context: {"user_id":1,"reason":"invalid_password","service":"UserService"}
+[2025-12-29 13:14:22] INFO: Service action: authenticate_attempt Context: {"identifier":"nonexistent@example.com","service":"UserService"}
+[2025-12-29 13:14:22] INFO: Service action: authenticate_attempt Context: {"identifier":"lockouttest@example.com","service":"UserService"}
+[2025-12-29 13:14:22] INFO: Service action: authenticate_failed Context: {"user_id":1,"reason":"invalid_password","service":"UserService"}
+[2025-12-29 13:14:22] INFO: Service action: authenticate_attempt Context: {"identifier":"lockouttest@example.com","service":"UserService"}
+[2025-12-29 13:14:22] INFO: Service action: authenticate_failed Context: {"user_id":1,"reason":"invalid_password","service":"UserService"}
+[2025-12-29 13:14:22] INFO: Service action: authenticate_attempt Context: {"identifier":"lockouttest@example.com","service":"UserService"}
+[2025-12-29 13:14:22] INFO: Service action: authenticate_failed Context: {"user_id":1,"reason":"invalid_password","service":"UserService"}
+[2025-12-29 13:14:22] INFO: Service action: authenticate_attempt Context: {"identifier":"lockouttest@example.com","service":"UserService"}
+[2025-12-29 13:14:22] INFO: Service action: authenticate_failed Context: {"user_id":1,"reason":"invalid_password","service":"UserService"}
+[2025-12-29 13:14:22] INFO: Service action: authenticate_attempt Context: {"identifier":"lockouttest@example.com","service":"UserService"}
+[2025-12-29 13:14:23] INFO: Service action: authenticate_failed Context: {"user_id":1,"reason":"invalid_password","service":"UserService"}
+[2025-12-29 13:14:23] INFO: Service action: authenticate_attempt Context: {"identifier":"lockouttest@example.com","service":"UserService"}
+[2025-12-29 13:14:23] INFO: Service action: authenticate_attempt Context: {"identifier":"sessiontest@example.com","service":"UserService"}
+[2025-12-29 13:14:23] INFO: Model action: update Context: {"id":1,"data":{"last_login":"2025-12-29 13:14:23","updated_at":"2025-12-29 13:14:23"},"model":"UserModel","table":"users"}
+[2025-12-29 13:14:23] INFO: Service action: authenticate_success Context: {"user_id":1,"service":"UserService"}
+[2025-12-29 13:14:23] INFO: Model action: update Context: {"id":1,"data":{"session_token":"c12d31459063b1f896189cebe6c8826c908892073e365f699cb0f3c4bef64a53","last_login":"2025-12-29 13:14:23","updated_at":"2025-12-29 13:14:23"},"model":"UserModel","table":"users"}
+[2025-12-29 13:14:23] INFO: Service action: session_created Context: {"user_id":1,"session_token":"c12d3145...","service":"UserService"}
+[2025-12-29 13:14:24] INFO: Model action: update Context: {"id":1,"data":{"session_token":null,"updated_at":"2025-12-29 13:14:24"},"model":"UserModel","table":"users"}
+[2025-12-29 13:14:24] INFO: Service action: session_destroyed Context: {"user_id":1,"service":"UserService"}
+[2025-12-29 13:14:24] INFO: Service action: authenticate_attempt Context: {"identifier":"inactive@example.com","service":"UserService"}
+[2025-12-29 13:14:42] INFO: Service action: authenticate_attempt Context: {"identifier":"testuser@example.com","service":"UserService"}
+[2025-12-29 13:14:42] INFO: Model action: update Context: {"id":1,"data":{"last_login":"2025-12-29 13:14:42","updated_at":"2025-12-29 13:14:42"},"model":"UserModel","table":"users"}
+[2025-12-29 13:14:42] INFO: Service action: authenticate_success Context: {"user_id":1,"service":"UserService"}
+[2025-12-29 13:14:43] INFO: Service action: authenticate_attempt Context: {"identifier":"testuser@example.com","service":"UserService"}
+[2025-12-29 13:14:43] INFO: Service action: authenticate_failed Context: {"user_id":1,"reason":"invalid_password","service":"UserService"}
+[2025-12-29 13:14:43] INFO: Service action: authenticate_attempt Context: {"identifier":"nonexistent@example.com","service":"UserService"}
+[2025-12-29 13:14:43] INFO: Service action: authenticate_attempt Context: {"identifier":"lockouttest@example.com","service":"UserService"}
+[2025-12-29 13:14:43] INFO: Service action: authenticate_failed Context: {"user_id":1,"reason":"invalid_password","service":"UserService"}
+[2025-12-29 13:14:43] INFO: Service action: authenticate_attempt Context: {"identifier":"lockouttest@example.com","service":"UserService"}
+[2025-12-29 13:14:43] INFO: Service action: authenticate_failed Context: {"user_id":1,"reason":"invalid_password","service":"UserService"}
+[2025-12-29 13:14:43] INFO: Service action: authenticate_attempt Context: {"identifier":"lockouttest@example.com","service":"UserService"}
+[2025-12-29 13:14:43] INFO: Service action: authenticate_failed Context: {"user_id":1,"reason":"invalid_password","service":"UserService"}
+[2025-12-29 13:14:43] INFO: Service action: authenticate_attempt Context: {"identifier":"lockouttest@example.com","service":"UserService"}
+[2025-12-29 13:14:43] INFO: Service action: authenticate_failed Context: {"user_id":1,"reason":"invalid_password","service":"UserService"}
+[2025-12-29 13:14:43] INFO: Service action: authenticate_attempt Context: {"identifier":"lockouttest@example.com","service":"UserService"}
+[2025-12-29 13:14:43] INFO: Service action: authenticate_failed Context: {"user_id":1,"reason":"invalid_password","service":"UserService"}
+[2025-12-29 13:14:43] INFO: Service action: authenticate_attempt Context: {"identifier":"lockouttest@example.com","service":"UserService"}
+[2025-12-29 13:14:44] INFO: Service action: authenticate_attempt Context: {"identifier":"sessiontest@example.com","service":"UserService"}
+[2025-12-29 13:14:44] INFO: Model action: update Context: {"id":1,"data":{"last_login":"2025-12-29 13:14:44","updated_at":"2025-12-29 13:14:44"},"model":"UserModel","table":"users"}
+[2025-12-29 13:14:44] INFO: Service action: authenticate_success Context: {"user_id":1,"service":"UserService"}
+[2025-12-29 13:14:44] INFO: Model action: update Context: {"id":1,"data":{"session_token":"43eba76494726a3afd3f6644d16c0452541d9ff1e37092a9e8431ebfbe468e5c","last_login":"2025-12-29 13:14:44","updated_at":"2025-12-29 13:14:44"},"model":"UserModel","table":"users"}
+[2025-12-29 13:14:44] INFO: Service action: session_created Context: {"user_id":1,"session_token":"43eba764...","service":"UserService"}
+[2025-12-29 13:14:44] INFO: Model action: update Context: {"id":1,"data":{"session_token":null,"updated_at":"2025-12-29 13:14:44"},"model":"UserModel","table":"users"}
+[2025-12-29 13:14:44] INFO: Service action: session_destroyed Context: {"user_id":1,"service":"UserService"}
+[2025-12-29 13:14:45] INFO: Service action: authenticate_attempt Context: {"identifier":"inactive@example.com","service":"UserService"}
+[2025-12-29 13:14:46] WARNING: Authorization failed Context: {"user_id":1,"user_role":"member","required_roles":["admin"],"reason":"insufficient_permissions","ip":"127.0.0.1","url":"/"}
+[2025-12-29 13:14:57] INFO: Service action: authenticate_attempt Context: {"identifier":"testuser@example.com","service":"UserService"}
+[2025-12-29 13:14:57] INFO: Model action: update Context: {"id":1,"data":{"last_login":"2025-12-29 13:14:57","updated_at":"2025-12-29 13:14:57"},"model":"UserModel","table":"users"}
+[2025-12-29 13:14:57] INFO: Service action: authenticate_success Context: {"user_id":1,"service":"UserService"}
+[2025-12-29 13:14:57] INFO: Service action: authenticate_attempt Context: {"identifier":"testuser@example.com","service":"UserService"}
+[2025-12-29 13:14:57] INFO: Service action: authenticate_failed Context: {"user_id":1,"reason":"invalid_password","service":"UserService"}
+[2025-12-29 13:14:57] INFO: Service action: authenticate_attempt Context: {"identifier":"nonexistent@example.com","service":"UserService"}
+[2025-12-29 13:14:58] INFO: Service action: authenticate_attempt Context: {"identifier":"lockouttest@example.com","service":"UserService"}
+[2025-12-29 13:14:58] INFO: Service action: authenticate_failed Context: {"user_id":1,"reason":"invalid_password","service":"UserService"}
+[2025-12-29 13:14:58] INFO: Service action: authenticate_attempt Context: {"identifier":"lockouttest@example.com","service":"UserService"}
+[2025-12-29 13:14:58] INFO: Service action: authenticate_failed Context: {"user_id":1,"reason":"invalid_password","service":"UserService"}
+[2025-12-29 13:14:58] INFO: Service action: authenticate_attempt Context: {"identifier":"lockouttest@example.com","service":"UserService"}
+[2025-12-29 13:14:58] INFO: Service action: authenticate_failed Context: {"user_id":1,"reason":"invalid_password","service":"UserService"}
+[2025-12-29 13:14:58] INFO: Service action: authenticate_attempt Context: {"identifier":"lockouttest@example.com","service":"UserService"}
+[2025-12-29 13:14:58] INFO: Service action: authenticate_failed Context: {"user_id":1,"reason":"invalid_password","service":"UserService"}
+[2025-12-29 13:14:58] INFO: Service action: authenticate_attempt Context: {"identifier":"lockouttest@example.com","service":"UserService"}
+[2025-12-29 13:14:58] INFO: Service action: authenticate_failed Context: {"user_id":1,"reason":"invalid_password","service":"UserService"}
+[2025-12-29 13:14:58] INFO: Service action: authenticate_attempt Context: {"identifier":"lockouttest@example.com","service":"UserService"}
+[2025-12-29 13:14:58] INFO: Service action: authenticate_attempt Context: {"identifier":"sessiontest@example.com","service":"UserService"}
+[2025-12-29 13:14:58] INFO: Model action: update Context: {"id":1,"data":{"last_login":"2025-12-29 13:14:58","updated_at":"2025-12-29 13:14:58"},"model":"UserModel","table":"users"}
+[2025-12-29 13:14:58] INFO: Service action: authenticate_success Context: {"user_id":1,"service":"UserService"}
+[2025-12-29 13:14:58] INFO: Model action: update Context: {"id":1,"data":{"session_token":"6244bb320e013986f6eb231f5331565ff8bacaa888fdfebee0e58f84105cfec9","last_login":"2025-12-29 13:14:58","updated_at":"2025-12-29 13:14:58"},"model":"UserModel","table":"users"}
+[2025-12-29 13:14:58] INFO: Service action: session_created Context: {"user_id":1,"session_token":"6244bb32...","service":"UserService"}
+[2025-12-29 13:14:59] INFO: Model action: update Context: {"id":1,"data":{"session_token":null,"updated_at":"2025-12-29 13:14:59"},"model":"UserModel","table":"users"}
+[2025-12-29 13:14:59] INFO: Service action: session_destroyed Context: {"user_id":1,"service":"UserService"}
+[2025-12-29 13:14:59] INFO: Service action: authenticate_attempt Context: {"identifier":"inactive@example.com","service":"UserService"}
+[2025-12-29 13:15:00] WARNING: Authorization failed Context: {"user_id":1,"user_role":"member","required_roles":["admin"],"reason":"insufficient_permissions","ip":"127.0.0.1","url":"/"}
+[2025-12-29 13:15:08] INFO: Service action: authenticate_attempt Context: {"identifier":"testuser@example.com","service":"UserService"}
+[2025-12-29 13:15:08] INFO: Model action: update Context: {"id":1,"data":{"last_login":"2025-12-29 13:15:08","updated_at":"2025-12-29 13:15:08"},"model":"UserModel","table":"users"}
+[2025-12-29 13:15:08] INFO: Service action: authenticate_success Context: {"user_id":1,"service":"UserService"}
+[2025-12-29 13:15:09] INFO: Service action: authenticate_attempt Context: {"identifier":"testuser@example.com","service":"UserService"}
+[2025-12-29 13:15:09] INFO: Service action: authenticate_failed Context: {"user_id":1,"reason":"invalid_password","service":"UserService"}
+[2025-12-29 13:15:09] INFO: Service action: authenticate_attempt Context: {"identifier":"nonexistent@example.com","service":"UserService"}
+[2025-12-29 13:15:09] INFO: Service action: authenticate_attempt Context: {"identifier":"lockouttest@example.com","service":"UserService"}
+[2025-12-29 13:15:09] INFO: Service action: authenticate_failed Context: {"user_id":1,"reason":"invalid_password","service":"UserService"}
+[2025-12-29 13:15:09] INFO: Service action: authenticate_attempt Context: {"identifier":"lockouttest@example.com","service":"UserService"}
+[2025-12-29 13:15:09] INFO: Service action: authenticate_failed Context: {"user_id":1,"reason":"invalid_password","service":"UserService"}
+[2025-12-29 13:15:09] INFO: Service action: authenticate_attempt Context: {"identifier":"lockouttest@example.com","service":"UserService"}
+[2025-12-29 13:15:09] INFO: Service action: authenticate_failed Context: {"user_id":1,"reason":"invalid_password","service":"UserService"}
+[2025-12-29 13:15:09] INFO: Service action: authenticate_attempt Context: {"identifier":"lockouttest@example.com","service":"UserService"}
+[2025-12-29 13:15:09] INFO: Service action: authenticate_failed Context: {"user_id":1,"reason":"invalid_password","service":"UserService"}
+[2025-12-29 13:15:09] INFO: Service action: authenticate_attempt Context: {"identifier":"lockouttest@example.com","service":"UserService"}
+[2025-12-29 13:15:10] INFO: Service action: authenticate_failed Context: {"user_id":1,"reason":"invalid_password","service":"UserService"}
+[2025-12-29 13:15:10] INFO: Service action: authenticate_attempt Context: {"identifier":"lockouttest@example.com","service":"UserService"}
+[2025-12-29 13:15:10] INFO: Service action: authenticate_attempt Context: {"identifier":"sessiontest@example.com","service":"UserService"}
+[2025-12-29 13:15:10] INFO: Model action: update Context: {"id":1,"data":{"last_login":"2025-12-29 13:15:10","updated_at":"2025-12-29 13:15:10"},"model":"UserModel","table":"users"}
+[2025-12-29 13:15:10] INFO: Service action: authenticate_success Context: {"user_id":1,"service":"UserService"}
+[2025-12-29 13:15:10] INFO: Model action: update Context: {"id":1,"data":{"session_token":"fa9a857a5379c658a46bd9b7683d38f8cd09ba45f031f6426708c76433247306","last_login":"2025-12-29 13:15:10","updated_at":"2025-12-29 13:15:10"},"model":"UserModel","table":"users"}
+[2025-12-29 13:15:10] INFO: Service action: session_created Context: {"user_id":1,"session_token":"fa9a857a...","service":"UserService"}
+[2025-12-29 13:15:10] INFO: Model action: update Context: {"id":1,"data":{"session_token":null,"updated_at":"2025-12-29 13:15:10"},"model":"UserModel","table":"users"}
+[2025-12-29 13:15:10] INFO: Service action: session_destroyed Context: {"user_id":1,"service":"UserService"}
+[2025-12-29 13:15:11] INFO: Service action: authenticate_attempt Context: {"identifier":"inactive@example.com","service":"UserService"}
+[2025-12-29 13:15:12] WARNING: Authorization failed Context: {"user_id":1,"user_role":"member","required_roles":["admin"],"reason":"insufficient_permissions","ip":"127.0.0.1","url":"/"}
+[2025-12-29 13:15:29] INFO: Service action: authenticate_attempt Context: {"identifier":"testuser@example.com","service":"UserService"}
+[2025-12-29 13:15:29] INFO: Model action: update Context: {"id":1,"data":{"last_login":"2025-12-29 13:15:29","updated_at":"2025-12-29 13:15:29"},"model":"UserModel","table":"users"}
+[2025-12-29 13:15:29] INFO: Service action: authenticate_success Context: {"user_id":1,"service":"UserService"}
+[2025-12-29 13:15:29] INFO: Service action: authenticate_attempt Context: {"identifier":"testuser@example.com","service":"UserService"}
+[2025-12-29 13:15:29] INFO: Service action: authenticate_failed Context: {"user_id":1,"reason":"invalid_password","service":"UserService"}
+[2025-12-29 13:15:29] INFO: Service action: authenticate_attempt Context: {"identifier":"nonexistent@example.com","service":"UserService"}
+[2025-12-29 13:15:29] INFO: Service action: authenticate_attempt Context: {"identifier":"lockouttest@example.com","service":"UserService"}
+[2025-12-29 13:15:30] INFO: Service action: authenticate_failed Context: {"user_id":1,"reason":"invalid_password","service":"UserService"}
+[2025-12-29 13:15:30] INFO: Service action: authenticate_attempt Context: {"identifier":"lockouttest@example.com","service":"UserService"}
+[2025-12-29 13:15:30] INFO: Service action: authenticate_failed Context: {"user_id":1,"reason":"invalid_password","service":"UserService"}
+[2025-12-29 13:15:30] INFO: Service action: authenticate_attempt Context: {"identifier":"lockouttest@example.com","service":"UserService"}
+[2025-12-29 13:15:30] INFO: Service action: authenticate_failed Context: {"user_id":1,"reason":"invalid_password","service":"UserService"}
+[2025-12-29 13:15:30] INFO: Service action: authenticate_attempt Context: {"identifier":"lockouttest@example.com","service":"UserService"}
+[2025-12-29 13:15:30] INFO: Service action: authenticate_failed Context: {"user_id":1,"reason":"invalid_password","service":"UserService"}
+[2025-12-29 13:15:30] INFO: Service action: authenticate_attempt Context: {"identifier":"lockouttest@example.com","service":"UserService"}
+[2025-12-29 13:15:30] INFO: Service action: authenticate_failed Context: {"user_id":1,"reason":"invalid_password","service":"UserService"}
+[2025-12-29 13:15:30] INFO: Service action: authenticate_attempt Context: {"identifier":"lockouttest@example.com","service":"UserService"}
+[2025-12-29 13:15:30] INFO: Service action: authenticate_attempt Context: {"identifier":"sessiontest@example.com","service":"UserService"}
+[2025-12-29 13:15:30] INFO: Model action: update Context: {"id":1,"data":{"last_login":"2025-12-29 13:15:30","updated_at":"2025-12-29 13:15:30"},"model":"UserModel","table":"users"}
+[2025-12-29 13:15:30] INFO: Service action: authenticate_success Context: {"user_id":1,"service":"UserService"}
+[2025-12-29 13:15:30] INFO: Model action: update Context: {"id":1,"data":{"session_token":"92619dc2824b4ffc2acbfe9db0bcbc86a1ee3afdca31bad3fde23138e830745e","last_login":"2025-12-29 13:15:30","updated_at":"2025-12-29 13:15:30"},"model":"UserModel","table":"users"}
+[2025-12-29 13:15:30] INFO: Service action: session_created Context: {"user_id":1,"session_token":"92619dc2...","service":"UserService"}
+[2025-12-29 13:15:31] INFO: Model action: update Context: {"id":1,"data":{"session_token":null,"updated_at":"2025-12-29 13:15:31"},"model":"UserModel","table":"users"}
+[2025-12-29 13:15:31] INFO: Service action: session_destroyed Context: {"user_id":1,"service":"UserService"}
+[2025-12-29 13:15:31] INFO: Service action: authenticate_attempt Context: {"identifier":"inactive@example.com","service":"UserService"}
+[2025-12-29 13:15:38] WARNING: Authorization failed Context: {"user_id":1,"user_role":"member","required_roles":["admin"],"reason":"insufficient_permissions","ip":"127.0.0.1","url":"/"}
+[2025-12-29 13:39:36] WARNING: Authorization failed Context: {"user_id":1,"user_role":"member","required_roles":["admin"],"reason":"insufficient_permissions","ip":"127.0.0.1","url":"/"}
+[2025-12-29 13:44:38] INFO: Model action: update Context: {"id":1,"data":{"name":"Updated","surname":"NameChanged","email":"updated@test.com","username":"editable","updated_at":"2025-12-29 13:44:38"},"model":"UserModel","table":"users"}
+[2025-12-29 13:44:39] INFO: Model action: update Context: {"id":1,"data":{"user_type":"mentor","updated_at":"2025-12-29 13:44:39"},"model":"UserModel","table":"users"}
+[2025-12-29 13:44:39] INFO: Model action: update Context: {"id":1,"data":{"user_type":"admin","updated_at":"2025-12-29 13:44:39"},"model":"UserModel","table":"users"}
+[2025-12-29 13:44:40] INFO: Model action: update Context: {"id":1,"data":{"status":"inactive","updated_at":"2025-12-29 13:44:40"},"model":"UserModel","table":"users"}
+[2025-12-29 13:44:40] INFO: Service action: authenticate_attempt Context: {"identifier":"suspendable@test.com","service":"UserService"}
+[2025-12-29 13:44:40] INFO: Model action: update Context: {"id":1,"data":{"status":"active","updated_at":"2025-12-29 13:44:40"},"model":"UserModel","table":"users"}
+[2025-12-29 13:49:24] INFO: Model action: update Context: {"id":1,"data":{"name":"Updated","surname":"NameChanged","email":"updated@test.com","username":"editable","updated_at":"2025-12-29 13:49:24"},"model":"UserModel","table":"users"}
+[2025-12-29 13:49:25] INFO: Model action: update Context: {"id":1,"data":{"user_type":"mentor","updated_at":"2025-12-29 13:49:25"},"model":"UserModel","table":"users"}
+[2025-12-29 13:49:25] INFO: Model action: update Context: {"id":1,"data":{"user_type":"admin","updated_at":"2025-12-29 13:49:25"},"model":"UserModel","table":"users"}
+[2025-12-29 13:49:25] INFO: Model action: update Context: {"id":1,"data":{"status":"inactive","updated_at":"2025-12-29 13:49:25"},"model":"UserModel","table":"users"}
+[2025-12-29 13:49:25] INFO: Service action: authenticate_attempt Context: {"identifier":"suspendable@test.com","service":"UserService"}
+[2025-12-29 13:49:26] INFO: Model action: update Context: {"id":1,"data":{"status":"active","updated_at":"2025-12-29 13:49:26"},"model":"UserModel","table":"users"}
+[2025-12-29 14:03:06] INFO: Model action: update Context: {"id":1,"data":{"name":"Updated","surname":"NameChanged","email":"updated@test.com","username":"editable","updated_at":"2025-12-29 14:03:06"},"model":"UserModel","table":"users"}
+[2025-12-29 14:03:08] INFO: Model action: update Context: {"id":1,"data":{"user_type":"mentor","updated_at":"2025-12-29 14:03:08"},"model":"UserModel","table":"users"}
+[2025-12-29 14:03:08] INFO: Model action: update Context: {"id":1,"data":{"user_type":"admin","updated_at":"2025-12-29 14:03:08"},"model":"UserModel","table":"users"}
+[2025-12-29 14:03:08] INFO: Model action: update Context: {"id":1,"data":{"status":"inactive","updated_at":"2025-12-29 14:03:08"},"model":"UserModel","table":"users"}
+[2025-12-29 14:03:08] INFO: Service action: authenticate_attempt Context: {"identifier":"suspendable@test.com","service":"UserService"}
+[2025-12-29 14:03:08] INFO: Model action: update Context: {"id":1,"data":{"status":"active","updated_at":"2025-12-29 14:03:08"},"model":"UserModel","table":"users"}
+[2025-12-29 14:05:42] INFO: Model action: update Context: {"id":1,"data":{"name":"Updated","surname":"NameChanged","email":"updated@test.com","username":"editable","updated_at":"2025-12-29 14:05:42"},"model":"UserModel","table":"users"}
+[2025-12-29 14:05:43] INFO: Model action: update Context: {"id":1,"data":{"user_type":"mentor","updated_at":"2025-12-29 14:05:43"},"model":"UserModel","table":"users"}
+[2025-12-29 14:05:43] INFO: Model action: update Context: {"id":1,"data":{"user_type":"admin","updated_at":"2025-12-29 14:05:43"},"model":"UserModel","table":"users"}
+[2025-12-29 14:05:44] INFO: Model action: update Context: {"id":1,"data":{"status":"inactive","updated_at":"2025-12-29 14:05:44"},"model":"UserModel","table":"users"}
+[2025-12-29 14:05:44] INFO: Service action: authenticate_attempt Context: {"identifier":"suspendable@test.com","service":"UserService"}
+[2025-12-29 14:05:44] INFO: Model action: update Context: {"id":1,"data":{"status":"active","updated_at":"2025-12-29 14:05:44"},"model":"UserModel","table":"users"}
+[2025-12-29 14:06:57] INFO: Model action: update Context: {"id":1,"data":{"name":"Updated","surname":"NameChanged","email":"updated@test.com","username":"editable","updated_at":"2025-12-29 14:06:57"},"model":"UserModel","table":"users"}
+[2025-12-29 14:06:58] INFO: Model action: update Context: {"id":1,"data":{"user_type":"mentor","updated_at":"2025-12-29 14:06:58"},"model":"UserModel","table":"users"}
+[2025-12-29 14:06:58] INFO: Model action: update Context: {"id":1,"data":{"user_type":"admin","updated_at":"2025-12-29 14:06:58"},"model":"UserModel","table":"users"}
+[2025-12-29 14:06:59] INFO: Model action: update Context: {"id":1,"data":{"status":"inactive","updated_at":"2025-12-29 14:06:59"},"model":"UserModel","table":"users"}
+[2025-12-29 14:06:59] INFO: Service action: authenticate_attempt Context: {"identifier":"suspendable@test.com","service":"UserService"}
+[2025-12-29 14:06:59] INFO: Model action: update Context: {"id":1,"data":{"status":"active","updated_at":"2025-12-29 14:06:59"},"model":"UserModel","table":"users"}
+[2025-12-29 14:07:23] INFO: Model action: update Context: {"id":1,"data":{"name":"Updated","surname":"NameChanged","email":"updated@test.com","username":"editable","updated_at":"2025-12-29 14:07:23"},"model":"UserModel","table":"users"}
+[2025-12-29 14:07:24] INFO: Model action: update Context: {"id":1,"data":{"user_type":"mentor","updated_at":"2025-12-29 14:07:24"},"model":"UserModel","table":"users"}
+[2025-12-29 14:07:24] INFO: Model action: update Context: {"id":1,"data":{"user_type":"admin","updated_at":"2025-12-29 14:07:24"},"model":"UserModel","table":"users"}
+[2025-12-29 14:07:25] INFO: Model action: update Context: {"id":1,"data":{"status":"inactive","updated_at":"2025-12-29 14:07:25"},"model":"UserModel","table":"users"}
+[2025-12-29 14:07:25] INFO: Service action: authenticate_attempt Context: {"identifier":"suspendable@test.com","service":"UserService"}
+[2025-12-29 14:07:25] INFO: Model action: update Context: {"id":1,"data":{"status":"active","updated_at":"2025-12-29 14:07:25"},"model":"UserModel","table":"users"}
+[2025-12-29 19:03:58] INFO: Service action: enroll_user_attempt Context: {"user_id":1,"course_id":8,"service":"CourseService"}
+[2025-12-29 19:03:58] INFO: Service action: user_enrolled_success Context: {"user_id":1,"course_id":8,"course_title":"Enrollment Test Course","service":"CourseService"}
+[2025-12-29 19:03:58] INFO: Invalidated enrollment cache Context: {"user_id":1,"course_id":8}
+[2025-12-29 19:03:58] INFO: Service action: enroll_user_attempt Context: {"user_id":1,"course_id":9,"service":"CourseService"}
+[2025-12-29 19:03:58] INFO: Service action: user_enrolled_success Context: {"user_id":1,"course_id":9,"course_title":"No Duplicate Enrollment Course","service":"CourseService"}
+[2025-12-29 19:03:58] INFO: Invalidated enrollment cache Context: {"user_id":1,"course_id":9}
+[2025-12-29 19:03:58] INFO: Service action: enroll_user_attempt Context: {"user_id":1,"course_id":9,"service":"CourseService"}
+[2025-12-29 19:03:58] ERROR: Enrollment failed: User is already enrolled in this course Context: {"user_id":1,"course_id":9,"service":"CourseService"}
+[2025-12-29 19:03:59] INFO: Service action: enroll_user_attempt Context: {"user_id":1,"course_id":10,"service":"CourseService"}
+[2025-12-29 19:03:59] INFO: Service action: user_enrolled_success Context: {"user_id":1,"course_id":10,"course_title":"Unenrollment Test Course","service":"CourseService"}
+[2025-12-29 19:03:59] INFO: Invalidated enrollment cache Context: {"user_id":1,"course_id":10}
+[2025-12-29 19:03:59] INFO: Service action: unenroll_user_attempt Context: {"user_id":1,"course_id":10,"service":"CourseService"}
+[2025-12-29 19:03:59] INFO: Service action: user_unenrolled_success Context: {"user_id":1,"course_id":10,"service":"CourseService"}
+[2025-12-29 19:03:59] INFO: Invalidated enrollment cache Context: {"user_id":1,"course_id":10}
+[2025-12-29 19:04:00] INFO: Service action: enroll_user_attempt Context: {"user_id":1,"course_id":11,"service":"CourseService"}
+[2025-12-29 19:04:00] INFO: Service action: user_enrolled_success Context: {"user_id":1,"course_id":11,"course_title":"Progress Tracking Course","service":"CourseService"}
+[2025-12-29 19:04:00] INFO: Invalidated enrollment cache Context: {"user_id":1,"course_id":11}
+[2025-12-29 19:04:01] INFO: Service action: enroll_user_attempt Context: {"user_id":1,"course_id":12,"service":"CourseService"}
+[2025-12-29 19:04:01] INFO: Service action: user_enrolled_success Context: {"user_id":1,"course_id":12,"course_title":"Statistics Test Course","service":"CourseService"}
+[2025-12-29 19:04:01] INFO: Invalidated enrollment cache Context: {"user_id":1,"course_id":12}
+[2025-12-29 19:04:01] INFO: Service action: enroll_user_attempt Context: {"user_id":1,"course_id":12,"service":"CourseService"}
+[2025-12-29 19:04:01] ERROR: Enrollment failed: User is already enrolled in this course Context: {"user_id":1,"course_id":12,"service":"CourseService"}
+[2025-12-29 19:05:44] INFO: Service action: enroll_user_attempt Context: {"user_id":1,"course_id":13,"service":"CourseService"}
+[2025-12-29 19:05:44] INFO: Service action: user_enrolled_success Context: {"user_id":1,"course_id":13,"course_title":"Enrollment Test Course","service":"CourseService"}
+[2025-12-29 19:05:44] INFO: Invalidated enrollment cache Context: {"user_id":1,"course_id":13}
+[2025-12-29 19:05:44] INFO: Service action: enroll_user_attempt Context: {"user_id":1,"course_id":14,"service":"CourseService"}
+[2025-12-29 19:05:44] INFO: Service action: user_enrolled_success Context: {"user_id":1,"course_id":14,"course_title":"No Duplicate Enrollment Course","service":"CourseService"}
+[2025-12-29 19:05:44] INFO: Invalidated enrollment cache Context: {"user_id":1,"course_id":14}
+[2025-12-29 19:05:44] INFO: Service action: enroll_user_attempt Context: {"user_id":1,"course_id":14,"service":"CourseService"}
+[2025-12-29 19:05:44] ERROR: Enrollment failed: User is already enrolled in this course Context: {"user_id":1,"course_id":14,"service":"CourseService"}
+[2025-12-29 19:05:45] INFO: Service action: enroll_user_attempt Context: {"user_id":1,"course_id":15,"service":"CourseService"}
+[2025-12-29 19:05:45] INFO: Service action: user_enrolled_success Context: {"user_id":1,"course_id":15,"course_title":"Unenrollment Test Course","service":"CourseService"}
+[2025-12-29 19:05:45] INFO: Invalidated enrollment cache Context: {"user_id":1,"course_id":15}
+[2025-12-29 19:05:45] INFO: Service action: unenroll_user_attempt Context: {"user_id":1,"course_id":15,"service":"CourseService"}
+[2025-12-29 19:05:45] INFO: Service action: user_unenrolled_success Context: {"user_id":1,"course_id":15,"service":"CourseService"}
+[2025-12-29 19:05:45] INFO: Invalidated enrollment cache Context: {"user_id":1,"course_id":15}
+[2025-12-29 19:05:45] INFO: Service action: enroll_user_attempt Context: {"user_id":1,"course_id":16,"service":"CourseService"}
+[2025-12-29 19:05:45] INFO: Service action: user_enrolled_success Context: {"user_id":1,"course_id":16,"course_title":"Progress Tracking Course","service":"CourseService"}
+[2025-12-29 19:05:45] INFO: Invalidated enrollment cache Context: {"user_id":1,"course_id":16}
+[2025-12-29 19:08:53] INFO: Service action: enroll_user_attempt Context: {"user_id":1,"course_id":21,"service":"CourseService"}
+[2025-12-29 19:08:53] INFO: Service action: user_enrolled_success Context: {"user_id":1,"course_id":21,"course_title":"Enrollment Test Course","service":"CourseService"}
+[2025-12-29 19:08:53] INFO: Invalidated enrollment cache Context: {"user_id":1,"course_id":21}
+[2025-12-29 19:08:53] INFO: Service action: enroll_user_attempt Context: {"user_id":1,"course_id":22,"service":"CourseService"}
+[2025-12-29 19:08:53] INFO: Service action: user_enrolled_success Context: {"user_id":1,"course_id":22,"course_title":"No Duplicate Enrollment Course","service":"CourseService"}
+[2025-12-29 19:08:53] INFO: Invalidated enrollment cache Context: {"user_id":1,"course_id":22}
+[2025-12-29 19:08:53] INFO: Service action: enroll_user_attempt Context: {"user_id":1,"course_id":22,"service":"CourseService"}
+[2025-12-29 19:08:53] ERROR: Enrollment failed: User is already enrolled in this course Context: {"user_id":1,"course_id":22,"service":"CourseService"}
+[2025-12-29 19:08:54] INFO: Service action: enroll_user_attempt Context: {"user_id":1,"course_id":23,"service":"CourseService"}
+[2025-12-29 19:08:54] INFO: Service action: user_enrolled_success Context: {"user_id":1,"course_id":23,"course_title":"Unenrollment Test Course","service":"CourseService"}
+[2025-12-29 19:08:54] INFO: Invalidated enrollment cache Context: {"user_id":1,"course_id":23}
+[2025-12-29 19:08:54] INFO: Service action: unenroll_user_attempt Context: {"user_id":1,"course_id":23,"service":"CourseService"}
+[2025-12-29 19:08:54] INFO: Service action: user_unenrolled_success Context: {"user_id":1,"course_id":23,"service":"CourseService"}
+[2025-12-29 19:08:54] INFO: Invalidated enrollment cache Context: {"user_id":1,"course_id":23}
+[2025-12-29 19:08:54] INFO: Service action: enroll_user_attempt Context: {"user_id":1,"course_id":24,"service":"CourseService"}
+[2025-12-29 19:08:54] INFO: Service action: user_enrolled_success Context: {"user_id":1,"course_id":24,"course_title":"Progress Tracking Course","service":"CourseService"}
+[2025-12-29 19:08:54] INFO: Invalidated enrollment cache Context: {"user_id":1,"course_id":24}
+[2025-12-29 19:09:22] INFO: Service action: enroll_user_attempt Context: {"user_id":1,"course_id":26,"service":"CourseService"}
+[2025-12-29 19:09:22] INFO: Service action: user_enrolled_success Context: {"user_id":1,"course_id":26,"course_title":"Enrollment Test Course","service":"CourseService"}
+[2025-12-29 19:09:22] INFO: Invalidated enrollment cache Context: {"user_id":1,"course_id":26}
+[2025-12-29 19:09:23] INFO: Service action: enroll_user_attempt Context: {"user_id":1,"course_id":27,"service":"CourseService"}
+[2025-12-29 19:09:23] INFO: Service action: user_enrolled_success Context: {"user_id":1,"course_id":27,"course_title":"No Duplicate Enrollment Course","service":"CourseService"}
+[2025-12-29 19:09:23] INFO: Invalidated enrollment cache Context: {"user_id":1,"course_id":27}
+[2025-12-29 19:09:23] INFO: Service action: enroll_user_attempt Context: {"user_id":1,"course_id":27,"service":"CourseService"}
+[2025-12-29 19:09:23] ERROR: Enrollment failed: User is already enrolled in this course Context: {"user_id":1,"course_id":27,"service":"CourseService"}
+[2025-12-29 19:09:23] INFO: Service action: enroll_user_attempt Context: {"user_id":1,"course_id":28,"service":"CourseService"}
+[2025-12-29 19:09:23] INFO: Service action: user_enrolled_success Context: {"user_id":1,"course_id":28,"course_title":"Unenrollment Test Course","service":"CourseService"}
+[2025-12-29 19:09:23] INFO: Invalidated enrollment cache Context: {"user_id":1,"course_id":28}
+[2025-12-29 19:09:23] INFO: Service action: unenroll_user_attempt Context: {"user_id":1,"course_id":28,"service":"CourseService"}
+[2025-12-29 19:09:23] INFO: Service action: user_unenrolled_success Context: {"user_id":1,"course_id":28,"service":"CourseService"}
+[2025-12-29 19:09:23] INFO: Invalidated enrollment cache Context: {"user_id":1,"course_id":28}
+[2025-12-29 19:09:24] INFO: Service action: enroll_user_attempt Context: {"user_id":1,"course_id":29,"service":"CourseService"}
+[2025-12-29 19:09:24] INFO: Service action: user_enrolled_success Context: {"user_id":1,"course_id":29,"course_title":"Progress Tracking Course","service":"CourseService"}
+[2025-12-29 19:09:24] INFO: Invalidated enrollment cache Context: {"user_id":1,"course_id":29}

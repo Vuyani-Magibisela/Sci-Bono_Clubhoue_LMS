@@ -1,9 +1,31 @@
 <?php
+/**
+ * Holiday Program Model
+ * Phase 4 Week 2 Day 4: Updated to use repository pattern
+ */
+
+require_once __DIR__ . '/../Repositories/ProgramRequirementRepository.php';
+require_once __DIR__ . '/../Repositories/EvaluationCriteriaRepository.php';
+require_once __DIR__ . '/../Repositories/FAQRepository.php';
+require_once __DIR__ . '/../Services/CacheService.php';
+
 class HolidayProgramModel {
     private $conn;
-    
+    private $requirementRepo;
+    private $criteriaRepo;
+    private $faqRepo;
+    private $cache;
+
     public function __construct($conn) {
         $this->conn = $conn;
+
+        // Initialize repositories
+        $this->requirementRepo = new ProgramRequirementRepository($conn);
+        $this->criteriaRepo = new EvaluationCriteriaRepository($conn);
+        $this->faqRepo = new FAQRepository($conn);
+
+        // Initialize cache service (1 hour TTL for configuration data)
+        $this->cache = new CacheService();
     }
     
     public function getProgramById($programId) {
@@ -117,46 +139,108 @@ class HolidayProgramModel {
         return $schedule;
     }
     
+    /**
+     * Get project requirements from database
+     * Migrated from hardcoded array to use ProgramRequirementRepository
+     *
+     * @param int $programId (not currently used, but kept for backward compatibility)
+     * @return array List of requirement strings in 'Project Guidelines' category
+     */
     private function getRequirementsForProgram($programId) {
-        // Example hardcoded data
-        return [
-            'All projects must address at least one UN Sustainable Development Goal',
-            'Projects must be completed by the end of the program',
-            'Each participant/team must prepare a brief presentation for the showcase',
-            'Projects should demonstrate application of skills learned during the program'
-        ];
+        // Use cache for frequently accessed configuration data (1 hour TTL)
+        return $this->cache->remember('program_requirements_project_guidelines', function() {
+            try {
+                // Get requirements from 'Project Guidelines' category
+                $requirements = $this->requirementRepo->getByCategory('Project Guidelines', true);
+
+                // Return as simple array of strings (backward compatible format)
+                return array_map(function($req) {
+                    return $req['requirement'];
+                }, $requirements);
+
+            } catch (Exception $e) {
+                // Fallback to empty array if database query fails
+                error_log("Failed to get requirements: " . $e->getMessage());
+                return [];
+            }
+        }, 3600); // Cache for 1 hour
     }
     
+    /**
+     * Get evaluation criteria from database
+     * Migrated from hardcoded array to use EvaluationCriteriaRepository
+     *
+     * @param int $programId (not currently used, but kept for backward compatibility)
+     * @return array Associative array of [name => description] (backward compatible format)
+     */
     private function getCriteriaForProgram($programId) {
-        // Example hardcoded data
-        return [
-            'Technical Execution' => 'Quality of technical skills demonstrated',
-            'Creativity' => 'Original ideas and creative approach',
-            'Message' => 'Clear connection to SDGs and effective communication of message',
-            'Completion' => 'Level of completion and polish',
-            'Presentation' => 'Quality of showcase presentation'
-        ];
+        // Use cache for frequently accessed configuration data (1 hour TTL)
+        return $this->cache->remember('evaluation_criteria_project_evaluation', function() {
+            try {
+                // Get criteria from 'Project Evaluation' category
+                // Uses getAsKeyValue() method for backward compatibility
+                $criteria = $this->criteriaRepo->getAsKeyValue('Project Evaluation', true);
+
+                return $criteria;
+
+            } catch (Exception $e) {
+                // Fallback to empty array if database query fails
+                error_log("Failed to get criteria: " . $e->getMessage());
+                return [];
+            }
+        }, 3600); // Cache for 1 hour
     }
     
+    /**
+     * Get "What to Bring" items from database
+     * Migrated from hardcoded array to use ProgramRequirementRepository
+     *
+     * @param int $programId (not currently used, but kept for backward compatibility)
+     * @return array List of item strings in 'What to Bring' category
+     */
     private function getItemsForProgram($programId) {
-        // Example hardcoded data
-        return [
-            'Notebook and pen/pencil',
-            'Snacks (lunch will be provided)',
-            'Water bottle',
-            'Enthusiasm and creativity!'
-        ];
+        // Use cache for frequently accessed configuration data (1 hour TTL)
+        return $this->cache->remember('program_requirements_what_to_bring', function() {
+            try {
+                // Get requirements from 'What to Bring' category
+                $items = $this->requirementRepo->getByCategory('What to Bring', true);
+
+                // Return as simple array of strings (backward compatible format)
+                return array_map(function($item) {
+                    return $item['requirement'];
+                }, $items);
+
+            } catch (Exception $e) {
+                // Fallback to empty array if database query fails
+                error_log("Failed to get items: " . $e->getMessage());
+                return [];
+            }
+        }, 3600); // Cache for 1 hour
     }
     
+    /**
+     * Get FAQs from database
+     * Migrated from hardcoded array to use FAQRepository
+     *
+     * @param int $programId (not currently used, but kept for backward compatibility)
+     * @return array Array of arrays with 'question' and 'answer' keys (backward compatible format)
+     */
     private function getFaqsForProgram($programId) {
-        // Example hardcoded data
-        return [
-            [
-                'question' => 'Do I need prior experience to participate?',
-                'answer' => 'No prior experience is necessary. Our workshops are designed for beginners, though those with experience will also benefit and can work on more advanced projects.'
-            ],
-            // Add more FAQs
-        ];
+        // Use cache for frequently accessed configuration data (1 hour TTL)
+        return $this->cache->remember('faqs_all_categories', function() {
+            try {
+                // Get all active FAQs (all categories)
+                // Uses getLegacyFormat() method for backward compatibility
+                $faqs = $this->faqRepo->getLegacyFormat(null, true);
+
+                return $faqs;
+
+            } catch (Exception $e) {
+                // Fallback to empty array if database query fails
+                error_log("Failed to get FAQs: " . $e->getMessage());
+                return [];
+            }
+        }, 3600); // Cache for 1 hour
     }
     
     public function checkProgramCapacity($programId) {
