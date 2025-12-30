@@ -1,97 +1,39 @@
 <?php
-/**
- * ====================================================================
- * DEPRECATED CONTROLLER - COMPATIBILITY WRAPPER
- * ====================================================================
- *
- * This controller has been deprecated as of Phase 4 Week 3 implementation.
- * All user management operations are now handled by modern controllers with
- * proper service layer and BaseController architecture.
- *
- * **Modern Controllers:**
- * - app/Controllers/Admin/UserController (admin user management)
- * - app/Controllers/SettingsController (user settings/profile)
- *
- * **Modern Routes:**
- * - GET /admin/users - User listing (Admin\UserController::index)
- * - GET /admin/users/{id} - User details (Admin\UserController::show)
- * - GET /admin/users/create - Create user form (Admin\UserController::create)
- * - POST /admin/users - Store user (Admin\UserController::store)
- * - GET /admin/users/{id}/edit - Edit user form (Admin\UserController::edit)
- * - PUT /admin/users/{id} - Update user (Admin\UserController::update)
- * - DELETE /admin/users/{id} - Delete user (Admin\UserController::destroy)
- * - GET /settings - User settings (SettingsController::index)
- * - POST /settings/profile - Update profile (SettingsController::updateProfile)
- *
- * **Modern Views:**
- * - app/Views/admin/users/index.php (user list)
- * - app/Views/admin/users/show.php (user details)
- * - app/Views/admin/users/create.php (create form)
- * - app/Views/admin/users/edit.php (edit form)
- * - app/Views/settings/*.php (user settings)
- *
- * @deprecated Since Phase 4 Week 3
- * @see app/Controllers/Admin/UserController
- * @see app/Controllers/SettingsController
- * ====================================================================
- */
-
-// Load modern dependencies for compatibility
 require_once __DIR__ . '/../Models/UserModel.php';
-require_once __DIR__ . '/../Services/UserService.php';
 
-/**
- * Legacy UserController - Compatibility Wrapper
- *
- * This class maintains backward compatibility for views still using
- * the old UserController (user_list.php, user_edit.php). It delegates
- * to UserService and UserModel to provide the same methods, but users
- * should migrate to modern routes and controllers.
- */
+
 class UserController {
     private $userModel;
-    private $userService;
     private $conn;
-
+    
     public function __construct($conn) {
         $this->conn = $conn;
         $this->userModel = new UserModel($conn);
-
-        // Try to use modern service layer if available
-        try {
-            $this->userService = new UserService($conn);
-        } catch (Exception $e) {
-            // Service not available, will use model directly
-            $this->userService = null;
-        }
     }
-
+    
     /**
      * Get all users based on current user's permissions
-     *
-     * @deprecated Use UserService or Admin\UserController::index()
+     * 
      * @param string $currentUserType The current user's type (admin, mentor, etc.)
      * @return array List of users
      */
     public function getAllUsers($currentUserType) {
         return $this->userModel->getAllUsers($currentUserType);
     }
-
+    
     /**
      * Get a single user by ID
-     *
-     * @deprecated Use UserService or Admin\UserController::show()
+     * 
      * @param int $userId The user's ID
      * @return array|null User data or null if not found
      */
     public function getUserById($userId) {
         return $this->userModel->getUserById($userId);
     }
-
+    
     /**
      * Check if current user has permission to edit the target user
-     *
-     * @deprecated Use BaseController::requireRole() or Admin\UserController permission checks
+     * 
      * @param string $currentUserType The current user's type
      * @param int $currentUserId The current user's ID
      * @param array $targetUser The target user's data
@@ -105,209 +47,200 @@ class UserController {
         } elseif ($currentUserId == $targetUser['id']) {
             return true; // Users can edit themselves
         }
-
+        
         return false;
     }
-
+    
     /**
      * Process form data and update user
-     *
-     * @deprecated Use UserService::updateUser() or Admin\UserController::update()
+     * 
      * @param array $formData The form data from $_POST
      * @return bool Success status
      */
     public function updateUser($formData) {
         // Process and sanitize form data
         $userData = $this->sanitizeUserData($formData);
-
+        
         // Update user in database
         return $this->userModel->updateUser($userData);
     }
-
+    
     /**
      * Delete a user
-     *
-     * @deprecated Use UserService::deleteUser() or Admin\UserController::destroy()
+     * 
      * @param int $userId The user's ID
      * @return bool Success status
      */
     public function deleteUser($userId) {
         // Check if user exists before attempting deletion
         $user = $this->userModel->getUserById($userId);
-
+        
         if (!$user) {
             return false; // User does not exist
         }
-
+        
         // Perform the deletion
         return $this->userModel->deleteUser($userId);
     }
-
+    
     /**
      * Sanitize and validate user data
-     *
-     * @deprecated Use Validator class or service layer validation
+     * 
      * @param array $formData Raw form data
      * @return array Sanitized user data
      */
     private function sanitizeUserData($formData) {
         $userData = [];
-
+        
         // Required fields
         $userData['id'] = intval($formData['id']);
         $userData['name'] = htmlspecialchars(trim($formData['name']));
         $userData['surname'] = htmlspecialchars(trim($formData['surname']));
         $userData['username'] = htmlspecialchars(trim($formData['username']));
         $userData['email'] = filter_var(trim($formData['email']), FILTER_SANITIZE_EMAIL);
-
+        
         // Optional fields - only add if present
         if (isset($formData['nationality'])) {
             $userData['nationality'] = htmlspecialchars(trim($formData['nationality']));
-
+            
             // Handle "Other" nationality
             if ($userData['nationality'] === 'Other' && !empty($formData['other_nationality'])) {
                 $userData['nationality'] = htmlspecialchars(trim($formData['other_nationality']));
             }
         }
-
+        
         if (isset($formData['gender'])) {
             $userData['gender'] = htmlspecialchars(trim($formData['gender']));
         }
-
+        
         if (isset($formData['dob'])) {
             $userData['dob'] = htmlspecialchars(trim($formData['dob']));
         }
-
+        
         if (isset($formData['id_number'])) {
             $userData['id_number'] = htmlspecialchars(trim($formData['id_number']));
         }
-
+        
         if (isset($formData['home_language'])) {
             $userData['home_language'] = htmlspecialchars(trim($formData['home_language']));
-
+            
             // Handle "Other" language
             if ($userData['home_language'] === 'Other' && !empty($formData['other_language'])) {
                 $userData['home_language'] = htmlspecialchars(trim($formData['other_language']));
             }
         }
-
+        
         // Address information
         if (isset($formData['address_street'])) {
             $userData['address_street'] = htmlspecialchars(trim($formData['address_street']));
         }
-
+        
         if (isset($formData['address_suburb'])) {
             $userData['address_suburb'] = htmlspecialchars(trim($formData['address_suburb']));
         }
-
+        
         if (isset($formData['address_city'])) {
             $userData['address_city'] = htmlspecialchars(trim($formData['address_city']));
         }
-
+        
         if (isset($formData['address_province'])) {
             $userData['address_province'] = htmlspecialchars(trim($formData['address_province']));
         }
-
+        
         if (isset($formData['address_postal_code'])) {
             $userData['address_postal_code'] = htmlspecialchars(trim($formData['address_postal_code']));
         }
-
+        
         // Member-specific fields
         if (isset($formData['school'])) {
             $userData['school'] = htmlspecialchars(trim($formData['school']));
         }
-
+        
         if (isset($formData['grade'])) {
             $userData['grade'] = intval($formData['grade']);
         }
-
+        
         if (isset($formData['parent'])) {
             $userData['parent'] = htmlspecialchars(trim($formData['parent']));
         }
-
+        
         if (isset($formData['parent_email'])) {
             $userData['parent_email'] = filter_var(trim($formData['parent_email']), FILTER_SANITIZE_EMAIL);
         }
-
+        
         if (isset($formData['relationship'])) {
             $userData['relationship'] = htmlspecialchars(trim($formData['relationship']));
         }
-
+        
         if (isset($formData['parent_number'])) {
             $userData['parent_number'] = preg_replace('/[^0-9]/', '', $formData['parent_number']);
         }
-
+        
         if (isset($formData['cell_number'])) {
             $userData['cell_number'] = preg_replace('/[^0-9]/', '', $formData['cell_number']);
         }
-
+        
         // Admin-only fields
         if (isset($formData['user_type'])) {
             $userData['user_type'] = htmlspecialchars(trim($formData['user_type']));
         }
-
+        
         if (isset($formData['center'])) {
             $userData['center'] = htmlspecialchars(trim($formData['center']));
         }
-
+        
         // Emergency contact information
         if (isset($formData['emergency_contact_name'])) {
             $userData['emergency_contact_name'] = htmlspecialchars(trim($formData['emergency_contact_name']));
         }
-
+        
         if (isset($formData['emergency_contact_relationship'])) {
             $userData['emergency_contact_relationship'] = htmlspecialchars(trim($formData['emergency_contact_relationship']));
         }
-
+        
         if (isset($formData['emergency_contact_phone'])) {
             $userData['emergency_contact_phone'] = htmlspecialchars(trim($formData['emergency_contact_phone']));
         }
-
+        
         if (isset($formData['emergency_contact_email'])) {
             $userData['emergency_contact_email'] = filter_var(trim($formData['emergency_contact_email']), FILTER_SANITIZE_EMAIL);
         }
-
+        
         if (isset($formData['emergency_contact_address'])) {
             $userData['emergency_contact_address'] = htmlspecialchars(trim($formData['emergency_contact_address']));
         }
-
+        
         // Interest and skills information
         if (isset($formData['interests'])) {
             $userData['interests'] = htmlspecialchars(trim($formData['interests']));
         }
-
+        
         if (isset($formData['role_models'])) {
             $userData['role_models'] = htmlspecialchars(trim($formData['role_models']));
         }
-
+        
         if (isset($formData['goals'])) {
             $userData['goals'] = htmlspecialchars(trim($formData['goals']));
         }
-
+        
         if (isset($formData['has_computer'])) {
             $userData['has_computer'] = intval($formData['has_computer']);
         }
-
+        
         if (isset($formData['computer_skills'])) {
             $userData['computer_skills'] = htmlspecialchars(trim($formData['computer_skills']));
         }
-
+        
         if (isset($formData['computer_skills_source'])) {
             $userData['computer_skills_source'] = htmlspecialchars(trim($formData['computer_skills_source']));
         }
-
+        
         // Password (only process if not empty)
         if (!empty($formData['password'])) {
             $userData['password'] = $formData['password'];
         }
-
+        
         return $userData;
     }
-}
-
-// Log deprecation warning
-if (!defined('USER_CONTROLLER_DEPRECATION_LOGGED')) {
-    error_log("DEPRECATION WARNING: Legacy UserController is being used. Please migrate to Admin\\UserController. Called from: " . ($_SERVER['REQUEST_URI'] ?? 'unknown'));
-    define('USER_CONTROLLER_DEPRECATION_LOGGED', true);
 }
 ?>

@@ -1,39 +1,98 @@
 <?php
+/**
+ * ====================================================================
+ * DEPRECATED CONTROLLER - COMPATIBILITY WRAPPER
+ * ====================================================================
+ *
+ * This controller has been deprecated as of Phase 4 Week 3 implementation.
+ * All course operations are now handled by modern controllers with proper
+ * service layer and BaseController architecture.
+ *
+ * **Modern Controllers:**
+ * - app/Controllers/Member/CourseController (member course browsing/enrollment)
+ * - app/Controllers/Admin/CourseController (admin course management)
+ *
+ * **Modern Routes:**
+ * - GET /courses - Course listing (Member\CourseController::index)
+ * - GET /courses/{id} - Course details (Member\CourseController::show)
+ * - POST /courses/{id}/enroll - Enroll in course (Member\CourseController::enroll)
+ * - GET /my-courses - My enrolled courses (Member\CourseController::myCourses)
+ * - GET /admin/courses - Admin course management (Admin\CourseController::index)
+ * - GET /admin/courses/{id} - Admin course details (Admin\CourseController::show)
+ *
+ * **Modern Views:**
+ * - app/Views/member/courses/index.php (course listing)
+ * - app/Views/member/courses/show.php (course details)
+ * - app/Views/member/courses/my-courses.php (enrolled courses)
+ * - app/Views/admin/courses/index.php (admin management)
+ * - app/Views/admin/courses/show.php (admin details)
+ * - app/Views/admin/courses/create.php (create course)
+ * - app/Views/admin/courses/edit.php (edit course)
+ *
+ * @deprecated Since Phase 4 Week 3
+ * @see app/Controllers/Member/CourseController
+ * @see app/Controllers/Admin/CourseController
+ * ====================================================================
+ */
+
+// Load modern controllers for compatibility
+require_once __DIR__ . '/Member/CourseController.php';
+require_once __DIR__ . '/../Services/CourseService.php';
 require_once __DIR__ . '/../Models/CourseModel.php';
 require_once __DIR__ . '/../Models/EnrollmentModel.php';
-require_once __DIR__ . '/LessonController.php'; // Added LessonController
 
+/**
+ * Legacy CourseController - Compatibility Wrapper
+ *
+ * This class maintains backward compatibility for views still using
+ * the old CourseController. It delegates to CourseService and models
+ * to provide the same methods, but users should migrate to modern
+ * routes and controllers.
+ */
 class CourseController {
     private $conn;
     private $courseModel;
     private $enrollmentModel;
-    private $lessonController; // Added lessonController property
-    
+    private $courseService;
+    private $lessonController;
+
     public function __construct($conn) {
         $this->conn = $conn;
         $this->courseModel = new CourseModel($conn);
         $this->enrollmentModel = new EnrollmentModel($conn);
-        $this->lessonController = new LessonController($conn); // Instantiate LessonController
+        $this->courseService = new CourseService($conn);
+
+        // LessonController might also be deprecated - load conditionally
+        if (file_exists(__DIR__ . '/LessonController.php')) {
+            require_once __DIR__ . '/LessonController.php';
+            $this->lessonController = new LessonController($conn);
+        }
     }
-    
+
+    /**
+     * @deprecated Use CourseService::getAllCourses() or Member\CourseController::index()
+     */
     public function getAllCourses() {
-        return $this->courseModel->getAllCourses();
+        $userId = $_SESSION['id'] ?? null;
+        return $this->courseService->getAllCourses($userId);
     }
-    
+
+    /**
+     * @deprecated Use CourseService::getCourseDetails() or Member\CourseController::show()
+     */
     public function getCourseDetails($courseId) {
         return $this->courseModel->getCourseDetails($courseId);
     }
-    
+
+    /**
+     * @deprecated Use CourseModel::getCourseSections()
+     */
     public function getCourseSections($courseId) {
         return $this->courseModel->getCourseSections($courseId);
     }
-    
+
     /**
-     * Check if a user is enrolled in a course
-     *
-     * @param int $userId User ID
-     * @param int $courseId Course ID
-     * @return bool True if enrolled, false otherwise
+     * @deprecated Use EnrollmentModel::isUserEnrolled()
      */
     public function isUserEnrolled($userId, $courseId) {
         if (!$userId || !$courseId) {
@@ -41,34 +100,32 @@ class CourseController {
         }
         return $this->enrollmentModel->isUserEnrolled($userId, $courseId);
     }
-    
+
     /**
-     * Enroll a user in a course
-     *
-     * @param int $userId User ID
-     * @param int $courseId Course ID
-     * @return bool Success status
+     * @deprecated Use CourseService::enrollUser() or Member\CourseController::enroll()
      */
     public function enrollUser($userId, $courseId) {
         // Validate CSRF token
         require_once __DIR__ . '/../core/CSRF.php';
         if (!CSRF::validateToken()) {
-            error_log("CSRF validation failed in CourseController::enrollUser - IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
+            error_log("CSRF validation failed in deprecated CourseController::enrollUser - IP: " . ($_SERVER['REMOTE_ADDR'] ?? 'unknown'));
             return false;
         }
 
         if (!$userId || !$courseId) {
             return false;
         }
-        return $this->enrollmentModel->enrollUser($userId, $courseId);
+
+        try {
+            return $this->courseService->enrollUser($userId, $courseId);
+        } catch (Exception $e) {
+            error_log("Enrollment failed in deprecated CourseController: " . $e->getMessage());
+            return false;
+        }
     }
-    
+
     /**
-     * Get user progress for a course
-     *
-     * @param int $userId User ID
-     * @param int $courseId Course ID
-     * @return array Progress data including percent completion, completion status
+     * @deprecated Use EnrollmentModel::getUserProgress()
      */
     public function getUserProgress($userId, $courseId) {
         if (!$userId || !$courseId) {
@@ -81,23 +138,21 @@ class CourseController {
         }
         return $this->enrollmentModel->getUserProgress($userId, $courseId);
     }
-    
+
     /**
-     * Check if a lesson is completed by a user
-     *
-     * @param int $userId User ID
-     * @param int $lessonId Lesson ID
-     * @return bool True if completed, false otherwise
+     * @deprecated Use EnrollmentModel::isLessonCompleted()
      */
     public function isLessonCompleted($userId, $lessonId) {
         return $this->enrollmentModel->isLessonCompleted($userId, $lessonId);
     }
-    
-    // Calculate total duration for a course
+
+    /**
+     * @deprecated Calculate in view or service layer
+     */
     public function calculateTotalDuration($courseId) {
         $sections = $this->getCourseSections($courseId);
         $totalMinutes = 0;
-        
+
         foreach ($sections as $section) {
             if (isset($section['lessons']) && is_array($section['lessons'])) {
                 foreach ($section['lessons'] as $lesson) {
@@ -105,16 +160,18 @@ class CourseController {
                 }
             }
         }
-        
+
         return $totalMinutes;
     }
-    
-    // Count total lessons and completed lessons for a course
+
+    /**
+     * @deprecated Calculate in view or service layer
+     */
     public function countLessons($courseId, $userId = null) {
         $sections = $this->getCourseSections($courseId);
         $total = 0;
         $completed = 0;
-        
+
         foreach ($sections as $section) {
             if (isset($section['lessons']) && is_array($section['lessons'])) {
                 foreach ($section['lessons'] as $lesson) {
@@ -125,71 +182,94 @@ class CourseController {
                 }
             }
         }
-        
+
         return [
             'total' => $total,
             'completed' => $completed
         ];
     }
 
-    // Add this method to get featured courses
+    /**
+     * @deprecated Use CourseService::getFeaturedCourses()
+     */
     public function getFeaturedCourses() {
-        $sql = "SELECT * FROM courses WHERE is_featured = 1 LIMIT 4";
-        $stmt = $this->conn->prepare($sql);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        
-        $featuredCourses = [];
-        while ($row = $result->fetch_assoc()) {
-            $featuredCourses[] = $row;
+        try {
+            return $this->courseService->getFeaturedCourses();
+        } catch (Exception $e) {
+            // Fallback to direct query
+            $sql = "SELECT * FROM courses WHERE is_featured = 1 LIMIT 4";
+            $stmt = $this->conn->prepare($sql);
+            $stmt->execute();
+            $result = $stmt->get_result();
+
+            $featuredCourses = [];
+            while ($row = $result->fetch_assoc()) {
+                $featuredCourses[] = $row;
+            }
+
+            return $featuredCourses;
         }
-        
-        return $featuredCourses;
     }
 
-    // Add this method to get recommended courses
+    /**
+     * @deprecated Use CourseService::getRecommendedCourses()
+     */
     public function getRecommendedCourses($userId) {
-        // You can implement your recommendation logic here
-        // For now, just return recent courses
-        $sql = "SELECT * FROM courses WHERE status = 'active' ORDER BY created_at DESC LIMIT 4";
-        $stmt = $this->conn->prepare($sql);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        
-        $recommendedCourses = [];
-        while ($row = $result->fetch_assoc()) {
-            $recommendedCourses[] = $row;
+        try {
+            return $this->courseService->getRecommendedCourses($userId, 4);
+        } catch (Exception $e) {
+            // Fallback to direct query
+            $sql = "SELECT * FROM courses WHERE status = 'active' ORDER BY created_at DESC LIMIT 4";
+            $stmt = $this->conn->prepare($sql);
+            $stmt->execute();
+            $result = $stmt->get_result();
+
+            $recommendedCourses = [];
+            while ($row = $result->fetch_assoc()) {
+                $recommendedCourses[] = $row;
+            }
+
+            return $recommendedCourses;
         }
-        
-        return $recommendedCourses;
     }
 
-    // Add this method to get user enrollments
+    /**
+     * @deprecated Use CourseService::getUserEnrolledCourses()
+     */
     public function getUserEnrollments($userId) {
-        $sql = "SELECT c.*, e.progress, e.last_accessed 
-        FROM courses c
-        JOIN user_enrollments e ON c.id = e.course_id 
-        WHERE e.user_id = ?";
-        
-        $stmt = $this->conn->prepare($sql);
-        $stmt->bind_param("i", $userId);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        
-        $enrollments = [];
-        while ($row = $result->fetch_assoc()) {
-            $enrollments[] = $row;
+        try {
+            return $this->courseService->getUserEnrolledCourses($userId);
+        } catch (Exception $e) {
+            // Fallback to direct query
+            $sql = "SELECT c.*, e.progress, e.last_accessed
+                    FROM courses c
+                    JOIN user_enrollments e ON c.id = e.course_id
+                    WHERE e.user_id = ?";
+
+            $stmt = $this->conn->prepare($sql);
+            $stmt->bind_param("i", $userId);
+            $stmt->execute();
+            $result = $stmt->get_result();
+
+            $enrollments = [];
+            while ($row = $result->fetch_assoc()) {
+                $enrollments[] = $row;
+            }
+
+            return $enrollments;
         }
-        
-        return $enrollments;
     }
 
-    // Add helper method to format course type
+    /**
+     * @deprecated Use view helpers or service layer
+     */
     public function formatCourseType($type) {
         return ucwords(str_replace('_', ' ', $type));
     }
 
-    // Add helper method to get difficulty class
+    /**
+     * @deprecated Use view helpers
+     */
     public function getDifficultyClass($level) {
         $classes = [
             'Beginner' => 'badge-success',
@@ -199,11 +279,16 @@ class CourseController {
         return $classes[$level] ?? 'badge-primary';
     }
 
+    /**
+     * Get comprehensive course data for view
+     * This is a complex method that aggregates data from multiple sources
+     *
+     * @deprecated Use Member\CourseController::show() which does this properly
+     */
     public function getCourseDataForView($courseId, $userId) {
         $courseDetails = $this->courseModel->getCourseDetails($courseId);
         if (!$courseDetails) {
-            // Consider logging this error or handling it more gracefully
-            return null; 
+            return null;
         }
 
         $sectionsFromDB = $this->courseModel->getCourseSections($courseId);
@@ -212,13 +297,12 @@ class CourseController {
         $totalLessons = 0;
         $completedLessons = 0;
 
-        if (is_array($sectionsFromDB)) {
+        if (is_array($sectionsFromDB) && $this->lessonController) {
             foreach ($sectionsFromDB as $section) {
                 $sectionLessons = $this->lessonController->getSectionLessons($section['id']);
                 $populatedSectionLessons = [];
                 if (is_array($sectionLessons)) {
                     foreach ($sectionLessons as $lesson) {
-                        // Ensure lesson ID exists before checking completion
                         $lessonId = isset($lesson['id']) ? $lesson['id'] : null;
                         if ($lessonId) {
                             $lesson['completed'] = $this->isLessonCompleted($userId, $lessonId);
@@ -226,31 +310,36 @@ class CourseController {
                                 $completedLessons++;
                             }
                         } else {
-                            $lesson['completed'] = false; // Default if no ID
+                            $lesson['completed'] = false;
                         }
                         $totalDuration += isset($lesson['duration_minutes']) ? intval($lesson['duration_minutes']) : 0;
                         $totalLessons++;
                         $populatedSectionLessons[] = $lesson;
                     }
                 }
-                $section['lessons'] = $populatedSectionLessons; 
+                $section['lessons'] = $populatedSectionLessons;
                 $populatedSections[] = $section;
             }
         }
 
         $isEnrolled = $this->isUserEnrolled($userId, $courseId);
-        // getUserProgress returns an array e.g. ['percent' => X, 'completed' => Y, ...]
-        $userProgressData = $this->getUserProgress($userId, $courseId); 
+        $userProgressData = $this->getUserProgress($userId, $courseId);
 
         return [
             'course' => $courseDetails,
             'sections' => $populatedSections,
             'isEnrolled' => $isEnrolled,
-            'progress' => $userProgressData, // Pass the whole array
+            'progress' => $userProgressData,
             'totalDuration' => $totalDuration,
             'totalLessons' => $totalLessons,
             'completedLessons' => $completedLessons,
         ];
     }
+}
+
+// Log deprecation warning
+if (!defined('COURSE_CONTROLLER_DEPRECATION_LOGGED')) {
+    error_log("DEPRECATION WARNING: Legacy CourseController is being used. Please migrate to Member\\CourseController or Admin\\CourseController. Called from: " . ($_SERVER['REQUEST_URI'] ?? 'unknown'));
+    define('COURSE_CONTROLLER_DEPRECATION_LOGGED', true);
 }
 ?>
