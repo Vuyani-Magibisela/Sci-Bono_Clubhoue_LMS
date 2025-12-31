@@ -1,0 +1,381 @@
+# ===============================================
+# Sci-Bono Clubhouse LMS - Git Ignore File
+# ===============================================
+# This file prevents sensitive data and unnecessary files
+# from being committed to version control.
+#
+# SECURITY CRITICAL: This file protects secrets and API keys
+# ===============================================
+
+# ===============================================
+# ENVIRONMENT & CONFIGURATION FILES (CRITICAL!)
+# ===============================================
+# Never commit environment files with real credentials
+.env
+.env.local
+.env.production
+.env.staging
+.env.development
+.env.backup
+.env.*.php
+.env.*.local
+
+# Keep .env.example for documentation purposes
+!.env.example
+
+# Configuration files with credentials
+config/database.php.local
+config/credentials.php
+config/secrets.php
+server.php.local
+
+# ===============================================
+# LOGS & DEBUG FILES (CRITICAL!)
+# ===============================================
+# Log files often contain sensitive data:
+# - Session tokens
+# - API keys
+# - User credentials
+# - Personal information
+# - Error traces with internal paths
+
+# Application logs
+storage/logs/*.log
+storage/logs/*.txt
+storage/logs/**/*.log
+storage/logs/**/*.txt
+logs/*.log
+logs/**/*.log
+
+# Debug logs
+debug.log
+error.log
+access.log
+*.log
+
+# PHP error logs
+php_errors.log
+php-error.log
+
+# ===============================================
+# CACHE & TEMPORARY FILES
+# ===============================================
+# Cache files can contain serialized session data
+storage/cache/*
+storage/cache/**/*
+!storage/cache/.gitkeep
+
+# Temporary files
+storage/tmp/*
+storage/tmp/**/*
+!storage/tmp/.gitkeep
+
+# Session files
+storage/sessions/*
+storage/sessions/**/*
+!storage/sessions/.gitkeep
+
+# Compiled views/templates
+storage/views/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+
+# ===============================================
+# UPLOADS & USER-GENERATED CONTENT
+# ===============================================
+# User uploads may contain sensitive documents
+# Uncomment if you want to exclude uploads from git
+# public/assets/uploads/*
+# public/assets/uploads/**/*
+# !public/assets/uploads/.gitkeep
+
+# Exclude specific sensitive upload types
+public/assets/uploads/**/*.pdf
+public/assets/uploads/**/*.doc
+public/assets/uploads/**/*.docx
+public/assets/uploads/**/*.xls
+public/assets/uploads/**/*.xlsx
+public/assets/uploads/documents/*
+public/assets/uploads/private/*
+
+# ===============================================
+# BACKUP FILES
+# ===============================================
+*.sql
+*.sql.gz
+*.sql.zip
+*.backup
+*.bak
+*.old
+*.orig
+*~
+*.swp
+*.swo
+*.tmp
+
+# Database dumps
+database/dumps/*
+database/backups/*
+*.dump
+
+# ===============================================
+# DEPENDENCY DIRECTORIES
+# ===============================================
+# Composer
+/vendor/
+composer.phar
+composer.lock
+
+# Node modules
+node_modules/
+npm-debug.log
+yarn-error.log
+yarn-debug.log
+package-lock.json
+yarn.lock
+
+# Bower
+bower_components/
+
+# ===============================================
+# IDE & EDITOR FILES
+# ===============================================
+# PhpStorm / IntelliJ IDEA
+.idea/
+*.iml
+*.ipr
+*.iws
+.idea_modules/
+
+# VS Code
+.vscode/
+*.code-workspace
+.history/
+
+# Sublime Text
+*.sublime-project
+*.sublime-workspace
+*.tmlanguage.cache
+*.tmPreferences.cache
+*.stTheme.cache
+
+# NetBeans
+nbproject/
+nbbuild/
+nbdist/
+.nb-gradle/
+
+# Eclipse
+.project
+.classpath
+.settings/
+.buildpath
+
+# Vim
+*.swp
+*.swo
+*~
+.netrwhist
+
+# Emacs
+*~
+\#*\#
+.\#*
+.*.swp
+.*.swo
+
+# ===============================================
+# OPERATING SYSTEM FILES
+# ===============================================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+.directory
+.Trash-*
+.nfs*
+
+# ===============================================
+# PHP SPECIFIC
+# ===============================================
+# Composer
+auth.json
+composer.lock
+
+# PHP-CS-Fixer
+.php_cs
+.php_cs.cache
+
+# PHPUnit
+.phpunit.result.cache
+phpunit.xml
+/phpunit.xml
+
+# Keep phpunit.xml.dist for distribution
+!phpunit.xml.dist
+
+# PHP CodeSniffer
+phpcs.xml
+!phpcs.xml.dist
+
+# ===============================================
+# TESTING & COVERAGE
+# ===============================================
+/coverage/
+.phpunit.result.cache
+/build/
+/tests/_output/
+/tests/_support/_generated
+
+# ===============================================
+# COMPILED & GENERATED FILES
+# ===============================================
+*.class
+*.dll
+*.exe
+*.o
+*.so
+*.pyc
+*.pyo
+
+# ===============================================
+# DOCUMENTATION BUILD FILES
+# ===============================================
+/docs/_build/
+/docs/.doctrees/
+
+# ===============================================
+# VERSION CONTROL
+# ===============================================
+.git/
+.gitattributes
+.gitmodules
+.svn/
+.hg/
+
+# ===============================================
+# SECURITY & SECRETS
+# ===============================================
+# SSH keys
+id_rsa
+id_rsa.pub
+*.pem
+*.key
+*.crt
+*.cer
+*.p12
+*.pfx
+
+# API keys and tokens
+.apikeys
+.tokens
+secrets.json
+credentials.json
+serviceAccount.json
+
+# OAuth tokens
+.oauth2
+
+# SSL certificates (if not needed for deployment)
+*.csr
+
+# ===============================================
+# PROJECT SPECIFIC
+# ===============================================
+# Custom exclusions for this project
+
+# Database connection test files
+Database/test_*.php
+!Database/test_week2_complete.php
+!Database/test_day4_services.php
+!Database/test_day5_integration.php
+
+# Benchmark files (keep some for documentation)
+Database/benchmark_*.php
+!Database/benchmark_week2.php
+
+# Migration files should be kept
+!database/migrations/*.sql
+
+# Seeder files should be kept
+!database/seeders/*.php
+
+# Screenshots folder (if contains sensitive data)
+# Uncomment to exclude screenshots
+# projectDocs/Screenshots/*
+# !projectDocs/Screenshots/.gitkeep
+
+# Keep important documentation
+!README.md
+!CLAUDE.md
+!*.md
+
+# ===============================================
+# BUILD ARTIFACTS
+# ===============================================
+/dist/
+/build/
+/out/
+
+# ===============================================
+# PACKAGE MANAGERS
+# ===============================================
+# NPM
+.npm
+.eslintcache
+
+# Yarn
+.yarn/cache
+.yarn/unplugged
+.yarn/build-state.yml
+.yarn/install-state.gz
+.pnp.*
+
+# ===============================================
+# MISC
+# ===============================================
+*.pid
+*.seed
+*.pid.lock
+.grunt
+.lock-wscript
+lib-cov
+coverage
+.nyc_output
+
+# ===============================================
+# END OF .gitignore
+# ===============================================
+# Last updated: 2025-12-31
+# For security issues, contact: security@scibono.org
+# ===============================================
