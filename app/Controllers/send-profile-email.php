@@ -1,4 +1,31 @@
 <?php
+/**
+ * ⚠️ DEPRECATED - This file is deprecated as of Phase 4 Week 3 Day 4
+ *
+ * This procedural email sending script has been deprecated in favor of the modernized
+ * HolidayProgramEmailController which extends BaseController.
+ *
+ * Migration Path:
+ * - Use: HolidayProgramEmailController->sendProfileAccessEmail($attendeeId) for single emails
+ * - Use: HolidayProgramEmailController->sendBulkProfileAccessEmails($attendeeIds) for bulk emails
+ *
+ * This file is kept for backward compatibility only and will be removed
+ * in a future release. Please update your code to use the new controller.
+ *
+ * @deprecated Phase 4 Week 3 Day 4
+ * @see HolidayProgramEmailController
+ */
+
+// Log deprecation warning
+if (function_exists('error_log')) {
+    error_log(
+        '[DEPRECATED] send-profile-email.php is deprecated. ' .
+        'Use HolidayProgramEmailController instead. ' .
+        'Called from: ' . ($_SERVER['REQUEST_URI'] ?? 'unknown') .
+        ' | IP: ' . ($_SERVER['REMOTE_ADDR'] ?? 'unknown')
+    );
+}
+
 session_start();
 require_once '../../server.php';
 require_once 'HolidayProgramEmailController.php';
@@ -29,7 +56,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['attendee_id'])) {
 
     $emailController = new HolidayProgramEmailController($conn);
     $result = $emailController->sendProfileAccessEmail($attendeeId);
-    
+
     header('Content-Type: application/json');
     echo json_encode($result);
 } else {

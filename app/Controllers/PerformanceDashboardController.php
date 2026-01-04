@@ -1,7 +1,18 @@
 <?php
+/**
+ * Performance Dashboard Controller
+ *
+ * Provides web interface for viewing performance metrics,
+ * alerts, and system health information.
+ * Migrated to extend BaseController - Phase 4 Week 3 Day 4
+ *
+ * @package App\Controllers
+ * @since Phase 7: API Development & Testing
+ */
 
 namespace App\Controllers;
 
+require_once __DIR__ . '/BaseController.php';
 require_once __DIR__ . '/../Services/PerformanceMonitor.php';
 require_once __DIR__ . '/../Utils/Logger.php';
 
@@ -9,59 +20,68 @@ use App\Services\PerformanceMonitor;
 use App\Utils\Logger;
 use Exception;
 
-/**
- * Performance Dashboard Controller
- * Sci-Bono Clubhouse LMS - Phase 7: API Development & Testing
- * 
- * Provides web interface for viewing performance metrics,
- * alerts, and system health information
- */
-class PerformanceDashboardController
+class PerformanceDashboardController extends \BaseController
 {
-    private $db;
     private $performanceMonitor;
-    
-    public function __construct($db)
+
+    public function __construct($conn, $config = null)
     {
-        $this->db = $db;
-        $this->performanceMonitor = PerformanceMonitor::getInstance($db);
+        parent::__construct($conn, $config);
+        $this->performanceMonitor = PerformanceMonitor::getInstance($this->conn);
     }
-    
+
     /**
      * Display main performance dashboard
+     * Requires admin or manager role
      */
     public function index()
     {
+        // Require admin or manager role
+        $this->requireRole(['admin', 'manager']);
+
         try {
             $timeRange = $_GET['range'] ?? '24h';
             $summary = $this->performanceMonitor->getPerformanceSummary($timeRange);
             $alerts = $this->performanceMonitor->getAlerts(false, 10);
-            
+
+            $this->logAction('view_performance_dashboard', [
+                'time_range' => $timeRange,
+                'alert_count' => count($alerts)
+            ]);
+
             $this->renderDashboard($summary, $alerts, $timeRange);
-            
+
         } catch (Exception $e) {
-            Logger::error('Performance dashboard error', [
+            $this->logger->error('Performance dashboard error', [
                 'error' => $e->getMessage(),
                 'trace' => $e->getTraceAsString()
             ]);
             $this->renderError('Failed to load performance dashboard');
         }
     }
-    
+
     /**
      * API endpoint for real-time metrics
+     * Modern method with role protection and activity logging
      */
     public function getMetricsApi()
     {
-        header('Content-Type: application/json');
-        
+        // Require admin or manager role
+        $this->requireRole(['admin', 'manager']);
+
         try {
-            $timeRange = $_GET['range'] ?? '1h';
-            $metricType = $_GET['type'] ?? null;
-            
+            $timeRange = $this->input('range', '1h');
+            $metricType = $this->input('type', null);
+
             $metrics = $this->performanceMonitor->getMetrics($timeRange, $metricType);
             $summary = $this->performanceMonitor->getPerformanceSummary($timeRange);
-            
+
+            $this->logAction('fetch_performance_metrics', [
+                'time_range' => $timeRange,
+                'metric_type' => $metricType,
+                'metric_count' => count($metrics)
+            ]);
+
             $response = [
                 'success' => true,
                 'data' => [
@@ -70,110 +90,168 @@ class PerformanceDashboardController
                     'timestamp' => date('c')
                 ]
             ];
-            
-            echo json_encode($response);
-            
+
+            $this->jsonResponse($response);
+
         } catch (Exception $e) {
-            http_response_code(500);
-            echo json_encode([
+            $this->logger->error('Failed to fetch metrics', [
+                'error' => $e->getMessage(),
+                'time_range' => $timeRange ?? 'unknown'
+            ]);
+
+            $this->jsonResponse([
                 'success' => false,
                 'error' => 'Failed to fetch metrics',
                 'message' => $e->getMessage()
-            ]);
+            ], 500);
         }
     }
-    
+
     /**
      * API endpoint for alerts
+     * Modern method with role protection
      */
     public function getAlertsApi()
     {
-        header('Content-Type: application/json');
-        
+        // Require admin or manager role
+        $this->requireRole(['admin', 'manager']);
+
         try {
             $resolved = isset($_GET['resolved']) ? (bool)$_GET['resolved'] : false;
-            $limit = (int)($_GET['limit'] ?? 50);
-            
+            $limit = (int)($this->input('limit', 50));
+
             $alerts = $this->performanceMonitor->getAlerts($resolved, $limit);
-            
-            echo json_encode([
+
+            $this->logAction('fetch_performance_alerts', [
+                'resolved' => $resolved,
+                'limit' => $limit,
+                'alert_count' => count($alerts)
+            ]);
+
+            $this->jsonResponse([
                 'success' => true,
                 'data' => $alerts,
                 'timestamp' => date('c')
             ]);
-            
+
         } catch (Exception $e) {
-            http_response_code(500);
-            echo json_encode([
+            $this->logger->error('Failed to fetch alerts', [
+                'error' => $e->getMessage()
+            ]);
+
+            $this->jsonResponse([
                 'success' => false,
                 'error' => 'Failed to fetch alerts',
                 'message' => $e->getMessage()
-            ]);
+            ], 500);
         }
     }
-    
+
     /**
      * Resolve alert
+     * Modern method with CSRF protection and role-based access
      */
     public function resolveAlert()
     {
-        header('Content-Type: application/json');
-        
+        // Require admin or manager role
+        $this->requireRole(['admin', 'manager']);
+
         if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-            http_response_code(405);
-            echo json_encode(['success' => false, 'error' => 'Method not allowed']);
+            $this->jsonResponse([
+                'success' => false,
+                'error' => 'Method not allowed'
+            ], 405);
             return;
         }
-        
+
+        // Validate CSRF token
+        if (!$this->validateCSRF()) {
+            $this->logger->warning("CSRF validation failed in resolve alert", [
+                'ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown'
+            ]);
+
+            $this->jsonResponse([
+                'success' => false,
+                'message' => 'Security validation failed. Please refresh the page and try again.',
+                'code' => 'CSRF_ERROR'
+            ], 403);
+            return;
+        }
+
         try {
             $input = json_decode(file_get_contents('php://input'), true);
             $alertId = $input['alert_id'] ?? null;
-            
+
             if (!$alertId) {
-                http_response_code(400);
-                echo json_encode(['success' => false, 'error' => 'Alert ID is required']);
+                $this->jsonResponse([
+                    'success' => false,
+                    'error' => 'Alert ID is required'
+                ], 400);
                 return;
             }
-            
-            $stmt = $this->db->prepare("UPDATE performance_alerts SET is_resolved = TRUE, resolved_at = NOW() WHERE id = ?");
+
+            $stmt = $this->conn->prepare("UPDATE performance_alerts SET is_resolved = TRUE, resolved_at = NOW() WHERE id = ?");
             $stmt->bind_param('i', $alertId);
             $result = $stmt->execute();
-            
+
             if ($result) {
-                echo json_encode(['success' => true, 'message' => 'Alert resolved successfully']);
+                $this->logAction('resolve_performance_alert', [
+                    'alert_id' => $alertId,
+                    'success' => true
+                ]);
+
+                $this->jsonResponse([
+                    'success' => true,
+                    'message' => 'Alert resolved successfully'
+                ]);
             } else {
                 throw new Exception('Failed to update alert');
             }
-            
+
         } catch (Exception $e) {
-            http_response_code(500);
-            echo json_encode([
+            $this->logger->error('Failed to resolve alert', [
+                'alert_id' => $alertId ?? 'unknown',
+                'error' => $e->getMessage()
+            ]);
+
+            $this->jsonResponse([
                 'success' => false,
                 'error' => 'Failed to resolve alert',
                 'message' => $e->getMessage()
-            ]);
+            ], 500);
         }
     }
-    
+
     /**
      * Export performance data
+     * Modern method with role protection and activity logging
      */
     public function exportData()
     {
+        // Require admin or manager role
+        $this->requireRole(['admin', 'manager']);
+
         try {
-            $format = $_GET['format'] ?? 'json';
-            $timeRange = $_GET['range'] ?? '24h';
-            
+            $format = $this->input('format', 'json');
+            $timeRange = $this->input('range', '24h');
+
             $metrics = $this->performanceMonitor->getMetrics($timeRange);
             $alerts = $this->performanceMonitor->getAlerts(false, 1000);
-            
+
             $data = [
                 'metrics' => $metrics,
                 'alerts' => $alerts,
                 'exported_at' => date('c'),
                 'time_range' => $timeRange
             ];
-            
+
+            $this->logAction('export_performance_data', [
+                'format' => $format,
+                'time_range' => $timeRange,
+                'metric_count' => count($metrics),
+                'alert_count' => count($alerts)
+            ]);
+
             switch ($format) {
                 case 'csv':
                     $this->exportCsv($data);
@@ -184,38 +262,39 @@ class PerformanceDashboardController
                 default:
                     $this->exportJson($data);
             }
-            
+
         } catch (Exception $e) {
-            Logger::error('Performance data export failed', [
+            $this->logger->error('Performance data export failed', [
                 'error' => $e->getMessage(),
-                'format' => $format ?? 'unknown'
+                'format' => $format ?? 'unknown',
+                'time_range' => $timeRange ?? 'unknown'
             ]);
-            $this->renderError('Export failed');
+
+            $this->renderError('Export failed: ' . $e->getMessage());
         }
     }
-    
+
     /**
      * Health check endpoint
+     * Public endpoint for monitoring systems
      */
     public function healthCheck()
     {
-        header('Content-Type: application/json');
-        
         try {
             $health = [
                 'status' => 'healthy',
                 'timestamp' => date('c'),
                 'checks' => []
             ];
-            
+
             // Database connectivity
-            $health['checks']['database'] = $this->db ? 'connected' : 'disconnected';
-            
+            $health['checks']['database'] = $this->conn ? 'connected' : 'disconnected';
+
             // Memory usage
             $memoryUsage = memory_get_usage(true);
             $memoryLimit = $this->parseMemoryLimit(ini_get('memory_limit'));
             $memoryPercent = $memoryLimit > 0 ? ($memoryUsage / $memoryLimit) * 100 : 0;
-            
+
             $health['checks']['memory'] = [
                 'usage_bytes' => $memoryUsage,
                 'usage_mb' => round($memoryUsage / (1024 * 1024), 2),
@@ -223,20 +302,20 @@ class PerformanceDashboardController
                 'usage_percent' => round($memoryPercent, 2),
                 'status' => $memoryPercent > 90 ? 'critical' : ($memoryPercent > 75 ? 'warning' : 'ok')
             ];
-            
+
             // Recent alerts
             $recentAlerts = $this->performanceMonitor->getAlerts(false, 1);
             $health['checks']['alerts'] = [
                 'active_count' => count($recentAlerts),
                 'status' => count($recentAlerts) > 0 ? 'warning' : 'ok'
             ];
-            
+
             // Disk space (if available)
             if (function_exists('disk_free_space')) {
                 $freeSpace = disk_free_space('./');
                 $totalSpace = disk_total_space('./');
                 $usedPercent = (($totalSpace - $freeSpace) / $totalSpace) * 100;
-                
+
                 $health['checks']['disk'] = [
                     'free_gb' => round($freeSpace / (1024 * 1024 * 1024), 2),
                     'total_gb' => round($totalSpace / (1024 * 1024 * 1024), 2),
@@ -244,32 +323,45 @@ class PerformanceDashboardController
                     'status' => $usedPercent > 90 ? 'critical' : ($usedPercent > 80 ? 'warning' : 'ok')
                 ];
             }
-            
+
             // Overall status
             $criticalChecks = array_filter($health['checks'], function($check) {
-                return (is_array($check) && ($check['status'] ?? '') === 'critical') || 
+                return (is_array($check) && ($check['status'] ?? '') === 'critical') ||
                        $check === 'disconnected';
             });
-            
+
             if (!empty($criticalChecks)) {
                 $health['status'] = 'unhealthy';
                 http_response_code(503);
             }
-            
-            echo json_encode($health, JSON_PRETTY_PRINT);
-            
+
+            $this->logAction('health_check', [
+                'status' => $health['status'],
+                'critical_checks' => count($criticalChecks)
+            ]);
+
+            $this->jsonResponse($health);
+
         } catch (Exception $e) {
-            http_response_code(500);
-            echo json_encode([
+            $this->logger->error('Health check failed', [
+                'error' => $e->getMessage()
+            ]);
+
+            $this->jsonResponse([
                 'status' => 'error',
                 'message' => $e->getMessage(),
                 'timestamp' => date('c')
-            ]);
+            ], 500);
         }
     }
-    
+
     /**
      * Render performance dashboard HTML
+     * Private helper method for dashboard rendering
+     *
+     * @param array $summary Performance summary data
+     * @param array $alerts Alert data
+     * @param string $timeRange Selected time range
      */
     private function renderDashboard($summary, $alerts, $timeRange)
     {
@@ -317,7 +409,7 @@ class PerformanceDashboardController
                     <p class="subtitle">Real-time monitoring for Sci-Bono Clubhouse LMS</p>
                     <div class="refresh-timer">Auto-refresh in: <span id="timer">60</span>s</div>
                 </div>
-                
+
                 <div class="controls">
                     <select id="timeRange" onchange="changeTimeRange()">
                         <option value="1h" <?= $timeRange === '1h' ? 'selected' : '' ?>>Last Hour</option>
@@ -329,7 +421,7 @@ class PerformanceDashboardController
                     <button onclick="exportData('json')">📊 Export JSON</button>
                     <button onclick="exportData('csv')">📄 Export CSV</button>
                 </div>
-                
+
                 <div class="grid">
                     <!-- API Performance Card -->
                     <div class="card">
@@ -359,14 +451,14 @@ class PerformanceDashboardController
                             <p>No API performance data available</p>
                         <?php endif; ?>
                     </div>
-                    
+
                     <!-- Error Rate Card -->
                     <div class="card">
                         <h3>⚠️ Error Rate</h3>
                         <div class="metric">
                             <span>Current Error Rate</span>
                             <span class="metric-value">
-                                <?php 
+                                <?php
                                 $errorRate = $summary['error_rate'] ?? 0;
                                 $statusClass = $errorRate > 5 ? 'status-critical' : ($errorRate > 1 ? 'status-warning' : 'status-ok');
                                 ?>
@@ -377,7 +469,7 @@ class PerformanceDashboardController
                         <div class="metric">
                             <span>Alert Status</span>
                             <span class="metric-value">
-                                <?php 
+                                <?php
                                 $alertCount = $summary['alert_count'] ?? 0;
                                 $alertStatus = $alertCount > 0 ? 'status-warning' : 'status-ok';
                                 ?>
@@ -386,7 +478,7 @@ class PerformanceDashboardController
                             </span>
                         </div>
                     </div>
-                    
+
                     <!-- Memory Usage Card -->
                     <div class="card">
                         <h3>💾 Memory Usage</h3>
@@ -399,7 +491,7 @@ class PerformanceDashboardController
                             <?php endif; ?>
                         </div>
                     </div>
-                    
+
                     <!-- Database Performance Card -->
                     <div class="card">
                         <h3>🗄️ Database Performance</h3>
@@ -426,7 +518,7 @@ class PerformanceDashboardController
                             </div>
                         <?php endif; ?>
                     </div>
-                    
+
                     <!-- System Health Card -->
                     <div class="card">
                         <h3>🏥 System Health</h3>
@@ -445,7 +537,7 @@ class PerformanceDashboardController
                         </div>
                         <button class="btn btn-small" onclick="checkHealth()">🔍 Detailed Health Check</button>
                     </div>
-                    
+
                     <!-- Recent Alerts Card -->
                     <div class="card">
                         <h3>🚨 Recent Alerts</h3>
@@ -469,32 +561,32 @@ class PerformanceDashboardController
                     </div>
                 </div>
             </div>
-            
+
             <script>
                 let refreshInterval;
                 let countdownTimer = 60;
-                
+
                 // Auto-refresh functionality
                 function startAutoRefresh() {
                     refreshInterval = setInterval(refreshData, 60000); // Refresh every minute
                     startCountdown();
                 }
-                
+
                 function startCountdown() {
                     const timerElement = document.getElementById('timer');
                     countdownTimer = 60;
-                    
+
                     const countdown = setInterval(() => {
                         countdownTimer--;
                         if (timerElement) timerElement.textContent = countdownTimer;
-                        
+
                         if (countdownTimer <= 0) {
                             clearInterval(countdown);
                             startCountdown();
                         }
                     }, 1000);
                 }
-                
+
                 function refreshData() {
                     const timeRange = document.getElementById('timeRange').value;
                     fetch(`?action=api&range=${timeRange}`)
@@ -506,22 +598,22 @@ class PerformanceDashboardController
                         })
                         .catch(error => console.error('Error refreshing data:', error));
                 }
-                
+
                 function updateDashboard(data) {
                     // Update dashboard with new data
                     console.log('Dashboard updated', data);
                 }
-                
+
                 function changeTimeRange() {
                     const timeRange = document.getElementById('timeRange').value;
                     window.location.href = `?range=${timeRange}`;
                 }
-                
+
                 function exportData(format) {
                     const timeRange = document.getElementById('timeRange').value;
                     window.open(`?action=export&format=${format}&range=${timeRange}`, '_blank');
                 }
-                
+
                 function resolveAlert(alertId) {
                     fetch('?action=resolve-alert', {
                         method: 'POST',
@@ -541,7 +633,7 @@ class PerformanceDashboardController
                         alert('Failed to resolve alert');
                     });
                 }
-                
+
                 function checkHealth() {
                     fetch('?action=health')
                         .then(response => response.json())
@@ -554,11 +646,11 @@ class PerformanceDashboardController
                             alert('Failed to check system health');
                         });
                 }
-                
+
                 function viewAllAlerts() {
                     window.open('?action=alerts', '_blank');
                 }
-                
+
                 // Start auto-refresh when page loads
                 document.addEventListener('DOMContentLoaded', startAutoRefresh);
             </script>
@@ -566,9 +658,12 @@ class PerformanceDashboardController
         </html>
         <?php
     }
-    
+
     /**
      * Render error page
+     * Private helper method
+     *
+     * @param string $message Error message to display
      */
     private function renderError($message)
     {
@@ -577,9 +672,12 @@ class PerformanceDashboardController
         echo "<p>" . htmlspecialchars($message) . "</p>";
         echo "<p><a href='?'>← Back to Dashboard</a></p>";
     }
-    
+
     /**
      * Export data as JSON
+     * Private helper method for JSON export
+     *
+     * @param array $data Performance data to export
      */
     private function exportJson($data)
     {
@@ -587,17 +685,20 @@ class PerformanceDashboardController
         header('Content-Disposition: attachment; filename="performance-metrics-' . date('Y-m-d-H-i') . '.json"');
         echo json_encode($data, JSON_PRETTY_PRINT);
     }
-    
+
     /**
      * Export data as CSV
+     * Private helper method for CSV export
+     *
+     * @param array $data Performance data to export
      */
     private function exportCsv($data)
     {
         header('Content-Type: text/csv');
         header('Content-Disposition: attachment; filename="performance-metrics-' . date('Y-m-d-H-i') . '.csv"');
-        
+
         $output = fopen('php://output', 'w');
-        
+
         // Metrics CSV
         fputcsv($output, ['Type', 'Name', 'Count', 'Min Value', 'Max Value', 'Avg Value', 'Unit']);
         foreach ($data['metrics'] as $metric) {
@@ -611,39 +712,55 @@ class PerformanceDashboardController
                 $metric['unit']
             ]);
         }
-        
+
         fclose($output);
     }
-    
+
+    /**
+     * Export data as Excel (placeholder)
+     * Private helper method - currently exports as CSV
+     *
+     * @param array $data Performance data to export
+     */
+    private function exportExcel($data)
+    {
+        // For now, export as CSV (can be enhanced with PHPExcel/PhpSpreadsheet later)
+        $this->exportCsv($data);
+    }
+
     /**
      * Parse memory limit string to bytes
+     * Private helper method for memory calculations
+     *
+     * @param string $limit Memory limit string (e.g., '128M', '1G')
+     * @return int Memory limit in bytes
      */
     private function parseMemoryLimit($limit)
     {
         if ($limit === '-1') return -1;
-        
+
         $value = (int)$limit;
         $unit = strtolower(substr($limit, -1));
-        
+
         switch ($unit) {
             case 'g': $value *= 1024;
             case 'm': $value *= 1024;
             case 'k': $value *= 1024;
         }
-        
+
         return $value;
     }
 }
 
-// Handle dashboard requests
+// Handle dashboard requests (backward compatibility)
 if (php_sapi_name() === 'cli-server' || basename($_SERVER['SCRIPT_NAME']) === 'PerformanceDashboardController.php') {
     // Include database connection
     require_once __DIR__ . '/../../server.php';
-    
+
     $controller = new PerformanceDashboardController($mysqli);
-    
+
     $action = $_GET['action'] ?? 'index';
-    
+
     switch ($action) {
         case 'api':
             $controller->getMetricsApi();

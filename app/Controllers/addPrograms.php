@@ -1,4 +1,31 @@
 <?php
+/**
+ * ⚠️ DEPRECATED - This file is deprecated as of Phase 4 Week 3 Day 4
+ *
+ * This procedural file has been deprecated in favor of the modernized
+ * HolidayProgramCreationController which extends BaseController.
+ *
+ * Migration Path:
+ * - Use: HolidayProgramCreationController->create() for program creation form
+ * - Use: HolidayProgramCreationController->store() for saving new programs
+ *
+ * This file is kept for backward compatibility only and will be removed
+ * in a future release. Please update your code to use the new controller.
+ *
+ * @deprecated Phase 4 Week 3 Day 4
+ * @see HolidayProgramCreationController
+ */
+
+// Log deprecation warning
+if (function_exists('error_log')) {
+    error_log(
+        '[DEPRECATED] addPrograms.php is deprecated. ' .
+        'Use HolidayProgramCreationController instead. ' .
+        'Called from: ' . ($_SERVER['REQUEST_URI'] ?? 'unknown') .
+        ' | IP: ' . ($_SERVER['REMOTE_ADDR'] ?? 'unknown')
+    );
+}
+
 session_start();
 // Database connection details
 require '../../server.php';
@@ -35,9 +62,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $materials_needed = sanitize_input($_POST['materials_needed']);
     $difficulty_level = sanitize_input($_POST['difficulty_level']);
 
-    $sql = "INSERT INTO clubhouse_programs (title, description, learning_outcomes, target_age_group, duration, max_participants, materials_needed, difficulty_level) 
+    $sql = "INSERT INTO clubhouse_programs (title, description, learning_outcomes, target_age_group, duration, max_participants, materials_needed, difficulty_level)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
-    
+
     $stmt = $conn->prepare($sql);
     $stmt->bind_param("sssssiis", $title, $description, $learning_outcomes, $target_age_group, $duration, $max_participants, $materials_needed, $difficulty_level);
 

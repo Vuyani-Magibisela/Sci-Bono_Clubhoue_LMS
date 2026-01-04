@@ -1,4 +1,32 @@
 <?php
+/**
+ * ⚠️ DEPRECATED - This file is deprecated as of Phase 4 Week 3 Day 4
+ *
+ * This procedural login controller has been deprecated in favor of the modernized
+ * HolidayProgramProfileController which extends BaseController.
+ *
+ * Migration Path:
+ * - Use: HolidayProgramProfileController->verifyEmail() for email verification
+ * - Use: HolidayProgramProfileController->createPassword() for password creation
+ * - Use: HolidayProgramProfileController->index() for profile access
+ *
+ * This file is kept for backward compatibility only and will be removed
+ * in a future release. Please update your code to use the new controller.
+ *
+ * @deprecated Phase 4 Week 3 Day 4
+ * @see HolidayProgramProfileController
+ */
+
+// Log deprecation warning
+if (function_exists('error_log')) {
+    error_log(
+        '[DEPRECATED] holidayProgramLoginC.php is deprecated. ' .
+        'Use HolidayProgramProfileController instead. ' .
+        'Called from: ' . ($_SERVER['REQUEST_URI'] ?? 'unknown') .
+        ' | IP: ' . ($_SERVER['REMOTE_ADDR'] ?? 'unknown')
+    );
+}
+
 session_start();
 
 // Fix paths using __DIR__

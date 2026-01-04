@@ -1,4 +1,34 @@
 <?php
+/**
+ * ⚠️ DEPRECATED - This file is deprecated as of Phase 4 Week 3 Day 4
+ *
+ * This procedural session timeout handler should be converted to middleware.
+ *
+ * Migration Path:
+ * - Recommended: Implement as middleware class in app/Middleware/SessionTimeout.php
+ * - Alternative: Integrate session timeout logic into BaseController
+ * - Use modern session management with:
+ *   - Session configuration in config files
+ *   - Middleware stack for session handling
+ *   - Event-driven session timeout notifications
+ *
+ * This file is kept for backward compatibility only and will be removed
+ * in a future release. Please migrate to a proper middleware implementation.
+ *
+ * @deprecated Phase 4 Week 3 Day 4
+ * @see Future: app/Middleware/SessionTimeout.php (to be created)
+ */
+
+// Log deprecation warning
+if (function_exists('error_log')) {
+    error_log(
+        '[DEPRECATED] sessionTimer.php is deprecated. ' .
+        'Migrate to middleware-based session management. ' .
+        'Called from: ' . ($_SERVER['REQUEST_URI'] ?? 'unknown') .
+        ' | IP: ' . ($_SERVER['REMOTE_ADDR'] ?? 'unknown')
+    );
+}
+
 ob_start();
 // Check if the session is not already started
 if (session_status() == PHP_SESSION_NONE) {
@@ -8,7 +38,7 @@ if (session_status() == PHP_SESSION_NONE) {
 // Database connection details
 require __DIR__ . '/../../server.php';
 
-// Set the inactivity timeout in seconds 
+// Set the inactivity timeout in seconds
 $inactivityTimeout = 900; // 15 minutes
 
 // Check if the last activity time is set in the session
