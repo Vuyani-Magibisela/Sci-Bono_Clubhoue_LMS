@@ -1,0 +1,459 @@
+{
+    "generated_at": "2026-01-05 22:46:32",
+    "php_version": "8.1.2-1ubuntu2.22",
+    "memory_limit": "-1",
+    "max_execution_time": "0",
+    "results": {
+        "CourseController::file_read": {
+            "execution_time_ms": 0.062,
+            "memory_used_bytes": 0,
+            "memory_used_mb": 0,
+            "peak_memory_mb": 2,
+            "query_count": 0,
+            "metadata": {
+                "status": "success"
+            },
+            "timestamp": "2026-01-05 22:46:32"
+        },
+        "CourseController::syntax_check": {
+            "execution_time_ms": 25.074,
+            "memory_used_bytes": 0,
+            "memory_used_mb": 0,
+            "peak_memory_mb": 2,
+            "query_count": 0,
+            "metadata": {
+                "status": "success"
+            },
+            "timestamp": "2026-01-05 22:46:32"
+        },
+        "CourseController::metrics": {
+            "execution_time_ms": 0.019,
+            "memory_used_bytes": 0,
+            "memory_used_mb": 0,
+            "peak_memory_mb": 2,
+            "query_count": 0,
+            "metadata": {
+                "file_size_bytes": 12497,
+                "file_size_kb": 12.2,
+                "total_lines": 346,
+                "code_lines": 210,
+                "comment_lines": 98,
+                "blank_lines": 38,
+                "methods": 16,
+                "classes": 2,
+                "status": "success"
+            },
+            "timestamp": "2026-01-05 22:46:32"
+        },
+        "LessonController::file_read": {
+            "execution_time_ms": 0.05,
+            "memory_used_bytes": 0,
+            "memory_used_mb": 0,
+            "peak_memory_mb": 2,
+            "query_count": 0,
+            "metadata": {
+                "status": "success"
+            },
+            "timestamp": "2026-01-05 22:46:32"
+        },
+        "LessonController::syntax_check": {
+            "execution_time_ms": 24.026,
+            "memory_used_bytes": 0,
+            "memory_used_mb": 0,
+            "peak_memory_mb": 2,
+            "query_count": 0,
+            "metadata": {
+                "status": "success"
+            },
+            "timestamp": "2026-01-05 22:46:32"
+        },
+        "LessonController::metrics": {
+            "execution_time_ms": 0.003,
+            "memory_used_bytes": 0,
+            "memory_used_mb": 0,
+            "peak_memory_mb": 2,
+            "query_count": 0,
+            "metadata": {
+                "file_size_bytes": 6230,
+                "file_size_kb": 6.08,
+                "total_lines": 164,
+                "code_lines": 68,
+                "comment_lines": 81,
+                "blank_lines": 15,
+                "methods": 6,
+                "classes": 2,
+                "status": "success"
+            },
+            "timestamp": "2026-01-05 22:46:32"
+        },
+        "UserController::file_read": {
+            "execution_time_ms": 0.02,
+            "memory_used_bytes": 0,
+            "memory_used_mb": 0,
+            "peak_memory_mb": 2,
+            "query_count": 0,
+            "metadata": {
+                "status": "success"
+            },
+            "timestamp": "2026-01-05 22:46:32"
+        },
+        "UserController::syntax_check": {
+            "execution_time_ms": 24.682,
+            "memory_used_bytes": 0,
+            "memory_used_mb": 0,
+            "peak_memory_mb": 2,
+            "query_count": 0,
+            "metadata": {
+                "status": "success"
+            },
+            "timestamp": "2026-01-05 22:46:32"
+        },
+        "UserController::metrics": {
+            "execution_time_ms": 0.002,
+            "memory_used_bytes": 0,
+            "memory_used_mb": 0,
+            "peak_memory_mb": 2,
+            "query_count": 0,
+            "metadata": {
+                "file_size_bytes": 12174,
+                "file_size_kb": 11.89,
+                "total_lines": 314,
+                "code_lines": 157,
+                "comment_lines": 106,
+                "blank_lines": 51,
+                "methods": 7,
+                "classes": 3,
+                "status": "success"
+            },
+            "timestamp": "2026-01-05 22:46:32"
+        },
+        "AttendanceRegisterController::file_read": {
+            "execution_time_ms": 0.011,
+            "memory_used_bytes": 0,
+            "memory_used_mb": 0,
+            "peak_memory_mb": 2,
+            "query_count": 0,
+            "metadata": {
+                "status": "success"
+            },
+            "timestamp": "2026-01-05 22:46:32"
+        },
+        "AttendanceRegisterController::syntax_check": {
+            "execution_time_ms": 22.933,
+            "memory_used_bytes": 0,
+            "memory_used_mb": 0,
+            "peak_memory_mb": 2,
+            "query_count": 0,
+            "metadata": {
+                "status": "success"
+            },
+            "timestamp": "2026-01-05 22:46:32"
+        },
+        "AttendanceRegisterController::metrics": {
+            "execution_time_ms": 0.002,
+            "memory_used_bytes": 0,
+            "memory_used_mb": 0,
+            "peak_memory_mb": 2,
+            "query_count": 0,
+            "metadata": {
+                "file_size_bytes": 6972,
+                "file_size_kb": 6.81,
+                "total_lines": 211,
+                "code_lines": 126,
+                "comment_lines": 55,
+                "blank_lines": 30,
+                "methods": 7,
+                "classes": 1,
+                "status": "success"
+            },
+            "timestamp": "2026-01-05 22:46:32"
+        },
+        "HolidayProgramController::file_read": {
+            "execution_time_ms": 0.029,
+            "memory_used_bytes": 0,
+            "memory_used_mb": 0,
+            "peak_memory_mb": 2,
+            "query_count": 0,
+            "metadata": {
+                "status": "success"
+            },
+            "timestamp": "2026-01-05 22:46:32"
+        },
+        "HolidayProgramController::syntax_check": {
+            "execution_time_ms": 22.667,
+            "memory_used_bytes": 0,
+            "memory_used_mb": 0,
+            "peak_memory_mb": 2,
+            "query_count": 0,
+            "metadata": {
+                "status": "success"
+            },
+            "timestamp": "2026-01-05 22:46:32"
+        },
+        "HolidayProgramController::metrics": {
+            "execution_time_ms": 0.002,
+            "memory_used_bytes": 0,
+            "memory_used_mb": 0,
+            "peak_memory_mb": 2,
+            "query_count": 0,
+            "metadata": {
+                "file_size_bytes": 7531,
+                "file_size_kb": 7.35,
+                "total_lines": 236,
+                "code_lines": 140,
+                "comment_lines": 62,
+                "blank_lines": 34,
+                "methods": 9,
+                "classes": 1,
+                "status": "success"
+            },
+            "timestamp": "2026-01-05 22:46:32"
+        },
+        "HolidayProgramAdminController::file_read": {
+            "execution_time_ms": 0.019,
+            "memory_used_bytes": 0,
+            "memory_used_mb": 0,
+            "peak_memory_mb": 2,
+            "query_count": 0,
+            "metadata": {
+                "status": "success"
+            },
+            "timestamp": "2026-01-05 22:46:32"
+        },
+        "HolidayProgramAdminController::syntax_check": {
+            "execution_time_ms": 21.087,
+            "memory_used_bytes": 0,
+            "memory_used_mb": 0,
+            "peak_memory_mb": 2,
+            "query_count": 0,
+            "metadata": {
+                "status": "success"
+            },
+            "timestamp": "2026-01-05 22:46:32"
+        },
+        "HolidayProgramAdminController::metrics": {
+            "execution_time_ms": 0.002,
+            "memory_used_bytes": 0,
+            "memory_used_mb": 0,
+            "peak_memory_mb": 2,
+            "query_count": 0,
+            "metadata": {
+                "file_size_bytes": 18752,
+                "file_size_kb": 18.31,
+                "total_lines": 559,
+                "code_lines": 351,
+                "comment_lines": 110,
+                "blank_lines": 98,
+                "methods": 14,
+                "classes": 1,
+                "status": "success"
+            },
+            "timestamp": "2026-01-05 22:46:32"
+        },
+        "HolidayProgramCreationController::file_read": {
+            "execution_time_ms": 0.016,
+            "memory_used_bytes": 0,
+            "memory_used_mb": 0,
+            "peak_memory_mb": 2,
+            "query_count": 0,
+            "metadata": {
+                "status": "success"
+            },
+            "timestamp": "2026-01-05 22:46:32"
+        },
+        "HolidayProgramCreationController::syntax_check": {
+            "execution_time_ms": 22.299,
+            "memory_used_bytes": 0,
+            "memory_used_mb": 0,
+            "peak_memory_mb": 2,
+            "query_count": 0,
+            "metadata": {
+                "status": "success"
+            },
+            "timestamp": "2026-01-05 22:46:32"
+        },
+        "HolidayProgramCreationController::metrics": {
+            "execution_time_ms": 0.002,
+            "memory_used_bytes": 0,
+            "memory_used_mb": 0,
+            "peak_memory_mb": 2,
+            "query_count": 0,
+            "metadata": {
+                "file_size_bytes": 24879,
+                "file_size_kb": 24.3,
+                "total_lines": 739,
+                "code_lines": 483,
+                "comment_lines": 138,
+                "blank_lines": 118,
+                "methods": 16,
+                "classes": 1,
+                "status": "success"
+            },
+            "timestamp": "2026-01-05 22:46:32"
+        },
+        "HolidayProgramEmailController::file_read": {
+            "execution_time_ms": 0.018,
+            "memory_used_bytes": 0,
+            "memory_used_mb": 0,
+            "peak_memory_mb": 2,
+            "query_count": 0,
+            "metadata": {
+                "status": "success"
+            },
+            "timestamp": "2026-01-05 22:46:32"
+        },
+        "HolidayProgramEmailController::syntax_check": {
+            "execution_time_ms": 39.555,
+            "memory_used_bytes": 0,
+            "memory_used_mb": 0,
+            "peak_memory_mb": 2,
+            "query_count": 0,
+            "metadata": {
+                "status": "success"
+            },
+            "timestamp": "2026-01-05 22:46:32"
+        },
+        "HolidayProgramEmailController::metrics": {
+            "execution_time_ms": 0.001,
+            "memory_used_bytes": 0,
+            "memory_used_mb": 0,
+            "peak_memory_mb": 2,
+            "query_count": 0,
+            "metadata": {
+                "file_size_bytes": 13823,
+                "file_size_kb": 13.5,
+                "total_lines": 401,
+                "code_lines": 268,
+                "comment_lines": 68,
+                "blank_lines": 65,
+                "methods": 8,
+                "classes": 1,
+                "status": "success"
+            },
+            "timestamp": "2026-01-05 22:46:32"
+        },
+        "HolidayProgramProfileController::file_read": {
+            "execution_time_ms": 0.028,
+            "memory_used_bytes": 0,
+            "memory_used_mb": 0,
+            "peak_memory_mb": 2,
+            "query_count": 0,
+            "metadata": {
+                "status": "success"
+            },
+            "timestamp": "2026-01-05 22:46:32"
+        },
+        "HolidayProgramProfileController::syntax_check": {
+            "execution_time_ms": 23.205,
+            "memory_used_bytes": 0,
+            "memory_used_mb": 0,
+            "peak_memory_mb": 2,
+            "query_count": 0,
+            "metadata": {
+                "status": "success"
+            },
+            "timestamp": "2026-01-05 22:46:32"
+        },
+        "HolidayProgramProfileController::metrics": {
+            "execution_time_ms": 0.003,
+            "memory_used_bytes": 0,
+            "memory_used_mb": 0,
+            "peak_memory_mb": 2,
+            "query_count": 0,
+            "metadata": {
+                "file_size_bytes": 21902,
+                "file_size_kb": 21.39,
+                "total_lines": 612,
+                "code_lines": 426,
+                "comment_lines": 103,
+                "blank_lines": 83,
+                "methods": 12,
+                "classes": 1,
+                "status": "success"
+            },
+            "timestamp": "2026-01-05 22:46:32"
+        },
+        "PerformanceDashboardController::file_read": {
+            "execution_time_ms": 0.035,
+            "memory_used_bytes": 0,
+            "memory_used_mb": 0,
+            "peak_memory_mb": 2,
+            "query_count": 0,
+            "metadata": {
+                "status": "success"
+            },
+            "timestamp": "2026-01-05 22:46:32"
+        },
+        "PerformanceDashboardController::syntax_check": {
+            "execution_time_ms": 29.147,
+            "memory_used_bytes": 0,
+            "memory_used_mb": 0,
+            "peak_memory_mb": 2,
+            "query_count": 0,
+            "metadata": {
+                "status": "success"
+            },
+            "timestamp": "2026-01-05 22:46:32"
+        },
+        "PerformanceDashboardController::metrics": {
+            "execution_time_ms": 0.003,
+            "memory_used_bytes": 0,
+            "memory_used_mb": 0,
+            "peak_memory_mb": 2,
+            "query_count": 0,
+            "metadata": {
+                "file_size_bytes": 32120,
+                "file_size_kb": 31.37,
+                "total_lines": 784,
+                "code_lines": 598,
+                "comment_lines": 92,
+                "blank_lines": 94,
+                "methods": 13,
+                "classes": 1,
+                "status": "success"
+            },
+            "timestamp": "2026-01-05 22:46:32"
+        },
+        "AdminLessonController::file_read": {
+            "execution_time_ms": 0.021,
+            "memory_used_bytes": 0,
+            "memory_used_mb": 0,
+            "peak_memory_mb": 2,
+            "query_count": 0,
+            "metadata": {
+                "status": "success"
+            },
+            "timestamp": "2026-01-05 22:46:32"
+        },
+        "AdminLessonController::syntax_check": {
+            "execution_time_ms": 31.331,
+            "memory_used_bytes": 0,
+            "memory_used_mb": 0,
+            "peak_memory_mb": 2,
+            "query_count": 0,
+            "metadata": {
+                "status": "success"
+            },
+            "timestamp": "2026-01-05 22:46:32"
+        },
+        "AdminLessonController::metrics": {
+            "execution_time_ms": 0.003,
+            "memory_used_bytes": 0,
+            "memory_used_mb": 0,
+            "peak_memory_mb": 2,
+            "query_count": 0,
+            "metadata": {
+                "file_size_bytes": 13400,
+                "file_size_kb": 13.09,
+                "total_lines": 407,
+                "code_lines": 265,
+                "comment_lines": 87,
+                "blank_lines": 55,
+                "methods": 9,
+                "classes": 1,
+                "status": "success"
+            },
+            "timestamp": "2026-01-05 22:46:32"
+        }
+    }
+}

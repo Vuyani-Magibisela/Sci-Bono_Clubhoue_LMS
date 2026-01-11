@@ -4,7 +4,7 @@ if(session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-if(isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
+if(isset($_SESSION['user_id']) && !empty($_SESSION['user_id'])) {
     $destination = "home.php";
 } else {
     $destination = "login.php";

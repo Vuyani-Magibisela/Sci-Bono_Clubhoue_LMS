@@ -281,7 +281,7 @@
 
             <!-- Login Form -->
             <form action="/Sci-Bono_Clubhoue_LMS/holiday-login" method="POST">
-                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
+                <input type="hidden" name="_csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
 
                 <div class="form-group">
                     <label for="email">Email Address</label>

@@ -388,7 +388,7 @@
             },
 
             getTokenField: function() {
-                return '<input type="hidden" name="csrf_token" value="' + this.getToken() + '">';
+                return '<input type="hidden" name="_csrf_token" value="' + this.getToken() + '">';
             }
         };
 

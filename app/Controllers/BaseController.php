@@ -118,6 +118,11 @@ abstract class BaseController {
      * Redirect to URL
      */
     protected function redirect($url, $statusCode = 302) {
+        // Prepend base path if URL is relative (starts with /) and doesn't already have base path
+        if (!empty($url) && $url[0] === '/' && strpos($url, '/Sci-Bono_Clubhoue_LMS') !== 0) {
+            $url = '/Sci-Bono_Clubhoue_LMS' . $url;
+        }
+
         http_response_code($statusCode);
         header("Location: {$url}");
         exit;

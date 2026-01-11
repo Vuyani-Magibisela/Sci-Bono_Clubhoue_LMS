@@ -83,7 +83,7 @@ function isNavLinkActive($link, $currentPage) {
                 </li>
             <?php endif; ?>
             
-            <?php if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true): ?>
+            <?php if (!isset($_SESSION['user_id']) || empty($_SESSION['user_id'])): ?>
                 <li class="<?php echo isNavLinkActive('signin.php', $currentPage) ? 'active' : ''; ?>">
                     <a href="<?php echo $navBasePath; ?>signin.php">
                         <!-- SVG Sign In Icon -->
@@ -97,8 +97,8 @@ function isNavLinkActive($link, $currentPage) {
                 </li>
             <?php endif; ?>
 
-            <?php if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true): ?>
-                 <?php 
+            <?php if (isset($_SESSION['user_id']) && !empty($_SESSION['user_id'])): ?>
+                 <?php
                  // Determine if Settings or User Management is the active page
                  $isSettingsActive = isNavLinkActive('settings.php', $currentPage) || isNavLinkActive('users.php', $currentPage);
                  ?>
@@ -126,7 +126,7 @@ function isNavLinkActive($link, $currentPage) {
         </ul>
     </div>
 
-    <?php if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true): ?>
+    <?php if (isset($_SESSION['user_id']) && !empty($_SESSION['user_id'])): ?>
         <div class="logout">
             <a href="<?php echo $navBasePath; ?>logout_process.php"><button>Logout</button></a>
         </div>

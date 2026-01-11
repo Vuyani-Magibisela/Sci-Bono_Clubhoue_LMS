@@ -424,18 +424,10 @@ class AuthController extends BaseController {
             unset($_SESSION['intended_url']);
             return $url;
         }
-        
-        // Default redirects based on user type
-        switch ($user['user_type']) {
-            case 'admin':
-                return '/admin/dashboard';
-            case 'mentor':
-                return '/mentor/dashboard';
-            case 'member':
-            case 'student':
-            default:
-                return '/dashboard';
-        }
+
+        // Redirect all users to home page after login
+        // Users can then manually navigate to their respective dashboards
+        return '/';
     }
     
     private function handleError($message, $context = []) {

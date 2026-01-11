@@ -41,7 +41,7 @@
 
         <div class="form-content">
             <form id="visitor-registration-form" method="post" action="/visitor/register">
-                <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token'] ?? ''; ?>">
+                <input type="hidden" name="_csrf_token" value="<?php echo $_SESSION['csrf_token'] ?? ''; ?>">
 
                 <div class="form-group">
                     <label for="name" class="form-label">First Name <span class="required">*</span></label>

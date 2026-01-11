@@ -55,7 +55,7 @@
 
                 <div class="settings-content">
                     <form id="notifications-form" method="post">
-                        <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token'] ?? ''; ?>">
+                        <input type="hidden" name="_csrf_token" value="<?php echo $_SESSION['csrf_token'] ?? ''; ?>">
 
                         <!-- Email Notifications -->
                         <div class="form-section">

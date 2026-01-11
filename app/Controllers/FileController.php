@@ -21,7 +21,7 @@ class FileController extends BaseController {
      * Middleware: AuthMiddleware
      */
     public function upload() {
-        if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
+        if (!isset($_SESSION['user_id']) || empty($_SESSION['user_id'])) {
             http_response_code(401);
             echo json_encode(['error' => 'Unauthorized']);
             exit;
@@ -46,7 +46,7 @@ class FileController extends BaseController {
      * Middleware: AuthMiddleware
      */
     public function delete($id) {
-        if (!isset($_SESSION['loggedin']) || $_SESSION['loggedin'] !== true) {
+        if (!isset($_SESSION['user_id']) || empty($_SESSION['user_id'])) {
             http_response_code(401);
             echo json_encode(['error' => 'Unauthorized']);
             exit;

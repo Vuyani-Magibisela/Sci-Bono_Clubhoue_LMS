@@ -30,7 +30,7 @@
 
             <div style="background: #fff; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); padding: 2rem;">
                 <form id="edit-visitor-form" method="post" action="/visitors/<?php echo $visitor['id']; ?>">
-                    <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token'] ?? ''; ?>">
+                    <input type="hidden" name="_csrf_token" value="<?php echo $_SESSION['csrf_token'] ?? ''; ?>">
                     <input type="hidden" name="_method" value="PUT">
 
                     <div class="form-section">

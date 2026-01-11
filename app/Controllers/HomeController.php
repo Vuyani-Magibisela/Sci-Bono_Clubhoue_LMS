@@ -20,28 +20,14 @@ class HomeController extends BaseController {
      * Name: home
      */
     public function index() {
-        // TODO: Migrate functionality from /home.php
-        
-        // Check if user is logged in
-        if (isset($_SESSION['loggedin']) && $_SESSION['loggedin'] === true) {
-            // Redirect to appropriate dashboard based on user type
-            $userType = $_SESSION['user_type'] ?? 'member';
-            
-            if ($userType === 'admin') {
-                header('Location: /Sci-Bono_Clubhoue_LMS/admin');
-                exit;
-            } elseif ($userType === 'mentor') {
-                header('Location: /Sci-Bono_Clubhoue_LMS/mentor');
-                exit;
-            } else {
-                header('Location: /Sci-Bono_Clubhoue_LMS/dashboard');
-                exit;
-            }
-        }
-        
-        // Not logged in - show landing page
-        // For now, redirect to login
-        header('Location: /Sci-Bono_Clubhoue_LMS/login');
-        exit;
+        // Display home/landing page for all users (logged in or not)
+        // The view will show different content based on login status
+
+        $data = [
+            'page_title' => 'Welcome - Sci-Bono Clubhouse',
+        ];
+
+        // Render the home view
+        $this->view('home', $data);
     }
 }

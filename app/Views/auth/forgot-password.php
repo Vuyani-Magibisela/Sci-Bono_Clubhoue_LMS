@@ -61,7 +61,7 @@
 
                 <form name="forgotPasswordForm" action="/Sci-Bono_Clubhoue_LMS/forgot-password" method="post" onsubmit="return validateForm()">
                     <!-- CSRF Token -->
-                    <input type="hidden" name="csrf_token" value="<?php echo $csrf_token ?? ''; ?>">
+                    <input type="hidden" name="_csrf_token" value="<?php echo $csrf_token ?? ''; ?>">
 
                     <label for="email">Email Address:</label>
                     <input class="input_field"

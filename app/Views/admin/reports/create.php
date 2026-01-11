@@ -121,7 +121,7 @@
                 <!-- Single Report Form -->
                 <div id="single-tab" class="tab-content active">
                     <form id="single-report-form" method="post" action="/reports" enctype="multipart/form-data">
-                        <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token'] ?? ''; ?>">
+                        <input type="hidden" name="_csrf_token" value="<?php echo $_SESSION['csrf_token'] ?? ''; ?>">
 
                         <div class="form-section">
                             <div class="form-section-content">
@@ -189,7 +189,7 @@
                     </div>
 
                     <form id="batch-report-form" method="post" action="/reports/batch" enctype="multipart/form-data">
-                        <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token'] ?? ''; ?>">
+                        <input type="hidden" name="_csrf_token" value="<?php echo $_SESSION['csrf_token'] ?? ''; ?>">
 
                         <div id="batch-reports-container">
                             <!-- Initial batch report item -->

@@ -85,7 +85,7 @@
 
                 <form name="changePasswordForm" action="/Sci-Bono_Clubhoue_LMS/change-password" method="post" onsubmit="return validateForm()">
                     <!-- CSRF Token -->
-                    <input type="hidden" name="csrf_token" value="<?php echo $csrf_token ?? ''; ?>">
+                    <input type="hidden" name="_csrf_token" value="<?php echo $csrf_token ?? ''; ?>">
 
                     <label for="current_password">Current Password:</label>
                     <input class="input_field"

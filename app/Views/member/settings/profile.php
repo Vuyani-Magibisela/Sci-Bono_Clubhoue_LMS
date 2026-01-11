@@ -127,7 +127,7 @@
 
                     <!-- Edit Profile Form -->
                     <form id="settings-form" action="/settings/profile" method="post" enctype="multipart/form-data">
-                        <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token'] ?? ''; ?>">
+                        <input type="hidden" name="_csrf_token" value="<?php echo $_SESSION['csrf_token'] ?? ''; ?>">
 
                         <!-- Personal Details Section -->
                         <div class="form-section">

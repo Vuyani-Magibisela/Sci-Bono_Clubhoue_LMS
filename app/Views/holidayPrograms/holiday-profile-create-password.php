@@ -305,7 +305,7 @@
 
             <!-- Password Form -->
             <form action="/Sci-Bono_Clubhoue_LMS/holiday-create-password" method="POST" id="passwordForm">
-                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
+                <input type="hidden" name="_csrf_token" value="<?php echo htmlspecialchars($csrfToken); ?>">
 
                 <div class="form-group">
                     <label for="password">Password</label>

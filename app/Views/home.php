@@ -149,17 +149,52 @@
                 </svg>
             </div>
 
-            <div class="signup">
-                <a href="/Sci-Bono_Clubhoue_LMS/signup" class="signupBtn">Sign Up</a>
-            </div>
-            
-            <p>Already a member</p>
-            
-            <div>
-                <a href="/Sci-Bono_Clubhoue_LMS/login" class="loginBtn">Log In</a>
-            </div>
-            
-            <!-- Updated Attendance Register Button -->
+            <?php
+            // Check if user is logged in
+            $isLoggedIn = isset($_SESSION['user_id']) && !empty($_SESSION['user_id']);
+            $userType = $_SESSION['user_type'] ?? '';
+            $userName = $_SESSION['name'] ?? '';
+
+            if ($isLoggedIn): ?>
+                <!-- Logged In User View -->
+                <div style="text-align: center; margin-bottom: 1.5rem;">
+                    <p style="font-size: 1.2rem; color: #333; margin-bottom: 0.5rem;">
+                        Welcome back, <strong><?php echo htmlspecialchars($userName); ?></strong>!
+                    </p>
+                    <p style="font-size: 0.9rem; color: #666;">
+                        Role: <span style="text-transform: capitalize; color: #F29A2E; font-weight: 600;"><?php echo htmlspecialchars($userType); ?></span>
+                    </p>
+                </div>
+
+                <!-- Dashboard Navigation Buttons -->
+                <?php if ($userType === 'admin'): ?>
+                    <div>
+                        <a href="/Sci-Bono_Clubhoue_LMS/admin" class="loginBtn">Go to Admin Dashboard</a>
+                    </div>
+                <?php elseif ($userType === 'mentor'): ?>
+                    <div>
+                        <a href="/Sci-Bono_Clubhoue_LMS/mentor" class="loginBtn">Go to Mentor Dashboard</a>
+                    </div>
+                <?php else: ?>
+                    <div>
+                        <a href="/Sci-Bono_Clubhoue_LMS/dashboard" class="loginBtn">Go to My Dashboard</a>
+                    </div>
+                <?php endif; ?>
+
+            <?php else: ?>
+                <!-- Not Logged In View -->
+                <div class="signup">
+                    <a href="/Sci-Bono_Clubhoue_LMS/signup" class="signupBtn">Sign Up</a>
+                </div>
+
+                <p>Already a member</p>
+
+                <div>
+                    <a href="/Sci-Bono_Clubhoue_LMS/login" class="loginBtn">Log In</a>
+                </div>
+            <?php endif; ?>
+
+            <!-- Updated Attendance Register Button (Always visible) -->
             <div>
                 <a href="/Sci-Bono_Clubhoue_LMS/attendance" class="attendance-btn" title="Daily Attendance Register">
                     <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -167,12 +202,23 @@
                     </svg>
                     Sign Attendance Register
                 </a>
-
             </div>
             <div class="live-indicator">
                 <div class="pulse-dot"></div>
                 <span>Live attendance tracking</span>
             </div>
+
+            <?php if ($isLoggedIn): ?>
+                <!-- Logout Button for Logged In Users -->
+                <div style="margin-top: 1rem;">
+                    <form action="/Sci-Bono_Clubhoue_LMS/logout" method="POST" style="display: inline;">
+                        <input type="hidden" name="_csrf_token" value="<?php echo $_SESSION['_csrf_token'] ?? ''; ?>">
+                        <button type="submit" style="background: #e74c3c; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 8px; font-size: 0.95rem; cursor: pointer; font-weight: 600;">
+                            Logout
+                        </button>
+                    </form>
+                </div>
+            <?php endif; ?>
         </div>
     </main>
 

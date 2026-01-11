@@ -1,0 +1,253 @@
+{
+    "total": 61,
+    "passed": 55,
+    "failed": 6,
+    "success_rate": 90.16,
+    "tests": [
+        {
+            "status": "pass",
+            "description": "CourseController file exists"
+        },
+        {
+            "status": "pass",
+            "description": "CourseController syntax valid"
+        },
+        {
+            "status": "fail",
+            "description": "CourseController extends BaseController"
+        },
+        {
+            "status": "pass",
+            "description": "CourseController has deprecation notice"
+        },
+        {
+            "status": "pass",
+            "description": "CourseController has RBAC protection"
+        },
+        {
+            "status": "pass",
+            "description": "CourseController has backup file"
+        },
+        {
+            "status": "pass",
+            "description": "LessonController file exists"
+        },
+        {
+            "status": "pass",
+            "description": "LessonController syntax valid"
+        },
+        {
+            "status": "fail",
+            "description": "LessonController extends BaseController"
+        },
+        {
+            "status": "pass",
+            "description": "LessonController has deprecation notice"
+        },
+        {
+            "status": "pass",
+            "description": "LessonController has RBAC protection"
+        },
+        {
+            "status": "pass",
+            "description": "LessonController has backup file"
+        },
+        {
+            "status": "pass",
+            "description": "UserController file exists"
+        },
+        {
+            "status": "pass",
+            "description": "UserController syntax valid"
+        },
+        {
+            "status": "fail",
+            "description": "UserController extends BaseController"
+        },
+        {
+            "status": "pass",
+            "description": "UserController has deprecation notice"
+        },
+        {
+            "status": "pass",
+            "description": "UserController has RBAC protection"
+        },
+        {
+            "status": "pass",
+            "description": "UserController has backup file"
+        },
+        {
+            "status": "pass",
+            "description": "AttendanceRegisterController file exists"
+        },
+        {
+            "status": "pass",
+            "description": "AttendanceRegisterController syntax valid"
+        },
+        {
+            "status": "pass",
+            "description": "AttendanceRegisterController extends BaseController"
+        },
+        {
+            "status": "pass",
+            "description": "AttendanceRegisterController has RBAC protection"
+        },
+        {
+            "status": "pass",
+            "description": "AttendanceRegisterController has backup file"
+        },
+        {
+            "status": "pass",
+            "description": "HolidayProgramController file exists"
+        },
+        {
+            "status": "pass",
+            "description": "HolidayProgramController syntax valid"
+        },
+        {
+            "status": "pass",
+            "description": "HolidayProgramController extends BaseController"
+        },
+        {
+            "status": "fail",
+            "description": "HolidayProgramController has RBAC protection"
+        },
+        {
+            "status": "pass",
+            "description": "HolidayProgramController has backup file"
+        },
+        {
+            "status": "pass",
+            "description": "HolidayProgramAdminController file exists"
+        },
+        {
+            "status": "pass",
+            "description": "HolidayProgramAdminController syntax valid"
+        },
+        {
+            "status": "pass",
+            "description": "HolidayProgramAdminController extends BaseController"
+        },
+        {
+            "status": "pass",
+            "description": "HolidayProgramAdminController has RBAC protection"
+        },
+        {
+            "status": "pass",
+            "description": "HolidayProgramAdminController has backup file"
+        },
+        {
+            "status": "pass",
+            "description": "HolidayProgramCreationController file exists"
+        },
+        {
+            "status": "pass",
+            "description": "HolidayProgramCreationController syntax valid"
+        },
+        {
+            "status": "pass",
+            "description": "HolidayProgramCreationController extends BaseController"
+        },
+        {
+            "status": "pass",
+            "description": "HolidayProgramCreationController has RBAC protection"
+        },
+        {
+            "status": "pass",
+            "description": "HolidayProgramCreationController has backup file"
+        },
+        {
+            "status": "pass",
+            "description": "HolidayProgramEmailController file exists"
+        },
+        {
+            "status": "pass",
+            "description": "HolidayProgramEmailController syntax valid"
+        },
+        {
+            "status": "pass",
+            "description": "HolidayProgramEmailController extends BaseController"
+        },
+        {
+            "status": "fail",
+            "description": "HolidayProgramEmailController has RBAC protection"
+        },
+        {
+            "status": "pass",
+            "description": "HolidayProgramEmailController has backup file"
+        },
+        {
+            "status": "pass",
+            "description": "HolidayProgramProfileController file exists"
+        },
+        {
+            "status": "pass",
+            "description": "HolidayProgramProfileController syntax valid"
+        },
+        {
+            "status": "pass",
+            "description": "HolidayProgramProfileController extends BaseController"
+        },
+        {
+            "status": "fail",
+            "description": "HolidayProgramProfileController has RBAC protection"
+        },
+        {
+            "status": "pass",
+            "description": "HolidayProgramProfileController has backup file"
+        },
+        {
+            "status": "pass",
+            "description": "PerformanceDashboardController file exists"
+        },
+        {
+            "status": "pass",
+            "description": "PerformanceDashboardController syntax valid"
+        },
+        {
+            "status": "pass",
+            "description": "PerformanceDashboardController extends BaseController"
+        },
+        {
+            "status": "pass",
+            "description": "PerformanceDashboardController has RBAC protection"
+        },
+        {
+            "status": "pass",
+            "description": "PerformanceDashboardController has backup file"
+        },
+        {
+            "status": "pass",
+            "description": "AdminLessonController file exists"
+        },
+        {
+            "status": "pass",
+            "description": "AdminLessonController syntax valid"
+        },
+        {
+            "status": "pass",
+            "description": "AdminLessonController extends BaseController"
+        },
+        {
+            "status": "pass",
+            "description": "AdminLessonController has namespace"
+        },
+        {
+            "status": "pass",
+            "description": "AdminLessonController has RBAC protection"
+        },
+        {
+            "status": "pass",
+            "description": "AdminLessonController has CSRF protection"
+        },
+        {
+            "status": "pass",
+            "description": "AdminLessonController has activity logging"
+        },
+        {
+            "status": "pass",
+            "description": "AdminLessonController has backup file"
+        }
+    ],
+    "timestamp": "2026-01-05 22:45:26"
+}

@@ -26,12 +26,18 @@ class RateLimitMiddleware {
     public function handle($action = 'default') {
         $identifier = $this->getIdentifier();
         $limit = $this->limits[$action] ?? $this->limits['default'];
-        
+
+        // Get current request count and remaining requests
+        $stats = $this->getRateLimitStats($identifier, $action, $limit);
+
+        // Add rate limit headers to response
+        $this->addRateLimitHeaders($limit['requests'], $stats['remaining'], $stats['reset']);
+
         if ($this->isRateLimited($identifier, $action, $limit)) {
             $this->handleRateLimit($action, $limit);
             return false;
         }
-        
+
         $this->recordRequest($identifier, $action);
         return true;
     }
@@ -97,23 +103,35 @@ class RateLimitMiddleware {
     
     private function handleRateLimit($action, $limit) {
         $retryAfter = $limit['window'];
-        
-        header("Retry-After: {$retryAfter}");
+        $resetTime = time() + $retryAfter;
+
+        // Add rate limit headers (remaining = 0 since limit exceeded)
+        if (!headers_sent()) {
+            header("X-RateLimit-Limit: {$limit['requests']}");
+            header("X-RateLimit-Remaining: 0");
+            header("X-RateLimit-Reset: {$resetTime}");
+            header("Retry-After: {$retryAfter}");
+        }
+
         http_response_code(429);
-        
+
         if ($this->isAjaxRequest()) {
-            header('Content-Type: application/json');
+            if (!headers_sent()) {
+                header('Content-Type: application/json');
+            }
             echo json_encode([
                 'error' => true,
                 'message' => 'Rate limit exceeded. Please try again later.',
                 'code' => 'RATE_LIMIT_EXCEEDED',
                 'retry_after' => $retryAfter,
+                'reset_at' => $resetTime,
+                'limit' => $limit['requests'],
                 'action' => $action
             ]);
         } else {
             $this->showRateLimitPage($retryAfter);
         }
-        
+
         exit;
     }
     
@@ -209,19 +227,83 @@ class RateLimitMiddleware {
         $identifier = $this->getIdentifier();
         $limit = $this->limits[$action] ?? $this->limits['default'];
         $windowStart = time() - $limit['window'];
-        
-        $sql = "SELECT COUNT(*) as request_count 
-                FROM rate_limits 
-                WHERE identifier = ? 
-                AND action = ? 
+
+        $sql = "SELECT COUNT(*) as request_count
+                FROM rate_limits
+                WHERE identifier = ?
+                AND action = ?
                 AND timestamp > ?";
-        
+
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param("ssi", $identifier, $action, $windowStart);
         $stmt->execute();
         $result = $stmt->get_result();
         $row = $result->fetch_assoc();
-        
+
         return max(0, $limit['requests'] - $row['request_count']);
+    }
+
+    /**
+     * Get rate limit statistics (remaining, reset time)
+     *
+     * @param string $identifier User/IP identifier
+     * @param string $action Rate limit action
+     * @param array $limit Limit configuration
+     * @return array ['remaining' => int, 'reset' => int, 'current' => int]
+     */
+    private function getRateLimitStats($identifier, $action, $limit) {
+        $windowStart = time() - $limit['window'];
+        $resetTime = time() + $limit['window'];
+
+        $sql = "SELECT COUNT(*) as request_count
+                FROM rate_limits
+                WHERE identifier = ?
+                AND action = ?
+                AND timestamp > ?";
+
+        $stmt = $this->conn->prepare($sql);
+        if (!$stmt) {
+            // Fail gracefully
+            return [
+                'remaining' => $limit['requests'],
+                'reset' => $resetTime,
+                'current' => 0
+            ];
+        }
+
+        $stmt->bind_param("ssi", $identifier, $action, $windowStart);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $row = $result->fetch_assoc();
+
+        $currentRequests = (int)$row['request_count'];
+        $remaining = max(0, $limit['requests'] - $currentRequests);
+
+        return [
+            'remaining' => $remaining,
+            'reset' => $resetTime,
+            'current' => $currentRequests
+        ];
+    }
+
+    /**
+     * Add rate limit headers to response
+     *
+     * Adds standard rate limit headers:
+     * - X-RateLimit-Limit: Maximum requests allowed
+     * - X-RateLimit-Remaining: Requests remaining in current window
+     * - X-RateLimit-Reset: Unix timestamp when limit resets
+     *
+     * @param int $limit Maximum requests allowed
+     * @param int $remaining Requests remaining
+     * @param int $reset Reset timestamp
+     */
+    private function addRateLimitHeaders($limit, $remaining, $reset) {
+        // Only add headers if not already sent (for testing compatibility)
+        if (!headers_sent()) {
+            header("X-RateLimit-Limit: {$limit}");
+            header("X-RateLimit-Remaining: {$remaining}");
+            header("X-RateLimit-Reset: {$reset}");
+        }
     }
 }

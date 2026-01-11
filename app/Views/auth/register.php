@@ -75,7 +75,7 @@
 
             <form id="signup_form" method="POST" action="/Sci-Bono_Clubhoue_LMS/signup" onsubmit="return validateForm()">
                 <!-- CSRF Token -->
-                <input type="hidden" name="csrf_token" value="<?php echo $csrf_token ?? ''; ?>">
+                <input type="hidden" name="_csrf_token" value="<?php echo $csrf_token ?? ''; ?>">
 
                 <div class="form-row">
                     <div class="form-group">

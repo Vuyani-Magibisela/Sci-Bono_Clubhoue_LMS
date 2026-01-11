@@ -1,0 +1,272 @@
+{
+    "total": 66,
+    "passed": 57,
+    "failed": 9,
+    "success_rate": 86.36,
+    "tests": [
+        {
+            "status": "fail",
+            "description": "CourseController wrapper exists"
+        },
+        {
+            "status": "fail",
+            "description": "CourseController extends BaseController"
+        },
+        {
+            "status": "fail",
+            "description": "LessonController wrapper exists"
+        },
+        {
+            "status": "fail",
+            "description": "LessonController extends BaseController"
+        },
+        {
+            "status": "fail",
+            "description": "UserController wrapper exists"
+        },
+        {
+            "status": "fail",
+            "description": "UserController extends BaseController"
+        },
+        {
+            "status": "pass",
+            "description": "AttendanceRegisterController exists"
+        },
+        {
+            "status": "pass",
+            "description": "AttendanceRegisterController syntax valid"
+        },
+        {
+            "status": "pass",
+            "description": "CourseController backup exists"
+        },
+        {
+            "status": "pass",
+            "description": "AttendanceRegisterController backup exists"
+        },
+        {
+            "status": "pass",
+            "description": "HolidayProgramController file exists"
+        },
+        {
+            "status": "pass",
+            "description": "HolidayProgramController syntax valid"
+        },
+        {
+            "status": "pass",
+            "description": "HolidayProgramController extends BaseController"
+        },
+        {
+            "status": "pass",
+            "description": "HolidayProgramController backup exists"
+        },
+        {
+            "status": "pass",
+            "description": "HolidayProgramEmailController file exists"
+        },
+        {
+            "status": "pass",
+            "description": "HolidayProgramEmailController syntax valid"
+        },
+        {
+            "status": "pass",
+            "description": "HolidayProgramEmailController extends BaseController"
+        },
+        {
+            "status": "pass",
+            "description": "HolidayProgramEmailController backup exists"
+        },
+        {
+            "status": "pass",
+            "description": "HolidayProgramAdminController file exists"
+        },
+        {
+            "status": "pass",
+            "description": "HolidayProgramAdminController syntax valid"
+        },
+        {
+            "status": "pass",
+            "description": "HolidayProgramAdminController extends BaseController"
+        },
+        {
+            "status": "pass",
+            "description": "HolidayProgramAdminController backup exists"
+        },
+        {
+            "status": "pass",
+            "description": "HolidayProgramProfileController file exists"
+        },
+        {
+            "status": "pass",
+            "description": "HolidayProgramProfileController syntax valid"
+        },
+        {
+            "status": "pass",
+            "description": "HolidayProgramProfileController extends BaseController"
+        },
+        {
+            "status": "pass",
+            "description": "HolidayProgramProfileController backup exists"
+        },
+        {
+            "status": "pass",
+            "description": "HolidayProgramCreationController file exists"
+        },
+        {
+            "status": "pass",
+            "description": "HolidayProgramCreationController syntax valid"
+        },
+        {
+            "status": "pass",
+            "description": "HolidayProgramCreationController extends BaseController"
+        },
+        {
+            "status": "pass",
+            "description": "HolidayProgramCreationController backup exists"
+        },
+        {
+            "status": "pass",
+            "description": "PerformanceDashboardController file exists"
+        },
+        {
+            "status": "pass",
+            "description": "PerformanceDashboardController syntax valid"
+        },
+        {
+            "status": "pass",
+            "description": "PerformanceDashboardController extends BaseController"
+        },
+        {
+            "status": "pass",
+            "description": "PerformanceDashboardController backup exists"
+        },
+        {
+            "status": "pass",
+            "description": "PerformanceDashboardController has role protection"
+        },
+        {
+            "status": "pass",
+            "description": "PerformanceDashboardController has CSRF validation"
+        },
+        {
+            "status": "pass",
+            "description": "PerformanceDashboardController has activity logging"
+        },
+        {
+            "status": "pass",
+            "description": "addPrograms.php exists"
+        },
+        {
+            "status": "pass",
+            "description": "addPrograms.php syntax valid"
+        },
+        {
+            "status": "pass",
+            "description": "addPrograms.php has deprecation notice"
+        },
+        {
+            "status": "pass",
+            "description": "addPrograms.php has error_log deprecation"
+        },
+        {
+            "status": "pass",
+            "description": "addPrograms.php has migration path documented"
+        },
+        {
+            "status": "pass",
+            "description": "holidayProgramLoginC.php exists"
+        },
+        {
+            "status": "pass",
+            "description": "holidayProgramLoginC.php syntax valid"
+        },
+        {
+            "status": "pass",
+            "description": "holidayProgramLoginC.php has deprecation notice"
+        },
+        {
+            "status": "pass",
+            "description": "holidayProgramLoginC.php has error_log deprecation"
+        },
+        {
+            "status": "pass",
+            "description": "holidayProgramLoginC.php has migration path documented"
+        },
+        {
+            "status": "pass",
+            "description": "send-profile-email.php exists"
+        },
+        {
+            "status": "pass",
+            "description": "send-profile-email.php syntax valid"
+        },
+        {
+            "status": "pass",
+            "description": "send-profile-email.php has deprecation notice"
+        },
+        {
+            "status": "pass",
+            "description": "send-profile-email.php has error_log deprecation"
+        },
+        {
+            "status": "pass",
+            "description": "send-profile-email.php has migration path documented"
+        },
+        {
+            "status": "pass",
+            "description": "sessionTimer.php exists"
+        },
+        {
+            "status": "pass",
+            "description": "sessionTimer.php syntax valid"
+        },
+        {
+            "status": "pass",
+            "description": "sessionTimer.php has deprecation notice"
+        },
+        {
+            "status": "pass",
+            "description": "sessionTimer.php has error_log deprecation"
+        },
+        {
+            "status": "pass",
+            "description": "sessionTimer.php has migration path documented"
+        },
+        {
+            "status": "pass",
+            "description": "BaseController exists"
+        },
+        {
+            "status": "pass",
+            "description": "BaseController has requireRole method"
+        },
+        {
+            "status": "fail",
+            "description": "BaseController has validateCSRF method"
+        },
+        {
+            "status": "pass",
+            "description": "BaseController has logAction method"
+        },
+        {
+            "status": "fail",
+            "description": "BaseController has jsonResponse method"
+        },
+        {
+            "status": "pass",
+            "description": "BaseController has input method"
+        },
+        {
+            "status": "pass",
+            "description": "BaseController has view method"
+        },
+        {
+            "status": "pass",
+            "description": "CSRF class exists"
+        },
+        {
+            "status": "fail",
+            "description": "Logger class exists"
+        }
+    ]
+}

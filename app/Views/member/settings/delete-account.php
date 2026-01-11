@@ -98,7 +98,7 @@
                             </p>
 
                             <form id="delete-account-form" method="post">
-                                <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token'] ?? ''; ?>">
+                                <input type="hidden" name="_csrf_token" value="<?php echo $_SESSION['csrf_token'] ?? ''; ?>">
 
                                 <div class="form-group">
                                     <label for="password" class="form-label">Password *</label>

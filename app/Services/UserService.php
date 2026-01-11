@@ -68,12 +68,12 @@ class UserService extends BaseService {
             
             // Clear failed attempts on successful login
             $this->clearFailedAttempts($identifier);
-            
-            // Update last login
-            $this->updateLastLogin($user['id']);
-            
+
+            // Update last login (commented out - column doesn't exist in database)
+            // $this->updateLastLogin($user['id']);
+
             $this->logAction('authenticate_success', ['user_id' => $user['id']]);
-            
+
             return [
                 'success' => true,
                 'user' => $this->sanitizeUserData($user),
@@ -114,13 +114,13 @@ class UserService extends BaseService {
             $_SESSION['user_type'] = $user['user_type'];
             $_SESSION['last_activity'] = time();
             $_SESSION['session_token'] = $this->generateSessionToken();
-            
-            // Update user's session token in database
-            $this->userModel->update($user['id'], [
-                'session_token' => $_SESSION['session_token'],
-                'last_login' => date('Y-m-d H:i:s')
-            ]);
-            
+
+            // Database update removed - session_token and last_login columns don't exist
+            // Sessions are managed by PHP session system
+            // TODO: Add these columns to users table if needed:
+            //   - session_token VARCHAR(255) NULL
+            //   - last_login TIMESTAMP NULL
+
             $this->logAction('session_created', [
                 'user_id' => $user['id'],
                 'session_token' => substr($_SESSION['session_token'], 0, 8) . '...'
@@ -408,7 +408,15 @@ class UserService extends BaseService {
     }
     
     private function isUserActive($user) {
-        return isset($user['status']) && $user['status'] === 'active';
+        // Check both 'active' (boolean) and 'status' (string) fields for compatibility
+        if (isset($user['active'])) {
+            return $user['active'] == 1 || $user['active'] === true;
+        }
+        if (isset($user['status'])) {
+            return $user['status'] === 'active';
+        }
+        // Default to active if field doesn't exist (for backward compatibility)
+        return true;
     }
     
     private function userExists($username, $email) {

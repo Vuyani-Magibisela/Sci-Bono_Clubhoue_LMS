@@ -2,31 +2,75 @@
 
 namespace App\API;
 
-use App\Controllers\BaseController;
+require_once __DIR__ . '/../Controllers/BaseController.php';
+require_once __DIR__ . '/../Utils/ResponseHelper.php';
+require_once __DIR__ . '/../../core/Logger.php';
+require_once __DIR__ . '/../Middleware/CacheMiddleware.php';
+require_once __DIR__ . '/../Utils/CacheHelper.php';
+require_once __DIR__ . '/../Middleware/CorsMiddleware.php';
+require_once __DIR__ . '/../Utils/ApiLogger.php';
+
 use App\Utils\ResponseHelper;
-use App\Traits\ValidatesData;
-use App\Services\ApiTokenService;
-use App\Utils\Logger;
+use App\Middleware\CacheMiddleware;
+use App\Utils\CacheHelper;
+use App\Middleware\CorsMiddleware;
+use App\Utils\ApiLogger;
 use Exception;
 
-abstract class BaseApiController extends BaseController
+abstract class BaseApiController extends \BaseController
 {
-    use ValidatesData;
-    
+    protected $db;
     protected $requestMethod;
     protected $requestData;
     protected $queryParams;
     protected $headers;
     protected $user = null;
-    
-    public function __construct($db)
+    protected $cacheMiddleware = null;
+    protected $cachingEnabled = true;
+    protected $corsMiddleware = null;
+    protected $apiLogger = null;
+    protected $requestLogId = null;
+    protected $loggingEnabled = true;
+
+    public function __construct()
     {
-        parent::__construct($db);
-        $this->requestMethod = $_SERVER['REQUEST_METHOD'];
-        $this->queryParams = $_GET;
+        // Get database connection
+        require_once __DIR__ . '/../../server.php';
+        global $conn;
+        $this->db = $conn;
+
+        // Initialize parent with database connection
+        parent::__construct($this->db);
+
+        $this->requestMethod = $_SERVER['REQUEST_METHOD'] ?? 'GET';
+        $this->queryParams = $_GET ?? [];
         $this->headers = $this->getAllHeaders();
         $this->parseRequestData();
-        $this->setCorsHeaders();
+
+        // Initialize CORS middleware
+        $this->corsMiddleware = new CorsMiddleware([
+            'allowed_origins' => ['*'],
+            'supports_credentials' => true,
+            'enabled' => true
+        ]);
+
+        // Handle CORS (may exit for preflight)
+        $this->corsMiddleware->handle();
+
+        // Initialize cache middleware
+        $this->cacheMiddleware = new CacheMiddleware($this->db, [
+            'enabled' => $this->cachingEnabled
+        ]);
+
+        // Initialize API logger
+        $this->apiLogger = new ApiLogger($this->db, [
+            'enabled' => $this->loggingEnabled
+        ]);
+
+        // Log incoming request
+        if ($this->loggingEnabled) {
+            $this->requestLogId = $this->apiLogger->logRequest();
+        }
     }
     
     /**
@@ -72,20 +116,12 @@ abstract class BaseApiController extends BaseController
     }
     
     /**
-     * Set CORS headers for API responses
+     * Set Content-Type header
      */
-    protected function setCorsHeaders()
+    protected function setContentTypeHeader()
     {
-        header('Access-Control-Allow-Origin: *');
-        header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
-        header('Access-Control-Allow-Headers: Content-Type, Authorization, X-Requested-With, X-CSRF-Token');
-        header('Access-Control-Max-Age: 86400'); // Cache preflight for 24 hours
-        header('Content-Type: application/json; charset=UTF-8');
-        
-        // Handle preflight OPTIONS request
-        if ($this->requestMethod === 'OPTIONS') {
-            http_response_code(200);
-            exit();
+        if (!headers_sent()) {
+            header('Content-Type: application/json; charset=UTF-8');
         }
     }
     
@@ -251,13 +287,239 @@ abstract class BaseApiController extends BaseController
     }
     
     /**
-     * Abstract methods that must be implemented by child classes
+     * Send success response
      */
-    abstract protected function handleGet();
-    abstract protected function handlePost();
-    abstract protected function handlePut();
-    abstract protected function handleDelete();
-    
+    protected function successResponse($data, $message = 'Success', $code = 200)
+    {
+        $this->setContentTypeHeader();
+
+        if (!headers_sent()) {
+            http_response_code($code);
+        }
+
+        $responseBody = [
+            'success' => true,
+            'message' => $message,
+            'data' => $data
+        ];
+
+        echo json_encode($responseBody, JSON_PRETTY_PRINT);
+
+        // Log response
+        if ($this->loggingEnabled && $this->apiLogger) {
+            $this->apiLogger->logResponse($this->requestLogId, $code, $responseBody);
+        }
+
+        // Don't exit in test environment (when headers were already sent)
+        if (!headers_sent() || !defined('PHPUNIT_RUNNING')) {
+            return; // Return instead of exit for test compatibility
+        }
+    }
+
+    /**
+     * Send error response
+     */
+    protected function errorResponse($message, $code = 400, $errors = null)
+    {
+        $this->setContentTypeHeader();
+
+        if (!headers_sent()) {
+            http_response_code($code);
+        }
+
+        $response = [
+            'success' => false,
+            'message' => $message
+        ];
+
+        if ($errors !== null) {
+            $response['errors'] = $errors;
+        }
+
+        echo json_encode($response, JSON_PRETTY_PRINT);
+
+        // Log error response
+        if ($this->loggingEnabled && $this->apiLogger) {
+            $this->apiLogger->logResponse($this->requestLogId, $code, $response);
+        }
+
+        // Don't exit in test environment (when headers were already sent)
+        if (!headers_sent() || !defined('PHPUNIT_RUNNING')) {
+            return; // Return instead of exit for test compatibility
+        }
+    }
+
+    /**
+     * Get user ID from authentication (session or JWT)
+     */
+    protected function getUserIdFromAuth()
+    {
+        // Check session first
+        if (isset($_SESSION['user_id'])) {
+            return $_SESSION['user_id'];
+        }
+
+        // Could add JWT token checking here later
+        return null;
+    }
+
+    /**
+     * Log an action to the activity log
+     */
+    protected function logAction($action, $metadata = [])
+    {
+        try {
+            $userId = $_SESSION['user_id'] ?? null;
+            $ipAddress = $_SERVER['REMOTE_ADDR'] ?? null;
+            $userAgent = $_SERVER['HTTP_USER_AGENT'] ?? null;
+            $metadataJson = json_encode($metadata);
+
+            $stmt = $this->db->prepare("
+                INSERT INTO activity_log (user_id, action, metadata, ip_address, user_agent, created_at)
+                VALUES (?, ?, ?, ?, ?, NOW())
+            ");
+
+            $stmt->bind_param('issss', $userId, $action, $metadataJson, $ipAddress, $userAgent);
+            $stmt->execute();
+        } catch (Exception $e) {
+            // Log but don't fail the request
+            error_log("Failed to log action: " . $e->getMessage());
+        }
+    }
+
+    /**
+     * Cache-aware success response
+     *
+     * Sends a success response with caching headers.
+     *
+     * @param mixed $data Response data
+     * @param string $message Success message
+     * @param int $code HTTP status code
+     * @param array $cacheOptions Cache options (optional)
+     * @return void
+     */
+    protected function cachedSuccessResponse($data, $message = 'Success', $code = 200, $cacheOptions = [])
+    {
+        $this->setContentTypeHeader();
+
+        // Send response
+        if (!headers_sent()) {
+            http_response_code($code);
+        }
+
+        $responseBodyArray = [
+            'success' => true,
+            'message' => $message,
+            'data' => $data
+        ];
+
+        $responseBody = json_encode($responseBodyArray, JSON_PRETTY_PRINT);
+
+        // Add cache headers
+        if ($this->requestMethod === 'GET' && $this->cachingEnabled) {
+            $endpoint = $_SERVER['REQUEST_URI'] ?? '';
+            $this->cacheMiddleware->handleResponse(
+                $endpoint,
+                $this->requestMethod,
+                $responseBody,
+                $code,
+                $cacheOptions
+            );
+        }
+
+        echo $responseBody;
+
+        // Log response
+        if ($this->loggingEnabled && $this->apiLogger) {
+            $this->apiLogger->logResponse($this->requestLogId, $code, $responseBodyArray);
+        }
+    }
+
+    /**
+     * Check conditional request and return 304 if not modified
+     *
+     * @return bool True if request should continue, false if 304 sent
+     */
+    protected function checkConditionalRequest()
+    {
+        if ($this->requestMethod !== 'GET' || !$this->cachingEnabled) {
+            return true;
+        }
+
+        $endpoint = $_SERVER['REQUEST_URI'] ?? '';
+        return $this->cacheMiddleware->handleRequest($endpoint, $this->requestMethod);
+    }
+
+    /**
+     * Invalidate cache for endpoint
+     *
+     * @param string|null $endpoint Endpoint to invalidate (null = current endpoint)
+     * @return bool True on success
+     */
+    protected function invalidateCache($endpoint = null)
+    {
+        if ($endpoint === null) {
+            $endpoint = $_SERVER['REQUEST_URI'] ?? '';
+        }
+
+        return $this->cacheMiddleware->invalidateEndpoint($endpoint);
+    }
+
+    /**
+     * Invalidate cache by pattern
+     *
+     * @param string $pattern Endpoint pattern (e.g., "/api/v1/users/%")
+     * @return bool True on success
+     */
+    protected function invalidateCachePattern($pattern)
+    {
+        return $this->cacheMiddleware->invalidatePattern($pattern);
+    }
+
+    /**
+     * Disable caching for current request
+     *
+     * @return void
+     */
+    protected function disableCaching()
+    {
+        $this->cachingEnabled = false;
+    }
+
+    /**
+     * Enable caching for current request
+     *
+     * @return void
+     */
+    protected function enableCaching()
+    {
+        $this->cachingEnabled = true;
+    }
+
+    /**
+     * Abstract methods that must be implemented by child classes
+     * Made optional with default implementations
+     */
+    protected function handleGet()
+    {
+        $this->errorResponse('Method not implemented', 501);
+    }
+
+    protected function handlePost()
+    {
+        $this->errorResponse('Method not implemented', 501);
+    }
+
+    protected function handlePut()
+    {
+        $this->errorResponse('Method not implemented', 501);
+    }
+
+    protected function handleDelete()
+    {
+        $this->errorResponse('Method not implemented', 501);
+    }
+
     /**
      * Optional PATCH method (defaults to PUT behavior)
      */

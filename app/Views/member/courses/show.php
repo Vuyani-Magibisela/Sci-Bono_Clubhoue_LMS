@@ -381,7 +381,7 @@
                             </div>
 
                             <form id="enroll-form" method="post" action="/courses/<?php echo $course['id']; ?>/enroll">
-                                <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token'] ?? ''; ?>">
+                                <input type="hidden" name="_csrf_token" value="<?php echo $_SESSION['csrf_token'] ?? ''; ?>">
                                 <button type="submit" class="btn-primary" style="width: 100%; padding: 1rem; background: var(--primary); color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 1rem; font-weight: 600;">
                                     <i class="fas fa-graduation-cap"></i> Enroll Now
                                 </button>

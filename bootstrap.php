@@ -18,16 +18,22 @@ $errorHandler = new ErrorHandler();
 require_once __DIR__ . '/core/Logger.php';
 
 // Configure session security (Phase 3 Week 9 - Security Hardening)
-ini_set('session.cookie_httponly', 1);      // Prevent JavaScript access to session cookie
-ini_set('session.cookie_secure', 1);        // Require HTTPS for session cookie
-ini_set('session.use_strict_mode', 1);      // Prevent session fixation attacks
-ini_set('session.cookie_samesite', 'Strict'); // CSRF protection
-ini_set('session.gc_maxlifetime', 7200);    // 2 hours session lifetime
-ini_set('session.cookie_lifetime', 0);      // Session cookie (expires on browser close)
+// Check if HTTPS is available
+$isHttps = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ||
+           (isset($_SERVER['HTTP_X_FORWARDED_PROTO']) && $_SERVER['HTTP_X_FORWARDED_PROTO'] === 'https');
 
-// Start session if not already started
+// Start session with security options (PHP 7.3+ syntax)
 if (session_status() === PHP_SESSION_NONE) {
-    session_start();
+    session_start([
+        'cookie_httponly' => true,           // Prevent JavaScript access to session cookie
+        'cookie_secure' => $isHttps,         // Require HTTPS only if available
+        'cookie_samesite' => 'Lax',          // CSRF protection with better compatibility (Lax allows same-site POST)
+        'use_strict_mode' => true,           // Prevent session fixation attacks
+        'gc_maxlifetime' => 7200,            // 2 hours session lifetime
+        'cookie_lifetime' => 0,              // Session cookie (expires on browser close)
+        'sid_length' => 48,                  // Longer session IDs for better security
+        'sid_bits_per_character' => 6        // More entropy in session IDs
+    ]);
 }
 
 // Load security components (Phase 2)
@@ -51,7 +57,7 @@ if ($config['debug']) {
 }
 
 // Force production error handling on non-localhost (Phase 3 Week 9 - Security Hardening)
-if ($_SERVER['SERVER_NAME'] !== 'localhost' && $_SERVER['SERVER_NAME'] !== '127.0.0.1') {
+if (isset($_SERVER['SERVER_NAME']) && $_SERVER['SERVER_NAME'] !== 'localhost' && $_SERVER['SERVER_NAME'] !== '127.0.0.1') {
     ini_set('display_errors', '0');  // Never display errors in production
     ini_set('log_errors', '1');      // Always log errors
 }

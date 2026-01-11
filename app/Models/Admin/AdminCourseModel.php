@@ -34,26 +34,36 @@ class AdminCourseModel {
     
     /**
      * Get course details by ID
-     * 
+     *
      * @param int $courseId Course ID
      * @return array|null Course details or null if not found
      */
     public function getCourseDetails($courseId) {
-        $sql = "SELECT c.*, u.name as creator_name, u.surname as creator_surname 
+        $sql = "SELECT c.*, u.name as creator_name, u.surname as creator_surname
                 FROM courses c
                 LEFT JOIN users u ON c.created_by = u.id
                 WHERE c.id = ?";
-        
+
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param("i", $courseId);
         $stmt->execute();
         $result = $stmt->get_result();
-        
+
         if ($result && $result->num_rows > 0) {
             return $result->fetch_assoc();
         }
-        
+
         return null;
+    }
+
+    /**
+     * Get course by ID (alias for getCourseDetails for API compatibility)
+     *
+     * @param int $courseId Course ID
+     * @return array|null Course details or null if not found
+     */
+    public function getCourseById($courseId) {
+        return $this->getCourseDetails($courseId);
     }
     
     /**

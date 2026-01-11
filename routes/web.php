@@ -199,7 +199,15 @@ $router->group(['prefix' => 'admin', 'middleware' => ['AuthMiddleware', 'RoleMid
         $router->put('/{courseId}/lessons/{id}', 'Admin\\LessonController@update', 'admin.courses.lessons.update');
         $router->delete('/{courseId}/lessons/{id}', 'Admin\\LessonController@destroy', 'admin.courses.lessons.destroy');
     });
-    
+
+    // Deprecation monitoring
+    $router->group(['prefix' => 'deprecation-monitor'], function($router) {
+        $router->get('/', 'Admin\\DeprecationMonitorController@index', 'admin.deprecation.index');
+        $router->get('/export', 'Admin\\DeprecationMonitorController@export', 'admin.deprecation.export');
+        $router->get('/stats', 'Admin\\DeprecationMonitorController@getStats', 'admin.deprecation.stats');
+        $router->get('/recommendations', 'Admin\\DeprecationMonitorController@getRecommendations', 'admin.deprecation.recommendations');
+    });
+
     // Holiday program management
     $router->group(['prefix' => 'programs'], function($router) {
         $router->get('/', 'Admin\\ProgramController@index', 'admin.programs.index');

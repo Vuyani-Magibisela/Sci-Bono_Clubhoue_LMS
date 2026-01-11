@@ -66,7 +66,7 @@
                     </div>
 
                     <form id="password-form" method="post">
-                        <input type="hidden" name="csrf_token" value="<?php echo $_SESSION['csrf_token'] ?? ''; ?>">
+                        <input type="hidden" name="_csrf_token" value="<?php echo $_SESSION['csrf_token'] ?? ''; ?>">
 
                         <div class="form-section">
                             <div class="form-section-content">

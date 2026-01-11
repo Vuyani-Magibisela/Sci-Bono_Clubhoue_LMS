@@ -9,9 +9,11 @@
  * Status: STUB - Needs implementation
  */
 
+namespace Admin;
+
 require_once __DIR__ . '/../BaseController.php';
 
-class AdminController extends BaseController {
+class AdminController extends \BaseController {
 
     /**
      * Display the admin dashboard
