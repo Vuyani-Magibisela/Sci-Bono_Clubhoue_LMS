@@ -47,7 +47,7 @@ class AuthController extends BaseController {
         
         $this->logActivity('login_form_shown', ['ip' => $_SERVER['REMOTE_ADDR'] ?? 'unknown']);
         
-        $this->view('auth/login', $data);
+        $this->view('auth.login', $data);
     }
     
     /**
@@ -174,7 +174,7 @@ class AuthController extends BaseController {
         
         $this->logActivity('registration_form_shown');
         
-        $this->view('auth/register', $data);
+        $this->view('auth.register', $data);
     }
 
     /**
@@ -272,7 +272,7 @@ class AuthController extends BaseController {
         
         unset($_SESSION['flash_error'], $_SESSION['flash_success'], $_SESSION['old_input']);
         
-        $this->view('auth/forgot-password', $data);
+        $this->view('auth.forgot-password', $data);
     }
     
     /**
@@ -324,7 +324,7 @@ class AuthController extends BaseController {
         
         unset($_SESSION['flash_error'], $_SESSION['flash_success'], $_SESSION['validation_errors']);
         
-        $this->view('auth/change-password', $data);
+        $this->view('auth.change-password', $data);
     }
     
     /**
@@ -425,9 +425,8 @@ class AuthController extends BaseController {
             return $url;
         }
 
-        // Redirect all users to home page after login
-        // Users can then manually navigate to their respective dashboards
-        return '/';
+        // Redirect all users to dashboard after login
+        return '/dashboard';
     }
     
     private function handleError($message, $context = []) {

@@ -67,7 +67,7 @@ class ProgramController extends BaseController {
             }
 
             // Render view
-            $this->view('holidayPrograms/holidayProgramIndex', [
+            $this->view('programs.index', [
                 'programs' => $programs,
                 'currentStatus' => $status,
                 'searchTerm' => $search
@@ -78,7 +78,7 @@ class ProgramController extends BaseController {
                 'error' => $e->getMessage()
             ]);
 
-            $this->view('errors/500', [
+            $this->view('errors.500', [
                 'error' => 'Failed to load programs'
             ]);
         }
@@ -95,7 +95,7 @@ class ProgramController extends BaseController {
             // Get existing terms for dropdown
             $existingTerms = $this->programService->getExistingTerms();
 
-            $this->view('holidayPrograms/holidayProgramCreationForm', [
+            $this->view('programs.create-form', [
                 'program' => null,
                 'existingTerms' => $existingTerms,
                 'isEdit' => false,
@@ -107,7 +107,7 @@ class ProgramController extends BaseController {
                 'error' => $e->getMessage()
             ]);
 
-            $this->view('errors/500', [
+            $this->view('errors.500', [
                 'error' => 'Failed to load form'
             ]);
         }
@@ -199,7 +199,7 @@ class ProgramController extends BaseController {
         try {
             $dashboardData = $this->programService->getDashboardData($id);
 
-            $this->view('holidayPrograms/holidayProgramAdminDashboard', [
+            $this->view('programs.dashboard.admin', [
                 'program' => $dashboardData['program'],
                 'statistics' => $dashboardData['statistics'],
                 'capacity' => $dashboardData['capacity'],
@@ -213,7 +213,7 @@ class ProgramController extends BaseController {
                 'error' => $e->getMessage()
             ]);
 
-            $this->view('errors/404', [
+            $this->view('errors.404', [
                 'error' => 'Program not found'
             ]);
         }
@@ -230,7 +230,7 @@ class ProgramController extends BaseController {
             $program = $this->programService->getProgramById($id);
             $existingTerms = $this->programService->getExistingTerms();
 
-            $this->view('holidayPrograms/holidayProgramCreationForm', [
+            $this->view('programs.create-form', [
                 'program' => $program,
                 'existingTerms' => $existingTerms,
                 'isEdit' => true,
@@ -243,7 +243,7 @@ class ProgramController extends BaseController {
                 'error' => $e->getMessage()
             ]);
 
-            $this->view('errors/404', [
+            $this->view('errors.404', [
                 'error' => 'Program not found'
             ]);
         }
@@ -390,7 +390,7 @@ class ProgramController extends BaseController {
             $program = $this->programService->getProgramById($id);
             $registrations = $this->attendeeService->getRegistrations($id);
 
-            $this->view('holidayPrograms/admin/registrations', [
+            $this->view('programs.admin.registrations', [
                 'program' => $program,
                 'registrations' => $registrations,
                 'csrfToken' => CSRF::getToken()
@@ -402,7 +402,7 @@ class ProgramController extends BaseController {
                 'error' => $e->getMessage()
             ]);
 
-            $this->view('errors/404', [
+            $this->view('errors.404', [
                 'error' => 'Program not found'
             ]);
         }

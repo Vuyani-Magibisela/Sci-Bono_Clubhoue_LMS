@@ -38,7 +38,7 @@ class HolidayProgramAdminController extends BaseController {
                 'programs_count' => count($dashboardData['programs'])
             ]);
 
-            return $this->view('holidayPrograms.admin.dashboard', $dashboardData, 'admin');
+            return $this->view('programs.dashboard.admin', $dashboardData, 'admin');
 
         } catch (Exception $e) {
             $this->logger->error("Failed to load admin dashboard", [

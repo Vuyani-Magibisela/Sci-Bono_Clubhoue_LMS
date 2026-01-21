@@ -278,3 +278,105 @@ The attendance system has been significantly improved with modern UI/UX and robu
 - **Input Validation**: Server-side validation with proper error handling
 - **SQL Injection Prevention**: Prepared statements throughout the system
 - **Development Safety**: Clear separation of development and production authentication methods
+## Views Directory Structure (Updated January 2026)
+
+The `app/Views/` directory has been reorganized for consistency and maintainability. All view paths use **dot notation** in controllers.
+
+### Structure Overview
+```
+app/Views/
+├── shared/              # Common components used across multiple areas
+├── dashboard/           # Centralized dashboard views (home, stats)
+├── courses/             # Public course views (index, catalog, show)
+├── lessons/             # Public lesson views
+├── reports/             # All reporting views (daily, monthly, forms)
+├── programs/            # Holiday program views (formerly holidayPrograms/)
+│   ├── auth/           # Program authentication (login, logout, create-password)
+│   ├── profile/        # Participant profiles (index, verify-email, create-password, components/)
+│   ├── dashboard/      # Program dashboards (participant, admin)
+│   ├── shared/         # Program-specific shared components (header, errors)
+│   ├── api/            # API-related views
+│   ├── admin/          # Admin program views (registrations, etc.)
+│   └── processing/     # Background processing views
+├── admin/              # Admin panel views
+│   ├── shared/         # Admin shared components (header, footer, learn-header)
+│   ├── courses/        # Course management (manage, manage-enhanced, manage-content, etc.)
+│   ├── lessons/        # Lesson management
+│   ├── programs/       # Program management (add-program)
+│   ├── system/         # System views (deprecation-monitor)
+│   ├── dashboard/      # Admin dashboard
+│   ├── users/          # User management (index, create, edit, show)
+│   ├── reports/        # Admin reports
+│   └── visitors/       # Visitor management
+├── member/             # Member area views
+│   ├── courses/        # Member courses
+│   ├── dashboard/      # Member dashboard
+│   ├── lessons/        # Member lessons
+│   └── settings/       # Member settings (index, profile, password, notifications, delete-account)
+├── mentor/             # Mentor-specific views
+│   └── attendance/     # Mentor attendance management
+├── auth/               # Authentication views (login, register, forgot-password, change-password)
+├── attendance/         # Attendance system views (signin)
+├── visitors/           # Visitor views (index from visitorsPage.php)
+├── layouts/            # Layout templates
+├── partials/           # Reusable partial views (alerts, navigation, etc.)
+├── errors/             # Error pages (404, 500, 403)
+└── settings.php        # Legacy settings file (root level)
+```
+
+### View Path Examples
+
+Controllers use **dot notation** to reference views:
+
+```php
+// Programs (formerly holidayPrograms)
+$this->view('programs.index');                    // /programs/index.php
+$this->view('programs.auth.login');               // /programs/auth/login.php
+$this->view('programs.dashboard.participant');    // /programs/dashboard/participant.php
+$this->view('programs.profile.index');            // /programs/profile/index.php
+
+// Admin
+$this->view('admin.courses.manage');              // /admin/courses/manage.php
+$this->view('admin.system.deprecation-monitor');  // /admin/system/deprecation-monitor.php
+$this->view('admin.shared.header');               // /admin/shared/header.php
+
+// Member
+$this->view('member.settings.index');             // /member/settings/index.php
+$this->view('member.dashboard.index');            // /member/dashboard/index.php
+
+// Other
+$this->view('dashboard.home');                    // /dashboard/home.php
+$this->view('auth.login');                        // /auth/login.php
+$this->view('errors.404');                        // /errors/404.php
+```
+
+### Key Naming Conventions
+
+1. **Dot Notation**: All view paths use dots (`.`) instead of slashes (`/`)
+2. **Kebab Case**: Multi-word file names use kebab-case (e.g., `create-password.php`, `my-programs.php`)
+3. **Descriptive Names**: Files named by their action (e.g., `index.php`, `create.php`, `edit.php`, `show.php`)
+
+### Internal View Includes
+
+Views that include other views use relative paths:
+
+```php
+// From programs/ root
+<?php include __DIR__ . '/shared/header.php'; ?>
+
+// From programs/dashboard/
+<?php include '../shared/header.php'; ?>
+
+// From programs/auth/
+<?php include '../shared/header.php'; ?>
+```
+
+### Migration Notes
+
+- **holidayPrograms/** folder renamed to **programs/** (all files moved)
+- **settings/** folder moved to **member/settings/**
+- **Deleted Duplicates**: `user_list.php`, `admin/user_edit.php`, `admin/course.php`
+- **Backup Created**: `app/Views_backup_20260112_111558/` (available for rollback)
+
+See `VIEWS_REORGANIZATION_LOG.md` for complete reorganization details.
+

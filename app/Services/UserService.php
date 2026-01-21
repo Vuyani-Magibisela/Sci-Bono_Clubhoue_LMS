@@ -192,17 +192,16 @@ class UserService extends BaseService {
             }
             
             $userId = $_SESSION['user_id'] ?? null;
-            
-            // Clear session token in database
+
+            // Log session destruction
             if ($userId) {
-                $this->userModel->update($userId, ['session_token' => null]);
                 $this->logAction('session_destroyed', ['user_id' => $userId]);
             }
-            
+
             // Destroy session
             session_unset();
             session_destroy();
-            
+
             return true;
             
         } catch (Exception $e) {

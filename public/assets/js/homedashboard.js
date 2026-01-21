@@ -82,67 +82,28 @@ document.addEventListener('DOMContentLoaded', function() {
     const menuItems = document.querySelectorAll('.menu-item:not(.active)');
     menuItems.forEach(item => {
         item.addEventListener('click', function(e) {
-            // Check if there's a link inside
-            const link = this.querySelector('a');
-            if (link) {
-                // If there's a link, let it handle the navigation
-                // We just show the loading animation
+            // Check if this is actually an anchor tag (the new structure)
+            if (this.tagName === 'A' && this.href && this.href !== '#' && !this.hasAttribute('onclick')) {
+                // It's a real link, just show loader and let it navigate
                 showLoader();
-                return; // Don't prevent default; let the link work
+                return; // Let the link work normally
             }
-            
-            // If there's no link, prevent default behavior and handle it here
+
+            // For placeholder links with onclick (like "coming soon" alerts)
+            if (this.hasAttribute('onclick')) {
+                // Let the onclick handler run
+                return;
+            }
+
+            // For buttons or non-link menu items
+            if (this.tagName === 'BUTTON' || this.type === 'submit') {
+                // Let forms submit normally
+                showLoader();
+                return;
+            }
+
+            // Only prevent default if it's not a functional link
             e.preventDefault();
-            simulateLoading();
-            
-            // Get the menu text
-            const menuText = this.querySelector('.menu-text');
-            if (menuText) {
-                // Determine where to navigate based on the menu text
-                let targetUrl = '';
-                switch(menuText.textContent.toLowerCase()) {
-                    case 'home':
-                        targetUrl = 'home.php';
-                        break;
-                    case 'profile':
-                        targetUrl = 'app/Views/profile.php';
-                        break;
-                    case 'messages':
-                        targetUrl = 'app/Views/messages.php';
-                        break;
-                    case 'members':
-                        targetUrl = 'members.php';
-                        break;
-                    case 'feed':
-                        targetUrl = 'feed.php';
-                        break;
-                    case 'learn':
-                        targetUrl = 'app/Views/learn.php';
-                        break;
-                    case 'daily register':
-                        targetUrl = 'signin.php';
-                        break;
-                    case 'projects':
-                        targetUrl = 'app/Views/projects.php';
-                        break;
-                    case 'reports':
-                        targetUrl = 'app/Views/statsDashboard.php';
-                        break;
-                    case 'settings':
-                        targetUrl = 'app/Views/settings.php';
-                        break;
-                    default:
-                        targetUrl = '#';
-                        break;
-                }
-                
-                // Navigate to the target URL after a short delay to show the loading animation
-                if (targetUrl !== '#') {
-                    setTimeout(() => {
-                        window.location.href = targetUrl;
-                    }, 500);
-                }
-            }
         });
     });
     

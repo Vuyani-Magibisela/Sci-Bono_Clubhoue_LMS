@@ -8,25 +8,55 @@ class EnrollmentModel {
     
     public function getUserEnrollments($userId) {
         $enrollments = [];
-        $sql = "SELECT e.id, e.course_id, e.progress, e.last_accessed, 
-                    c.title, c.type, c.description, c.difficulty_level, c.image_path 
+        $sql = "SELECT e.id, e.course_id, e.progress, e.last_accessed,
+                    c.title, c.type, c.description, c.difficulty_level, c.image_path
                 FROM user_enrollments e
                 JOIN courses c ON e.course_id = c.id
-                WHERE e.user_id = ? 
+                WHERE e.user_id = ?
                 ORDER BY e.last_accessed DESC";
-        
+
         $stmt = $this->conn->prepare($sql);
         $stmt->bind_param("i", $userId);
         $stmt->execute();
         $result = $stmt->get_result();
-        
+
         if ($result->num_rows > 0) {
             while ($row = $result->fetch_assoc()) {
                 $enrollments[] = $row;
             }
         }
-        
+
         return $enrollments;
+    }
+
+    /**
+     * Get the count of user enrollments
+     *
+     * @param int $userId User ID
+     * @return int Number of enrollments
+     */
+    public function getUserEnrollmentCount($userId) {
+        if (!$userId) {
+            return 0;
+        }
+
+        $sql = "SELECT COUNT(*) as count FROM user_enrollments WHERE user_id = ?";
+        $stmt = $this->conn->prepare($sql);
+
+        if (!$stmt) {
+            return 0;
+        }
+
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result && $result->num_rows > 0) {
+            $row = $result->fetch_assoc();
+            return (int)$row['count'];
+        }
+
+        return 0;
     }
     
     /**

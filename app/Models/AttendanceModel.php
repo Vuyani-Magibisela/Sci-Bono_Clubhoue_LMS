@@ -160,30 +160,95 @@ class AttendanceModel extends BaseModel {
     
     /**
      * Get attendance record for a user
-     * 
+     *
      * @param int $userId User ID
      * @return array|null Attendance record or null if not found
      */
     public function getUserAttendance($userId) {
         $sql = "SELECT * FROM attendance WHERE user_id = ? AND sign_in_status = 'signedIn' ORDER BY checked_in DESC LIMIT 1";
         $stmt = $this->conn->prepare($sql);
-        
+
         if (!$stmt) {
             error_log("Database error in getUserAttendance: " . $this->conn->error);
             return null;
         }
-        
+
         $stmt->bind_param("i", $userId);
         $stmt->execute();
         $result = $stmt->get_result();
-        
+
         $attendance = null;
         if ($result->num_rows > 0) {
             $attendance = $result->fetch_assoc();
         }
-        
+
         $stmt->close();
         return $attendance;
+    }
+
+    /**
+     * Get user's attendance streak (consecutive days attended)
+     *
+     * @param int $userId User ID
+     * @return int Number of consecutive days attended
+     */
+    public function getUserAttendanceStreak($userId) {
+        if (!$userId) {
+            return 0;
+        }
+
+        // Get distinct attendance dates for the user, ordered by date descending
+        $sql = "SELECT DISTINCT DATE(checked_in) as attendance_date
+                FROM attendance
+                WHERE user_id = ? AND sign_in_status = 'signedOut'
+                ORDER BY attendance_date DESC
+                LIMIT 365";
+
+        $stmt = $this->conn->prepare($sql);
+
+        if (!$stmt) {
+            error_log("Database error in getUserAttendanceStreak: " . $this->conn->error);
+            return 0;
+        }
+
+        $stmt->bind_param("i", $userId);
+        $stmt->execute();
+        $result = $stmt->get_result();
+
+        if ($result->num_rows === 0) {
+            $stmt->close();
+            return 0;
+        }
+
+        $dates = [];
+        while ($row = $result->fetch_assoc()) {
+            $dates[] = $row['attendance_date'];
+        }
+        $stmt->close();
+
+        // Calculate streak
+        $streak = 0;
+        $today = date('Y-m-d');
+        $yesterday = date('Y-m-d', strtotime('-1 day'));
+
+        // Check if user attended today or yesterday (streak is still active)
+        if ($dates[0] !== $today && $dates[0] !== $yesterday) {
+            return 0; // Streak broken
+        }
+
+        // Count consecutive days
+        $expectedDate = new DateTime($dates[0]);
+        foreach ($dates as $date) {
+            $currentDate = new DateTime($date);
+            if ($currentDate->format('Y-m-d') === $expectedDate->format('Y-m-d')) {
+                $streak++;
+                $expectedDate->modify('-1 day');
+            } else {
+                break; // Streak broken
+            }
+        }
+
+        return $streak;
     }
     
     /**

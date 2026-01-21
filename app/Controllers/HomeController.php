@@ -28,6 +28,6 @@ class HomeController extends BaseController {
         ];
 
         // Render the home view
-        $this->view('home', $data);
+        $this->view('dashboard.home', $data);
     }
 }

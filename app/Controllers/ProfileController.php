@@ -40,7 +40,7 @@ class ProfileController extends BaseController {
                 exit;
             }
 
-            $this->view('holidayPrograms/holidayProgramLogin', [
+            $this->view('programs.auth.login', [
                 'csrfToken' => CSRF::getToken(),
                 'error' => $_SESSION['login_error'] ?? null
             ]);
@@ -53,7 +53,7 @@ class ProfileController extends BaseController {
                 'error' => $e->getMessage()
             ]);
 
-            $this->view('errors/500', [
+            $this->view('errors.500', [
                 'error' => 'Failed to load login page'
             ]);
         }
@@ -194,7 +194,7 @@ class ProfileController extends BaseController {
             // Get enrolled workshops
             $enrolledWorkshops = $profile['enrolled_workshops'] ?? [];
 
-            $this->view('holidayPrograms/holiday-dashboard', [
+            $this->view('programs.dashboard.participant', [
                 'profile' => $profile,
                 'program' => $program,
                 'enrolledWorkshops' => $enrolledWorkshops,
@@ -207,7 +207,7 @@ class ProfileController extends BaseController {
                 'error' => $e->getMessage()
             ]);
 
-            $this->view('errors/500', [
+            $this->view('errors.500', [
                 'error' => 'Failed to load dashboard'
             ]);
         }
@@ -251,7 +251,7 @@ class ProfileController extends BaseController {
                 'error' => $e->getMessage()
             ]);
 
-            $this->view('holidayPrograms/holiday-profile-verify-email', [
+            $this->view('programs.profile.verify-email', [
                 'success' => false,
                 'error' => $e->getMessage()
             ]);
@@ -271,7 +271,7 @@ class ProfileController extends BaseController {
                 exit;
             }
 
-            $this->view('holidayPrograms/holiday-profile-create-password', [
+            $this->view('programs.profile.create-password', [
                 'email' => $_SESSION['verified_email'],
                 'csrfToken' => CSRF::getToken(),
                 'success' => $_SESSION['verification_success'] ?? null
@@ -285,7 +285,7 @@ class ProfileController extends BaseController {
                 'error' => $e->getMessage()
             ]);
 
-            $this->view('errors/500', [
+            $this->view('errors.500', [
                 'error' => 'Failed to load password creation form'
             ]);
         }
@@ -384,7 +384,7 @@ class ProfileController extends BaseController {
             // Get program details
             $program = $this->programService->getProgramById($profile['program_id']);
 
-            $this->view('holidayPrograms/holiday-profile', [
+            $this->view('programs.profile.index', [
                 'profile' => $profile,
                 'program' => $program,
                 'success' => $_SESSION['profile_success'] ?? null,
@@ -401,7 +401,7 @@ class ProfileController extends BaseController {
                 'error' => $e->getMessage()
             ]);
 
-            $this->view('errors/500', [
+            $this->view('errors.500', [
                 'error' => 'Failed to load profile'
             ]);
         }
@@ -432,7 +432,7 @@ class ProfileController extends BaseController {
             // Get program details
             $program = $this->programService->getProgramById($profile['program_id']);
 
-            $this->view('holidayPrograms/holiday-profile-edit', [
+            $this->view('programs.profile.edit', [
                 'profile' => $profile,
                 'program' => $program,
                 'csrfToken' => CSRF::getToken()
@@ -444,7 +444,7 @@ class ProfileController extends BaseController {
                 'error' => $e->getMessage()
             ]);
 
-            $this->view('errors/500', [
+            $this->view('errors.500', [
                 'error' => 'Failed to load profile edit form'
             ]);
         }

@@ -41,7 +41,7 @@ class ProgramController extends BaseController {
             // Check if user is logged in (holiday program session)
             $isLoggedIn = isset($_SESSION['holiday_logged_in']) && $_SESSION['holiday_logged_in'] === true;
 
-            $this->view('holidayPrograms/holidayProgramIndex', [
+            $this->view('programs.index', [
                 'programs' => $programs,
                 'isLoggedIn' => $isLoggedIn,
                 'userEmail' => $_SESSION['holiday_email'] ?? null
@@ -52,7 +52,7 @@ class ProgramController extends BaseController {
                 'error' => $e->getMessage()
             ]);
 
-            $this->view('errors/500', [
+            $this->view('errors.500', [
                 'error' => 'Failed to load programs'
             ]);
         }
@@ -86,7 +86,7 @@ class ProgramController extends BaseController {
                 }
             }
 
-            $this->view('holidayPrograms/holiday-program-details-term', [
+            $this->view('programs.show', [
                 'program' => $program,
                 'capacity' => $capacity,
                 'canRegister' => $canRegister,
@@ -101,7 +101,7 @@ class ProgramController extends BaseController {
                 'error' => $e->getMessage()
             ]);
 
-            $this->view('errors/404', [
+            $this->view('errors.404', [
                 'error' => 'Program not found'
             ]);
         }
@@ -227,7 +227,7 @@ class ProgramController extends BaseController {
                 }
             }
 
-            $this->view('holidayPrograms/workshop-selection', [
+            $this->view('programs.workshop-selection', [
                 'program' => $program,
                 'workshops' => $workshops,
                 'userIsRegistered' => $userIsRegistered,
@@ -241,7 +241,7 @@ class ProgramController extends BaseController {
                 'error' => $e->getMessage()
             ]);
 
-            $this->view('errors/404', [
+            $this->view('errors.404', [
                 'error' => 'Program not found'
             ]);
         }
@@ -276,7 +276,7 @@ class ProgramController extends BaseController {
             // Get enrolled workshops
             $enrolledWorkshops = $profile['enrolled_workshops'] ?? [];
 
-            $this->view('holidayPrograms/my-programs', [
+            $this->view('programs.my-programs', [
                 'attendee' => $attendee,
                 'profile' => $profile,
                 'program' => $program,
@@ -289,7 +289,7 @@ class ProgramController extends BaseController {
                 'error' => $e->getMessage()
             ]);
 
-            $this->view('errors/404', [
+            $this->view('errors.404', [
                 'error' => 'Registration not found'
             ]);
         }
@@ -316,7 +316,7 @@ class ProgramController extends BaseController {
             unset($_SESSION['registration_email']);
             unset($_SESSION['verification_token']);
 
-            $this->view('holidayPrograms/registration_confirmation', [
+            $this->view('programs.registration-confirmation', [
                 'program' => $program,
                 'email' => $email,
                 'verificationToken' => $token

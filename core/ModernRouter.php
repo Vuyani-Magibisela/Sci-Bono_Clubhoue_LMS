@@ -26,6 +26,8 @@ class Router {
      */
     public function setBasePath($basePath) {
         $this->basePath = rtrim($basePath, '/');
+        // Recalculate current route with new base path
+        $this->currentRoute = $this->getCurrentRoute();
         return $this;
     }
     

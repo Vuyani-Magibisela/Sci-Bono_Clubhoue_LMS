@@ -32,7 +32,7 @@ class HolidayProgramController extends BaseController {
                 'count' => count($programs)
             ]);
 
-            return $this->view('holidayPrograms.index', [
+            return $this->view('programs.index', [
                 'programs' => $programs
             ]);
         } catch (Exception $e) {
@@ -61,7 +61,7 @@ class HolidayProgramController extends BaseController {
                 'program_id' => $programId
             ]);
 
-            return $this->view('holidayPrograms.details', $data);
+            return $this->view('programs.show', $data);
         } catch (Exception $e) {
             $this->logger->error("Failed to load holiday program", [
                 'program_id' => $programId,

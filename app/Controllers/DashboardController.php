@@ -50,7 +50,7 @@ class DashboardController extends BaseController {
 
             $this->logAction('dashboard_view', ['user_id' => $userId]);
 
-            return $this->view('member.dashboard.index', $data, 'app');
+            return $this->view('member.dashboard.index', $data);
 
         } catch (Exception $e) {
             $this->logger->error("Dashboard load failed: " . $e->getMessage());

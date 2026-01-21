@@ -23,7 +23,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo htmlspecialchars($pageTitle ?? 'Dashboard'); ?> - Sci-Bono Clubhouse</title>
-    <link rel="stylesheet" href="/public/assets/css/homeStyle.css">
+    <link rel="stylesheet" href="/Sci-Bono_Clubhoue_LMS/public/assets/css/homeStyle.css">
     <!-- Font Awesome for icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
@@ -39,7 +39,7 @@
         <!-- Header -->
         <header class="header">
             <div class="logo">
-                <img src="/public/assets/images/Sci-Bono logo White.png" alt="Sci-Bono Clubhouse">
+                <img src="/Sci-Bono_Clubhoue_LMS/public/assets/images/Sci-Bono logo White.png" alt="Sci-Bono Clubhouse">
                 <span>SCI-BONO CLUBHOUSE</span>
             </div>
             <div class="search-bar">
@@ -75,450 +75,390 @@
 
         <!-- Sidebar Navigation -->
         <nav class="sidebar">
+            <!-- Main Navigation -->
             <div class="menu-group">
-                <div class="menu-item active">
-                    <div class="menu-icon">
-                        <i class="fas fa-home"></i>
-                    </div>
-                    <div class="menu-text"><a href="/dashboard">Home</a></div>
-                </div>
-                <div class="menu-item">
-                    <div class="menu-icon">
-                        <i class="fas fa-user"></i>
-                    </div>
-                    <div class="menu-text"><a href="/profile">Profile</a></div>
-                </div>
-                <div class="menu-item">
-                    <div class="menu-icon">
-                        <i class="fas fa-comment-dots"></i>
-                    </div>
-                    <div class="menu-text"><a href="/messages">Messages</a></div>
-                </div>
-                <div class="menu-item">
-                    <div class="menu-icon">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <div class="menu-text"><a href="/members">Members</a></div>
-                </div>
-                <div class="menu-item">
-                    <div class="menu-icon">
-                        <i class="fa-solid fa-chalkboard"></i>
-                    </div>
-                    <div class="menu-text"><a href="/courses">Learn</a></div>
-                </div>
-                <div class="menu-item">
-                    <div class="menu-icon">
-                        <i class="fas fa-calendar-alt"></i>
-                    </div>
-                    <div class="menu-text"><a href="/attendance">Daily Register</a></div>
-                </div>
-                <div class="menu-item">
-                    <div class="menu-icon">
-                        <i class="fas fa-photo-video"></i>
-                    </div>
-                    <div class="menu-text"><a href="/projects">Projects</a></div>
-                </div>
+                <a href="/Sci-Bono_Clubhoue_LMS/dashboard" class="menu-item active">
+                    <div class="menu-icon"><i class="fas fa-home"></i></div>
+                    <div class="menu-text">Home</div>
+                </a>
+                <a href="/Sci-Bono_Clubhoue_LMS/settings" class="menu-item">
+                    <div class="menu-icon"><i class="fas fa-user"></i></div>
+                    <div class="menu-text">Profile</div>
+                </a>
+                <a href="#" class="menu-item" onclick="alert('Messages feature coming soon!'); return false;">
+                    <div class="menu-icon"><i class="fas fa-envelope"></i></div>
+                    <div class="menu-text">Messages</div>
+                </a>
+                <a href="#" class="menu-item" onclick="alert('Members directory coming soon!'); return false;">
+                    <div class="menu-icon"><i class="fas fa-users"></i></div>
+                    <div class="menu-text">Members</div>
+                </a>
+                <a href="/Sci-Bono_Clubhoue_LMS/courses" class="menu-item">
+                    <div class="menu-icon"><i class="fas fa-book"></i></div>
+                    <div class="menu-text">Courses</div>
+                </a>
+                <a href="/Sci-Bono_Clubhoue_LMS/attendance" class="menu-item">
+                    <div class="menu-icon"><i class="fas fa-clipboard-check"></i></div>
+                    <div class="menu-text">Register</div>
+                </a>
+                <a href="#" class="menu-item" onclick="alert('Projects feature coming soon!'); return false;">
+                    <div class="menu-icon"><i class="fas fa-project-diagram"></i></div>
+                    <div class="menu-text">Projects</div>
+                </a>
             </div>
 
-            <!-- Clubhouse Programs/Groups -->
-            <?php if (!empty($clubhousePrograms)): ?>
+            <!-- Groups Section -->
             <div class="menu-group">
                 <div class="menu-title">Groups</div>
-                <?php foreach (array_slice($clubhousePrograms, 0, 5) as $program): ?>
-                <div class="menu-item">
-                    <div class="menu-icon">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <div class="menu-text">
-                        <a href="/programs/<?php echo $program['id']; ?>">
-                            <?php echo htmlspecialchars($program['title']); ?>
-                        </a>
-                    </div>
-                </div>
-                <?php endforeach; ?>
+                <a href="#" class="menu-item" onclick="alert('Groups feature coming soon!'); return false;">
+                    <div class="menu-icon"><i class="fas fa-vr-cardboard"></i></div>
+                    <div class="menu-text">Mixed Reality</div>
+                </a>
+                <a href="#" class="menu-item" onclick="alert('Groups feature coming soon!'); return false;">
+                    <div class="menu-icon"><i class="fas fa-theater-masks"></i></div>
+                    <div class="menu-text">Performance</div>
+                </a>
+                <a href="#" class="menu-item" onclick="alert('Groups feature coming soon!'); return false;">
+                    <div class="menu-icon"><i class="fas fa-robot"></i></div>
+                    <div class="menu-text">FLL</div>
+                </a>
+                <a href="#" class="menu-item" onclick="alert('Groups feature coming soon!'); return false;">
+                    <div class="menu-icon"><i class="fas fa-video"></i></div>
+                    <div class="menu-text">Video</div>
+                </a>
+                <a href="#" class="menu-item" onclick="alert('Groups feature coming soon!'); return false;">
+                    <div class="menu-icon"><i class="fas fa-cogs"></i></div>
+                    <div class="menu-text">FTC</div>
+                </a>
             </div>
-            <?php endif; ?>
 
-            <!-- Settings -->
-            <div class="menu-item">
-                <div class="menu-icon">
-                    <i class="fas fa-cog"></i>
-                </div>
-                <div class="menu-text"><a href="/settings">Settings</a></div>
-            </div>
-
-            <!-- Admin Section (if admin) -->
+            <!-- Admin Section (Conditional) -->
             <?php if (isset($user['user_type']) && $user['user_type'] === 'admin'): ?>
-            <div class="menu-group">
+            <div class="menu-group admin-section">
                 <div class="menu-title">Admin</div>
-                <div class="menu-item">
-                    <div class="menu-icon">
-                        <i class="fa-solid fa-chalkboard"></i>
-                    </div>
-                    <div class="menu-text"><a href="/admin/courses">Manage Courses</a></div>
-                </div>
-                <div class="menu-item">
-                    <div class="menu-icon">
-                        <i class="fas fa-chart-bar"></i>
-                    </div>
-                    <div class="menu-text"><a href="/reports">Reports</a></div>
-                </div>
-                <div class="menu-item">
-                    <div class="menu-icon">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <div class="menu-text"><a href="/admin/users">Manage Users</a></div>
-                </div>
+                <a href="/Sci-Bono_Clubhoue_LMS/admin/users" class="menu-item">
+                    <div class="menu-icon"><i class="fas fa-users-cog"></i></div>
+                    <div class="menu-text">Users</div>
+                </a>
+                <a href="/Sci-Bono_Clubhoue_LMS/admin/programs" class="menu-item">
+                    <div class="menu-icon"><i class="fas fa-calendar-alt"></i></div>
+                    <div class="menu-text">Programs</div>
+                </a>
+                <a href="/Sci-Bono_Clubhoue_LMS/admin/courses" class="menu-item">
+                    <div class="menu-icon"><i class="fas fa-book"></i></div>
+                    <div class="menu-text">Courses</div>
+                </a>
+                <a href="/Sci-Bono_Clubhoue_LMS/admin/reports" class="menu-item">
+                    <div class="menu-icon"><i class="fas fa-chart-bar"></i></div>
+                    <div class="menu-text">Reports</div>
+                </a>
+                <a href="/Sci-Bono_Clubhoue_LMS/admin/settings" class="menu-item">
+                    <div class="menu-icon"><i class="fas fa-cog"></i></div>
+                    <div class="menu-text">Settings</div>
+                </a>
             </div>
             <?php endif; ?>
 
-            <!-- Logout -->
-            <div class="menu-item" onclick="window.location.href='/logout'">
-                <div class="menu-icon">
-                    <i class="fas fa-sign-out-alt"></i>
-                </div>
-                <div class="menu-text">Log out</div>
+            <!-- Logout Button -->
+            <div class="menu-group logout-section">
+                <form method="POST" action="/Sci-Bono_Clubhoue_LMS/logout" style="margin: 0;">
+                    <?php
+                    // Include CSRF token for logout
+                    require_once __DIR__ . '/../../../../core/CSRF.php';
+                    echo CSRF::field();
+                    ?>
+                    <button type="submit" class="menu-item logout-item" style="border: none; background: none; width: 100%; cursor: pointer;">
+                        <div class="menu-icon"><i class="fas fa-sign-out-alt"></i></div>
+                        <div class="menu-text">Logout</div>
+                    </button>
+                </form>
             </div>
         </nav>
 
         <!-- Main Content Area -->
         <main class="main-content">
-            <!-- Stats Cards -->
-            <?php if (isset($stats) && !empty($stats)): ?>
-            <div class="stats-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1.5rem;">
-                <div class="stat-card" style="background: #fff; padding: 1rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-                    <div style="display: flex; align-items: center; justify-content: space-between;">
-                        <div>
-                            <div style="color: #65676b; font-size: 0.875rem;">Courses Enrolled</div>
-                            <div style="font-size: 1.5rem; font-weight: 600; color: #1c1e21;">
-                                <?php echo $stats['total_courses'] ?? 0; ?>
-                            </div>
-                        </div>
-                        <div style="color: var(--primary); font-size: 2rem;">
-                            <i class="fas fa-book"></i>
-                        </div>
+            <!-- Post Creation Widget -->
+            <div class="post-creation">
+                <div class="post-creation-header">
+                    <div class="post-avatar" style="background-color: <?php echo $user['avatar_color'] ?? '#6366F1'; ?>">
+                        <?php
+                        $firstName = $user['name'] ?? $user['username'] ?? 'U';
+                        $lastName = $user['surname'] ?? '';
+                        $initials = strtoupper(substr($firstName, 0, 1) . substr($lastName, 0, 1));
+                        echo $initials;
+                        ?>
                     </div>
-                </div>
-
-                <div class="stat-card" style="background: #fff; padding: 1rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-                    <div style="display: flex; align-items: center; justify-content: space-between;">
-                        <div>
-                            <div style="color: #65676b; font-size: 0.875rem;">Lessons Completed</div>
-                            <div style="font-size: 1.5rem; font-weight: 600; color: #1c1e21;">
-                                <?php echo $stats['total_lessons_completed'] ?? 0; ?>
-                            </div>
-                        </div>
-                        <div style="color: #28a745; font-size: 2rem;">
-                            <i class="fas fa-check-circle"></i>
-                        </div>
+                    <div class="post-input">
+                        What's on your mind, <?php echo htmlspecialchars($user['name'] ?? $user['username'] ?? 'User'); ?>?
                     </div>
-                </div>
-
-                <div class="stat-card" style="background: #fff; padding: 1rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-                    <div style="display: flex; align-items: center; justify-content: space-between;">
-                        <div>
-                            <div style="color: #65676b; font-size: 0.875rem;">Learning Hours</div>
-                            <div style="font-size: 1.5rem; font-weight: 600; color: #1c1e21;">
-                                <?php echo $stats['total_hours'] ?? 0; ?>
-                            </div>
-                        </div>
-                        <div style="color: #ff6b6b; font-size: 2rem;">
-                            <i class="fas fa-clock"></i>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="stat-card" style="background: #fff; padding: 1rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
-                    <div style="display: flex; align-items: center; justify-content: space-between;">
-                        <div>
-                            <div style="color: #65676b; font-size: 0.875rem;">Badges Earned</div>
-                            <div style="font-size: 1.5rem; font-weight: 600; color: #1c1e21;">
-                                <?php echo $stats['total_badges'] ?? 0; ?>
-                            </div>
-                        </div>
-                        <div style="color: #ffc107; font-size: 2rem;">
-                            <i class="fas fa-award"></i>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <?php endif; ?>
-
-            <!-- Continue Learning Section -->
-            <?php if (!empty($continueLearning)): ?>
-            <div class="continue-learning-section" style="background: #fff; padding: 1.5rem; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); margin-bottom: 1.5rem;">
-                <h3 style="margin: 0 0 1rem 0; font-size: 1.25rem; color: #1c1e21;">Continue Learning</h3>
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 1rem;">
-                    <?php foreach ($continueLearning as $course): ?>
-                    <div class="course-card" style="border: 1px solid #e4e6eb; border-radius: 8px; overflow: hidden; cursor: pointer;" onclick="window.location.href='/courses/<?php echo $course['id']; ?>'">
-                        <?php if (!empty($course['thumbnail'])): ?>
-                        <img src="<?php echo htmlspecialchars($course['thumbnail']); ?>" alt="<?php echo htmlspecialchars($course['title']); ?>" style="width: 100%; height: 150px; object-fit: cover;">
-                        <?php endif; ?>
-                        <div style="padding: 1rem;">
-                            <h4 style="margin: 0 0 0.5rem 0; font-size: 1rem; color: #1c1e21;">
-                                <?php echo htmlspecialchars($course['title']); ?>
-                            </h4>
-                            <div style="color: #65676b; font-size: 0.875rem; margin-bottom: 0.5rem;">
-                                <?php echo $course['progress']; ?>% complete
-                            </div>
-                            <div class="progress-bar-container" style="height: 6px; background: #e4e6eb; border-radius: 3px;">
-                                <div class="progress-bar" style="width: <?php echo $course['progress']; ?>%; height: 100%; background: var(--primary); border-radius: 3px;"></div>
-                            </div>
-                        </div>
-                    </div>
-                    <?php endforeach; ?>
-                </div>
-            </div>
-            <?php endif; ?>
-
-            <!-- Post Creation -->
-            <div class="create-post">
-                <div class="post-input">
-                    <div class="avatar" style="background-color: <?php echo $user['avatar_color'] ?? '#3F51B5'; ?>">
-                        <?php if (!empty($user['avatar_url'])): ?>
-                            <img src="<?php echo htmlspecialchars($user['avatar_url']); ?>" alt="Avatar">
-                        <?php else: ?>
-                            <?php echo strtoupper(substr($user['username'], 0, 1)); ?>
-                        <?php endif; ?>
-                    </div>
-                    <input type="text" placeholder="What's on your mind?">
                 </div>
                 <div class="post-actions">
-                    <div class="post-action">
-                        <i class="fas fa-image photo-icon"></i>
+                    <button class="post-action-btn">
+                        <i class="fas fa-image" style="color: #10B981;"></i>
                         <span>Photo</span>
-                    </div>
-                    <div class="post-action">
-                        <i class="fas fa-link link-icon"></i>
+                    </button>
+                    <button class="post-action-btn">
+                        <i class="fas fa-link" style="color: #3B82F6;"></i>
                         <span>Link</span>
-                    </div>
-                    <div class="post-action">
-                        <i class="fas fa-smile emoji-icon"></i>
+                    </button>
+                    <button class="post-action-btn">
+                        <i class="fas fa-smile" style="color: #F59E0B;"></i>
                         <span>Feeling</span>
-                    </div>
+                    </button>
                 </div>
             </div>
 
-            <!-- Activity Feed -->
-            <div class="feed" id="activityFeed">
-                <?php if (!empty($activityFeed)): ?>
-                    <?php foreach ($activityFeed as $activity): ?>
-                        <div class="post">
-                            <div class="post-header">
-                                <div class="post-user">
-                                    <div class="avatar" style="background-color: <?php echo $activity['avatar_color'] ?? '#3F51B5'; ?>">
-                                        <?php echo htmlspecialchars($activity['initials']); ?>
-                                    </div>
-                                    <div class="post-info">
-                                        <div class="post-author"><?php echo htmlspecialchars($activity['user_name']); ?></div>
-                                        <div class="post-meta">
-                                            <?php echo htmlspecialchars($activity['relative_time']); ?>
-                                            <?php if (!empty($activity['activity_type'])): ?>
-                                                • <?php echo htmlspecialchars($activity['activity_type']); ?>
-                                            <?php endif; ?>
-                                        </div>
-                                    </div>
-                                </div>
-                                <div class="post-options">
-                                    <i class="fas fa-ellipsis-h"></i>
-                                </div>
-                            </div>
-                            <div class="post-content">
-                                <div class="post-text">
-                                    <?php echo htmlspecialchars($activity['description']); ?>
-                                </div>
-                                <?php if (!empty($activity['image_url'])): ?>
-                                <div class="post-images">
-                                    <div class="post-image">
-                                        <img src="<?php echo htmlspecialchars($activity['image_url']); ?>" alt="Activity Image">
-                                    </div>
-                                </div>
-                                <?php endif; ?>
-                            </div>
-                            <div class="post-stats">
-                                <div class="like-count">
-                                    <i class="fas fa-thumbs-up" style="color: var(--primary);"></i>
-                                    <span><?php echo $activity['likes'] ?? 0; ?></span>
-                                </div>
-                                <div class="comment-share-count">
-                                    <span><?php echo $activity['comments'] ?? 0; ?> comments</span>
-                                    <span><?php echo $activity['shares'] ?? 0; ?> shares</span>
-                                </div>
-                            </div>
-                            <div class="post-buttons">
-                                <div class="post-button like-btn">
-                                    <i class="far fa-thumbs-up"></i>
-                                    <span>Like</span>
-                                </div>
-                                <div class="post-button comment-btn">
-                                    <i class="far fa-comment"></i>
-                                    <span>Comment</span>
-                                </div>
-                                <div class="post-button share-btn">
-                                    <i class="far fa-share-square"></i>
-                                    <span>Share</span>
-                                </div>
-                            </div>
-                        </div>
-                    <?php endforeach; ?>
-                <?php else: ?>
-                    <div class="post">
-                        <div class="post-content" style="text-align: center; padding: 2rem;">
-                            <div class="post-text">
-                                No recent activity. Be the first to share something with the community!
-                            </div>
-                        </div>
+            <!-- Social Feed -->
+            <?php
+            // Mock social posts data
+            $mockPosts = [
+                [
+                    'user_name' => 'Thabo Mokoena',
+                    'initials' => 'TM',
+                    'avatar_color' => '#3B82F6',
+                    'relative_time' => '2 hours ago',
+                    'post_text' => 'Just finished building my first Arduino robot! It can follow a line and avoid obstacles. Thanks to the mentors at Sci-Bono for the guidance. 🤖',
+                    'likes' => 24,
+                    'comments' => 5,
+                    'shares' => 2
+                ],
+                [
+                    'user_name' => 'Lesego Dlamini',
+                    'initials' => 'LD',
+                    'avatar_color' => '#EC4899',
+                    'relative_time' => '4 hours ago',
+                    'post_text' => 'Our FLL team just completed our first practice run! We\'re so excited for the competition next month. Let\'s go Team Innovators! 💪',
+                    'likes' => 18,
+                    'comments' => 3,
+                    'shares' => 1
+                ],
+                [
+                    'user_name' => 'Sipho Khumalo',
+                    'initials' => 'SK',
+                    'avatar_color' => '#F59E0B',
+                    'relative_time' => '6 hours ago',
+                    'post_text' => 'Check out this cool 3D model I designed in Blender! It\'s a replica of the Sci-Bono building. Still learning but I\'m getting better every day.',
+                    'likes' => 32,
+                    'comments' => 8,
+                    'shares' => 4
+                ],
+                [
+                    'user_name' => 'Nomsa Mthembu',
+                    'initials' => 'NM',
+                    'avatar_color' => '#8B5CF6',
+                    'relative_time' => '8 hours ago',
+                    'post_text' => 'Had an amazing time at today\'s coding workshop! Learned about APIs and how to fetch data from external sources. Can\'t wait to build my own weather app!',
+                    'likes' => 15,
+                    'comments' => 2,
+                    'shares' => 0
+                ],
+                [
+                    'user_name' => 'Themba Ndlovu',
+                    'initials' => 'TN',
+                    'avatar_color' => '#14B8A6',
+                    'relative_time' => '12 hours ago',
+                    'post_text' => 'Our video production team just wrapped filming for our documentary about renewable energy. Huge shoutout to everyone involved!',
+                    'likes' => 27,
+                    'comments' => 6,
+                    'shares' => 3
+                ]
+            ];
+
+            foreach ($mockPosts as $post):
+            ?>
+            <div class="social-post">
+                <div class="post-header">
+                    <div class="post-avatar-large" style="background-color: <?php echo $post['avatar_color']; ?>">
+                        <?php echo $post['initials']; ?>
                     </div>
-                <?php endif; ?>
+                    <div class="post-user-info">
+                        <h4><?php echo htmlspecialchars($post['user_name']); ?></h4>
+                        <span class="post-time"><?php echo $post['relative_time']; ?></span>
+                    </div>
+                </div>
+                <div class="post-content">
+                    <?php echo htmlspecialchars($post['post_text']); ?>
+                </div>
+                <div class="post-stats">
+                    <div class="post-stat">
+                        <i class="fas fa-thumbs-up" style="color: var(--primary);"></i>
+                        <span><?php echo $post['likes']; ?> likes</span>
+                    </div>
+                    <div class="post-stat">
+                        <i class="fas fa-comment"></i>
+                        <span><?php echo $post['comments']; ?> comments</span>
+                    </div>
+                    <div class="post-stat">
+                        <i class="fas fa-share"></i>
+                        <span><?php echo $post['shares']; ?> shares</span>
+                    </div>
+                </div>
+                <div class="post-interactions">
+                    <button class="interaction-btn">
+                        <i class="far fa-thumbs-up"></i>
+                        <span>Like</span>
+                    </button>
+                    <button class="interaction-btn">
+                        <i class="far fa-comment"></i>
+                        <span>Comment</span>
+                    </button>
+                    <button class="interaction-btn">
+                        <i class="fas fa-share"></i>
+                        <span>Share</span>
+                    </button>
+                </div>
             </div>
+            <?php endforeach; ?>
         </main>
 
         <!-- Right Sidebar -->
         <aside class="right-sidebar">
-            <!-- Upcoming Events Section -->
-            <div class="sidebar-section">
-                <div class="section-header">
-                    <div class="section-title">Your upcoming events</div>
-                    <div class="section-more">See All</div>
+            <!-- Upcoming Events Widget -->
+            <div class="widget">
+                <div class="widget-header">
+                    <h3 class="widget-title">Upcoming Events</h3>
+                    <a href="/events" class="widget-link">View all</a>
                 </div>
-                <div class="event-list">
-                    <?php if (empty($upcomingEvents)): ?>
-                        <div style="text-align: center; color: #65676b; padding: 1rem;">
-                            No upcoming events at this time.
-                        </div>
-                    <?php else: ?>
-                        <?php foreach ($upcomingEvents as $event): ?>
-                            <div class="event-item">
-                                <div class="event-icon">
-                                    <i class="fas fa-calendar-day"></i>
-                                </div>
-                                <div class="event-details">
-                                    <div class="event-name"><?php echo htmlspecialchars($event['title']); ?></div>
-                                    <div class="event-info">
-                                        <?php echo htmlspecialchars($event['date'] . ' • ' . $event['time']); ?>
-                                    </div>
-                                    <?php if (!empty($event['location'])): ?>
-                                    <div class="event-info">
-                                        <i class="fas fa-map-marker-alt"></i> <?php echo htmlspecialchars($event['location']); ?>
-                                    </div>
-                                    <?php endif; ?>
-                                </div>
+                <div class="widget-content">
+                    <?php if (!empty($upcomingEvents)): ?>
+                        <?php foreach (array_slice($upcomingEvents, 0, 3) as $event): ?>
+                        <div class="event-item">
+                            <div class="event-date">
+                                <div class="event-date-day"><?php echo date('d', strtotime($event['date'])); ?></div>
+                                <div class="event-date-month"><?php echo date('M', strtotime($event['date'])); ?></div>
                             </div>
+                            <div class="event-details">
+                                <h4><?php echo htmlspecialchars($event['title']); ?></h4>
+                                <div class="event-time"><?php echo date('H:i', strtotime($event['time'])); ?></div>
+                            </div>
+                        </div>
                         <?php endforeach; ?>
+                    <?php else: ?>
+                        <div class="event-item">
+                            <div class="event-date" style="background-color: #6366F1;">
+                                <div class="event-date-day">15</div>
+                                <div class="event-date-month">JAN</div>
+                            </div>
+                            <div class="event-details">
+                                <h4>Robotics Workshop</h4>
+                                <div class="event-time">14:00</div>
+                            </div>
+                        </div>
+                        <div class="event-item">
+                            <div class="event-date" style="background-color: #10B981;">
+                                <div class="event-date-day">18</div>
+                                <div class="event-date-month">JAN</div>
+                            </div>
+                            <div class="event-details">
+                                <h4>3D Printing Basics</h4>
+                                <div class="event-time">10:00</div>
+                            </div>
+                        </div>
+                        <div class="event-item">
+                            <div class="event-date" style="background-color: #F59E0B;">
+                                <div class="event-date-day">22</div>
+                                <div class="event-date-month">JAN</div>
+                            </div>
+                            <div class="event-details">
+                                <h4>Coding Bootcamp</h4>
+                                <div class="event-time">09:00</div>
+                            </div>
+                        </div>
                     <?php endif; ?>
                 </div>
             </div>
 
-            <!-- Learning Progress -->
-            <?php if (!empty($learningProgress)): ?>
-            <div class="sidebar-section">
-                <div class="section-header">
-                    <div class="section-title">Your learning</div>
-                    <div class="section-more" onclick="window.location.href='/my-courses'">See All</div>
+            <!-- Learning Progress Widget -->
+            <div class="widget">
+                <div class="widget-header">
+                    <h3 class="widget-title">My Learning</h3>
+                    <a href="/courses" class="widget-link">View all</a>
                 </div>
-                <div class="learning-progress-mini">
-                    <?php foreach ($learningProgress as $course): ?>
-                    <div class="course-progress" style="margin-bottom: 1rem;">
-                        <div class="course-info">
-                            <strong><?php echo htmlspecialchars($course['title']); ?></strong>
-                            <span><?php echo $course['progress']; ?>% complete</span>
-                        </div>
-                        <div class="progress-bar-container" style="height: 6px; background: #eee; border-radius: 3px; margin: 5px 0;">
-                            <div class="progress-bar" style="width: <?php echo $course['progress']; ?>%; height: 100%; background: var(--primary); border-radius: 3px;"></div>
-                        </div>
-                    </div>
-                    <?php endforeach; ?>
-                </div>
-            </div>
-            <?php endif; ?>
-
-            <!-- Birthdays Section -->
-            <div class="sidebar-section">
-                <div class="section-header">
-                    <div class="section-title">Birthdays</div>
-                </div>
-                <div class="birthdays-list">
-                    <?php if (empty($birthdays)): ?>
-                        <div style="text-align: center; color: #65676b; padding: 1rem;">
-                            No upcoming birthdays.
-                        </div>
-                    <?php else: ?>
-                        <?php foreach ($birthdays as $birthday): ?>
-                            <div class="birthday-item">
-                                <div class="birthday-icon">
-                                    <i class="fas fa-birthday-cake"></i>
-                                </div>
-                                <div class="birthday-info">
-                                    <strong><?php echo htmlspecialchars($birthday['name']); ?></strong>
-                                    <?php echo htmlspecialchars($birthday['message']); ?>
-                                </div>
+                <div class="widget-content">
+                    <?php if (!empty($learningProgress)): ?>
+                        <?php foreach (array_slice($learningProgress, 0, 3) as $course): ?>
+                        <div class="progress-item">
+                            <div class="progress-header">
+                                <span class="progress-title"><?php echo htmlspecialchars($course['title']); ?></span>
+                                <span class="progress-percentage"><?php echo $course['progress']; ?>%</span>
                             </div>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar-fill" style="width: <?php echo $course['progress']; ?>%;"></div>
+                            </div>
+                        </div>
                         <?php endforeach; ?>
+                    <?php else: ?>
+                        <div class="progress-item">
+                            <div class="progress-header">
+                                <span class="progress-title">Arduino Basics</span>
+                                <span class="progress-percentage">75%</span>
+                            </div>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar-fill" style="width: 75%; background-color: #6366F1;"></div>
+                            </div>
+                        </div>
+                        <div class="progress-item">
+                            <div class="progress-header">
+                                <span class="progress-title">3D Design</span>
+                                <span class="progress-percentage">45%</span>
+                            </div>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar-fill" style="width: 45%; background-color: #10B981;"></div>
+                            </div>
+                        </div>
+                        <div class="progress-item">
+                            <div class="progress-header">
+                                <span class="progress-title">Web Development</span>
+                                <span class="progress-percentage">90%</span>
+                            </div>
+                            <div class="progress-bar-container">
+                                <div class="progress-bar-fill" style="width: 90%; background-color: #F59E0B;"></div>
+                            </div>
+                        </div>
                     <?php endif; ?>
                 </div>
             </div>
 
-            <!-- Community Chats Section -->
-            <?php if (!empty($communityChats)): ?>
-            <div class="sidebar-section">
-                <div class="section-header">
-                    <div class="section-title">Community chats</div>
-                    <div class="section-more">See All</div>
+            <!-- Birthdays Widget -->
+            <div class="widget">
+                <div class="widget-header">
+                    <h3 class="widget-title">Birthdays</h3>
                 </div>
-                <div class="chat-list">
-                    <?php foreach ($communityChats as $chat): ?>
-                    <div class="chat-item" onclick="window.location.href='/chats/<?php echo $chat['id']; ?>'">
-                        <div class="avatar chat-avatar">
-                            <?php if (!empty($chat['image'])): ?>
-                                <img src="<?php echo htmlspecialchars($chat['image']); ?>" alt="<?php echo htmlspecialchars($chat['name']); ?>">
-                            <?php else: ?>
-                                <i class="fas fa-users"></i>
-                            <?php endif; ?>
-                            <?php if ($chat['is_active']): ?>
-                                <div class="online-indicator"></div>
-                            <?php endif; ?>
+                <div class="widget-content">
+                    <?php if (!empty($birthdays)): ?>
+                        <?php foreach (array_slice($birthdays, 0, 3) as $birthday): ?>
+                        <div class="birthday-item">
+                            <div class="birthday-avatar" style="background-color: <?php echo $birthday['avatar_color'] ?? '#6366F1'; ?>">
+                                <?php
+                                $bFirstName = $birthday['name'] ?? 'U';
+                                $bLastName = $birthday['surname'] ?? '';
+                                echo strtoupper(substr($bFirstName, 0, 1) . substr($bLastName, 0, 1));
+                                ?>
+                            </div>
+                            <div class="birthday-info">
+                                <h4><?php echo htmlspecialchars($birthday['name'] . ($birthday['surname'] ?? '')); ?></h4>
+                                <div class="birthday-date"><?php echo date('F d', strtotime($birthday['date'])); ?></div>
+                            </div>
                         </div>
-                        <div class="chat-info">
-                            <strong><?php echo htmlspecialchars($chat['name']); ?></strong>
-                            <?php if (isset($chat['member_count'])): ?>
-                                <div style="font-size: 0.75rem; color: #65676b;">
-                                    <?php echo $chat['member_count']; ?> members
-                                </div>
-                            <?php endif; ?>
+                        <?php endforeach; ?>
+                    <?php else: ?>
+                        <div class="birthday-item">
+                            <div class="birthday-avatar" style="background-color: #EC4899;">LS</div>
+                            <div class="birthday-info">
+                                <h4>Lerato Sithole</h4>
+                                <div class="birthday-date">January 16</div>
+                            </div>
                         </div>
-                    </div>
-                    <?php endforeach; ?>
-                </div>
-            </div>
-            <?php endif; ?>
-
-            <!-- Online Contacts -->
-            <?php if (!empty($onlineContacts)): ?>
-            <div class="sidebar-section">
-                <div class="section-header">
-                    <div class="section-title">Online contacts</div>
-                </div>
-                <div class="chat-list">
-                    <?php foreach ($onlineContacts as $contact): ?>
-                    <div class="chat-item" onclick="window.location.href='/messages/<?php echo $contact['id']; ?>'">
-                        <div class="avatar chat-avatar">
-                            <?php if (!empty($contact['avatar_url'])): ?>
-                                <img src="<?php echo htmlspecialchars($contact['avatar_url']); ?>" alt="<?php echo htmlspecialchars($contact['name']); ?>">
-                            <?php else: ?>
-                                <div style="background-color: <?php echo $contact['avatar_color']; ?>; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: white; font-weight: 500;">
-                                    <?php echo htmlspecialchars($contact['initials']); ?>
-                                </div>
-                            <?php endif; ?>
-                            <div class="online-indicator"></div>
+                        <div class="birthday-item">
+                            <div class="birthday-avatar" style="background-color: #8B5CF6;">MB</div>
+                            <div class="birthday-info">
+                                <h4>Michael Banda</h4>
+                                <div class="birthday-date">January 20</div>
+                            </div>
                         </div>
-                        <div class="chat-info">
-                            <strong><?php echo htmlspecialchars($contact['name']); ?></strong>
-                        </div>
-                    </div>
-                    <?php endforeach; ?>
+                    <?php endif; ?>
                 </div>
             </div>
-            <?php endif; ?>
         </aside>
     </div>
 
@@ -558,7 +498,7 @@
         </a>
     </nav>
 
-    <script src="/public/assets/js/homedashboard.js"></script>
+    <script src="/Sci-Bono_Clubhoue_LMS/public/assets/js/homedashboard.js"></script>
     <script>
         // AJAX Dashboard Refresh
         function refreshDashboardSection(section) {

@@ -48,7 +48,7 @@ class DeprecationMonitorController extends \BaseController {
             ]);
 
             // Render dashboard view
-            $this->view('admin/deprecation-monitor', [
+            $this->view('admin.system.deprecation-monitor', [
                 'stats' => $stats,
                 'statsByDate' => $statsByDate,
                 'recommendations' => $recommendations,
@@ -61,7 +61,7 @@ class DeprecationMonitorController extends \BaseController {
                 'trace' => $e->getTraceAsString()
             ]);
 
-            $this->view('errors/500', [
+            $this->view('errors.500', [
                 'error' => 'Failed to load deprecation monitoring dashboard'
             ]);
         }

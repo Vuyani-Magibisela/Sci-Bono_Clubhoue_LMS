@@ -32,7 +32,7 @@ class HolidayProgramCreationController extends BaseController {
         try {
             $this->logAction('view_program_creation_form');
 
-            return $this->view('holidayPrograms.admin.create', [
+            return $this->view('programs.create-form', [
                 'program' => null,
                 'mode' => 'create'
             ], 'admin');
@@ -84,7 +84,7 @@ class HolidayProgramCreationController extends BaseController {
                 'program_id' => $programId
             ]);
 
-            return $this->view('holidayPrograms.admin.edit', [
+            return $this->view('programs.create-form', [
                 'program' => $program,
                 'mode' => 'edit'
             ], 'admin');

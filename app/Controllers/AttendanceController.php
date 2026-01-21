@@ -148,11 +148,11 @@ class AttendanceController extends BaseController {
                 $user['is_signed_in'] = false;
             }
             
-            $this->view('attendance/signin', $viewData);
+            $this->view('attendance.signin', $viewData);
             
         } catch (Exception $e) {
             $this->logFailure('attendance_page_load', [], $e->getMessage());
-            $this->view('errors/500', [
+            $this->view('errors.500', [
                 'error_message' => 'Unable to load attendance page. Please try again.',
                 'page_title' => 'Error'
             ]);

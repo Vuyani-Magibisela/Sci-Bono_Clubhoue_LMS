@@ -46,7 +46,7 @@ class HolidayProgramProfileController extends BaseController {
                 'attendee_id' => $attendeeId
             ]);
 
-            return $this->view('holidayPrograms.profile', [
+            return $this->view('programs.profile.index', [
                 'profile' => $profile,
                 'welcome' => $this->input('welcome', false)
             ]);
@@ -75,7 +75,7 @@ class HolidayProgramProfileController extends BaseController {
             $attendeeId = $_SESSION['holiday_user_id'] ?? null;
             $profile = $this->getProfile($attendeeId);
 
-            return $this->view('holidayPrograms.profileEdit', [
+            return $this->view('programs.profile.edit', [
                 'profile' => $profile
             ]);
 
